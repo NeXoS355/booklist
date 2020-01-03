@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -34,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
@@ -57,6 +59,8 @@ public class Dialog_edit extends JDialog {
 	private JTextField txt_merk;
 	private JTextField txt_serie;
 	private Font standardFont = new Font("standard", Font.BOLD, 14);
+	private Border standardBorder = BorderFactory.createLineBorder(new Color(70,130,180,125),2);
+	private Border activeBorder = BorderFactory.createLineBorder(new Color(70,130,180,200),4);
 
 	public Dialog_edit(BookListModel einträge, int index, DefaultTreeModel treeModel,
 			DefaultMutableTreeNode rootNode) {
@@ -226,6 +230,7 @@ public class Dialog_edit extends JDialog {
 		txt_author = new JTextField(eintrag.getAutor());
 		txt_author.setFont(standardFont);
 		txt_author.setPreferredSize(new Dimension(50, höhe));
+		txt_author.setBorder(standardBorder);
 		txt_author.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -239,6 +244,21 @@ public class Dialog_edit extends JDialog {
 					dispose();
 			}
 		});
+		txt_author.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				txt_author.setBorder(standardBorder);
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				txt_author.setBorder(activeBorder);
+				
+			}
+			
+		});
 		panel_center.add(txt_author, BorderLayout.NORTH);
 
 		JLabel lbl_title = new JLabel("Titel:");
@@ -249,6 +269,7 @@ public class Dialog_edit extends JDialog {
 		txt_title = new JTextField(eintrag.getTitel());
 		txt_title.setFont(standardFont);
 		txt_title.setPreferredSize(new Dimension(50, höhe));
+		txt_title.setBorder(standardBorder);
 		txt_title.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -267,6 +288,21 @@ public class Dialog_edit extends JDialog {
 			}
 
 		});
+		txt_title.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				txt_title.setBorder(standardBorder);
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				txt_title.setBorder(activeBorder);
+				
+			}
+			
+		});
 		panel_center.add(txt_title, BorderLayout.CENTER);
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
@@ -277,6 +313,7 @@ public class Dialog_edit extends JDialog {
 		txt_merk = new JTextField(eintrag.getBemerkung());
 		txt_merk.setFont(standardFont);
 		txt_merk.setPreferredSize(new Dimension(50, höhe));
+		txt_merk.setBorder(standardBorder);
 		txt_merk.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -288,6 +325,21 @@ public class Dialog_edit extends JDialog {
 			}
 
 		});
+		txt_merk.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				txt_merk.setBorder(standardBorder);
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				txt_merk.setBorder(activeBorder);
+				
+			}
+			
+		});
 		panel_center.add(txt_merk, BorderLayout.SOUTH);
 
 		JLabel lbl_serie = new JLabel("Serie:");
@@ -298,6 +350,7 @@ public class Dialog_edit extends JDialog {
 		txt_serie = new JTextField(eintrag.getSerie());
 		txt_serie.setFont(standardFont);
 		txt_serie.setPreferredSize(new Dimension(50, höhe));
+		txt_serie.setBorder(standardBorder);
 		txt_serie.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -309,6 +362,21 @@ public class Dialog_edit extends JDialog {
 					dispose();
 			}
 
+		});
+		txt_serie.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				txt_serie.setBorder(standardBorder);
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				txt_serie.setBorder(activeBorder);
+				
+			}
+			
 		});
 		panel_center.add(txt_serie);
 
@@ -355,6 +423,7 @@ public class Dialog_edit extends JDialog {
 
 		txt_leihVon = new JTextField(eintrag.getAusgeliehen_von());
 		txt_leihVon.setFont(standardFont);
+		txt_leihVon.setBorder(standardBorder);
 		if (eintrag.getAusgeliehen_von().isEmpty())
 			txt_leihVon.setVisible(false);
 		txt_leihVon.addKeyListener(new KeyAdapter() {
@@ -368,10 +437,26 @@ public class Dialog_edit extends JDialog {
 			}
 
 		});
+		txt_leihVon.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				txt_leihVon.setBorder(standardBorder);
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				txt_leihVon.setBorder(activeBorder);
+				
+			}
+			
+		});
 		panel_south.add(txt_leihVon);
 
 		txt_leihAn = new JTextField(eintrag.getAusgeliehen_an());
 		txt_leihAn.setFont(standardFont);
+		txt_leihAn.setBorder(standardBorder);
 		if (eintrag.getAusgeliehen_an().isEmpty())
 			txt_leihAn.setVisible(false);
 		txt_leihAn.addKeyListener(new KeyAdapter() {
@@ -384,6 +469,21 @@ public class Dialog_edit extends JDialog {
 					dispose();
 			}
 
+		});
+		txt_leihAn.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				txt_leihAn.setBorder(standardBorder);
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				txt_leihAn.setBorder(activeBorder);
+				
+			}
+			
 		});
 		panel_south.add(txt_leihAn);
 
