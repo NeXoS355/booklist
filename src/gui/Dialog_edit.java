@@ -1,4 +1,4 @@
-package darstellung;
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -40,7 +40,7 @@ import javax.swing.tree.DefaultTreeModel;
 import application.Book;
 import application.BookListModel;
 import application.HandleImage;
-import datenhaltung.Database;
+import data.Database;
 
 public class Dialog_edit extends JDialog {
 

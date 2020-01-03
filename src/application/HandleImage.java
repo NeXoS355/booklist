@@ -15,7 +15,7 @@ import java.net.URLConnection;
 
 import javax.swing.JOptionPane;
 
-import datenhaltung.Database;
+import data.Database;
 
 public class HandleImage {
 	

@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-import datenhaltung.Database;
+import data.Database;
 
 public class Book {
 

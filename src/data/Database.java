@@ -1,4 +1,4 @@
-package datenhaltung;
+package data;
 
 import java.io.InputStream;
 import java.sql.Connection;

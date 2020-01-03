@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
 
-import darstellung.Mainframe;
-import datenhaltung.Database;
+import data.Database;
+import gui.Mainframe;
 
 public class BookListModel extends AbstractListModel<Book> {
 
