@@ -1,4 +1,4 @@
-package anwendung;
+package application;
 
 import java.awt.Image;
 import java.io.BufferedInputStream;

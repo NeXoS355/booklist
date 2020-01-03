@@ -26,8 +26,8 @@ import javax.swing.JTextField;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import anwendung.Book;
-import anwendung.BookListModel;
+import application.Book;
+import application.BookListModel;
 
 public class Dialog_add extends JDialog {
 

@@ -37,10 +37,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import anwendung.Book;
-import anwendung.BookListModel;
+import application.Book;
+import application.BookListModel;
+import application.HandleImage;
 import datenhaltung.Database;
-import anwendung.HandleImage;
 
 public class Dialog_edit extends JDialog {
 

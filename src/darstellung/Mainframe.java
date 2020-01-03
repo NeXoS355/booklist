@@ -45,9 +45,9 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import anwendung.Book;
-import anwendung.BookListModel;
-import anwendung.SimpleTableModel;
+import application.Book;
+import application.BookListModel;
+import application.SimpleTableModel;
 
 public class Mainframe extends JFrame {
 
