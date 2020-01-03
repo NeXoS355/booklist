@@ -15,7 +15,7 @@ public class SimpleTableModel extends DefaultTableModel {
 	private String[] rowData = new String[cols];
 	private String[] columnNames = { "Autor", "Titel", "Serie", "Bemerkung" };
 
-	public SimpleTableModel(EintragListModel bücher) {
+	public SimpleTableModel(BookListModel bücher) {
 
 		super();
 		this.setColumnIdentifiers(columnNames);
@@ -41,7 +41,7 @@ public class SimpleTableModel extends DefaultTableModel {
 
 	}
 	
-	public SimpleTableModel(DefaultListModel<Buch> bücher) {
+	public SimpleTableModel(DefaultListModel<Book> bücher) {
 
 		super();
 		this.setColumnIdentifiers(columnNames);

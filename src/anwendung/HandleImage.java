@@ -15,11 +15,11 @@ import java.net.URLConnection;
 
 import javax.swing.JOptionPane;
 
-import datenhaltung.Datenbank;
+import datenhaltung.Database;
 
 public class HandleImage {
 	
-    public static boolean DownloadWebPage(String webpage, Buch eintrag)  {
+    public static boolean DownloadWebPage(String webpage, Book eintrag)  {
         
     	BufferedInputStream in;
 		try {
@@ -41,7 +41,7 @@ public class HandleImage {
 	    	fos.write(response);
 	    	fos.close();
 	    	InputStream photoStream = new BufferedInputStream( new FileInputStream(path));
-	    	Datenbank.addPic(eintrag.getAutor(), eintrag.getTitel(), photoStream);
+	    	Database.addPic(eintrag.getAutor(), eintrag.getTitel(), photoStream);
 	    	photoStream.close();
 	    	out.close();
 	    	in.close();
@@ -70,11 +70,11 @@ public class HandleImage {
     } 
     
     public static boolean deletePic(String autor, String titel) {
-    	return Datenbank.delPic(autor, titel);
+    	return Database.delPic(autor, titel);
     	
     }
     
-	public static void getImage(Buch eintrag) {
+	public static void getImage(Book eintrag) {
 		String url1 = "https://www.thalia.de/suche?filterPATHROOT=&sq=";
 		String url2 = eintrag.getAutor().replaceAll(" ","+") + "+" + eintrag.getTitel().replaceAll(" ","+");
 		url2 = url2.toUpperCase().replaceAll("Ä","AE").replaceAll("Ö","OE").replaceAll("Ü","UE").replaceAll("ß","ss");

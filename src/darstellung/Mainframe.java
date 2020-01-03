@@ -45,8 +45,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import anwendung.Buch;
-import anwendung.EintragListModel;
+import anwendung.Book;
+import anwendung.BookListModel;
 import anwendung.SimpleTableModel;
 
 public class Mainframe extends JFrame {
@@ -57,8 +57,8 @@ public class Mainframe extends JFrame {
 	private static final long serialVersionUID = 1L;
 	Font schrift = new Font("Roboto", Font.BOLD, 16);
 	private static JTable table = new JTable();
-	public static EintragListModel einträge;
-	private static DefaultListModel<Buch> filter;
+	public static BookListModel einträge;
+	private static DefaultListModel<Book> filter;
 	private static SimpleTableModel anzeige;
 	private static DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("rootNode");
 	private static DefaultMutableTreeNode autorNode = new DefaultMutableTreeNode("AutorNode");
@@ -88,9 +88,9 @@ public class Mainframe extends JFrame {
 			e.printStackTrace();
 		}
 
-		einträge = new EintragListModel();
-		filter = new DefaultListModel<Buch>();
-		EintragListModel.autorenPrüfen();
+		einträge = new BookListModel();
+		filter = new DefaultListModel<Book>();
+		BookListModel.autorenPrüfen();
 		anzeige = new SimpleTableModel(einträge);
 
 		JPanel panel = new JPanel();
@@ -283,7 +283,7 @@ public class Mainframe extends JFrame {
 					deleteBuch();
 					updateModel();
 				}
-				EintragListModel.autorenPrüfen();
+				BookListModel.autorenPrüfen();
 				txt_search.setText("Suche ... (" + einträge.getSize() + ")");
 			}
 		});
@@ -294,7 +294,7 @@ public class Mainframe extends JFrame {
 		pnl_mid.add(listScrollPane, BorderLayout.CENTER);
 
 		rootNode.removeAllChildren();
-		EintragListModel.autorenPrüfen();
+		BookListModel.autorenPrüfen();
 		updateNode();
 		tree.setEditable(false);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -376,7 +376,7 @@ public class Mainframe extends JFrame {
 				if (antwort == JOptionPane.YES_OPTION) {
 					einträge.delete(index);
 				}
-				EintragListModel.autorenPrüfen();
+				BookListModel.autorenPrüfen();
 			} else {
 				JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
 			}
@@ -389,16 +389,16 @@ public class Mainframe extends JFrame {
 	}
 
 	public static void updateNode() {
-		EintragListModel.seriesPrüfen();
-		rootNode = new DefaultMutableTreeNode("Autoren (" + EintragListModel.autoren.size() + ")");
+		BookListModel.seriesPrüfen();
+		rootNode = new DefaultMutableTreeNode("Autoren (" + BookListModel.autoren.size() + ")");
 		treeModel = new DefaultTreeModel(rootNode);
-		for (int i = 0; i < EintragListModel.autoren.size(); i++) {
-			String autor = EintragListModel.autoren.get(i);
+		for (int i = 0; i < BookListModel.autoren.size(); i++) {
+			String autor = BookListModel.autoren.get(i);
 			autorNode = new DefaultMutableTreeNode(autor);
 			treeModel.insertNodeInto(autorNode, rootNode, i);
-			if(EintragListModel.hatAutorSerie(autor)) {
+			if(BookListModel.hatAutorSerie(autor)) {
 				try {
-					String[] serien = EintragListModel.getSerienVonAutor(autor);
+					String[] serien = BookListModel.getSerienVonAutor(autor);
 					int j = 0;
 					while(serien[j]!=null) {
 						serieNode = new DefaultMutableTreeNode(serien[j]);
@@ -455,7 +455,7 @@ public class Mainframe extends JFrame {
 	public static int anz_bücherAutor(String text) {
 		int anz = 0;
 		for (int i = 0; i < einträge.getSize(); i++) {
-			Buch eintrag = einträge.getElementAt(i);
+			Book eintrag = einträge.getElementAt(i);
 			String autor = eintrag.getAutor();
 			if (autor.equals(text))
 				anz += 1;
@@ -466,7 +466,7 @@ public class Mainframe extends JFrame {
 	public static int anz_bücherSerie(String text) {
 		int anz = 0;
 		for (int i = 0; i < einträge.getSize(); i++) {
-			Buch eintrag = einträge.getElementAt(i);
+			Book eintrag = einträge.getElementAt(i);
 			String serie = eintrag.getSerie();
 			if (serie.equals(text))
 				anz += 1;
@@ -479,7 +479,7 @@ public class Mainframe extends JFrame {
 		filter.clear();
 		text = text.toUpperCase();
 		for (int i = 0; i < einträge.getSize(); i++) {
-			Buch eintrag = einträge.getElementAt(i);
+			Book eintrag = einträge.getElementAt(i);
 			String autor = eintrag.getAutor().toUpperCase();
 			String titel = eintrag.getTitel().toUpperCase();
 			String bemerkung = eintrag.getBemerkung().toUpperCase();

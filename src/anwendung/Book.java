@@ -5,9 +5,9 @@ import java.awt.image.BufferedImage;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-import datenhaltung.Datenbank;
+import datenhaltung.Database;
 
-public class Buch {
+public class Book {
 
 	private String autor;
 	private String titel;
@@ -19,7 +19,7 @@ public class Buch {
 	private Image pic;
 	private Timestamp datum;
 
-	public Buch(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
+	public Book(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
 			String bemerkung, String serie, Image pic,Timestamp datum, boolean db) throws SQLException {
 		super();
 		this.autor = autor;
@@ -39,15 +39,15 @@ public class Buch {
 
 		if (db) {
 			if (!ausgeliehen_an.isEmpty())
-				Datenbank.add(autor, titel, "an", ausgeliehen_an, bemerkung, serie, datum.toString());
+				Database.add(autor, titel, "an", ausgeliehen_an, bemerkung, serie, datum.toString());
 			else if (!ausgeliehen_von.isEmpty())
-				Datenbank.add(autor, titel, "von", ausgeliehen_von, bemerkung, serie, datum.toString());
+				Database.add(autor, titel, "von", ausgeliehen_von, bemerkung, serie, datum.toString());
 			else
-				Datenbank.add(autor, titel, "nein", "", bemerkung, serie, datum.toString());
+				Database.add(autor, titel, "nein", "", bemerkung, serie, datum.toString());
 		}
 	}
 
-	public Buch(String autor, String titel, String bemerkung, String serie, Image pic, boolean ausgeliehen,Timestamp datum, boolean db) throws SQLException {
+	public Book(String autor, String titel, String bemerkung, String serie, Image pic, boolean ausgeliehen,Timestamp datum, boolean db) throws SQLException {
 		this(autor, titel, ausgeliehen, "", "", bemerkung, serie,pic, datum, db);
 	}
 
@@ -73,7 +73,7 @@ public class Buch {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Buch other = (Buch) obj;
+		Book other = (Book) obj;
 		if (autor == null) {
 			if (other.autor != null)
 				return false;

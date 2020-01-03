@@ -37,9 +37,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import anwendung.Buch;
-import anwendung.EintragListModel;
-import datenhaltung.Datenbank;
+import anwendung.Book;
+import anwendung.BookListModel;
+import datenhaltung.Database;
 import anwendung.HandleImage;
 
 public class Dialog_edit extends JDialog {
@@ -58,7 +58,7 @@ public class Dialog_edit extends JDialog {
 	private JTextField txt_serie;
 	private Font standardFont = new Font("standard", Font.BOLD, 14);
 
-	public Dialog_edit(EintragListModel einträge, int index, DefaultTreeModel treeModel,
+	public Dialog_edit(BookListModel einträge, int index, DefaultTreeModel treeModel,
 			DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(700, 500));
@@ -66,7 +66,7 @@ public class Dialog_edit extends JDialog {
 //		this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
 		this.setAlwaysOnTop(true);
 		
-		Buch eintrag = einträge.getElementAt(index);
+		Book eintrag = einträge.getElementAt(index);
 
 		URL iconURL = getClass().getResource("/resources/Liste.png");
 		// iconURL is null when not found
@@ -419,7 +419,7 @@ public class Dialog_edit extends JDialog {
 
 	}
 
-	public void speichern(Buch eintrag) {
+	public void speichern(Book eintrag) {
 		try {
 			String oldAutor = eintrag.getAutor();
 			String oldTitel = eintrag.getTitel();
@@ -434,23 +434,23 @@ public class Dialog_edit extends JDialog {
 					eintrag.setAusgeliehen(true);
 					eintrag.setAusgeliehen_an(txt_leihAn.getText().trim());
 					eintrag.setAusgeliehen_von("");
-					Datenbank.delete(oldAutor, oldTitel);
-					Datenbank.add(newAutor, newTitel, "an", txt_leihAn.getText().trim(), txt_merk.getText().trim(),
+					Database.delete(oldAutor, oldTitel);
+					Database.add(newAutor, newTitel, "an", txt_leihAn.getText().trim(), txt_merk.getText().trim(),
 							txt_serie.getText().trim(),datum.toString());
 				} else if (check_von.isSelected()) {
 					eintrag.setAusgeliehen(true);
 					eintrag.setAusgeliehen_von(txt_leihVon.getText().trim());
 					eintrag.setAusgeliehen_an("");
-					Datenbank.delete(oldAutor, oldTitel);
-					Datenbank.add(newAutor, newTitel, "von", txt_leihVon.getText().trim(), txt_merk.getText().trim(),
+					Database.delete(oldAutor, oldTitel);
+					Database.add(newAutor, newTitel, "von", txt_leihVon.getText().trim(), txt_merk.getText().trim(),
 							txt_serie.getText().trim(),datum.toString());
 
 				} else {
 					eintrag.setAusgeliehen(false);
 					eintrag.setAusgeliehen_an("");
 					eintrag.setAusgeliehen_von("");
-					Datenbank.delete(oldAutor, oldTitel);
-					Datenbank.add(newAutor, newTitel, "nein", "", txt_merk.getText().trim(),
+					Database.delete(oldAutor, oldTitel);
+					Database.add(newAutor, newTitel, "nein", "", txt_merk.getText().trim(),
 							txt_serie.getText().trim(),datum.toString());
 				}
 				eintrag.setAutor(newAutor);
@@ -477,7 +477,7 @@ public class Dialog_edit extends JDialog {
 				txt_title.setText("Autor/Titel zu lang (max. 50 Zeichen)!");
 			}
 		}
-		EintragListModel.autorenPrüfen();
+		BookListModel.autorenPrüfen();
 	}
 
 	public static boolean openWebpage(URI uri) {
@@ -502,7 +502,7 @@ public class Dialog_edit extends JDialog {
 		return false;
 	}
 
-	public ImageIcon showImg(Buch eintrag) {
+	public ImageIcon showImg(Book eintrag) {
 		Image img = null;
 		try {
 			img = eintrag.getPic();

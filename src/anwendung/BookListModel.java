@@ -13,21 +13,21 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
 
 import darstellung.Mainframe;
-import datenhaltung.Datenbank;
+import datenhaltung.Database;
 
-public class EintragListModel extends AbstractListModel<Buch> {
+public class BookListModel extends AbstractListModel<Book> {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static ArrayList<Buch> bücher = new ArrayList<Buch>();
+	private static ArrayList<Book> bücher = new ArrayList<Book>();
 	public static ArrayList<String> autoren = new ArrayList<String>();
 	public static ArrayList<String> series = new ArrayList<String>();
 
-	public EintragListModel() {
-		Datenbank.createConnection();
-		ResultSet rs = Datenbank.readDB();
+	public BookListModel() {
+		Database.createConnection();
+		ResultSet rs = Database.readDB();
 		try {
 			while (rs.next()) {
 				try {
@@ -46,15 +46,15 @@ public class EintragListModel extends AbstractListModel<Buch> {
 					if (rs.getString(3).equals("an")) {
 						ausgeliehen = true;
 						String ausgeliehen_an = rs.getString("name").trim();
-						bücher.add(new Buch(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung, serie, buf_pic,
+						bücher.add(new Book(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung, serie, buf_pic,
 								datum, false));
 					} else if (rs.getString(3).equals("von")) {
 						ausgeliehen = true;
 						String ausgeliehen_von = rs.getString("name").trim();
-						bücher.add(new Buch(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung, serie, buf_pic,
+						bücher.add(new Book(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung, serie, buf_pic,
 								datum, false));
 					} else {
-						bücher.add(new Buch(autor, titel, bemerkung, serie, buf_pic, ausgeliehen, datum, false));
+						bücher.add(new Book(autor, titel, bemerkung, serie, buf_pic, ausgeliehen, datum, false));
 					}
 				} catch (DateTimeParseException ex1) {
 					System.err.println("Datum falsch während DB auslesen");
@@ -85,20 +85,20 @@ public class EintragListModel extends AbstractListModel<Buch> {
 //		Mainframe.updateNode();
 	}
 
-	public void add(Buch buch) {
+	public void add(Book buch) {
 		bücher.add(buch);
 		fireIntervalAdded(this, 0, bücher.size());
 		System.out.println("Buch hinzugefügt: " + buch.getAutor() + "," + buch.getTitel());
 	}
 
-	public void delete(Buch buch) {
+	public void delete(Book buch) {
 		bücher.remove(buch);
 		fireIntervalRemoved(this, 0, bücher.size());
 		System.out.println("Buch gelöscht: " + buch.getAutor() + "," + buch.getTitel());
 	}
 
 	public void delete(int index) {
-		Datenbank.delete(bücher.get(index).getAutor(), bücher.get(index).getTitel());
+		Database.delete(bücher.get(index).getAutor(), bücher.get(index).getTitel());
 		bücher.remove(index);
 		fireIntervalRemoved(this, index, index);
 	}
@@ -107,7 +107,7 @@ public class EintragListModel extends AbstractListModel<Buch> {
 		String[] serien = new String[bücher.size()];
 		int counter = 0;
 		for (int i = 0; i < bücher.size(); i++) {
-			Buch buch = bücher.get(i);
+			Book buch = bücher.get(i);
 			if (buch.getAutor().contains(autor)) {
 				if (!buch.getSerie().trim().equals("")) {
 					serien[counter] = buch.getSerie();
@@ -120,7 +120,7 @@ public class EintragListModel extends AbstractListModel<Buch> {
 
 	public static boolean hatAutorSerie(String autor) {
 		for (int i = 0; i < bücher.size(); i++) {
-			Buch buch = bücher.get(i);
+			Book buch = bücher.get(i);
 			if (buch.getAutor().contains(autor)) {
 				if (!buch.getSerie().trim().equals("")) {
 					return true;
@@ -131,13 +131,13 @@ public class EintragListModel extends AbstractListModel<Buch> {
 	}
 
 	@Override
-	public Buch getElementAt(int arg0) {
+	public Book getElementAt(int arg0) {
 		return bücher.get(arg0);
 	}
 
 	public int getIndexOf(String searchAutor, String searchTitel) {
 		for (int i = 0; i < bücher.size(); i++) {
-			Buch eintrag = bücher.get(i);
+			Book eintrag = bücher.get(i);
 			String autor = eintrag.getAutor().toUpperCase();
 			String titel = eintrag.getTitel().toUpperCase();
 			if (autor.contains(searchAutor.toUpperCase()) && titel.contains(searchTitel.toUpperCase())) {
@@ -153,7 +153,7 @@ public class EintragListModel extends AbstractListModel<Buch> {
 		return bücher.size();
 	}
 
-	public int indexOf(Buch buch) {
+	public int indexOf(Book buch) {
 		return bücher.indexOf(buch);
 	}
 

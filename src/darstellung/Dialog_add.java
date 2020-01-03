@@ -26,8 +26,8 @@ import javax.swing.JTextField;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import anwendung.Buch;
-import anwendung.EintragListModel;
+import anwendung.Book;
+import anwendung.BookListModel;
 
 public class Dialog_add extends JDialog {
 
@@ -45,7 +45,7 @@ public class Dialog_add extends JDialog {
 	private JTextField txt_serie;
 	private Font standardFont = new Font("standard", Font.BOLD, 14);
 
-	public Dialog_add(EintragListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
+	public Dialog_add(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 365));
 		
@@ -289,12 +289,12 @@ public class Dialog_add extends JDialog {
 				Timestamp datum = new Timestamp(System.currentTimeMillis());
 				if (check_an.isSelected()) {
 					Mainframe.einträge
-					.add(new Buch(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,null,datum, true));
+					.add(new Book(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,null,datum, true));
 				} else if (check_von.isSelected()) {
 					Mainframe.einträge
-							.add(new Buch(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,null,datum, true));
+							.add(new Book(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,null,datum, true));
 				} else
-					Mainframe.einträge.add(new Buch(autor, titel, bemerkung, serie,null, false,datum, true));
+					Mainframe.einträge.add(new Book(autor, titel, bemerkung, serie,null, false,datum, true));
 				dispose();
 			} else {
 				if (txt_author.getText().isEmpty()) {
@@ -320,7 +320,7 @@ public class Dialog_add extends JDialog {
 		} else {
 			Mainframe.search(Mainframe.getTreeSelection());
 		}
-		EintragListModel.autorenPrüfen();
+		BookListModel.autorenPrüfen();
 	}
 
 }
