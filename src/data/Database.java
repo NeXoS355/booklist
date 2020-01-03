@@ -45,7 +45,7 @@ public class Database {
 		try {
 			createTable = con.createStatement();
 			createTable.execute(
-					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),pic blob,date timestamp, CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
+					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart numeric, pic blob,date timestamp, CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
 		} catch (SQLException e) {
 			if ("X0Y32".equals(e.getSQLState())) {
 				System.out.println("Tabelle existiert schon.");

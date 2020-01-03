@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Fri Jan 03 23:19:43 CET 2020:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-016f-6d7e-2ca7-00001f20d818 
+Fri Jan 03 23:32:26 CET 2020:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-016f-6d89-d407-00001f20d820 
 on database directory C:\Users\mariu\git\booklist\MyDB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@c387f44 
 Loaded from file:/C:/Users/mariu/git/booklist/derby.jar
 java.vendor=Oracle Corporation
