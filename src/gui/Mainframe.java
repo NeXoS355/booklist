@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
@@ -69,14 +70,12 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.0.2  (01.2020)  ";
+	private String version = "Ver. 2.1.0  (01.2020)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
 		this.setLayout(new BorderLayout(10, 10));
 		this.setSize(1300, 1000);
-//		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-//		this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
 		URL iconURL = getClass().getResource("/resources/Liste.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
@@ -90,7 +89,6 @@ public class Mainframe extends JFrame {
 
 		einträge = new BookListModel();
 		filter = new DefaultListModel<Book>();
-		BookListModel.autorenPrüfen();
 		anzeige = new SimpleTableModel(einträge);
 
 		JPanel panel = new JPanel();
@@ -209,7 +207,7 @@ public class Mainframe extends JFrame {
 		lblVersion.setFont(newLabelFont);
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
-
+		
 		table.setModel(anzeige);
 		table.setFont(schrift);
 		table.setRowHeight(table.getRowHeight()+6);
@@ -295,7 +293,6 @@ public class Mainframe extends JFrame {
 
 		rootNode.removeAllChildren();
 		BookListModel.autorenPrüfen();
-		updateNode();
 		tree.setEditable(false);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		tree.setFont(schrift);
@@ -355,8 +352,8 @@ public class Mainframe extends JFrame {
 		});
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		treeScrollPane.setPreferredSize(new Dimension(200, pnl_mid.getHeight()));
 		this.add(treeScrollPane, BorderLayout.WEST);
-
 		this.add(pnl_mid, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
 		updateModel();
@@ -389,7 +386,6 @@ public class Mainframe extends JFrame {
 	}
 
 	public static void updateNode() {
-		BookListModel.seriesPrüfen();
 		rootNode = new DefaultMutableTreeNode("Autoren (" + BookListModel.autoren.size() + ")");
 		treeModel = new DefaultTreeModel(rootNode);
 		for (int i = 0; i < BookListModel.autoren.size(); i++) {
@@ -399,11 +395,9 @@ public class Mainframe extends JFrame {
 			if(BookListModel.hatAutorSerie(autor)) {
 				try {
 					String[] serien = BookListModel.getSerienVonAutor(autor);
-					int j = 0;
-					while(serien[j]!=null) {
+					for (int j = 0;j < serien.length;j++) {
 						serieNode = new DefaultMutableTreeNode(serien[j]);
 						treeModel.insertNodeInto(serieNode, autorNode, j);
-						j++;
 					}
 				} catch(NullPointerException e) {
 					System.out.println("Keine Serie gefunden zu " + autor);
@@ -417,6 +411,7 @@ public class Mainframe extends JFrame {
 		tree.setModel(treeModel);
 		tree.revalidate();
 		tree.repaint();
+		System.out.println("Node updated");
 	}
 
 	public static void copyFilesInDirectory(File from, File to) {

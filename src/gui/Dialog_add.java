@@ -4,7 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +15,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -46,30 +48,37 @@ public class Dialog_add extends JDialog {
 	private JTextField txt_leihAn;
 	private JTextField txt_merk;
 	private JTextField txt_serie;
+	private JTextField txt_seriePart;
 	private Font standardFont = new Font("standard", Font.BOLD, 14);
-	private Border standardBorder = BorderFactory.createLineBorder(new Color(70,130,180,125),2);
-	private Border activeBorder = BorderFactory.createLineBorder(new Color(70,130,180,200),4);
+	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
+	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	public Dialog_add(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 365));
-		
+
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
+		this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
 		this.setAlwaysOnTop(true);
 		URL iconURL = getClass().getResource("/resources/Liste.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
 		this.setIconImage(icon.getImage());
 
-		this.setLayout(new BorderLayout(10,10));
+		this.setLayout(new BorderLayout(10, 10));
 
 		JPanel panel_west = new JPanel();
 		panel_west.setLayout(new GridLayout(4, 1, 10, 10));
+
 		JPanel panel_center = new JPanel();
-		panel_center.setLayout(new GridLayout(4, 1, 10, 10));
+		panel_center.setLayout(new GridBagLayout());
+		GridBagConstraints center_c = new GridBagConstraints();
+		center_c.ipady = 10;
+		int padding_c = 10;
+
 		JPanel panel_south = new JPanel();
 		panel_south.setLayout(new GridLayout(3, 2, 10, 10));
+
 		int höhe = 60;
 		int breite = 100;
 
@@ -77,14 +86,14 @@ public class Dialog_add extends JDialog {
 		lbl_author.setFont(standardFont);
 		lbl_author.setSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_author);
-		
+
 		txt_author = new JTextField();
 		txt_author.setFont(standardFont);
 		txt_author.setText(Mainframe.getTreeSelection());
 		txt_author.setPreferredSize(new Dimension(50, höhe));
 		txt_author.setBorder(standardBorder);
 		txt_author.addKeyListener(new KeyAdapter() {
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -98,21 +107,27 @@ public class Dialog_add extends JDialog {
 
 		});
 		txt_author.addMouseListener(new MouseAdapter() {
-						
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_author.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_author.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
-		panel_center.add(txt_author);
+		center_c.fill = GridBagConstraints.HORIZONTAL;
+		center_c.gridx = 0;
+		center_c.gridy = 0;
+		center_c.weightx = 0.5;
+		center_c.gridwidth = 4;
+		center_c.insets = new Insets(0, 0, padding_c, 0);
+		panel_center.add(txt_author, center_c);
 
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(standardFont);
@@ -124,46 +139,58 @@ public class Dialog_add extends JDialog {
 		txt_title.setPreferredSize(new Dimension(50, höhe));
 		txt_title.setBorder(standardBorder);
 		txt_title.addKeyListener(new KeyAdapter() {
-			
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					addBuch();
 				} else if (!e.isActionKey()) {
-					txt_title.setBackground(Color.white);
-					txt_title.setForeground(Color.black);
 					if (txt_title.getText().equals("Buch bereits vorhanden!")) {
 						txt_title.setText("");
 					}
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
+				if (txt_title.getText().length() > 50) {
+					txt_title.setEditable(false);
+					txt_title.setText("Nicht mehr als 50 Zeichen!");
+					txt_title.setBackground(new Color(255, 105, 105));
+				}
 			}
 		});
 		txt_title.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_title.setBorder(standardBorder);
-				
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_title.setBorder(activeBorder);
-				
 			}
-			
-		});
-		txt_title.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mousePressed(MouseEvent e) {
-				txt_title.setForeground(Color.black);
-				txt_title.setText("");
+				if (txt_title.getText().equals("Nicht mehr als 50 Zeichen!")) {
+					txt_title.setEditable(true);
+					txt_title.setForeground(Color.black);
+					txt_title.setBackground(Color.white);
+					txt_title.setText("");
+				} else if (txt_title.getText().equals("Buch bereits vorhanden!")) {
+					txt_title.setForeground(Color.black);
+					txt_title.setBackground(Color.white);
+					txt_title.setText("");
+				}
 			}
+
 		});
-		panel_center.add(txt_title);
+		center_c.gridx = 0;
+		center_c.gridy = 1;
+		center_c.weightx = 0.5;
+		center_c.gridwidth = 4;
+		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
+		panel_center.add(txt_title, center_c);
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
 		lbl_merk.setFont(standardFont);
@@ -175,7 +202,7 @@ public class Dialog_add extends JDialog {
 		txt_merk.setPreferredSize(new Dimension(50, höhe));
 		txt_merk.setBorder(standardBorder);
 		txt_merk.addKeyListener(new KeyAdapter() {
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -184,25 +211,30 @@ public class Dialog_add extends JDialog {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 			}
-			
+
 		});
 		txt_merk.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_merk.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_merk.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
-		panel_center.add(txt_merk);
-		
+		center_c.gridx = 0;
+		center_c.gridy = 2;
+		center_c.weightx = 0.5;
+		center_c.gridwidth = 4;
+		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
+		panel_center.add(txt_merk, center_c);
+
 		JLabel lbl_serie = new JLabel("Serie:");
 		lbl_serie.setFont(standardFont);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
@@ -213,7 +245,7 @@ public class Dialog_add extends JDialog {
 		txt_serie.setPreferredSize(new Dimension(50, höhe));
 		txt_serie.setBorder(standardBorder);
 		txt_serie.addKeyListener(new KeyAdapter() {
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -222,24 +254,68 @@ public class Dialog_add extends JDialog {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 			}
-			
+
 		});
 		txt_serie.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_serie.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_serie.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
-		panel_center.add(txt_serie);
+		center_c.gridx = 0;
+		center_c.gridy = 3;
+		center_c.weightx = 4;
+		center_c.gridwidth = 2;
+		center_c.insets = new Insets(padding_c, 0, 0, 0);
+		panel_center.add(txt_serie, center_c);
+
+		txt_seriePart = new JTextField();
+		txt_seriePart.setFont(standardFont);
+		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
+		txt_seriePart.setBorder(standardBorder);
+		txt_seriePart.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					addBuch();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+					dispose();
+				if (txt_seriePart.getText().length() > 2) {
+					txt_seriePart.setBackground(new Color(255, 105, 105));
+					txt_seriePart.setText("");
+				} else
+					txt_seriePart.setBackground(Color.white);
+			}
+		});
+		txt_seriePart.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				txt_seriePart.setBorder(standardBorder);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				txt_seriePart.setBorder(activeBorder);
+			}
+
+		});
+		center_c.gridx = 2;
+		center_c.gridy = 3;
+		center_c.weightx = 0.5;
+		center_c.gridwidth = 1;
+		panel_center.add(txt_seriePart, center_c);
 
 		check_von = new JCheckBox("ausgeliehen von");
 		check_von.setFont(standardFont);
@@ -282,7 +358,7 @@ public class Dialog_add extends JDialog {
 		txt_leihVon.setVisible(false);
 		txt_leihVon.setBorder(standardBorder);
 		txt_leihVon.addKeyListener(new KeyAdapter() {
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -293,19 +369,19 @@ public class Dialog_add extends JDialog {
 			}
 		});
 		txt_leihVon.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_leihVon.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_leihVon.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
 		panel_south.add(txt_leihVon);
 
@@ -314,7 +390,7 @@ public class Dialog_add extends JDialog {
 		txt_leihAn.setVisible(false);
 		txt_leihAn.setBorder(standardBorder);
 		txt_leihAn.addKeyListener(new KeyAdapter() {
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -326,19 +402,19 @@ public class Dialog_add extends JDialog {
 			}
 		});
 		txt_leihAn.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_leihAn.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_leihAn.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
 		panel_south.add(txt_leihAn);
 
@@ -367,58 +443,59 @@ public class Dialog_add extends JDialog {
 		this.add(panel_west, BorderLayout.WEST);
 		this.add(panel_center, BorderLayout.CENTER);
 		this.add(panel_south, BorderLayout.SOUTH);
-		this.add(new JLabel(""), BorderLayout.NORTH); //oberer Abstand vom JFrame
+		this.add(new JLabel(""), BorderLayout.NORTH); // oberer Abstand vom JFrame
 
 		this.setVisible(true);
 		this.setModal(true);
 		this.setResizable(false);
-	
 
 		if (!(Mainframe.getTreeSelection()).equals("")) {
 			txt_title.requestFocus();
 		}
 
 	}
-	
-	public void MouseEntered(MouseEvent e) {
-		System.out.println("Mouse entered");
-	}
-	
+
 	public void addBuch() {
 		try {
-			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty() && txt_title.getForeground() != Color.white) {
+			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()
+					&& txt_title.getForeground() != Color.white) {
 				String autor = txt_author.getText();
 				String titel = txt_title.getText();
 				String bemerkung = txt_merk.getText();
 				String serie = txt_serie.getText();
+				String seriePart = txt_seriePart.getText();
 				Timestamp datum = new Timestamp(System.currentTimeMillis());
-				if (check_an.isSelected()) {
-					Mainframe.einträge
-					.add(new Book(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,null,datum, true));
-				} else if (check_von.isSelected()) {
-					Mainframe.einträge
-							.add(new Book(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,null,datum, true));
-				} else
-					Mainframe.einträge.add(new Book(autor, titel, bemerkung, serie,null, false,datum, true));
-				dispose();
-			} else {
-				if (txt_author.getText().isEmpty()) {
-					txt_author.setBackground(new Color(255,105,105));
-				}
-				if (txt_title.getText().isEmpty()){
-					txt_title.setBackground(new Color(255,105,105));
+				if (checkInput(autor, titel)) {
+					if (check_an.isSelected()) {
+						Mainframe.einträge.add(new Book(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,
+								seriePart, null, datum, true));
+					} else if (check_von.isSelected()) {
+						Mainframe.einträge.add(new Book(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,
+								seriePart, null, datum, true));
+					} else
+						Mainframe.einträge
+								.add(new Book(autor, titel, bemerkung, serie, seriePart, null, false, datum, true));
+					dispose();
+				} else {
+					txt_title.setText("Buch bereits vorhanden!");
+					txt_title.setBackground(new Color(255, 105, 105));
+					if (txt_author.getText().isEmpty()) {
+						txt_author.setBackground(new Color(255, 105, 105));
+					}
+					if (txt_title.getText().isEmpty()) {
+						txt_title.setBackground(new Color(255, 105, 105));
+					}
 				}
 			}
 			Mainframe.setLastSearch(txt_author.getText());
 		} catch (SQLException ex) {
-			txt_title.setForeground(Color.white);
-			txt_title.setBackground(new Color(255,105,105));
-			if (ex.getSQLState()=="23505") {
-			txt_title.setText("Buch bereits vorhanden!");
-			} else if (ex.getSQLState()=="22001") {
-				txt_title.setText("Autor/Titel zu lang (max. 50 Zeichen)!");
-			}
-		} 
+			ex.printStackTrace();
+//			txt_title.setForeground(Color.white);
+//			txt_title.setBackground(new Color(255, 105, 105));
+//			if (ex.getSQLState() == "23505") {
+//				txt_title.setText("Buch bereits vorhanden!");
+//			}
+		}
 		Mainframe.updateModel();
 		if (Mainframe.getTreeSelection() == "") {
 			Mainframe.search(txt_author.getText());
@@ -426,6 +503,16 @@ public class Dialog_add extends JDialog {
 			Mainframe.search(Mainframe.getTreeSelection());
 		}
 		BookListModel.autorenPrüfen();
+	}
+
+	public boolean checkInput(String autor, String titel) {
+		for (int i = 0; i < Mainframe.einträge.getSize(); i++) {
+			Book eintrag = Mainframe.einträge.getElementAt(i);
+			if (eintrag.getAutor().equals(autor) && eintrag.getTitel().equals(titel)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

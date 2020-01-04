@@ -31,7 +31,7 @@ public class SimpleTableModel extends DefaultTableModel {
 				} else if (j == 1) {
 					rowData[j] = bücher.getElementAt(i).getTitel();
 				} else if (j == 2) {
-					rowData[j] = bücher.getElementAt(i).getSerie();
+					rowData[j] = bücher.getElementAt(i).getSerie() + " - " + bücher.getElementAt(i).getSeriePart();
 				} else if (j == 3) {
 					rowData[j] = bücher.getElementAt(i).getBemerkung();
 				}
@@ -57,7 +57,7 @@ public class SimpleTableModel extends DefaultTableModel {
 				} else if (j == 1) {
 					rowData[j] = bücher.getElementAt(i).getTitel();
 				} else if (j == 2) {
-					rowData[j] = bücher.getElementAt(i).getSerie();
+					rowData[j] = bücher.getElementAt(i).getSerie() + " - " + bücher.getElementAt(i).getSeriePart();
 				} else if (j == 3) {
 					rowData[j] = bücher.getElementAt(i).getBemerkung();
 				}

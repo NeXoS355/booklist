@@ -16,17 +16,19 @@ public class Book {
 	private String ausgeliehen_von;
 	private String bemerkung;
 	private String serie;
+	private String seriePart;
 	private Image pic;
 	private Timestamp datum;
 
 	public Book(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
-			String bemerkung, String serie, Image pic,Timestamp datum, boolean db) throws SQLException {
+			String bemerkung, String serie,String seriePart, Image pic,Timestamp datum, boolean db) throws SQLException {
 		super();
 		this.autor = autor;
 		this.titel = titel;
 		this.ausgeliehen = ausgeliehen;
 		this.bemerkung = bemerkung;
 		this.serie = serie;
+		this.seriePart = seriePart;
 		this.pic = pic;
 		this.datum = datum;
 		if (ausgeliehen) {
@@ -39,16 +41,16 @@ public class Book {
 
 		if (db) {
 			if (!ausgeliehen_an.isEmpty())
-				Database.add(autor, titel, "an", ausgeliehen_an, bemerkung, serie, datum.toString());
+				Database.add(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, datum.toString());
 			else if (!ausgeliehen_von.isEmpty())
-				Database.add(autor, titel, "von", ausgeliehen_von, bemerkung, serie, datum.toString());
+				Database.add(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, datum.toString());
 			else
-				Database.add(autor, titel, "nein", "", bemerkung, serie, datum.toString());
+				Database.add(autor, titel, "nein", "", bemerkung, serie, seriePart, datum.toString());
 		}
 	}
 
-	public Book(String autor, String titel, String bemerkung, String serie, Image pic, boolean ausgeliehen,Timestamp datum, boolean db) throws SQLException {
-		this(autor, titel, ausgeliehen, "", "", bemerkung, serie,pic, datum, db);
+	public Book(String autor, String titel, String bemerkung, String serie,String seriePart, Image pic, boolean ausgeliehen,Timestamp datum, boolean db) throws SQLException {
+		this(autor, titel, ausgeliehen, "", "", bemerkung, serie, seriePart, pic, datum, db);
 	}
 
 	@Override
@@ -157,6 +159,14 @@ public class Book {
 
 	public void setDatum(Timestamp datum) {
 		this.datum = datum;
+	}
+
+	public String getSeriePart() {
+		return seriePart;
+	}
+
+	public void setSeriePart(String seriePart) {
+		this.seriePart = seriePart;
 	}
 	
 	

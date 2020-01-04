@@ -18,8 +18,12 @@ public class patch_2_1_0 {
 		try {
 			con = createConnection();
 			Database.createTable(con);
-			String sql = "ALTER TABLE bücher ADD number(2) serieNumber";
+			String sql = "ALTER TABLE bücher ADD seriePart VARCHAR(2)";
 			PreparedStatement st;
+			st = con.prepareStatement(sql);
+			st.execute();
+			st.close();
+			sql = "Update bücher set seriePart=''";
 			st = con.prepareStatement(sql);
 			st.execute();
 			st.close();

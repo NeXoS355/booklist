@@ -5,8 +5,11 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -58,18 +61,16 @@ public class Dialog_edit extends JDialog {
 	private JTextField txt_leihAn;
 	private JTextField txt_merk;
 	private JTextField txt_serie;
+	private JTextField txt_seriePart;
 	private Font standardFont = new Font("standard", Font.BOLD, 14);
-	private Border standardBorder = BorderFactory.createLineBorder(new Color(70,130,180,125),2);
-	private Border activeBorder = BorderFactory.createLineBorder(new Color(70,130,180,200),4);
+	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
+	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_edit(BookListModel einträge, int index, DefaultTreeModel treeModel,
-			DefaultMutableTreeNode rootNode) {
+	public Dialog_edit(BookListModel einträge, int index, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(700, 500));
-//		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-//		this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
 		this.setAlwaysOnTop(true);
-		
+
 		Book eintrag = einträge.getElementAt(index);
 
 		URL iconURL = getClass().getResource("/resources/Liste.png");
@@ -86,7 +87,10 @@ public class Dialog_edit extends JDialog {
 		panel_west.setLayout(new GridLayout(4, 1, 40, 40));
 
 		JPanel panel_center = new JPanel();
-		panel_center.setLayout(new GridLayout(4, 1, 40, 40));
+		panel_center.setLayout(new GridBagLayout());
+		GridBagConstraints center_c = new GridBagConstraints();
+		center_c.ipady = 25;
+		int padding_c = 22;
 
 		JPanel panel_east_border = new JPanel();
 		panel_east_border.setLayout(new BorderLayout(10, 10));
@@ -107,7 +111,6 @@ public class Dialog_edit extends JDialog {
 			image = ImageIO.read(getClass().getResource("/resources/amazon.png"));
 			btn_browseAuthor.setIcon(new ImageIcon(image));
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
@@ -164,7 +167,7 @@ public class Dialog_edit extends JDialog {
 							if (state == true) {
 								JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
 								eintrag.setPic(null);
-								dispose(); 
+								dispose();
 							} else {
 								JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten");
 							}
@@ -187,8 +190,7 @@ public class Dialog_edit extends JDialog {
 			});
 			panel_east_border.add(btn_downloadPic, BorderLayout.CENTER);
 		}
-		
-		
+
 		JLabel lbl_datum = new JLabel("Datum: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
 		panel_north.add(lbl_datum);
 
@@ -245,21 +247,27 @@ public class Dialog_edit extends JDialog {
 			}
 		});
 		txt_author.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_author.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_author.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
-		panel_center.add(txt_author, BorderLayout.NORTH);
+		center_c.fill = GridBagConstraints.HORIZONTAL;
+		center_c.gridx = 0;
+		center_c.gridy = 0;
+		center_c.weightx = 0.5;
+		center_c.gridwidth = 4;
+		center_c.insets = new Insets(0, 0, padding_c, 0);
+		panel_center.add(txt_author, center_c);
 
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(standardFont);
@@ -277,33 +285,52 @@ public class Dialog_edit extends JDialog {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					speichern(eintrag);
 				} else if (!e.isActionKey()) {
-					txt_title.setBackground(Color.white);
-					txt_title.setForeground(Color.black);
 					if (txt_title.getText().equals("Buch bereits vorhanden!")) {
 						txt_title.setText("");
 					}
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
+				if (txt_title.getText().length() > 50) {
+					txt_title.setEditable(false);
+					txt_title.setText("Nicht mehr als 50 Zeichen!");
+					txt_title.setBackground(new Color(255, 105, 105));
+				}
+
 			}
 
 		});
 		txt_title.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_title.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_title.setBorder(activeBorder);
-				
+
 			}
-			
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (txt_title.getText().equals("Nicht mehr als 50 Zeichen!")) {
+					txt_title.setEditable(true);
+					txt_title.setForeground(Color.black);
+					txt_title.setBackground(Color.white);
+					txt_title.setText("");
+				}
+			}
+
 		});
-		panel_center.add(txt_title, BorderLayout.CENTER);
+		center_c.gridx = 0;
+		center_c.gridy = 1;
+		center_c.weightx = 0.5;
+		center_c.gridwidth = 4;
+		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
+		panel_center.add(txt_title, center_c);
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
 		lbl_merk.setFont(standardFont);
@@ -326,21 +353,26 @@ public class Dialog_edit extends JDialog {
 
 		});
 		txt_merk.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_merk.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_merk.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
-		panel_center.add(txt_merk, BorderLayout.SOUTH);
+		center_c.gridx = 0;
+		center_c.gridy = 2;
+		center_c.weightx = 0.5;
+		center_c.gridwidth = 4;
+		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
+		panel_center.add(txt_merk, center_c);
 
 		JLabel lbl_serie = new JLabel("Serie:");
 		lbl_serie.setFont(standardFont);
@@ -364,21 +396,67 @@ public class Dialog_edit extends JDialog {
 
 		});
 		txt_serie.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_serie.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_serie.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
-		panel_center.add(txt_serie);
+		center_c.gridx = 0;
+		center_c.gridy = 3;
+		center_c.weightx = 4;
+		center_c.gridwidth = 3;
+		center_c.insets = new Insets(padding_c, 0, 0, 0);
+		panel_center.add(txt_serie, center_c);
+
+		txt_seriePart = new JTextField(eintrag.getSeriePart());
+		txt_seriePart.setFont(standardFont);
+		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
+		txt_seriePart.setBorder(standardBorder);
+		txt_seriePart.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+					speichern(eintrag);
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+					dispose();
+				if (txt_seriePart.getText().length() > 2) {
+					txt_seriePart.setText("");
+					txt_seriePart.setBackground(new Color(255, 105, 105));
+				} else
+					txt_seriePart.setBackground(Color.white);
+			}
+
+		});
+		txt_seriePart.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				txt_seriePart.setBorder(standardBorder);
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				txt_seriePart.setBorder(activeBorder);
+
+			}
+
+		});
+		center_c.gridx = 3;
+		center_c.gridy = 3;
+		center_c.weightx = 0.5;
+		center_c.gridwidth = 1;
+		panel_center.add(txt_seriePart, center_c);
 
 		check_von = new JCheckBox("ausgeliehen von");
 		check_von.setFont(standardFont);
@@ -438,19 +516,19 @@ public class Dialog_edit extends JDialog {
 
 		});
 		txt_leihVon.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_leihVon.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_leihVon.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
 		panel_south.add(txt_leihVon);
 
@@ -471,19 +549,19 @@ public class Dialog_edit extends JDialog {
 
 		});
 		txt_leihAn.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				txt_leihAn.setBorder(standardBorder);
-				
+
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				txt_leihAn.setBorder(activeBorder);
-				
+
 			}
-			
+
 		});
 		panel_south.add(txt_leihAn);
 
@@ -527,57 +605,68 @@ public class Dialog_edit extends JDialog {
 			String newTitel = txt_title.getText().trim();
 			String newBemerkung = txt_merk.getText().trim();
 			String newSerie = txt_serie.getText().trim();
+			String newSeriePart = txt_seriePart.getText();
 			Timestamp datum = new Timestamp(System.currentTimeMillis());
-			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()
-					&& txt_title.getForeground() != Color.white) {
-				if (check_an.isSelected()) {
-					eintrag.setAusgeliehen(true);
-					eintrag.setAusgeliehen_an(txt_leihAn.getText().trim());
-					eintrag.setAusgeliehen_von("");
-					Database.delete(oldAutor, oldTitel);
-					Database.add(newAutor, newTitel, "an", txt_leihAn.getText().trim(), txt_merk.getText().trim(),
-							txt_serie.getText().trim(),datum.toString());
-				} else if (check_von.isSelected()) {
-					eintrag.setAusgeliehen(true);
-					eintrag.setAusgeliehen_von(txt_leihVon.getText().trim());
-					eintrag.setAusgeliehen_an("");
-					Database.delete(oldAutor, oldTitel);
-					Database.add(newAutor, newTitel, "von", txt_leihVon.getText().trim(), txt_merk.getText().trim(),
-							txt_serie.getText().trim(),datum.toString());
+			if (checkInput(newAutor, newTitel, Mainframe.einträge.getIndexOf(oldAutor, oldTitel))) {
+				if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()
+						&& txt_title.getForeground() != Color.white) {
+					if (check_an.isSelected()) {
+						eintrag.setAusgeliehen(true);
+						eintrag.setAusgeliehen_an(txt_leihAn.getText().trim());
+						eintrag.setAusgeliehen_von("");
+						Database.delete(oldAutor, oldTitel);
+						Database.add(newAutor, newTitel, "an", txt_leihAn.getText().trim(), newBemerkung, newSerie,
+								newSeriePart, datum.toString());
+					} else if (check_von.isSelected()) {
+						eintrag.setAusgeliehen(true);
+						eintrag.setAusgeliehen_von(txt_leihVon.getText().trim());
+						eintrag.setAusgeliehen_an("");
+						Database.delete(oldAutor, oldTitel);
+						Database.add(newAutor, newTitel, "von", txt_leihVon.getText().trim(), newBemerkung, newSerie,
+								newSeriePart, datum.toString());
 
-				} else {
-					eintrag.setAusgeliehen(false);
-					eintrag.setAusgeliehen_an("");
-					eintrag.setAusgeliehen_von("");
-					Database.delete(oldAutor, oldTitel);
-					Database.add(newAutor, newTitel, "nein", "", txt_merk.getText().trim(),
-							txt_serie.getText().trim(),datum.toString());
+					} else {
+						eintrag.setAusgeliehen(false);
+						eintrag.setAusgeliehen_an("");
+						eintrag.setAusgeliehen_von("");
+						Database.delete(oldAutor, oldTitel);
+						Database.add(newAutor, newTitel, "nein", "", newBemerkung, newSerie, newSeriePart,
+								datum.toString());
+					}
 				}
 				eintrag.setAutor(newAutor);
 				eintrag.setTitel(newTitel);
 				eintrag.setBemerkung(newBemerkung);
 				eintrag.setSerie(newSerie);
+				eintrag.setSeriePart(newSeriePart);
 				eintrag.setDatum(datum);
 				dispose();
 			} else {
+				txt_title.setText("Buch bereits vorhanden!");
+				txt_title.setBackground(new Color(255, 105, 105));
 				if (txt_author.getText().isEmpty()) {
 					txt_author.setBackground(new Color(255, 105, 105));
 				}
 				if (txt_title.getText().isEmpty()) {
 					txt_title.setBackground(new Color(255, 105, 105));
 				}
-				txt_title.setText("");
 			}
 		} catch (SQLException ex) {
-			txt_title.setForeground(Color.white);
-			txt_title.setBackground(new Color(255, 105, 105));
-			if (ex.getSQLState() == "23505") {
-				txt_title.setText("Buch bereits vorhanden!");
-			} else if (ex.getSQLState() == "22001") {
-				txt_title.setText("Autor/Titel zu lang (max. 50 Zeichen)!");
-			}
+			ex.printStackTrace();
 		}
 		BookListModel.autorenPrüfen();
+		Mainframe.updateModel();
+	}
+
+	public boolean checkInput(String autor, String titel, int index) {
+		for (int i = 0; i < Mainframe.einträge.getSize(); i++) {
+			Book eintrag = Mainframe.einträge.getElementAt(i);
+			if (eintrag.getAutor().equals(autor) && eintrag.getTitel().equals(titel)) {
+				if (i != index)
+					return false;
+			}
+		}
+		return true;
 	}
 
 	public static boolean openWebpage(URI uri) {

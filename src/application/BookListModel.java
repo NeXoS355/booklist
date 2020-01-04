@@ -23,7 +23,6 @@ public class BookListModel extends AbstractListModel<Book> {
 	private static final long serialVersionUID = 1L;
 	private static ArrayList<Book> bücher = new ArrayList<Book>();
 	public static ArrayList<String> autoren = new ArrayList<String>();
-	public static ArrayList<String> series = new ArrayList<String>();
 
 	public BookListModel() {
 		Database.createConnection();
@@ -35,6 +34,7 @@ public class BookListModel extends AbstractListModel<Book> {
 					String titel = rs.getString("titel").trim();
 					String bemerkung = rs.getString("bemerkung").trim();
 					String serie = rs.getString("serie").trim();
+					String seriePart = rs.getString("seriePart");
 					boolean ausgeliehen = false;
 					Timestamp datum = rs.getTimestamp("date");
 					Blob picture = rs.getBlob("pic");
@@ -46,15 +46,16 @@ public class BookListModel extends AbstractListModel<Book> {
 					if (rs.getString(3).equals("an")) {
 						ausgeliehen = true;
 						String ausgeliehen_an = rs.getString("name").trim();
-						bücher.add(new Book(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung, serie, buf_pic,
-								datum, false));
+						bücher.add(new Book(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung, serie, seriePart,
+								buf_pic, datum, false));
 					} else if (rs.getString(3).equals("von")) {
 						ausgeliehen = true;
 						String ausgeliehen_von = rs.getString("name").trim();
-						bücher.add(new Book(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung, serie, buf_pic,
-								datum, false));
+						bücher.add(new Book(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung, serie, seriePart,
+								buf_pic, datum, false));
 					} else {
-						bücher.add(new Book(autor, titel, bemerkung, serie, buf_pic, ausgeliehen, datum, false));
+						bücher.add(new Book(autor, titel, bemerkung, serie, seriePart, buf_pic, ausgeliehen, datum,
+								false));
 					}
 				} catch (DateTimeParseException ex1) {
 					System.err.println("Datum falsch während DB auslesen");
@@ -62,7 +63,6 @@ public class BookListModel extends AbstractListModel<Book> {
 
 			}
 		} catch (SQLException | IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -74,15 +74,6 @@ public class BookListModel extends AbstractListModel<Book> {
 				autoren.add(bücher.get(i).getAutor());
 		}
 		Mainframe.updateNode();
-	}
-
-	public static void seriesPrüfen() {
-		series.clear();
-		for (int i = 0; i < bücher.size(); i++) {
-			if (!series.contains(bücher.get(i).getSerie()))
-				series.add(bücher.get(i).getSerie());
-		}
-//		Mainframe.updateNode();
 	}
 
 	public void add(Book buch) {
@@ -104,18 +95,27 @@ public class BookListModel extends AbstractListModel<Book> {
 	}
 
 	public static String[] getSerienVonAutor(String autor) {
-		String[] serien = new String[bücher.size()];
-		int counter = 0;
+		ArrayList<String> serien = new ArrayList<String>();
+		
 		for (int i = 0; i < bücher.size(); i++) {
 			Book buch = bücher.get(i);
 			if (buch.getAutor().contains(autor)) {
 				if (!buch.getSerie().trim().equals("")) {
-					serien[counter] = buch.getSerie();
-					counter++;
+					boolean newSerie = true;
+					for(int j=0;j < serien.size();j++) {
+						if(serien.get(j).equals(buch.getSerie())) newSerie=false;
+					}
+					if (newSerie) serien.add(buch.getSerie());
+					
 				}
 			}
+
 		}
-		return serien;
+		String[] returnArr = new String[serien.size()];
+		for (int i = 0; i < serien.size(); i++) {
+			returnArr[i] = serien.get(i);
+		}
+		return returnArr;
 	}
 
 	public static boolean hatAutorSerie(String autor) {
@@ -140,7 +140,7 @@ public class BookListModel extends AbstractListModel<Book> {
 			Book eintrag = bücher.get(i);
 			String autor = eintrag.getAutor().toUpperCase();
 			String titel = eintrag.getTitel().toUpperCase();
-			if (autor.contains(searchAutor.toUpperCase()) && titel.contains(searchTitel.toUpperCase())) {
+			if (autor.equals(searchAutor.toUpperCase()) && titel.equals(searchTitel.toUpperCase())) {
 				return i;
 			}
 		}

@@ -45,7 +45,7 @@ public class Database {
 		try {
 			createTable = con.createStatement();
 			createTable.execute(
-					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart numeric, pic blob,date timestamp, CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
+					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), pic blob,date timestamp, CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
 		} catch (SQLException e) {
 			if ("X0Y32".equals(e.getSQLState())) {
 				System.out.println("Tabelle existiert schon.");
@@ -95,8 +95,8 @@ public class Database {
 		}
 	}
 
-	public static void add(String autor, String titel, String ausgeliehen, String name, String bemerkung, String serie, String datum) throws SQLException {
-		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,date) VALUES(?,?,?,?,?,?,?)";
+	public static void add(String autor, String titel, String ausgeliehen, String name, String bemerkung, String serie, String seriePart, String datum) throws SQLException {
+		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?,?,?)";
 		PreparedStatement st = con.prepareStatement(sql);
 		st.setString(1, autor);
 		st.setString(2, titel);
@@ -104,10 +104,11 @@ public class Database {
 		st.setString(4, name);
 		st.setString(5, bemerkung);
 		st.setString(6, serie);
-		st.setString(7, datum);
+		st.setString(7, seriePart);
+		st.setString(8, datum);
 		st.executeUpdate();
 		st.close();
-		System.out.println("Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + "," + name + "," + bemerkung + "," + serie + "," + datum);
+		System.out.println("Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + "," + name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum);
 	}
 	
 	public static void select(String autor, String titel) throws SQLException {

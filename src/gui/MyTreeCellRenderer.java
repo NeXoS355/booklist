@@ -15,7 +15,7 @@ public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	public MyTreeCellRenderer(){ 
         openIcon = createImageIcon("resources/User.png"); 
-        closedIcon = createImageIcon("resources/User.png"); 
+        closedIcon = createImageIcon("resources/User.png");
         textNonSelectionColor=Color.BLACK;
         textSelectionColor=Color.WHITE;
         backgroundNonSelectionColor=Color.WHITE;
@@ -23,6 +23,7 @@ public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
         borderSelectionColor=Color.LIGHT_GRAY;
         setFont(new Font("Roboto", Font.PLAIN, 16));
     } 
+	
      
     protected ImageIcon createImageIcon(String path) { 
         java.net.URL imgURL = getClass().getClassLoader().getResource(path); 
