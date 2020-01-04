@@ -49,6 +49,7 @@ import javax.swing.tree.TreeSelectionModel;
 import application.Book_Booklist;
 import application.BookListModel;
 import application.SimpleTableModel;
+import data.Database;
 
 public class Mainframe extends JFrame {
 
@@ -206,10 +207,19 @@ public class Mainframe extends JFrame {
 				new wishlist();
 			}
 		});
+		JMenuItem dbVersion = new JMenuItem("DB Version");
+		dbVersion.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null, Database.readCurrentDbVersion());
+			}
+		});
 
 		menue.add(datei);
 		datei.add(wishlist);
 		datei.add(backup);
+		datei.add(dbVersion);
 		datei.add(close);
 		pnlMenü.add(menue, BorderLayout.WEST);
 

@@ -49,7 +49,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		this.setSize(new Dimension(500, 365));
 		this.setLocation(200, 200);
 		this.setAlwaysOnTop(true);
-		
+
 		URL iconURL = getClass().getResource("/resources/Liste.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
@@ -341,48 +341,47 @@ public class Dialog_add_Wishlist extends JDialog {
 
 	public void addBuch() {
 		try {
-			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()
-					&& txt_title.getForeground() != Color.white) {
+			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
 				String autor = txt_author.getText();
 				String titel = txt_title.getText();
 				String bemerkung = txt_merk.getText();
 				String serie = txt_serie.getText();
 				String seriePart = txt_seriePart.getText();
 				Timestamp datum = new Timestamp(System.currentTimeMillis());
-				if (checkInput(autor, titel)) {
-						wishlist.einträge.add(new Book_Wishlist(autor, titel, bemerkung, serie,
-								seriePart, datum, true));
+				if (!Duplicant(autor, titel)) {
+					wishlist.Wishlisteinträge.add(new Book_Wishlist(autor, titel, bemerkung, serie, seriePart, datum, true));
 					dispose();
 				} else {
 					txt_title.setText("Buch bereits vorhanden!");
 					txt_title.setBackground(new Color(255, 105, 105));
-					if (txt_author.getText().isEmpty()) {
-						txt_author.setBackground(new Color(255, 105, 105));
-					}
-					if (txt_title.getText().isEmpty()) {
-						txt_title.setBackground(new Color(255, 105, 105));
-					}
+				}
+			} else {
+				if (txt_author.getText().isEmpty()) {
+					txt_author.setBackground(new Color(255, 105, 105));
+				}
+				if (txt_title.getText().isEmpty()) {
+					txt_title.setBackground(new Color(255, 105, 105));
 				}
 			}
 		} catch (SQLException ex) {
 			ex.printStackTrace();
-//			txt_title.setForeground(Color.white);
-//			txt_title.setBackground(new Color(255, 105, 105));
-//			if (ex.getSQLState() == "23505") {
-//				txt_title.setText("Buch bereits vorhanden!");
-//			}
+			txt_title.setForeground(Color.white);
+			txt_title.setBackground(new Color(255, 105, 105));
+			if (ex.getSQLState() == "23505") {
+				txt_title.setText("Buch bereits vorhanden!");
+			}
 		}
 		wishlist.updateModel();
 	}
 
-	public boolean checkInput(String autor, String titel) {
-		for (int i = 0; i < wishlist.einträge.getSize(); i++) {
-			Book_Wishlist eintrag = wishlist.einträge.getElementAt(i);
+	public boolean Duplicant(String autor, String titel) {
+		for (int i = 0; i < wishlist.Wishlisteinträge.getSize(); i++) {
+			Book_Wishlist eintrag = wishlist.Wishlisteinträge.getElementAt(i);
 			if (eintrag.getAutor().equals(autor) && eintrag.getTitel().equals(titel)) {
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 }

@@ -79,13 +79,13 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	public void add(Book_Booklist buch) {
 		bücher.add(buch);
 		fireIntervalAdded(this, 0, bücher.size());
-		System.out.println("Buch hinzugefügt: " + buch.getAutor() + "," + buch.getTitel());
+		System.out.println("Booklist Buch hinzugefügt: " + buch.getAutor() + "," + buch.getTitel());
 	}
 
 	public void delete(Book_Booklist buch) {
 		bücher.remove(buch);
 		fireIntervalRemoved(this, 0, bücher.size());
-		System.out.println("Buch gelöscht: " + buch.getAutor() + "," + buch.getTitel());
+		System.out.println("Booklist Buch gelöscht: " + buch.getAutor() + "," + buch.getTitel());
 	}
 
 	public void delete(int index) {

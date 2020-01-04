@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 
 public class Database {
 
@@ -43,12 +45,21 @@ public class Database {
 	public static void createTable(Connection con) {
 		Statement createBooklist = null;
 		Statement createWishlist = null;
+		Statement createVersions = null;
+		PreparedStatement pst;
+		Timestamp datum = new Timestamp(System.currentTimeMillis());
 		try {
 			createBooklist = con.createStatement();
 			createBooklist.execute(
 					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), pic blob,date timestamp, CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
 			createWishlist = con.createStatement();
-			createWishlist.execute("CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), pic blob,date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
+			createWishlist.execute("CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
+			createVersions = con.createStatement();
+			createVersions.execute("CREATE TABLE versions (version VARCHAR(10) NOT NULL, date timestamp NOT NULL)");
+			String sql = "INSERT INTO versions (version ,date) VALUES ('2.2.0','" + datum + "')";
+			pst = con.prepareStatement(sql);
+			pst.execute();
+			pst.close();
 		} catch (SQLException e) {
 			if ("X0Y32".equals(e.getSQLState())) {
 				System.out.println("Tabelle existiert schon.");
@@ -61,6 +72,7 @@ public class Database {
 				 try {
 					 createBooklist.close();
 					 createWishlist.close();
+					 createVersions.close();
 					System.out.println("DB closed");
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -98,6 +110,26 @@ public class Database {
 			e.printStackTrace();
 		}
 		return rs;
+	}
+	
+	public static String readCurrentDbVersion() {
+		ResultSet rs = null;
+		String version = "";
+		Timestamp date = null;
+		String sql = "SELECT * FROM versions";
+		try {
+			Statement st = con.createStatement();
+			rs = st.executeQuery(sql);
+			while (rs.next()) { 
+				version = rs.getString("version").trim();
+				date = rs.getTimestamp("date");
+			}
+			st.close();
+		} catch (SQLException e) {
+			System.out.println("Fehler beim auslesen der DB Version");
+			e.printStackTrace();
+		}		
+		return version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);	
 	}
 
 	public static void deleteFromBooklist(String autor, String titel) {

@@ -10,7 +10,6 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -67,7 +66,8 @@ public class Dialog_edit_Booklist extends JDialog {
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_edit_Booklist(BookListModel einträge, int index, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
+	public Dialog_edit_Booklist(BookListModel einträge, int index, DefaultTreeModel treeModel,
+			DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(700, 500));
 		this.setLocation(200, 200);
@@ -210,7 +210,8 @@ public class Dialog_edit_Booklist extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+") + "+" + txt_serie.getText().replaceAll(" ", "+");
+					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+") + "+"
+							+ txt_serie.getText().replaceAll(" ", "+");
 					openWebpage(new URI(amazonUrl));
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
@@ -609,23 +610,23 @@ public class Dialog_edit_Booklist extends JDialog {
 			String newSerie = txt_serie.getText().trim();
 			String newSeriePart = txt_seriePart.getText();
 			Timestamp datum = new Timestamp(System.currentTimeMillis());
-			if (checkInput(newAutor, newTitel, Mainframe.einträge.getIndexOf(oldAutor, oldTitel))) {
-				if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()
-						&& txt_title.getForeground() != Color.white) {
+			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
+				if (checkInput(newAutor, newTitel, Mainframe.einträge.getIndexOf(oldAutor, oldTitel))) {
+
 					if (check_an.isSelected()) {
 						eintrag.setAusgeliehen(true);
 						eintrag.setAusgeliehen_an(txt_leihAn.getText().trim());
 						eintrag.setAusgeliehen_von("");
 						Database.deleteFromBooklist(oldAutor, oldTitel);
-						Database.addToBooklist(newAutor, newTitel, "an", txt_leihAn.getText().trim(), newBemerkung, newSerie,
-								newSeriePart, datum.toString());
+						Database.addToBooklist(newAutor, newTitel, "an", txt_leihAn.getText().trim(), newBemerkung,
+								newSerie, newSeriePart, datum.toString());
 					} else if (check_von.isSelected()) {
 						eintrag.setAusgeliehen(true);
 						eintrag.setAusgeliehen_von(txt_leihVon.getText().trim());
 						eintrag.setAusgeliehen_an("");
 						Database.deleteFromBooklist(oldAutor, oldTitel);
-						Database.addToBooklist(newAutor, newTitel, "von", txt_leihVon.getText().trim(), newBemerkung, newSerie,
-								newSeriePart, datum.toString());
+						Database.addToBooklist(newAutor, newTitel, "von", txt_leihVon.getText().trim(), newBemerkung,
+								newSerie, newSeriePart, datum.toString());
 
 					} else {
 						eintrag.setAusgeliehen(false);
@@ -635,17 +636,18 @@ public class Dialog_edit_Booklist extends JDialog {
 						Database.addToBooklist(newAutor, newTitel, "nein", "", newBemerkung, newSerie, newSeriePart,
 								datum.toString());
 					}
+					eintrag.setAutor(newAutor);
+					eintrag.setTitel(newTitel);
+					eintrag.setBemerkung(newBemerkung);
+					eintrag.setSerie(newSerie);
+					eintrag.setSeriePart(newSeriePart);
+					eintrag.setDatum(datum);
+					dispose();
+				} else {
+					txt_title.setText("Buch bereits vorhanden!");
+					txt_title.setBackground(new Color(255, 105, 105));
 				}
-				eintrag.setAutor(newAutor);
-				eintrag.setTitel(newTitel);
-				eintrag.setBemerkung(newBemerkung);
-				eintrag.setSerie(newSerie);
-				eintrag.setSeriePart(newSeriePart);
-				eintrag.setDatum(datum);
-				dispose();
 			} else {
-				txt_title.setText("Buch bereits vorhanden!");
-				txt_title.setBackground(new Color(255, 105, 105));
 				if (txt_author.getText().isEmpty()) {
 					txt_author.setBackground(new Color(255, 105, 105));
 				}

@@ -5,21 +5,32 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+
 import javax.swing.JOptionPane;
 
 import data.Database;
 
-//Patch from 2.0.2 -> 2.1.0
+//Patch from 2.1.0 -> 2.2.0
 public class patch_2_2_0 {
 	
 	private static Connection con = null;
 
 	public static void main(String[] args) {
 		try {
+			Timestamp datum = new Timestamp(System.currentTimeMillis());
 			con = createConnection();
 			Database.createTable(con);
-			String sql = "CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), pic blob,date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))";
+			String sql = "CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))";
 			PreparedStatement st;
+			st = con.prepareStatement(sql);
+			st.execute();
+			st.close();
+			sql = "CREATE TABLE versions (version VARCHAR(10) NOT NULL, date timestamp NOT NULL)";
+			st = con.prepareStatement(sql);
+			st.execute();
+			st.close();
+			sql = "INSERT INTO versions (version ,date) VALUES ('2.2.0','" + datum + "')";
 			st = con.prepareStatement(sql);
 			st.execute();
 			st.close();

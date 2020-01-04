@@ -455,8 +455,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 	public void addBuch() {
 		try {
-			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()
-					&& txt_title.getForeground() != Color.white) {
+			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
 				String autor = txt_author.getText();
 				String titel = txt_title.getText();
 				String bemerkung = txt_merk.getText();
@@ -477,12 +476,13 @@ public class Dialog_add_Booklist extends JDialog {
 				} else {
 					txt_title.setText("Buch bereits vorhanden!");
 					txt_title.setBackground(new Color(255, 105, 105));
-					if (txt_author.getText().isEmpty()) {
-						txt_author.setBackground(new Color(255, 105, 105));
-					}
-					if (txt_title.getText().isEmpty()) {
-						txt_title.setBackground(new Color(255, 105, 105));
-					}
+				}
+			} else {
+				if (txt_author.getText().isEmpty()) {
+					txt_author.setBackground(new Color(255, 105, 105));
+				}
+				if (txt_title.getText().isEmpty()) {
+					txt_title.setBackground(new Color(255, 105, 105));
 				}
 			}
 			Mainframe.setLastSearch(txt_author.getText());

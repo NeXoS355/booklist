@@ -19,6 +19,7 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 	public static ArrayList<String> autoren = new ArrayList<String>();
 
 	public WishlistListModel() {
+		bücher.clear();
 		Database.createConnection();
 		ResultSet rs = Database.readDbWishlist();
 		try {
@@ -46,17 +47,23 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 	public void add(Book_Wishlist buch) {
 		bücher.add(buch);
 		fireIntervalAdded(this, 0, bücher.size());
-		System.out.println("Buch hinzugefügt: " + buch.getAutor() + "," + buch.getTitel());
+		System.out.println("Wishlist Buch hinzugefügt: " + buch.getAutor() + "," + buch.getTitel());
+	}
+	
+	public static void clear() {
+		for (int i = 0;i < bücher.size();i++) {
+			bücher.remove(i);
+		}
 	}
 
 	public void delete(Book_Wishlist buch) {
 		bücher.remove(buch);
 		fireIntervalRemoved(this, 0, bücher.size());
-		System.out.println("Buch gelöscht: " + buch.getAutor() + "," + buch.getTitel());
+		System.out.println("Wischlist Buch gelöscht: " + buch.getAutor() + "," + buch.getTitel());
 	}
 
 	public void delete(int index) {
-		Database.deleteFromBooklist(bücher.get(index).getAutor(), bücher.get(index).getTitel());
+		Database.deleteFromWishlist(bücher.get(index).getAutor(), bücher.get(index).getTitel());
 		bücher.remove(index);
 		fireIntervalRemoved(this, index, index);
 	}

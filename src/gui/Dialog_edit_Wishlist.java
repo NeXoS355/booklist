@@ -53,6 +53,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	public Dialog_edit_Wishlist(WishlistListModel einträge, int index) {
+
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(600, 360));
 		this.setLocation(200, 200);
@@ -132,7 +133,8 @@ public class Dialog_edit_Wishlist extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+") + "+" + txt_serie.getText().replaceAll(" ", "+");
+					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+") + "+"
+							+ txt_serie.getText().replaceAll(" ", "+");
 					openWebpage(new URI(amazonUrl));
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
@@ -388,7 +390,6 @@ public class Dialog_edit_Wishlist extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				speichern(eintrag);
-//				Mainframe.search(Mainframe.getLastSearch());
 			}
 		});
 		panel_south.add(btn_add);
@@ -416,30 +417,30 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 	public void speichern(Book_Wishlist eintrag) {
 		try {
-			String oldAutor = eintrag.getAutor();
-			String oldTitel = eintrag.getTitel();
-			String newAutor = txt_author.getText().trim();
-			String newTitel = txt_title.getText().trim();
-			String newBemerkung = txt_merk.getText().trim();
-			String newSerie = txt_serie.getText().trim();
-			String newSeriePart = txt_seriePart.getText();
-			Timestamp datum = new Timestamp(System.currentTimeMillis());
-			if (checkInput(newAutor, newTitel, wishlist.einträge.getIndexOf(oldAutor, oldTitel))) {
-				if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()
-						&& txt_title.getForeground() != Color.white) {
+			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
+				String oldAutor = eintrag.getAutor();
+				String oldTitel = eintrag.getTitel();
+				String newAutor = txt_author.getText().trim();
+				String newTitel = txt_title.getText().trim();
+				String newBemerkung = txt_merk.getText().trim();
+				String newSerie = txt_serie.getText().trim();
+				String newSeriePart = txt_seriePart.getText();
+				Timestamp datum = new Timestamp(System.currentTimeMillis());
+				if (!Duplicant(newAutor, newTitel, wishlist.Wishlisteinträge.getIndexOf(newAutor, newTitel))) {
 					Database.deleteFromWishlist(oldAutor, oldTitel);
 					Database.addToWishlist(newAutor, newTitel, newBemerkung, newSerie, newSeriePart, datum.toString());
+					eintrag.setAutor(newAutor);
+					eintrag.setTitel(newTitel);
+					eintrag.setBemerkung(newBemerkung);
+					eintrag.setSerie(newSerie);
+					eintrag.setSeriePart(newSeriePart);
+					eintrag.setDatum(datum);
+					dispose();
+				} else {
+					txt_title.setText("Buch bereits vorhanden!");
+					txt_title.setBackground(new Color(255, 105, 105));
 				}
-				eintrag.setAutor(newAutor);
-				eintrag.setTitel(newTitel);
-				eintrag.setBemerkung(newBemerkung);
-				eintrag.setSerie(newSerie);
-				eintrag.setSeriePart(newSeriePart);
-				eintrag.setDatum(datum);
-				dispose();
 			} else {
-				txt_title.setText("Buch bereits vorhanden!");
-				txt_title.setBackground(new Color(255, 105, 105));
 				if (txt_author.getText().isEmpty()) {
 					txt_author.setBackground(new Color(255, 105, 105));
 				}
@@ -453,15 +454,14 @@ public class Dialog_edit_Wishlist extends JDialog {
 		wishlist.updateModel();
 	}
 
-	public boolean checkInput(String autor, String titel, int index) {
-		for (int i = 0; i < wishlist.einträge.getSize(); i++) {
-			Book_Wishlist eintrag = wishlist.einträge.getElementAt(i);
+	public boolean Duplicant(String autor, String titel, int index) {
+		for (int i = 0; i < wishlist.Wishlisteinträge.getSize(); i++) {
+			Book_Wishlist eintrag = wishlist.Wishlisteinträge.getElementAt(i);
 			if (eintrag.getAutor().equals(autor) && eintrag.getTitel().equals(titel)) {
-				if (i != index)
-					return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public static boolean openWebpage(URI uri) {
