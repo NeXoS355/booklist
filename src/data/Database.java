@@ -41,20 +41,30 @@ public class Database {
 	}
 
 	public static void createTable(Connection con) {
-		Statement createTable = null;
+		Statement createBooklist = null;
+		Statement createWishlist = null;
 		try {
-			createTable = con.createStatement();
-			createTable.execute(
+			createBooklist = con.createStatement();
+			createBooklist.execute(
 					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), pic blob,date timestamp, CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
+			createWishlist = con.createStatement();
+			createWishlist.execute("CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), pic blob,date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
 		} catch (SQLException e) {
 			if ("X0Y32".equals(e.getSQLState())) {
 				System.out.println("Tabelle existiert schon.");
+//				e.printStackTrace();
 			} else {
 				printSQLException(e);
 			}
 		} finally {
-			if (createTable != null) {
-				// createTable.close();
+			if (createBooklist != null && createWishlist != null) {
+				 try {
+					 createBooklist.close();
+					 createWishlist.close();
+					System.out.println("DB closed");
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -68,11 +78,22 @@ public class Database {
 		e.printStackTrace(System.err);
 	}
 
-	public static ResultSet readDB() {
+	public static ResultSet readDbBooklist() {
 		ResultSet rs = null;
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery("SELECT * FROM bücher ORDER BY autor");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+	
+	public static ResultSet readDbWishlist() {
+		ResultSet rs = null;
+		try {
+			Statement st = con.createStatement();
+			rs = st.executeQuery("SELECT * FROM wishlist ORDER BY autor");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

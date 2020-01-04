@@ -47,7 +47,7 @@ import application.BookListModel;
 import application.HandleImage;
 import data.Database;
 
-public class Dialog_edit extends JDialog {
+public class Dialog_edit_Booklist extends JDialog {
 
 	/**
 	 * 
@@ -66,7 +66,7 @@ public class Dialog_edit extends JDialog {
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_edit(BookListModel einträge, int index, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
+	public Dialog_edit_Booklist(BookListModel einträge, int index, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(700, 500));
 		this.setAlwaysOnTop(true);

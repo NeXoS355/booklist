@@ -34,7 +34,7 @@ import javax.swing.tree.DefaultTreeModel;
 import application.Book;
 import application.BookListModel;
 
-public class Dialog_add extends JDialog {
+public class Dialog_add_Booklist extends JDialog {
 
 	/**
 	 * 
@@ -53,7 +53,7 @@ public class Dialog_add extends JDialog {
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_add(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
+	public Dialog_add_Booklist(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 365));
 

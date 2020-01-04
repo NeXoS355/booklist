@@ -26,7 +26,7 @@ public class BookListModel extends AbstractListModel<Book> {
 
 	public BookListModel() {
 		Database.createConnection();
-		ResultSet rs = Database.readDB();
+		ResultSet rs = Database.readDbBooklist();
 		try {
 			while (rs.next()) {
 				try {

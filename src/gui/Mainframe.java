@@ -70,7 +70,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.1.0  (01.2020)  ";
+	private String version = "Ver. 2.1.1  (01.2020)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -135,7 +135,7 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Dialog_add(einträge, treeModel, rootNode);
+				new Dialog_add_Booklist(einträge, treeModel, rootNode);
 				txt_search.setText("Suche ... (" + einträge.getSize() + ")");
 			}
 		});
@@ -196,8 +196,17 @@ public class Mainframe extends JFrame {
 				System.exit(1);
 			}
 		});
+		JMenuItem wishlist = new JMenuItem("Wunschliste");
+		wishlist.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new wishlist();
+			}
+		});
 
 		menue.add(datei);
+		datei.add(wishlist);
 		datei.add(backup);
 		datei.add(close);
 		pnlMenü.add(menue, BorderLayout.WEST);
@@ -219,7 +228,7 @@ public class Mainframe extends JFrame {
 					String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
 					String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
 					int index = einträge.getIndexOf(searchAutor, searchTitel);
-					new Dialog_edit(einträge, index, treeModel, rootNode);
+					new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
 				}
 				txt_search.setText("Suche ... (" + einträge.getSize() + ")");
 				if (SwingUtilities.isRightMouseButton(e)) {
@@ -245,7 +254,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch hinzufügen") {
-							new Dialog_add(einträge, treeModel, rootNode);
+							new Dialog_add_Booklist(einträge, treeModel, rootNode);
 						}
 					}
 				});
@@ -266,7 +275,7 @@ public class Mainframe extends JFrame {
 							String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
 							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
 							int index = einträge.getIndexOf(searchAutor, searchTitel);
-							new Dialog_edit(einträge, index, treeModel, rootNode);
+							new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
 						}
 					}
 				});
@@ -343,7 +352,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand().equals("Buch hinzufügen")) {
-							new Dialog_add(einträge, treeModel, rootNode);
+							new Dialog_add_Booklist(einträge, treeModel, rootNode);
 						}
 					}
 				});
@@ -352,7 +361,7 @@ public class Mainframe extends JFrame {
 		});
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		treeScrollPane.setPreferredSize(new Dimension(200, pnl_mid.getHeight()));
+		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
 		this.add(treeScrollPane, BorderLayout.WEST);
 		this.add(pnl_mid, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
