@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 
 import data.Database;
 
-
+//Patch from 2.0.2 -> 2.1.0
 public class patch_2_1_0 {
 	
 	private static Connection con = null;
