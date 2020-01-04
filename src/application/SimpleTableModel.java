@@ -41,7 +41,7 @@ public class SimpleTableModel extends DefaultTableModel {
 
 	}
 	
-	public SimpleTableModel(DefaultListModel<Book> bücher) {
+	public SimpleTableModel(DefaultListModel<Book_Booklist> bücher) {
 
 		super();
 		this.setColumnIdentifiers(columnNames);

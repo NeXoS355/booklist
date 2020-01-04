@@ -46,7 +46,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import application.Book;
+import application.Book_Booklist;
 import application.BookListModel;
 import application.SimpleTableModel;
 
@@ -59,7 +59,7 @@ public class Mainframe extends JFrame {
 	Font schrift = new Font("Roboto", Font.BOLD, 16);
 	private static JTable table = new JTable();
 	public static BookListModel einträge;
-	private static DefaultListModel<Book> filter;
+	private static DefaultListModel<Book_Booklist> filter;
 	private static SimpleTableModel anzeige;
 	private static DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("rootNode");
 	private static DefaultMutableTreeNode autorNode = new DefaultMutableTreeNode("AutorNode");
@@ -70,11 +70,13 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.1.1  (01.2020)  ";
+	private String version = "Ver. 2.2.0  (01.2020)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
+		
 		this.setLayout(new BorderLayout(10, 10));
+		this.setLocation(100, 100);
 		this.setSize(1300, 1000);
 		URL iconURL = getClass().getResource("/resources/Liste.png");
 		// iconURL is null when not found
@@ -88,7 +90,7 @@ public class Mainframe extends JFrame {
 		}
 
 		einträge = new BookListModel();
-		filter = new DefaultListModel<Book>();
+		filter = new DefaultListModel<Book_Booklist>();
 		anzeige = new SimpleTableModel(einträge);
 
 		JPanel panel = new JPanel();
@@ -409,7 +411,7 @@ public class Mainframe extends JFrame {
 						treeModel.insertNodeInto(serieNode, autorNode, j);
 					}
 				} catch(NullPointerException e) {
-					System.out.println("Keine Serie gefunden zu " + autor);
+					System.out.println("Mainframe Keine Serie gefunden zu " + autor);
 				}
  
 			}
@@ -420,7 +422,7 @@ public class Mainframe extends JFrame {
 		tree.setModel(treeModel);
 		tree.revalidate();
 		tree.repaint();
-		System.out.println("Node updated");
+		System.out.println("Mainframe Node updated");
 	}
 
 	public static void copyFilesInDirectory(File from, File to) {
@@ -453,13 +455,13 @@ public class Mainframe extends JFrame {
 		anzeige = new SimpleTableModel(einträge);
 		table.setModel(anzeige);
 		treeSelection = "";
-		System.out.println("Model updated");
+		System.out.println("Mainframe Model updated");
 	}
 
 	public static int anz_bücherAutor(String text) {
 		int anz = 0;
 		for (int i = 0; i < einträge.getSize(); i++) {
-			Book eintrag = einträge.getElementAt(i);
+			Book_Booklist eintrag = einträge.getElementAt(i);
 			String autor = eintrag.getAutor();
 			if (autor.equals(text))
 				anz += 1;
@@ -470,7 +472,7 @@ public class Mainframe extends JFrame {
 	public static int anz_bücherSerie(String text) {
 		int anz = 0;
 		for (int i = 0; i < einträge.getSize(); i++) {
-			Book eintrag = einträge.getElementAt(i);
+			Book_Booklist eintrag = einträge.getElementAt(i);
 			String serie = eintrag.getSerie();
 			if (serie.equals(text))
 				anz += 1;
@@ -479,11 +481,11 @@ public class Mainframe extends JFrame {
 	}
 
 	public static void search(String text) {
-		System.out.println("search for: " + text);
+		System.out.println("Mainframe search for: " + text);
 		filter.clear();
 		text = text.toUpperCase();
 		for (int i = 0; i < einträge.getSize(); i++) {
-			Book eintrag = einträge.getElementAt(i);
+			Book_Booklist eintrag = einträge.getElementAt(i);
 			String autor = eintrag.getAutor().toUpperCase();
 			String titel = eintrag.getTitel().toUpperCase();
 			String bemerkung = eintrag.getBemerkung().toUpperCase();

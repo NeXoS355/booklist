@@ -15,13 +15,13 @@ import javax.swing.AbstractListModel;
 import data.Database;
 import gui.Mainframe;
 
-public class BookListModel extends AbstractListModel<Book> {
+public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static ArrayList<Book> bücher = new ArrayList<Book>();
+	private static ArrayList<Book_Booklist> bücher = new ArrayList<Book_Booklist>();
 	public static ArrayList<String> autoren = new ArrayList<String>();
 
 	public BookListModel() {
@@ -46,15 +46,15 @@ public class BookListModel extends AbstractListModel<Book> {
 					if (rs.getString(3).equals("an")) {
 						ausgeliehen = true;
 						String ausgeliehen_an = rs.getString("name").trim();
-						bücher.add(new Book(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung, serie, seriePart,
+						bücher.add(new Book_Booklist(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung, serie, seriePart,
 								buf_pic, datum, false));
 					} else if (rs.getString(3).equals("von")) {
 						ausgeliehen = true;
 						String ausgeliehen_von = rs.getString("name").trim();
-						bücher.add(new Book(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung, serie, seriePart,
+						bücher.add(new Book_Booklist(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung, serie, seriePart,
 								buf_pic, datum, false));
 					} else {
-						bücher.add(new Book(autor, titel, bemerkung, serie, seriePart, buf_pic, ausgeliehen, datum,
+						bücher.add(new Book_Booklist(autor, titel, bemerkung, serie, seriePart, buf_pic, ausgeliehen, datum,
 								false));
 					}
 				} catch (DateTimeParseException ex1) {
@@ -76,20 +76,20 @@ public class BookListModel extends AbstractListModel<Book> {
 		Mainframe.updateNode();
 	}
 
-	public void add(Book buch) {
+	public void add(Book_Booklist buch) {
 		bücher.add(buch);
 		fireIntervalAdded(this, 0, bücher.size());
 		System.out.println("Buch hinzugefügt: " + buch.getAutor() + "," + buch.getTitel());
 	}
 
-	public void delete(Book buch) {
+	public void delete(Book_Booklist buch) {
 		bücher.remove(buch);
 		fireIntervalRemoved(this, 0, bücher.size());
 		System.out.println("Buch gelöscht: " + buch.getAutor() + "," + buch.getTitel());
 	}
 
 	public void delete(int index) {
-		Database.delete(bücher.get(index).getAutor(), bücher.get(index).getTitel());
+		Database.deleteFromBooklist(bücher.get(index).getAutor(), bücher.get(index).getTitel());
 		bücher.remove(index);
 		fireIntervalRemoved(this, index, index);
 	}
@@ -98,7 +98,7 @@ public class BookListModel extends AbstractListModel<Book> {
 		ArrayList<String> serien = new ArrayList<String>();
 		
 		for (int i = 0; i < bücher.size(); i++) {
-			Book buch = bücher.get(i);
+			Book_Booklist buch = bücher.get(i);
 			if (buch.getAutor().contains(autor)) {
 				if (!buch.getSerie().trim().equals("")) {
 					boolean newSerie = true;
@@ -120,7 +120,7 @@ public class BookListModel extends AbstractListModel<Book> {
 
 	public static boolean hatAutorSerie(String autor) {
 		for (int i = 0; i < bücher.size(); i++) {
-			Book buch = bücher.get(i);
+			Book_Booklist buch = bücher.get(i);
 			if (buch.getAutor().contains(autor)) {
 				if (!buch.getSerie().trim().equals("")) {
 					return true;
@@ -131,13 +131,13 @@ public class BookListModel extends AbstractListModel<Book> {
 	}
 
 	@Override
-	public Book getElementAt(int arg0) {
+	public Book_Booklist getElementAt(int arg0) {
 		return bücher.get(arg0);
 	}
 
 	public int getIndexOf(String searchAutor, String searchTitel) {
 		for (int i = 0; i < bücher.size(); i++) {
-			Book eintrag = bücher.get(i);
+			Book_Booklist eintrag = bücher.get(i);
 			String autor = eintrag.getAutor().toUpperCase();
 			String titel = eintrag.getTitel().toUpperCase();
 			if (autor.equals(searchAutor.toUpperCase()) && titel.equals(searchTitel.toUpperCase())) {
@@ -153,7 +153,7 @@ public class BookListModel extends AbstractListModel<Book> {
 		return bücher.size();
 	}
 
-	public int indexOf(Book buch) {
+	public int indexOf(Book_Booklist buch) {
 		return bücher.indexOf(buch);
 	}
 

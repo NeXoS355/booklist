@@ -100,7 +100,7 @@ public class Database {
 		return rs;
 	}
 
-	public static void delete(String autor, String titel) {
+	public static void deleteFromBooklist(String autor, String titel) {
 		try {
 			String sql = "DELETE FROM bücher WHERE autor = ? AND titel = ?";
 			PreparedStatement st = con.prepareStatement(sql);
@@ -108,7 +108,23 @@ public class Database {
 			st.setString(2, titel);
 			st.executeUpdate();
 			st.close();
-			System.out.println("Datenbank Eintrag gelöscht: " + autor + "," + titel);
+			System.out.println("Booklist Datenbank Eintrag gelöscht: " + autor + "," + titel);
+		} catch (
+
+		SQLException ex) {
+			System.err.println("Buch wurde nicht gelöscht");
+		}
+	}
+	
+	public static void deleteFromWishlist(String autor, String titel) {
+		try {
+			String sql = "DELETE FROM wishlist WHERE autor = ? AND titel = ?";
+			PreparedStatement st = con.prepareStatement(sql);
+			st.setString(1, autor);
+			st.setString(2, titel);
+			st.executeUpdate();
+			st.close();
+			System.out.println("Wishlist Datenbank Eintrag gelöscht: " + autor + "," + titel);
 		} catch (
 
 		SQLException ex) {
@@ -116,7 +132,7 @@ public class Database {
 		}
 	}
 
-	public static void add(String autor, String titel, String ausgeliehen, String name, String bemerkung, String serie, String seriePart, String datum) throws SQLException {
+	public static void addToBooklist(String autor, String titel, String ausgeliehen, String name, String bemerkung, String serie, String seriePart, String datum) throws SQLException {
 		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?,?,?)";
 		PreparedStatement st = con.prepareStatement(sql);
 		st.setString(1, autor);
@@ -129,10 +145,24 @@ public class Database {
 		st.setString(8, datum);
 		st.executeUpdate();
 		st.close();
-		System.out.println("Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + "," + name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum);
+		System.out.println("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + "," + name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum);
 	}
 	
-	public static void select(String autor, String titel) throws SQLException {
+	public static void addToWishlist(String autor, String titel, String bemerkung, String serie, String seriePart, String datum) throws SQLException {
+		String sql = "INSERT INTO wishlist(autor,titel,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?)";
+		PreparedStatement st = con.prepareStatement(sql);
+		st.setString(1, autor);
+		st.setString(2, titel);
+		st.setString(3, bemerkung);
+		st.setString(4, serie);
+		st.setString(5, seriePart);
+		st.setString(6, datum);
+		st.executeUpdate();
+		st.close();
+		System.out.println("Wishlist Datenbank Eintrag erstellt: " + autor + "," + titel + ","  + bemerkung + "," + serie + "," + seriePart + "," + datum);
+	}
+	
+	public static void selectFromBooklist(String autor, String titel) throws SQLException {
 		String sql = "SELECT * FROM bücher WHERE autor=? and titel=?";
 		PreparedStatement st = con.prepareStatement(sql);
 		st.setString(1, autor);

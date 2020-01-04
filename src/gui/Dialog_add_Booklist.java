@@ -8,7 +8,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -31,7 +30,7 @@ import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import application.Book;
+import application.Book_Booklist;
 import application.BookListModel;
 
 public class Dialog_add_Booklist extends JDialog {
@@ -56,10 +55,9 @@ public class Dialog_add_Booklist extends JDialog {
 	public Dialog_add_Booklist(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 365));
-
-		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
+		this.setLocation(200, 200);
 		this.setAlwaysOnTop(true);
+
 		URL iconURL = getClass().getResource("/resources/Liste.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
@@ -467,14 +465,14 @@ public class Dialog_add_Booklist extends JDialog {
 				Timestamp datum = new Timestamp(System.currentTimeMillis());
 				if (checkInput(autor, titel)) {
 					if (check_an.isSelected()) {
-						Mainframe.einträge.add(new Book(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,
+						Mainframe.einträge.add(new Book_Booklist(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,
 								seriePart, null, datum, true));
 					} else if (check_von.isSelected()) {
-						Mainframe.einträge.add(new Book(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,
+						Mainframe.einträge.add(new Book_Booklist(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,
 								seriePart, null, datum, true));
 					} else
 						Mainframe.einträge
-								.add(new Book(autor, titel, bemerkung, serie, seriePart, null, false, datum, true));
+								.add(new Book_Booklist(autor, titel, bemerkung, serie, seriePart, null, false, datum, true));
 					dispose();
 				} else {
 					txt_title.setText("Buch bereits vorhanden!");
@@ -507,7 +505,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 	public boolean checkInput(String autor, String titel) {
 		for (int i = 0; i < Mainframe.einträge.getSize(); i++) {
-			Book eintrag = Mainframe.einträge.getElementAt(i);
+			Book_Booklist eintrag = Mainframe.einträge.getElementAt(i);
 			if (eintrag.getAutor().equals(autor) && eintrag.getTitel().equals(titel)) {
 				return false;
 			}

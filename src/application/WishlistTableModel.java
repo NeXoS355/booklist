@@ -41,7 +41,7 @@ public class WishlistTableModel extends DefaultTableModel {
 
 	}
 	
-	public WishlistTableModel(DefaultListModel<Book> bücher) {
+	public WishlistTableModel(DefaultListModel<Book_Booklist> bücher) {
 
 		super();
 		this.setColumnIdentifiers(columnNames);

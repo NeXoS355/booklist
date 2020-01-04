@@ -10,6 +10,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -42,7 +43,7 @@ import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import application.Book;
+import application.Book_Booklist;
 import application.BookListModel;
 import application.HandleImage;
 import data.Database;
@@ -69,9 +70,10 @@ public class Dialog_edit_Booklist extends JDialog {
 	public Dialog_edit_Booklist(BookListModel einträge, int index, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(700, 500));
+		this.setLocation(200, 200);
 		this.setAlwaysOnTop(true);
 
-		Book eintrag = einträge.getElementAt(index);
+		Book_Booklist eintrag = einträge.getElementAt(index);
 
 		URL iconURL = getClass().getResource("/resources/Liste.png");
 		// iconURL is null when not found
@@ -208,7 +210,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					String amazonUrl = "www.amazon.de/s?k=" + txt_serie.getText().replaceAll(" ", "+");
+					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+") + "+" + txt_serie.getText().replaceAll(" ", "+");
 					openWebpage(new URI(amazonUrl));
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
@@ -597,7 +599,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	}
 
-	public void speichern(Book eintrag) {
+	public void speichern(Book_Booklist eintrag) {
 		try {
 			String oldAutor = eintrag.getAutor();
 			String oldTitel = eintrag.getTitel();
@@ -614,23 +616,23 @@ public class Dialog_edit_Booklist extends JDialog {
 						eintrag.setAusgeliehen(true);
 						eintrag.setAusgeliehen_an(txt_leihAn.getText().trim());
 						eintrag.setAusgeliehen_von("");
-						Database.delete(oldAutor, oldTitel);
-						Database.add(newAutor, newTitel, "an", txt_leihAn.getText().trim(), newBemerkung, newSerie,
+						Database.deleteFromBooklist(oldAutor, oldTitel);
+						Database.addToBooklist(newAutor, newTitel, "an", txt_leihAn.getText().trim(), newBemerkung, newSerie,
 								newSeriePart, datum.toString());
 					} else if (check_von.isSelected()) {
 						eintrag.setAusgeliehen(true);
 						eintrag.setAusgeliehen_von(txt_leihVon.getText().trim());
 						eintrag.setAusgeliehen_an("");
-						Database.delete(oldAutor, oldTitel);
-						Database.add(newAutor, newTitel, "von", txt_leihVon.getText().trim(), newBemerkung, newSerie,
+						Database.deleteFromBooklist(oldAutor, oldTitel);
+						Database.addToBooklist(newAutor, newTitel, "von", txt_leihVon.getText().trim(), newBemerkung, newSerie,
 								newSeriePart, datum.toString());
 
 					} else {
 						eintrag.setAusgeliehen(false);
 						eintrag.setAusgeliehen_an("");
 						eintrag.setAusgeliehen_von("");
-						Database.delete(oldAutor, oldTitel);
-						Database.add(newAutor, newTitel, "nein", "", newBemerkung, newSerie, newSeriePart,
+						Database.deleteFromBooklist(oldAutor, oldTitel);
+						Database.addToBooklist(newAutor, newTitel, "nein", "", newBemerkung, newSerie, newSeriePart,
 								datum.toString());
 					}
 				}
@@ -660,7 +662,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	public boolean checkInput(String autor, String titel, int index) {
 		for (int i = 0; i < Mainframe.einträge.getSize(); i++) {
-			Book eintrag = Mainframe.einträge.getElementAt(i);
+			Book_Booklist eintrag = Mainframe.einträge.getElementAt(i);
 			if (eintrag.getAutor().equals(autor) && eintrag.getTitel().equals(titel)) {
 				if (i != index)
 					return false;
@@ -691,7 +693,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		return false;
 	}
 
-	public ImageIcon showImg(Book eintrag) {
+	public ImageIcon showImg(Book_Booklist eintrag) {
 		Image img = null;
 		try {
 			img = eintrag.getPic();

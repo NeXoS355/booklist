@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 import data.Database;
 
-public class Book {
+public class Book_Booklist {
 
 	private String autor;
 	private String titel;
@@ -20,7 +20,7 @@ public class Book {
 	private Image pic;
 	private Timestamp datum;
 
-	public Book(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
+	public Book_Booklist(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
 			String bemerkung, String serie,String seriePart, Image pic,Timestamp datum, boolean db) throws SQLException {
 		super();
 		this.autor = autor;
@@ -41,15 +41,15 @@ public class Book {
 
 		if (db) {
 			if (!ausgeliehen_an.isEmpty())
-				Database.add(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, datum.toString());
+				Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, datum.toString());
 			else if (!ausgeliehen_von.isEmpty())
-				Database.add(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, datum.toString());
+				Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, datum.toString());
 			else
-				Database.add(autor, titel, "nein", "", bemerkung, serie, seriePart, datum.toString());
+				Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, datum.toString());
 		}
 	}
 
-	public Book(String autor, String titel, String bemerkung, String serie,String seriePart, Image pic, boolean ausgeliehen,Timestamp datum, boolean db) throws SQLException {
+	public Book_Booklist(String autor, String titel, String bemerkung, String serie,String seriePart, Image pic, boolean ausgeliehen,Timestamp datum, boolean db) throws SQLException {
 		this(autor, titel, ausgeliehen, "", "", bemerkung, serie, seriePart, pic, datum, db);
 	}
 
@@ -75,7 +75,7 @@ public class Book {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Book other = (Book) obj;
+		Book_Booklist other = (Book_Booklist) obj;
 		if (autor == null) {
 			if (other.autor != null)
 				return false;

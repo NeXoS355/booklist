@@ -19,7 +19,7 @@ import data.Database;
 
 public class HandleImage {
 	
-    public static boolean DownloadWebPage(String webpage, Book eintrag)  {
+    public static boolean DownloadWebPage(String webpage, Book_Booklist eintrag)  {
         
     	BufferedInputStream in;
 		try {
@@ -74,7 +74,7 @@ public class HandleImage {
     	
     }
     
-	public static void getImage(Book eintrag) {
+	public static void getImage(Book_Booklist eintrag) {
 		String url1 = "https://www.thalia.de/suche?filterPATHROOT=&sq=";
 		String url2 = eintrag.getAutor().replaceAll(" ","+") + "+" + eintrag.getTitel().replaceAll(" ","+");
 		url2 = url2.toUpperCase().replaceAll("Ä","AE").replaceAll("Ö","OE").replaceAll("Ü","UE").replaceAll("ß","ss");
