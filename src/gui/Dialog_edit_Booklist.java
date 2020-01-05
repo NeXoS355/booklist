@@ -595,6 +595,12 @@ public class Dialog_edit_Booklist extends JDialog {
 		this.add(panel_east_border, BorderLayout.EAST);
 		this.add(panel_south, BorderLayout.SOUTH);
 
+		if (Mainframe.getTreeSelection() == "") {
+			Mainframe.search(txt_author.getText());
+		} else {
+			Mainframe.search(Mainframe.getTreeSelection());
+		}
+		
 		this.setVisible(true);
 		this.setResizable(false);
 
