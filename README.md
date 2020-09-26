@@ -9,3 +9,5 @@ Because i come from Germany i mixed up the naming scheme quite a bit.
 I am just doing that to learn a bit of programming and get to know GitHub and Project Management.
 
 Feel free to do everything you want with it or create an issue to help me improve my programming. :)
+
+compiled with jdk15.
