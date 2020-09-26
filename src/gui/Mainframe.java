@@ -71,7 +71,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.2.0  (01.2020)  ";
+	private String version = "Ver. 2.2.1  (06.2020)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -79,7 +79,7 @@ public class Mainframe extends JFrame {
 		this.setLayout(new BorderLayout(10, 10));
 		this.setLocation(100, 100);
 		this.setSize(1300, 1000);
-		URL iconURL = getClass().getResource("/resources/Liste.png");
+		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
 		this.setIconImage(icon.getImage());
@@ -334,7 +334,6 @@ public class Mainframe extends JFrame {
 					String text = tree.getSelectionPath().getLastPathComponent().toString();
 					String[] text_array = text.split(Pattern.quote(" ("));
 					text = text_array[0];
-					System.out.println(text);
 					if (isAutor) {
 						updateModel();
 					} else {
@@ -516,8 +515,12 @@ public class Mainframe extends JFrame {
 				filter.addElement(einträge.getElementAt(i));
 			}
 		}
+		if (filter.getSize()>0) {
 		anzeige = new SimpleTableModel(filter);
 		table.setModel(anzeige);
+		} else {
+			JOptionPane.showMessageDialog(null, "Es gab leider keine Treffer!");
+		}
 	}
 
 	public static Mainframe getInstance() {

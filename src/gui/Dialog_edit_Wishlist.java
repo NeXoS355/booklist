@@ -61,7 +61,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		Book_Wishlist eintrag = einträge.getElementAt(index);
 
-		URL iconURL = getClass().getResource("/resources/Liste.png");
+		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
 		this.setIconImage(icon.getImage());
@@ -300,7 +300,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
 		panel_center.add(txt_merk, center_c);
 
-		JLabel lbl_serie = new JLabel("Serie:");
+		JLabel lbl_serie = new JLabel("Serie | Band:");
 		lbl_serie.setFont(standardFont);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_serie);
