@@ -71,7 +71,8 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.2.1  (09.2020)  ";
+	private String version = "Ver. 2.2.2  (04.2022)  ";
+	private int pressedVersionCount = 0;
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -85,6 +86,7 @@ public class Mainframe extends JFrame {
 		this.setIconImage(icon.getImage());
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
@@ -186,8 +188,11 @@ public class Mainframe extends JFrame {
 					String StrTime = Long.toString(LongTime).substring(0, LongTime.toString().length() - 3);
 					copyFilesInDirectory(new File("MyDB"), new File("Sicherung/" + StrTime + "/MyDB"));
 					copyFileToDirectory(new File("derby.log"), new File("Sicherung/" + StrTime));
+					JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
+					
 				} catch (IOException e1) {
 					e1.printStackTrace();
+					JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen.");
 				}
 			}
 		});
@@ -227,6 +232,26 @@ public class Mainframe extends JFrame {
 		Font newLabelFont = new Font(lblVersion.getFont().getName(), Font.BOLD, lblVersion.getFont().getSize());
 		lblVersion.setFont(newLabelFont);
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblVersion.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				pressedVersionCount = 0;
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				pressedVersionCount = 0;
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				pressedVersionCount++;
+				if (pressedVersionCount == 10) {
+					JOptionPane.showMessageDialog(null, "öffne Datenbankverwaltung. Work in progress ...");
+				}
+			}
+		});
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
 		
 		table.setModel(anzeige);
@@ -340,7 +365,7 @@ public class Mainframe extends JFrame {
 						search(text);
 						treeSelection = text;
 					}
-					if (isRightClick) {
+					if (isRightClick && !isAutor) {
 						search(text);
 						showMenu(e);
 					}
@@ -388,7 +413,7 @@ public class Mainframe extends JFrame {
 			String searchTitel = (String) table.getValueAt(selected[i], 1);
 			int index = einträge.getIndexOf(searchAutor, searchTitel);
 			if (selected.length != 0) {
-				int antwort = JOptionPane.showConfirmDialog(null, "Wirklich '" + searchTitel + "' löschen?", "Löschen",
+				int antwort = JOptionPane.showConfirmDialog(null, "Wirklich '" + searchAutor + " - " + searchTitel + "' löschen?", "Löschen",
 						JOptionPane.YES_NO_OPTION);
 				if (antwort == JOptionPane.YES_OPTION) {
 					einträge.delete(index);

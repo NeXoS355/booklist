@@ -49,9 +49,6 @@ import data.Database;
 
 public class Dialog_edit_Booklist extends JDialog {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private JTextField txt_author;
 	private JTextField txt_title;
@@ -187,7 +184,11 @@ public class Dialog_edit_Booklist extends JDialog {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					HandleImage.getImage(eintrag);
+					//HandleImage.getImage(eintrag);
+					String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
+					if (webpage != null && webpage != "") {
+						HandleImage.DownloadWebPage(webpage, eintrag);
+					}
 				}
 			});
 			panel_east_border.add(btn_downloadPic, BorderLayout.CENTER);
