@@ -13,16 +13,22 @@ import java.text.SimpleDateFormat;
 public class Database {
 
 	private static Connection con = null;
+	
 
 	public static Connection createConnection() {
+		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 		try {
 			if (con == null || con.isClosed()) {
-				con = DriverManager.getConnection("jdbc:derby:MyDB;create=true");
+				Class.forName(driver); 
+				con = DriverManager.getConnection("jdbc:derby:BooklistDB;create=true");
 				createTable(con);
 			}
 
 		} catch (SQLException e) {
 			System.err.println("Verbindung konnte nicht hergestellt werden");
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			System.err.println("Verbindung konnte nicht hergestellt werden. Class not found");
 			e.printStackTrace();
 		}
 		return con;
@@ -112,7 +118,7 @@ public class Database {
 		return rs;
 	}
 	
-	public static String readCurrentDbVersion() {
+	public static String readCurrentLayoutVersion() {
 		ResultSet rs = null;
 		String version = "";
 		Timestamp date = null;
@@ -129,7 +135,7 @@ public class Database {
 			System.out.println("Fehler beim auslesen der DB Version");
 			e.printStackTrace();
 		}		
-		return version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);	
+		return "DB Layout Version:" + version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);
 	}
 
 	public static void deleteFromBooklist(String autor, String titel) {

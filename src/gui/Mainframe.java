@@ -71,7 +71,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.2.2  (04.2022)  ";
+	private String version = "Ver. 2.2.3  (12.2022)  ";
 	private int pressedVersionCount = 0;
 
 	private Mainframe() throws HeadlessException {
@@ -86,7 +86,6 @@ public class Mainframe extends JFrame {
 		this.setIconImage(icon.getImage());
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
@@ -103,6 +102,7 @@ public class Mainframe extends JFrame {
 		txt_search.setToolTipText("Suchtext");
 		txt_search.setText("Suche ... (" + einträge.getSize() + ")");
 		txt_search.setForeground(Color.gray);
+		txt_search.setFont(schrift);
 		txt_search.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -186,7 +186,7 @@ public class Mainframe extends JFrame {
 					Date dt = new Date();
 					Long LongTime = dt.getTime();
 					String StrTime = Long.toString(LongTime).substring(0, LongTime.toString().length() - 3);
-					copyFilesInDirectory(new File("MyDB"), new File("Sicherung/" + StrTime + "/MyDB"));
+					copyFilesInDirectory(new File("BooklistDB"), new File("Sicherung/" + StrTime + "/BooklistDB"));
 					copyFileToDirectory(new File("derby.log"), new File("Sicherung/" + StrTime));
 					JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
 					
@@ -217,7 +217,7 @@ public class Mainframe extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, Database.readCurrentDbVersion());
+				JOptionPane.showMessageDialog(null, "Apache Derby 10.16.1.1 (May 19, 2022)");
 			}
 		});
 
@@ -247,8 +247,8 @@ public class Mainframe extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				pressedVersionCount++;
-				if (pressedVersionCount == 10) {
-					JOptionPane.showMessageDialog(null, "öffne Datenbankverwaltung. Work in progress ...");
+				if (pressedVersionCount == 5) {
+					JOptionPane.showMessageDialog(null, Database.readCurrentLayoutVersion());
 				}
 			}
 		});
@@ -256,6 +256,8 @@ public class Mainframe extends JFrame {
 		
 		table.setModel(anzeige);
 		table.setFont(schrift);
+		table.setShowVerticalLines(false);
+		table.setSelectionBackground(Color.LIGHT_GRAY);
 		table.setRowHeight(table.getRowHeight()+6);
 		table.addMouseListener(new MouseAdapter() {
 
@@ -335,7 +337,7 @@ public class Mainframe extends JFrame {
 		JPanel pnl_mid = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		pnl_mid.add(listScrollPane, BorderLayout.CENTER);
+		pnl_mid.add(listScrollPane,BorderLayout.CENTER);
 
 		rootNode.removeAllChildren();
 		BookListModel.autorenPrüfen();
