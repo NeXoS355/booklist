@@ -3,4 +3,5 @@
 This is just a small Project which i did for my family.
 We couldn't get track of all the books we owned so i decided to write this little program.
 
-compiled with jdk17.
+Compiled with jdk17 and tested with Apache DerbyDB 10.16.1.1.
+Compatbible with jdk17 an higher.
