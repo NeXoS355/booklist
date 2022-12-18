@@ -6,7 +6,21 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/mariu/Downloads/db-derby-10.16.1.1-lib/db-derby-10.16.1.1-lib/lib/derby.jar"/>
-	<classpathentry kind="lib" path="C:/Users/mariu/Downloads/db-derby-10.16.1.1-lib/db-derby-10.16.1.1-lib/lib/derbytools.jar"/>
+	<classpathentry kind="lib" path="derby.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="derbytools.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="derbyshared.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

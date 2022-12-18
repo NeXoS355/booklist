@@ -33,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTree;
@@ -46,8 +47,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import application.Book_Booklist;
 import application.BookListModel;
+import application.Book_Booklist;
 import application.SimpleTableModel;
 import data.Database;
 
@@ -71,7 +72,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.2.3  (12.2022)  ";
+	private String version = "Ver. 2.2.4  (12.2022)  ";
 	private int pressedVersionCount = 0;
 
 	private Mainframe() throws HeadlessException {
@@ -400,8 +401,8 @@ public class Mainframe extends JFrame {
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
-		this.add(treeScrollPane, BorderLayout.WEST);
-		this.add(pnl_mid, BorderLayout.CENTER);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,treeScrollPane,listScrollPane);
+		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
 		updateModel();
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
