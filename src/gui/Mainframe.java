@@ -72,7 +72,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.2.4  (12.2022)  ";
+	private String version = "Ver. 2.3.0  (12.2022)  ";
 	private int pressedVersionCount = 0;
 
 	private Mainframe() throws HeadlessException {
@@ -221,11 +221,25 @@ public class Mainframe extends JFrame {
 				JOptionPane.showMessageDialog(null, "Apache Derby 10.16.1.1 (May 19, 2022)");
 			}
 		});
+		JMenuItem ExcelExport = new JMenuItem("CSV Export");
+		ExcelExport.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int check = Database.CSVExport();
+				if(check == 1) {
+					JOptionPane.showMessageDialog(null, "Liste erfolgreich exportiert!");
+				} else {
+					JOptionPane.showMessageDialog(null, "Datei konnte nicht geschrieben werden!");
+				}
+			}
+		});
 
 		menue.add(datei);
 		datei.add(wishlist);
 		datei.add(backup);
 		datei.add(dbVersion);
+		datei.add(ExcelExport);
 		datei.add(close);
 		pnlMenü.add(menue, BorderLayout.WEST);
 

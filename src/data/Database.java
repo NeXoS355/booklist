@@ -1,5 +1,7 @@
 package data;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,6 +11,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+
+import com.opencsv.CSVWriter;
+
+import application.BookListModel;
+import application.Book_Booklist;
 
 public class Database {
 
@@ -105,6 +113,37 @@ public class Database {
 			e.printStackTrace();
 		}
 		return rs;
+	}
+	
+	public static int CSVExport() {
+		int returnValue=2;
+		System.out.println("CSV Export");
+		  String fileName = "books.csv";
+          try (CSVWriter writer = new CSVWriter(new FileWriter(fileName))) {
+             // Spaltenüberschriften hinzufügen
+            String[] header = {"Autor", "Titel", "Datum", "Serie", "Serienteil", "Bemerkung"};
+            writer.writeNext(header);
+            ArrayList<Book_Booklist> list = BookListModel.getBücher();
+            int größe = list.size();
+			// Bücher in die Tabelle einfügen
+			for (int i = 0;i < größe;i++) {
+			    String autor= list.get(i).getAutor();
+			    String titel= list.get(i).getTitel();
+			    Timestamp datum = list.get(i).getDatum();
+			    String serie= list.get(i).getSerie();
+			    String seriePart = list.get(i).getSeriePart();
+			    String bemerkung = list.get(i).getBemerkung();
+			    String[] data = {autor, titel, datum.toString(),serie,seriePart, bemerkung};
+			    writer.writeNext(data);
+			};
+			returnValue=1;
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
+        return returnValue;
 	}
 	
 	public static ResultSet readDbWishlist() {
