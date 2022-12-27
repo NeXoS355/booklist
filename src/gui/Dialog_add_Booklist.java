@@ -25,7 +25,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -39,18 +38,20 @@ public class Dialog_add_Booklist extends JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private JTextField txt_author;
-	private JTextField txt_title;
+	private RoundJTextField txt_author;
+	private RoundJTextField txt_title;
 	private JCheckBox check_von;
-	private JTextField txt_leihVon;
+	private RoundJTextField txt_leihVon;
 	private JCheckBox check_an;
-	private JTextField txt_leihAn;
-	private JTextField txt_merk;
-	private JTextField txt_serie;
-	private JTextField txt_seriePart;
+	private RoundJTextField txt_leihAn;
+	private RoundJTextField txt_merk;
+	private RoundJTextField txt_serie;
+	private RoundJTextField txt_seriePart;
 	private Font standardFont = new Font("standard", Font.BOLD, 14);
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
+//	private Color backgroundColor=Color.DARK_GRAY;
+//	private Color foregroundColor=Color.WHITE;
 
 	public Dialog_add_Booklist(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch hinzufügen");
@@ -67,15 +68,18 @@ public class Dialog_add_Booklist extends JDialog {
 
 		JPanel panel_west = new JPanel();
 		panel_west.setLayout(new GridLayout(4, 1, 10, 10));
+//		panel_west.setBackground(backgroundColor);
 
 		JPanel panel_center = new JPanel();
 		panel_center.setLayout(new GridBagLayout());
+//		panel_center.setBackground(backgroundColor);
 		GridBagConstraints center_c = new GridBagConstraints();
 		center_c.ipady = 10;
 		int padding_c = 10;
 
 		JPanel panel_south = new JPanel();
 		panel_south.setLayout(new GridLayout(3, 2, 10, 10));
+//		panel_south.setBackground(backgroundColor);
 
 		int höhe = 60;
 		int breite = 100;
@@ -85,7 +89,7 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_author.setSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_author);
 
-		txt_author = new JTextField();
+		txt_author = new RoundJTextField();
 		txt_author.setFont(standardFont);
 		txt_author.setText(Mainframe.getTreeSelection());
 		txt_author.setPreferredSize(new Dimension(50, höhe));
@@ -132,7 +136,7 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_title);
 
-		txt_title = new JTextField();
+		txt_title = new RoundJTextField();
 		txt_title.setFont(standardFont);
 		txt_title.setPreferredSize(new Dimension(50, höhe));
 		txt_title.setBorder(standardBorder);
@@ -195,7 +199,7 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_merk);
 
-		txt_merk = new JTextField();
+		txt_merk = new RoundJTextField();
 		txt_merk.setFont(standardFont);
 		txt_merk.setPreferredSize(new Dimension(50, höhe));
 		txt_merk.setBorder(standardBorder);
@@ -238,7 +242,7 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_serie);
 
-		txt_serie = new JTextField();
+		txt_serie = new RoundJTextField();
 		txt_serie.setFont(standardFont);
 		txt_serie.setPreferredSize(new Dimension(50, höhe));
 		txt_serie.setBorder(standardBorder);
@@ -276,7 +280,7 @@ public class Dialog_add_Booklist extends JDialog {
 		center_c.insets = new Insets(padding_c, 0, 0, 0);
 		panel_center.add(txt_serie, center_c);
 
-		txt_seriePart = new JTextField();
+		txt_seriePart = new RoundJTextField();
 		txt_seriePart.setFont(standardFont);
 		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
 		txt_seriePart.setBorder(standardBorder);
@@ -351,7 +355,7 @@ public class Dialog_add_Booklist extends JDialog {
 		});
 		panel_south.add(check_an);
 
-		txt_leihVon = new JTextField();
+		txt_leihVon = new RoundJTextField();
 		txt_leihVon.setFont(standardFont);
 		txt_leihVon.setVisible(false);
 		txt_leihVon.setBorder(standardBorder);
@@ -383,7 +387,7 @@ public class Dialog_add_Booklist extends JDialog {
 		});
 		panel_south.add(txt_leihVon);
 
-		txt_leihAn = new JTextField();
+		txt_leihAn = new RoundJTextField();
 		txt_leihAn.setFont(standardFont);
 		txt_leihAn.setVisible(false);
 		txt_leihAn.setBorder(standardBorder);
@@ -440,7 +444,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 		this.add(panel_west, BorderLayout.WEST);
 		this.add(panel_center, BorderLayout.CENTER);
-		this.add(panel_south, BorderLayout.SOUTH);
+		this.add(panel_south, BorderLayout.SOUTH);		
 		this.add(new JLabel(""), BorderLayout.NORTH); // oberer Abstand vom JFrame
 
 		this.setVisible(true);

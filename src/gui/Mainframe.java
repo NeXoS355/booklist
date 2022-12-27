@@ -2,15 +2,19 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.HeadlessException;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +46,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -72,7 +78,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.3.0  (12.2022)  ";
+	private String version = "Ver. 2.3.1  (12.2022)  ";
 	private int pressedVersionCount = 0;
 
 	private Mainframe() throws HeadlessException {
@@ -135,6 +141,7 @@ public class Mainframe extends JFrame {
 		panel.add(txt_search, BorderLayout.CENTER);
 
 		JButton btn_add = new JButton();
+		btn_add.setFocusPainted(false);
 		btn_add.setText("+");
 		btn_add.setFont(btn_add.getFont().deriveFont(Font.BOLD, 20));
 		btn_add.addActionListener(new ActionListener() {
@@ -148,6 +155,7 @@ public class Mainframe extends JFrame {
 		panel.add(btn_add, BorderLayout.WEST);
 
 		JButton btn_search = new JButton("suchen");
+		btn_search.setFocusPainted(false);
 		btn_search.setFont(btn_search.getFont().deriveFont(Font.BOLD, 13));
 		BufferedImage image = null;
 		try {

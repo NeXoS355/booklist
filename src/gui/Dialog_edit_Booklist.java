@@ -36,7 +36,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -50,15 +49,15 @@ import data.Database;
 public class Dialog_edit_Booklist extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField txt_author;
-	private JTextField txt_title;
+	private RoundJTextField txt_author;
+	private RoundJTextField txt_title;
 	private JCheckBox check_von;
-	private JTextField txt_leihVon;
+	private RoundJTextField txt_leihVon;
 	private JCheckBox check_an;
-	private JTextField txt_leihAn;
-	private JTextField txt_merk;
-	private JTextField txt_serie;
-	private JTextField txt_seriePart;
+	private RoundJTextField txt_leihAn;
+	private RoundJTextField txt_merk;
+	private RoundJTextField txt_serie;
+	private RoundJTextField txt_seriePart;
 	private Font standardFont = new Font("standard", Font.BOLD, 14);
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
@@ -66,7 +65,7 @@ public class Dialog_edit_Booklist extends JDialog {
 	public Dialog_edit_Booklist(BookListModel einträge, int index, DefaultTreeModel treeModel,
 			DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch bearbeiten");
-		this.setSize(new Dimension(700, 500));
+		this.setSize(new Dimension(500, 365));
 		this.setLocation(200, 200);
 		this.setAlwaysOnTop(true);
 
@@ -83,25 +82,25 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_north.setLayout(new GridLayout(1, 1));
 
 		JPanel panel_west = new JPanel();
-		panel_west.setLayout(new GridLayout(4, 1, 40, 40));
+		panel_west.setLayout(new GridLayout(4, 1, 10, 20));
 
 		JPanel panel_center = new JPanel();
 		panel_center.setLayout(new GridBagLayout());
 		GridBagConstraints center_c = new GridBagConstraints();
-		center_c.ipady = 25;
-		int padding_c = 22;
+		center_c.ipady = 10;
+		int padding_c = 10;
 
 		JPanel panel_east_border = new JPanel();
 		panel_east_border.setLayout(new BorderLayout(10, 10));
 
 		JPanel panel_east_grid = new JPanel();
-		panel_east_grid.setLayout(new GridLayout(4, 1, 40, 40));
+		panel_east_grid.setLayout(new GridLayout(4, 1, 10, 20));
 		panel_east_border.add(panel_east_grid, BorderLayout.WEST);
 
 		JPanel panel_south = new JPanel();
 		panel_south.setLayout(new GridLayout(3, 2, 10, 10));
 
-		int höhe = 35;
+		int höhe = 60;
 		int breite = 100;
 
 		BufferedImage image = null;
@@ -233,7 +232,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_author);
 
-		txt_author = new JTextField(eintrag.getAutor());
+		txt_author = new RoundJTextField(eintrag.getAutor());
 		txt_author.setFont(standardFont);
 		txt_author.setPreferredSize(new Dimension(50, höhe));
 		txt_author.setBorder(standardBorder);
@@ -278,7 +277,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_title);
 
-		txt_title = new JTextField(eintrag.getTitel());
+		txt_title = new RoundJTextField(eintrag.getTitel());
 		txt_title.setFont(standardFont);
 		txt_title.setPreferredSize(new Dimension(50, höhe));
 		txt_title.setBorder(standardBorder);
@@ -341,7 +340,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_merk);
 
-		txt_merk = new JTextField(eintrag.getBemerkung());
+		txt_merk = new RoundJTextField(eintrag.getBemerkung());
 		txt_merk.setFont(standardFont);
 		txt_merk.setPreferredSize(new Dimension(50, höhe));
 		txt_merk.setBorder(standardBorder);
@@ -383,7 +382,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_serie);
 
-		txt_serie = new JTextField(eintrag.getSerie());
+		txt_serie = new RoundJTextField(eintrag.getSerie());
 		txt_serie.setFont(standardFont);
 		txt_serie.setPreferredSize(new Dimension(50, höhe));
 		txt_serie.setBorder(standardBorder);
@@ -421,7 +420,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		center_c.insets = new Insets(padding_c, 0, 0, 0);
 		panel_center.add(txt_serie, center_c);
 
-		txt_seriePart = new JTextField(eintrag.getSeriePart());
+		txt_seriePart = new RoundJTextField(eintrag.getSeriePart());
 		txt_seriePart.setFont(standardFont);
 		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
 		txt_seriePart.setBorder(standardBorder);
@@ -503,7 +502,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		});
 		panel_south.add(check_an);
 
-		txt_leihVon = new JTextField(eintrag.getAusgeliehen_von());
+		txt_leihVon = new RoundJTextField(eintrag.getAusgeliehen_von());
 		txt_leihVon.setFont(standardFont);
 		txt_leihVon.setBorder(standardBorder);
 		if (eintrag.getAusgeliehen_von().isEmpty())
@@ -536,7 +535,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		});
 		panel_south.add(txt_leihVon);
 
-		txt_leihAn = new JTextField(eintrag.getAusgeliehen_an());
+		txt_leihAn = new RoundJTextField(eintrag.getAusgeliehen_an());
 		txt_leihAn.setFont(standardFont);
 		txt_leihAn.setBorder(standardBorder);
 		if (eintrag.getAusgeliehen_an().isEmpty())
