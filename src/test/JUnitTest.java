@@ -24,7 +24,7 @@ class JUnitTest {
 		Book_Booklist book = null;
 		try {
 			book = new Book_Booklist("Testautor", "Testtitel", true, "", "", "", "",
-						"", null, new Timestamp(System.currentTimeMillis()), false);
+						"", null, null, new Timestamp(System.currentTimeMillis()), false);
 			BookEinträge.add(book);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

@@ -13,6 +13,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
 import com.opencsv.CSVWriter;
 
 import application.BookListModel;
@@ -21,17 +23,16 @@ import application.Book_Booklist;
 public class Database {
 
 	private static Connection con = null;
-	
 
 	public static Connection createConnection() {
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 		try {
 			if (con == null || con.isClosed()) {
-				Class.forName(driver); 
-				con = DriverManager.getConnection("jdbc:derby:BooklistDB;create=true");
+				Class.forName(driver);
+				con = DriverManager.getConnection("jdbc:derby:BooklistDB;create=true;upgrade=true");
 				createTable(con);
 			}
-
+			checkUpdate();
 		} catch (SQLException e) {
 			System.err.println("Verbindung konnte nicht hergestellt werden");
 			e.printStackTrace();
@@ -65,12 +66,13 @@ public class Database {
 		try {
 			createBooklist = con.createStatement();
 			createBooklist.execute(
-					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), pic blob,date timestamp, CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
+					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),pic blob,description clob (64 M),date timestamp, CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
 			createWishlist = con.createStatement();
-			createWishlist.execute("CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
+			createWishlist.execute(
+					"CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
 			createVersions = con.createStatement();
 			createVersions.execute("CREATE TABLE versions (version VARCHAR(10) NOT NULL, date timestamp NOT NULL)");
-			String sql = "INSERT INTO versions (version ,date) VALUES ('2.2.0','" + datum + "')";
+			String sql = "INSERT INTO versions (version ,date) VALUES ('2.4.0','" + datum + "')";
 			pst = con.prepareStatement(sql);
 			pst.execute();
 			pst.close();
@@ -83,10 +85,10 @@ public class Database {
 			}
 		} finally {
 			if (createBooklist != null && createWishlist != null) {
-				 try {
-					 createBooklist.close();
-					 createWishlist.close();
-					 createVersions.close();
+				try {
+					createBooklist.close();
+					createWishlist.close();
+					createVersions.close();
 					System.out.println("DB closed");
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -114,38 +116,87 @@ public class Database {
 		}
 		return rs;
 	}
-	
+
+	public static void checkUpdate() {
+
+		String version_old = checkVersion();
+		switch (version_old) {
+		case "2.2.0":
+			try {
+				String sql = "ALTER TABLE bücher ADD description clob (64 M)";
+				PreparedStatement st;
+				st = con.prepareStatement(sql);
+				st.execute();
+				st.close();
+				sql = "UPDATE versions set version='2.4.0'";
+				st = con.prepareStatement(sql);
+				st.execute();
+				st.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			JOptionPane.showMessageDialog(null, "Datenbank aktualisiert!");
+
+		}
+		String version_new = checkVersion();
+
+		if (!version_new.equals("2.4.0")) {
+			JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell!");
+		}
+
+	}
+
+	public static String checkVersion() {
+		Statement st = null;
+		ResultSet rs = null;
+		String version = "";
+		try {
+			st = con.createStatement();
+			rs = st.executeQuery("SELECT version from versions");
+			while (rs.next()) {
+				version = rs.getString("version").trim();
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return version;
+	}
+
 	public static int CSVExport() {
-		int returnValue=2;
+		int returnValue = 2;
 		System.out.println("CSV Export");
-		  String fileName = "books.csv";
-          try (CSVWriter writer = new CSVWriter(new FileWriter(fileName))) {
-             // Spaltenüberschriften hinzufügen
-            String[] header = {"Autor", "Titel", "Datum", "Serie", "Serienteil", "Bemerkung"};
-            writer.writeNext(header);
-            ArrayList<Book_Booklist> list = BookListModel.getBücher();
-            int größe = list.size();
+		String fileName = "books.csv";
+		try (CSVWriter writer = new CSVWriter(new FileWriter(fileName))) {
+			// Spaltenüberschriften hinzufügen
+			String[] header = { "Autor", "Titel", "Datum", "Serie", "Serienteil", "Bemerkung" };
+			writer.writeNext(header);
+			ArrayList<Book_Booklist> list = BookListModel.getBücher();
+			int größe = list.size();
 			// Bücher in die Tabelle einfügen
-			for (int i = 0;i < größe;i++) {
-			    String autor= list.get(i).getAutor();
-			    String titel= list.get(i).getTitel();
-			    Timestamp datum = list.get(i).getDatum();
-			    String serie= list.get(i).getSerie();
-			    String seriePart = list.get(i).getSeriePart();
-			    String bemerkung = list.get(i).getBemerkung();
-			    String[] data = {autor, titel, datum.toString(),serie,seriePart, bemerkung};
-			    writer.writeNext(data);
-			};
-			returnValue=1;
+			for (int i = 0; i < größe; i++) {
+				String autor = list.get(i).getAutor();
+				String titel = list.get(i).getTitel();
+				Timestamp datum = list.get(i).getDatum();
+				String serie = list.get(i).getSerie();
+				String seriePart = list.get(i).getSeriePart();
+				String bemerkung = list.get(i).getBemerkung();
+				String[] data = { autor, titel, datum.toString(), serie, seriePart, bemerkung };
+				writer.writeNext(data);
+			}
+			;
+			returnValue = 1;
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			
+
 		}
-        return returnValue;
+		return returnValue;
 	}
-	
+
 	public static ResultSet readDbWishlist() {
 		ResultSet rs = null;
 		try {
@@ -156,7 +207,7 @@ public class Database {
 		}
 		return rs;
 	}
-	
+
 	public static String readCurrentLayoutVersion() {
 		ResultSet rs = null;
 		String version = "";
@@ -165,7 +216,7 @@ public class Database {
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery(sql);
-			while (rs.next()) { 
+			while (rs.next()) {
 				version = rs.getString("version").trim();
 				date = rs.getTimestamp("date");
 			}
@@ -173,7 +224,7 @@ public class Database {
 		} catch (SQLException e) {
 			System.out.println("Fehler beim auslesen der DB Version");
 			e.printStackTrace();
-		}		
+		}
 		return "DB Layout Version:" + version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);
 	}
 
@@ -192,7 +243,7 @@ public class Database {
 			System.err.println("Buch wurde nicht gelöscht");
 		}
 	}
-	
+
 	public static void deleteFromWishlist(String autor, String titel) {
 		try {
 			String sql = "DELETE FROM wishlist WHERE autor = ? AND titel = ?";
@@ -209,7 +260,8 @@ public class Database {
 		}
 	}
 
-	public static void addToBooklist(String autor, String titel, String ausgeliehen, String name, String bemerkung, String serie, String seriePart, String datum) throws SQLException {
+	public static void addToBooklist(String autor, String titel, String ausgeliehen, String name, String bemerkung,
+			String serie, String seriePart, String datum) throws SQLException {
 		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?,?,?)";
 		PreparedStatement st = con.prepareStatement(sql);
 		st.setString(1, autor);
@@ -222,10 +274,12 @@ public class Database {
 		st.setString(8, datum);
 		st.executeUpdate();
 		st.close();
-		System.out.println("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + "," + name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum);
+		System.out.println("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + ","
+				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum);
 	}
-	
-	public static void addToWishlist(String autor, String titel, String bemerkung, String serie, String seriePart, String datum) throws SQLException {
+
+	public static void addToWishlist(String autor, String titel, String bemerkung, String serie, String seriePart,
+			String datum) throws SQLException {
 		String sql = "INSERT INTO wishlist(autor,titel,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?)";
 		PreparedStatement st = con.prepareStatement(sql);
 		st.setString(1, autor);
@@ -236,9 +290,10 @@ public class Database {
 		st.setString(6, datum);
 		st.executeUpdate();
 		st.close();
-		System.out.println("Wishlist Datenbank Eintrag erstellt: " + autor + "," + titel + ","  + bemerkung + "," + serie + "," + seriePart + "," + datum);
+		System.out.println("Wishlist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + bemerkung + "," + serie
+				+ "," + seriePart + "," + datum);
 	}
-	
+
 	public static void selectFromBooklist(String autor, String titel) throws SQLException {
 		String sql = "SELECT * FROM bücher WHERE autor=? and titel=?";
 		PreparedStatement st = con.prepareStatement(sql);
@@ -248,7 +303,7 @@ public class Database {
 		st.close();
 		System.out.println("Datenbank durchsucht: " + autor + "," + titel);
 	}
-	
+
 	public static void addPic(String autor, String titel, InputStream photo) {
 		String sql = "update bücher set pic=? where autor=? and titel=?";
 		PreparedStatement st;
@@ -265,7 +320,7 @@ public class Database {
 		}
 
 	}
-	
+
 	public static boolean delPic(String autor, String titel) {
 		String sql = "update bücher set pic=null where autor=? and titel=?";
 		PreparedStatement st;
@@ -284,7 +339,43 @@ public class Database {
 		}
 
 	}
-	
+
+	public static void addDesc(String autor, String titel, String desc) {
+		String sql = "update bücher set description=? where autor=? and titel=?";
+		PreparedStatement st;
+		try {
+			st = con.prepareStatement(sql);
+			st.setString(1, desc);
+			st.setString(2, autor);
+			st.setString(3, titel);
+			st.execute();
+			st.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public static boolean delDesc(String autor, String titel) {
+		String sql = "update bücher set description=null where autor=? and titel=?";
+		PreparedStatement st;
+		try {
+			st = con.prepareStatement(sql);
+			st.setString(1, autor);
+			st.setString(2, titel);
+			st.execute();
+			st.close();
+			System.out.println("Bild gelöscht " + autor + " - " + titel);
+			return true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
+	}
+
 	public static void alterTableAdd(String spaltenName) throws SQLException {
 		String sql = "ALTER TABLE bücher ADD ? VARCHAR(100)";
 		PreparedStatement st = con.prepareStatement(sql);

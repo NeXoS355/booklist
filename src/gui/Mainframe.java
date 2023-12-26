@@ -2,19 +2,15 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.HeadlessException;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -46,8 +42,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -78,7 +72,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.3.1  (12.2022)  ";
+	private String version = "Ver. 2.4.0  (12.2023)  ";
 	private int pressedVersionCount = 0;
 
 	private Mainframe() throws HeadlessException {

@@ -469,13 +469,13 @@ public class Dialog_add_Booklist extends JDialog {
 				if (checkInput(autor, titel)) {
 					if (check_an.isSelected()) {
 						Mainframe.einträge.add(new Book_Booklist(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,
-								seriePart, null, datum, true));
+								seriePart, null, null, datum, true));
 					} else if (check_von.isSelected()) {
 						Mainframe.einträge.add(new Book_Booklist(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,
-								seriePart, null, datum, true));
+								seriePart, null, null, datum, true));
 					} else
 						Mainframe.einträge
-								.add(new Book_Booklist(autor, titel, bemerkung, serie, seriePart, null, false, datum, true));
+								.add(new Book_Booklist(autor, titel, bemerkung, serie, seriePart, null, null, false, datum, true));
 					dispose();
 				} else {
 					txt_title.setText("Buch bereits vorhanden!");

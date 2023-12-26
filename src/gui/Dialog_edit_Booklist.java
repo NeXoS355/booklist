@@ -16,8 +16,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -25,7 +23,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -43,7 +40,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import application.Book_Booklist;
 import application.BookListModel;
-import application.HandleImage;
+import application.HandleWebInfo;
 import data.Database;
 
 public class Dialog_edit_Booklist extends JDialog {
@@ -64,8 +61,9 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	public Dialog_edit_Booklist(BookListModel einträge, int index, DefaultTreeModel treeModel,
 			DefaultMutableTreeNode rootNode) {
+		
 		this.setTitle("Buch bearbeiten");
-		this.setSize(new Dimension(500, 365));
+		this.setSize(new Dimension(500, 405));
 		this.setLocation(200, 200);
 		this.setAlwaysOnTop(true);
 
@@ -97,39 +95,43 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_east_grid.setLayout(new GridLayout(4, 1, 10, 20));
 		panel_east_border.add(panel_east_grid, BorderLayout.WEST);
 
+		JPanel panel_south_border = new JPanel();
+		panel_south_border.setLayout(new BorderLayout(10,10));
+		
 		JPanel panel_south = new JPanel();
 		panel_south.setLayout(new GridLayout(3, 2, 10, 10));
 
 		int höhe = 60;
 		int breite = 100;
 
-		BufferedImage image = null;
-		JButton btn_browseAuthor = new JButton();
-		try {
-			image = ImageIO.read(getClass().getResource("/resources/amazon.png"));
-			btn_browseAuthor.setIcon(new ImageIcon(image));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		btn_browseAuthor.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try {
-					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+");
-					openWebpage(new URI(amazonUrl));
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		panel_east_grid.add(btn_browseAuthor);
+//		BufferedImage image = null;
+//		JButton btn_browseAuthor = new JButton();
+//		try {
+//			image = ImageIO.read(getClass().getResource("/resources/amazon.png"));
+//			btn_browseAuthor.setIcon(new ImageIcon(image));
+//		} catch (IOException e1) {
+//			e1.printStackTrace();
+//		}
+//
+//		btn_browseAuthor.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent arg0) {
+//				try {
+//					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+");
+//					openWebpage(new URI(amazonUrl));
+//				} catch (URISyntaxException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//		panel_east_grid.add(btn_browseAuthor);
 
 		// Bild anzeigen
 		ImageIcon img = showImg(eintrag);
 		if (img != null) {
 			JLabel lbl_pic = new JLabel(img);
+			lbl_pic.setPreferredSize(new Dimension(150,10));
 			lbl_pic.addMouseListener(new MouseAdapter() {
 
 				@Override
@@ -138,6 +140,10 @@ public class Dialog_edit_Booklist extends JDialog {
 						e.getPoint();
 						showMenu(e);
 					}
+				}
+				
+				public void mouseEntered(MouseEvent e) {
+					
 				}
 
 				private void showMenu(MouseEvent e) {
@@ -153,7 +159,7 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
 							if (webpage != null && webpage != "") {
-								HandleImage.DownloadWebPage(webpage, eintrag);
+								HandleWebInfo.DownloadWebPage(eintrag);
 							}
 						}
 					});
@@ -161,7 +167,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							boolean state = HandleImage.deletePic(txt_author.getText(), txt_title.getText());
+							boolean state = HandleWebInfo.deletePic(txt_author.getText(), txt_title.getText());
 							if (state == true) {
 								JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
 								eintrag.setPic(null);
@@ -178,53 +184,51 @@ public class Dialog_edit_Booklist extends JDialog {
 			panel_east_border.add(lbl_pic, BorderLayout.CENTER);
 
 		} else {
-			JButton btn_downloadPic = new JButton("Download");
-			btn_downloadPic.addActionListener(new ActionListener() {
+			JButton btn_downloadInfo = new JButton("Download Info");
+			btn_downloadInfo.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					//HandleImage.getImage(eintrag);
-					String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
-					if (webpage != null && webpage != "") {
-						HandleImage.DownloadWebPage(webpage, eintrag);
-					}
+
+					HandleWebInfo.DownloadWebPage(eintrag);
 				}
 			});
-			panel_east_border.add(btn_downloadPic, BorderLayout.CENTER);
+			panel_east_border.add(btn_downloadInfo, BorderLayout.CENTER);
 		}
 
-		JLabel lbl_datum = new JLabel("Datum: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
+		JLabel lbl_datum = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
 		panel_north.add(lbl_datum);
 
-		// empty Label amazon Button
-		JLabel lbl_emptySearch1 = new JLabel("");
-		panel_east_grid.add(lbl_emptySearch1);
-		JLabel lbl_emptySearch2 = new JLabel("");
-		panel_east_grid.add(lbl_emptySearch2);
-		// End empty Label
-
-		JButton btn_browseSeries = new JButton();
-		btn_browseSeries.setIcon(new ImageIcon(image));
-		btn_browseSeries.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try {
-					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+") + "+"
-							+ txt_serie.getText().replaceAll(" ", "+");
-					openWebpage(new URI(amazonUrl));
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		panel_east_grid.add(btn_browseSeries);
+//		// empty Label amazon Button
+//		JLabel lbl_emptySearch1 = new JLabel("");
+//		panel_east_grid.add(lbl_emptySearch1);
+//		JLabel lbl_emptySearch2 = new JLabel("");
+//		panel_east_grid.add(lbl_emptySearch2);
+//		// End empty Label
+//
+//		JButton btn_browseSeries = new JButton();
+//		btn_browseSeries.setIcon(new ImageIcon(image));
+//		btn_browseSeries.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent arg0) {
+//				try {
+//					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+") + "+"
+//							+ txt_serie.getText().replaceAll(" ", "+");
+//					openWebpage(new URI(amazonUrl));
+//				} catch (URISyntaxException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
+//		panel_east_grid.add(btn_browseSeries);
 
 		// Empty Panel top Gap
-		JLabel lbl_empty1 = new JLabel("");
-		lbl_empty1.setFont(standardFont);
-		lbl_empty1.setPreferredSize(new Dimension(breite, 10));
-		panel_north.add(lbl_empty1);
+//		JLabel lbl_empty1 = new JLabel("");
+//		lbl_empty1.setFont(standardFont);
+//		lbl_empty1.setPreferredSize(new Dimension(breite, 10));
+//		panel_north.add(lbl_empty1);
 		// Ende topGap
 
 		JLabel lbl_author = new JLabel("Autor:");
@@ -588,12 +592,24 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		});
 		panel_south.add(btn_abort);
+		
+		JLabel lbl_desc = new JLabel();
+		if (eintrag.getDesc() != null) {
+			lbl_desc.setText("<html>" + eintrag.getDesc() + "</html");
+			int anz_zeichen = eintrag.getDesc().length();
+			int heigth = anz_zeichen/5;
+			lbl_desc.setPreferredSize(new Dimension(120,heigth));
+			this.setSize(new Dimension(500, 405+heigth));
+		}
+
+		panel_south_border.add(lbl_desc, BorderLayout.SOUTH);
+		panel_south_border.add(panel_south,BorderLayout.CENTER);
 
 		this.add(panel_north, BorderLayout.NORTH);
 		this.add(panel_west, BorderLayout.WEST);
 		this.add(panel_center, BorderLayout.CENTER);
 		this.add(panel_east_border, BorderLayout.EAST);
-		this.add(panel_south, BorderLayout.SOUTH);
+		this.add(panel_south_border, BorderLayout.SOUTH);
 
 		if (Mainframe.getTreeSelection() == "") {
 			Mainframe.search(txt_author.getText());

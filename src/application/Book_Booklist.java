@@ -18,10 +18,11 @@ public class Book_Booklist {
 	private String serie;
 	private String seriePart;
 	private Image pic;
+	private String desc;
 	private Timestamp datum;
 
 	public Book_Booklist(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
-			String bemerkung, String serie,String seriePart, Image pic,Timestamp datum, boolean db) throws SQLException {
+			String bemerkung, String serie,String seriePart, Image pic, String desc,Timestamp datum, boolean db) throws SQLException {
 		super();
 		this.autor = autor;
 		this.titel = titel;
@@ -30,6 +31,7 @@ public class Book_Booklist {
 		this.serie = serie;
 		this.seriePart = seriePart;
 		this.pic = pic;
+		this.desc = desc;
 		this.datum = datum;
 		if (ausgeliehen) {
 			this.ausgeliehen_an = ausgeliehen_an;
@@ -49,8 +51,8 @@ public class Book_Booklist {
 		}
 	}
 
-	public Book_Booklist(String autor, String titel, String bemerkung, String serie,String seriePart, Image pic, boolean ausgeliehen,Timestamp datum, boolean db) throws SQLException {
-		this(autor, titel, ausgeliehen, "", "", bemerkung, serie, seriePart, pic, datum, db);
+	public Book_Booklist(String autor, String titel, String bemerkung, String serie,String seriePart, Image pic, String desc, boolean ausgeliehen,Timestamp datum, boolean db) throws SQLException {
+		this(autor, titel, ausgeliehen, "", "", bemerkung, serie, seriePart, pic, desc, datum, db);
 	}
 
 	@Override
@@ -167,6 +169,14 @@ public class Book_Booklist {
 
 	public void setSeriePart(String seriePart) {
 		this.seriePart = seriePart;
+	}
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
 	}
 	
 	
