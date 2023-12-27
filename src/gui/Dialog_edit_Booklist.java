@@ -106,10 +106,13 @@ public class Dialog_edit_Booklist extends JDialog {
 		int breite = 100;
 
 		// Bild anzeigen
-		ImageIcon img = showImg(eintrag);
-		if (img != null) {
-			lbl_pic = new JLabel(img);
-			lbl_pic.setPreferredSize(new Dimension(150,10));
+		ImageIcon imgIcn = showImg(eintrag);
+		if (imgIcn != null) {
+			Image img = imgIcn.getImage();
+			Image newimg = img.getScaledInstance(180, 200,  java.awt.Image.SCALE_SMOOTH);
+			imgIcn = new ImageIcon(newimg);
+			lbl_pic = new JLabel(imgIcn);
+			lbl_pic.setPreferredSize(new Dimension(160,280));
 			lbl_pic.addMouseListener(new MouseAdapter() {
 
 				@Override

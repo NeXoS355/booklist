@@ -29,9 +29,10 @@ public class HandleWebInfo {
 		boolean ret = false;
 		try {
 			String titel = eintrag.getTitel().replace(" ", "+");
+			String autor = eintrag.getAutor().replace(" ", "+");
 
 			// Die URL der REST-API
-			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=intitle:" + titel
+			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + titel + autor
 					+ "&maxResults=2&printType=books";
 
 //			System.out.println(apiUrl);
