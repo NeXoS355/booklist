@@ -1,5 +1,6 @@
 package application;
 
+import java.awt.Image;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -11,7 +12,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Blob;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
 import data.Database;
@@ -21,7 +26,7 @@ import com.google.gson.JsonParser;
 public class HandleWebInfo {
 
 	public static boolean DownloadWebPage(Book_Booklist eintrag) {
-
+		boolean ret = false;
 		try {
 			String titel = eintrag.getTitel().replace(" ", "+");
 
@@ -29,7 +34,7 @@ public class HandleWebInfo {
 			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=intitle:" + titel
 					+ "&maxResults=2&printType=books";
 
-			System.out.println(apiUrl);
+//			System.out.println(apiUrl);
 
 			// HttpURLConnection erstellen
 			URL url = new URL(apiUrl);
@@ -42,7 +47,7 @@ public class HandleWebInfo {
 			int responseCode = connection.getResponseCode();
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				// InputStream lesen und in einen String umwandeln
-				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"UTF-8"));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 				StringBuilder response = new StringBuilder();
 				String line;
 				while ((line = reader.readLine()) != null) {
@@ -79,7 +84,7 @@ public class HandleWebInfo {
 								}
 								if (volumeInfo.has("description")) {
 									String description = volumeInfo.get("description").getAsString();
-									System.out.println("Description: " + description);
+									eintrag.setDesc(description);
 									Database.addDesc(eintrag.getAutor(), eintrag.getTitel(), description);
 								} else {
 									System.out.println("Description nicht gefunden.");
@@ -100,8 +105,8 @@ public class HandleWebInfo {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		return false;
+		ret = true;
+		return ret;
 
 	}
 
@@ -110,7 +115,7 @@ public class HandleWebInfo {
 
 	}
 
-	public static void savePic(String weblink, Book_Booklist eintrag) {
+	public static boolean savePic(String weblink, Book_Booklist eintrag) {
 		BufferedInputStream in;
 		try {
 			URL url = new URL(weblink);
@@ -139,8 +144,21 @@ public class HandleWebInfo {
 				file.delete();
 				System.out.println("Temp File deleted");
 			}
-			JOptionPane.showMessageDialog(null,
-					"Bild erfolgreich importiert. Das Bild wird nach dem Neustart angezeigt.");
+			ResultSet rs = Database.getPic(eintrag.getAutor(), eintrag.getTitel());
+			try {
+				while (rs.next()) {
+					Blob picture = rs.getBlob("pic");
+					Image buf_pic = null;
+					if (picture != null) {
+						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
+						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
+					}
+					eintrag.setPic(buf_pic);
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -153,6 +171,7 @@ public class HandleWebInfo {
 			}
 
 		}
+		return true;
 	}
 
 }

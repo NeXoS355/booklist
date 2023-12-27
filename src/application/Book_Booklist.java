@@ -151,7 +151,7 @@ public class Book_Booklist {
 		return pic;
 	}
 
-	public void setPic(BufferedImage pic) {
+	public void setPic(Image pic) {
 		this.pic = pic;
 	}
 

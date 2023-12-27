@@ -55,6 +55,7 @@ public class Dialog_edit_Booklist extends JDialog {
 	private RoundJTextField txt_merk;
 	private RoundJTextField txt_serie;
 	private RoundJTextField txt_seriePart;
+	private JLabel lbl_pic;
 	private Font standardFont = new Font("standard", Font.BOLD, 14);
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
@@ -104,33 +105,10 @@ public class Dialog_edit_Booklist extends JDialog {
 		int höhe = 60;
 		int breite = 100;
 
-//		BufferedImage image = null;
-//		JButton btn_browseAuthor = new JButton();
-//		try {
-//			image = ImageIO.read(getClass().getResource("/resources/amazon.png"));
-//			btn_browseAuthor.setIcon(new ImageIcon(image));
-//		} catch (IOException e1) {
-//			e1.printStackTrace();
-//		}
-//
-//		btn_browseAuthor.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent arg0) {
-//				try {
-//					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+");
-//					openWebpage(new URI(amazonUrl));
-//				} catch (URISyntaxException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//		panel_east_grid.add(btn_browseAuthor);
-
 		// Bild anzeigen
 		ImageIcon img = showImg(eintrag);
 		if (img != null) {
-			JLabel lbl_pic = new JLabel(img);
+			lbl_pic = new JLabel(img);
 			lbl_pic.setPreferredSize(new Dimension(150,10));
 			lbl_pic.addMouseListener(new MouseAdapter() {
 
@@ -159,7 +137,8 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
 							if (webpage != null && webpage != "") {
-								HandleWebInfo.DownloadWebPage(eintrag);
+								HandleWebInfo.DownloadWebPage(eintrag);	
+								lbl_pic = new JLabel(showImg(eintrag));
 							}
 						}
 					});
@@ -189,9 +168,12 @@ public class Dialog_edit_Booklist extends JDialog {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					//HandleImage.getImage(eintrag);
-
-					HandleWebInfo.DownloadWebPage(eintrag);
+					boolean downloaded = HandleWebInfo.DownloadWebPage(eintrag);
+					if (downloaded) {
+						btn_downloadInfo.setText("Downloaded!");
+						btn_downloadInfo.setEnabled(false);
+					}
+					
 				}
 			});
 			panel_east_border.add(btn_downloadInfo, BorderLayout.CENTER);
@@ -199,37 +181,6 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		JLabel lbl_datum = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
 		panel_north.add(lbl_datum);
-
-//		// empty Label amazon Button
-//		JLabel lbl_emptySearch1 = new JLabel("");
-//		panel_east_grid.add(lbl_emptySearch1);
-//		JLabel lbl_emptySearch2 = new JLabel("");
-//		panel_east_grid.add(lbl_emptySearch2);
-//		// End empty Label
-//
-//		JButton btn_browseSeries = new JButton();
-//		btn_browseSeries.setIcon(new ImageIcon(image));
-//		btn_browseSeries.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent arg0) {
-//				try {
-//					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+") + "+"
-//							+ txt_serie.getText().replaceAll(" ", "+");
-//					openWebpage(new URI(amazonUrl));
-//				} catch (URISyntaxException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//		panel_east_grid.add(btn_browseSeries);
-
-		// Empty Panel top Gap
-//		JLabel lbl_empty1 = new JLabel("");
-//		lbl_empty1.setFont(standardFont);
-//		lbl_empty1.setPreferredSize(new Dimension(breite, 10));
-//		panel_north.add(lbl_empty1);
-		// Ende topGap
 
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(standardFont);

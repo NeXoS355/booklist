@@ -339,6 +339,21 @@ public class Database {
 		}
 
 	}
+	
+	public static ResultSet getPic(String autor, String titel) {
+		ResultSet rs = null;
+		String sql = "SELECT * FROM bücher WHERE autor=? and titel=?";
+		try {
+			PreparedStatement pst = con.prepareStatement(sql);
+			pst.setString(1, autor);
+			pst.setString(2, titel);
+			rs = pst.executeQuery();
+		} catch (SQLException e) {
+			System.out.println("Fehler beim auslesen des Bildes");
+			e.printStackTrace();
+		}
+		return rs;
+	}
 
 	public static void addDesc(String autor, String titel, String desc) {
 		String sql = "update bücher set description=? where autor=? and titel=?";
