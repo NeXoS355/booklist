@@ -29,13 +29,12 @@ public class HandleWebInfo {
 		boolean ret = false;
 		try {
 			String titel = eintrag.getTitel().replace(" ", "+");
-			String autor = eintrag.getAutor().replace(" ", "+");
+//			String autor = eintrag.getAutor().replace(" ", "+");
 
 			// Die URL der REST-API
-			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + titel + autor
-					+ "&maxResults=2&printType=books";
+			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + titel + "&maxResults=2&printType=books";
 
-//			System.out.println(apiUrl);
+			System.out.println(apiUrl);
 
 			// HttpURLConnection erstellen
 			URL url = new URL(apiUrl);
@@ -89,15 +88,19 @@ public class HandleWebInfo {
 									Database.addDesc(eintrag.getAutor(), eintrag.getTitel(), description);
 								} else {
 									System.out.println("Description nicht gefunden.");
+									i++;
 								}
 							} else {
 								System.out.println("Feld 'volumeInfo' nicht gefunden.");
+								i++;
 							}
 						} else {
 							System.out.println("Keine Elemente in 'items' gefunden.");
+							i++;
 						}
 					} else {
 						System.out.println("Feld 'items' nicht gefunden.");
+						i++;
 					}
 				}
 			}

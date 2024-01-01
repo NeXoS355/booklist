@@ -30,6 +30,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import application.Book_Booklist;
+import application.HandleWebInfo;
 import application.BookListModel;
 
 public class Dialog_add_Booklist extends JDialog {
@@ -56,7 +57,7 @@ public class Dialog_add_Booklist extends JDialog {
 	public Dialog_add_Booklist(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 365));
-		this.setLocation(200, 200);
+		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 		this.setAlwaysOnTop(true);
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
@@ -444,7 +445,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 		this.add(panel_west, BorderLayout.WEST);
 		this.add(panel_center, BorderLayout.CENTER);
-		this.add(panel_south, BorderLayout.SOUTH);		
+		this.add(panel_south, BorderLayout.SOUTH);
 		this.add(new JLabel(""), BorderLayout.NORTH); // oberer Abstand vom JFrame
 
 		this.setVisible(true);
@@ -460,6 +461,7 @@ public class Dialog_add_Booklist extends JDialog {
 	public void addBuch() {
 		try {
 			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
+				Book_Booklist book = null;
 				String autor = txt_author.getText();
 				String titel = txt_title.getText();
 				String bemerkung = txt_merk.getText();
@@ -468,14 +470,21 @@ public class Dialog_add_Booklist extends JDialog {
 				Timestamp datum = new Timestamp(System.currentTimeMillis());
 				if (checkInput(autor, titel)) {
 					if (check_an.isSelected()) {
-						Mainframe.einträge.add(new Book_Booklist(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,
-								seriePart, null, null, datum, true));
+						book = new Book_Booklist(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,
+								seriePart, null, null, datum, true);
+						Mainframe.einträge.add(book);
 					} else if (check_von.isSelected()) {
-						Mainframe.einträge.add(new Book_Booklist(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,
-								seriePart, null, null, datum, true));
-					} else
-						Mainframe.einträge
-								.add(new Book_Booklist(autor, titel, bemerkung, serie, seriePart, null, null, false, datum, true));
+						book = new Book_Booklist(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,
+								seriePart, null, null, datum, true);
+						Mainframe.einträge.add(book);
+					} else {
+						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, null, null, false, datum,
+								true);
+						Mainframe.einträge.add(book);
+					}
+					if (Mainframe.autoDownload == 1)
+						HandleWebInfo.DownloadWebPage(book);
+
 					dispose();
 				} else {
 					txt_title.setText("Buch bereits vorhanden!");

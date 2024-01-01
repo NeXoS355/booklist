@@ -12,8 +12,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -58,7 +62,9 @@ public class Mainframe extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	Font schrift = new Font("Roboto", Font.BOLD, 16);
+	public static int autoDownload = 1;
+	public static Font schrift = new Font("Roboto", Font.BOLD, 14);
+	public static Font descSchrift = new Font("Roboto", Font.PLAIN, 16);
 	private static JTable table = new JTable();
 	public static BookListModel einträge;
 	private static DefaultListModel<Book_Booklist> filter;
@@ -72,15 +78,17 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.4.2  (01.2024)  ";
+	private String version = "Ver. 2.4.3  (01.2024)  ";
 	private int pressedVersionCount = 0;
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
-		
+
 		this.setLayout(new BorderLayout(10, 10));
 		this.setLocation(100, 100);
 		this.setSize(1300, 1000);
+		this.setResizable(true);
+		readConfig();
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
@@ -192,7 +200,7 @@ public class Mainframe extends JFrame {
 					copyFilesInDirectory(new File("BooklistDB"), new File("Sicherung/" + StrTime + "/BooklistDB"));
 					copyFileToDirectory(new File("derby.log"), new File("Sicherung/" + StrTime));
 					JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
-					
+
 				} catch (IOException e1) {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen.");
@@ -209,7 +217,7 @@ public class Mainframe extends JFrame {
 		});
 		JMenuItem wishlist = new JMenuItem("Wunschliste");
 		wishlist.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				new wishlist();
@@ -217,25 +225,51 @@ public class Mainframe extends JFrame {
 		});
 		JMenuItem dbVersion = new JMenuItem("DB Version");
 		dbVersion.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "Apache Derby 10.16.1.1 (May 19, 2022)");
+				String text = Database.readCurrentLayoutVersion() + "\nApache Derby 10.16.1.1 (May 19, 2022)";
+				JOptionPane.showMessageDialog(null, text);
 			}
 		});
 		JMenuItem ExcelExport = new JMenuItem("CSV Export");
 		ExcelExport.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int check = Database.CSVExport();
-				if(check == 1) {
+				if (check == 1) {
 					JOptionPane.showMessageDialog(null, "Liste erfolgreich exportiert!");
 				} else {
 					JOptionPane.showMessageDialog(null, "Datei konnte nicht geschrieben werden!");
 				}
 			}
 		});
+//		JMenuItem settings = new JMenuItem("Einstellungen");
+//		settings.addActionListener(new ActionListener() {
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				JDialog settings = new JDialog();
+//				settings.setTitle("Einstellungen");
+//				settings.setModal(true);
+//				settings.setLayout(new GridBagLayout());
+//				GridBagConstraints c = new GridBagConstraints();
+//				c.fill = GridBagConstraints.HORIZONTAL;
+//				c.gridx = 0;
+//				c.gridy = 0;
+//
+//				Integer[] settings_fontSizes = new Integer[4];
+//				settings_fontSizes[0] = 12;
+//				settings_fontSizes[1] = 14;
+//				settings_fontSizes[2] = 16;
+//				settings_fontSizes[3] = 18;
+//				JComboBox cmb_fontSize = new JComboBox(settings_fontSizes);
+//				settings.add(cmb_fontSize);
+//
+//				settings.setVisible(true);
+//			}
+//		});
 
 		menue.add(datei);
 		datei.add(wishlist);
@@ -250,17 +284,17 @@ public class Mainframe extends JFrame {
 		lblVersion.setFont(newLabelFont);
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblVersion.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				pressedVersionCount = 0;
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				pressedVersionCount = 0;
 			}
-			
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				pressedVersionCount++;
@@ -270,12 +304,12 @@ public class Mainframe extends JFrame {
 			}
 		});
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
-		
+
 		table.setModel(anzeige);
 		table.setFont(schrift);
 		table.setShowVerticalLines(false);
 		table.setSelectionBackground(Color.LIGHT_GRAY);
-		table.setRowHeight(table.getRowHeight()+6);
+		table.setRowHeight(table.getRowHeight() + 6);
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -354,7 +388,7 @@ public class Mainframe extends JFrame {
 		JPanel pnl_mid = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		pnl_mid.add(listScrollPane,BorderLayout.CENTER);
+		pnl_mid.add(listScrollPane, BorderLayout.CENTER);
 
 		rootNode.removeAllChildren();
 		BookListModel.autorenPrüfen();
@@ -417,12 +451,69 @@ public class Mainframe extends JFrame {
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,treeScrollPane,listScrollPane);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, listScrollPane);
 		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
 		updateModel();
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setVisible(true);
+	}
+
+	private void readConfig() {
+
+		File f = new File("config.conf");
+		if (f.exists() && !f.isDirectory()) {
+			try (BufferedReader br = new BufferedReader(new FileReader("config.conf"))) {
+				StringBuilder sb = new StringBuilder();
+				String line = br.readLine();
+
+				while (line != null) {
+					sb.append(line);
+					sb.append(System.lineSeparator());
+					line = br.readLine();
+				}
+				String everything = sb.toString();
+				String[] settings = everything.split("\n");
+				String value = "";
+				String setting = "";
+				int size = 14;
+
+				for (int i = 0; i < settings.length; i++) {
+					setting = settings[i].split("=")[0];
+					value = settings[i].split("=")[1];
+					
+					switch (setting) {
+					case "fontSize":
+						size = Integer.parseInt(value.trim());
+						schrift = new Font("Roboto", Font.BOLD, size);
+					case "descFontSize":
+						size = Integer.parseInt(value.trim());
+						descSchrift = new Font("Roboto", Font.PLAIN, size);
+					case "autoDownload":
+							autoDownload= Integer.parseInt(value.trim());						
+					}
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Fehler in der config: Falsches Format - erwartet integer" );
+			}
+		} else {
+			try (PrintWriter out = new PrintWriter("config.conf")) {
+				out.println("fontSize=16");
+				out.println("descFontSize=16");
+				out.println("autoDownload=0");
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	public static void deleteBuch() {
@@ -432,7 +523,8 @@ public class Mainframe extends JFrame {
 			String searchTitel = (String) table.getValueAt(selected[i], 1);
 			int index = einträge.getIndexOf(searchAutor, searchTitel);
 			if (selected.length != 0) {
-				int antwort = JOptionPane.showConfirmDialog(null, "Wirklich '" + searchAutor + " - " + searchTitel + "' löschen?", "Löschen",
+				int antwort = JOptionPane.showConfirmDialog(null,
+						"Wirklich '" + searchAutor + " - " + searchTitel + "' löschen?", "Löschen",
 						JOptionPane.YES_NO_OPTION);
 				if (antwort == JOptionPane.YES_OPTION) {
 					einträge.delete(index);
@@ -456,17 +548,17 @@ public class Mainframe extends JFrame {
 			String autor = BookListModel.autoren.get(i);
 			autorNode = new DefaultMutableTreeNode(autor);
 			treeModel.insertNodeInto(autorNode, rootNode, i);
-			if(BookListModel.hatAutorSerie(autor)) {
+			if (BookListModel.hatAutorSerie(autor)) {
 				try {
 					String[] serien = BookListModel.getSerienVonAutor(autor);
-					for (int j = 0;j < serien.length;j++) {
+					for (int j = 0; j < serien.length; j++) {
 						serieNode = new DefaultMutableTreeNode(serien[j]);
 						treeModel.insertNodeInto(serieNode, autorNode, j);
 					}
-				} catch(NullPointerException e) {
+				} catch (NullPointerException e) {
 					System.out.println("Mainframe Keine Serie gefunden zu " + autor);
 				}
- 
+
 			}
 
 		}
@@ -559,9 +651,9 @@ public class Mainframe extends JFrame {
 				filter.addElement(einträge.getElementAt(i));
 			}
 		}
-		if (filter.getSize()>0) {
-		anzeige = new SimpleTableModel(filter);
-		table.setModel(anzeige);
+		if (filter.getSize() > 0) {
+			anzeige = new SimpleTableModel(filter);
+			table.setModel(anzeige);
 		} else {
 			JOptionPane.showMessageDialog(null, "Es gab leider keine Treffer!");
 		}

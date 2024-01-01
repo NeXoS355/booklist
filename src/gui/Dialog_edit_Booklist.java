@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -33,6 +32,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -56,8 +56,6 @@ public class Dialog_edit_Booklist extends JDialog {
 	private RoundJTextField txt_serie;
 	private RoundJTextField txt_seriePart;
 	private JLabel lbl_pic;
-	private Font standardFont = new Font("standard", Font.BOLD, 14);
-	private Font descFont = new Font("Serif", Font.PLAIN, 16);
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
@@ -65,8 +63,9 @@ public class Dialog_edit_Booklist extends JDialog {
 			DefaultMutableTreeNode rootNode) {
 		
 		this.setTitle("Buch bearbeiten");
+		this.setResizable(true);
 		this.setSize(new Dimension(500, 405));
-		this.setLocation(200, 200);
+		this.setLocation(Mainframe.getInstance().getX()+500, Mainframe.getInstance().getY()+200);
 		this.setAlwaysOnTop(true);
 
 		Book_Booklist eintrag = einträge.getElementAt(index);
@@ -190,12 +189,12 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_north.add(lbl_datum);
 
 		JLabel lbl_author = new JLabel("Autor:");
-		lbl_author.setFont(standardFont);
+		lbl_author.setFont(Mainframe.schrift);
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_author);
 
 		txt_author = new RoundJTextField(eintrag.getAutor());
-		txt_author.setFont(standardFont);
+		txt_author.setFont(Mainframe.schrift);
 		txt_author.setPreferredSize(new Dimension(50, höhe));
 		txt_author.setBorder(standardBorder);
 		txt_author.addKeyListener(new KeyAdapter() {
@@ -235,12 +234,12 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_center.add(txt_author, center_c);
 
 		JLabel lbl_title = new JLabel("Titel:");
-		lbl_title.setFont(standardFont);
+		lbl_title.setFont(Mainframe.schrift);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_title);
 
 		txt_title = new RoundJTextField(eintrag.getTitel());
-		txt_title.setFont(standardFont);
+		txt_title.setFont(Mainframe.schrift);
 		txt_title.setPreferredSize(new Dimension(50, höhe));
 		txt_title.setBorder(standardBorder);
 		txt_title.addKeyListener(new KeyAdapter() {
@@ -298,12 +297,12 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_center.add(txt_title, center_c);
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
-		lbl_merk.setFont(standardFont);
+		lbl_merk.setFont(Mainframe.schrift);
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_merk);
 
 		txt_merk = new RoundJTextField(eintrag.getBemerkung());
-		txt_merk.setFont(standardFont);
+		txt_merk.setFont(Mainframe.schrift);
 		txt_merk.setPreferredSize(new Dimension(50, höhe));
 		txt_merk.setBorder(standardBorder);
 		txt_merk.addKeyListener(new KeyAdapter() {
@@ -340,12 +339,12 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_center.add(txt_merk, center_c);
 
 		JLabel lbl_serie = new JLabel("Serie | Band:");
-		lbl_serie.setFont(standardFont);
+		lbl_serie.setFont(Mainframe.schrift);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_serie);
 
 		txt_serie = new RoundJTextField(eintrag.getSerie());
-		txt_serie.setFont(standardFont);
+		txt_serie.setFont(Mainframe.schrift);
 		txt_serie.setPreferredSize(new Dimension(50, höhe));
 		txt_serie.setBorder(standardBorder);
 		txt_serie.addKeyListener(new KeyAdapter() {
@@ -383,7 +382,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_center.add(txt_serie, center_c);
 
 		txt_seriePart = new RoundJTextField(eintrag.getSeriePart());
-		txt_seriePart.setFont(standardFont);
+		txt_seriePart.setFont(Mainframe.schrift);
 		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
 		txt_seriePart.setBorder(standardBorder);
 		txt_seriePart.addKeyListener(new KeyAdapter() {
@@ -424,7 +423,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_center.add(txt_seriePart, center_c);
 
 		check_von = new JCheckBox("ausgeliehen von");
-		check_von.setFont(standardFont);
+		check_von.setFont(Mainframe.schrift);
 		if (!eintrag.getAusgeliehen_von().isEmpty())
 			check_von.setSelected(true);
 		check_von.addActionListener(new ActionListener() {
@@ -445,7 +444,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_south.add(check_von);
 
 		check_an = new JCheckBox("ausgeliehen an");
-		check_an.setFont(standardFont);
+		check_an.setFont(Mainframe.schrift);
 		if (!eintrag.getAusgeliehen_an().isEmpty())
 			check_an.setSelected(true);
 		check_an.addActionListener(new ActionListener() {
@@ -465,7 +464,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_south.add(check_an);
 
 		txt_leihVon = new RoundJTextField(eintrag.getAusgeliehen_von());
-		txt_leihVon.setFont(standardFont);
+		txt_leihVon.setFont(Mainframe.schrift);
 		txt_leihVon.setBorder(standardBorder);
 		if (eintrag.getAusgeliehen_von().isEmpty())
 			txt_leihVon.setVisible(false);
@@ -498,7 +497,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_south.add(txt_leihVon);
 
 		txt_leihAn = new RoundJTextField(eintrag.getAusgeliehen_an());
-		txt_leihAn.setFont(standardFont);
+		txt_leihAn.setFont(Mainframe.schrift);
 		txt_leihAn.setBorder(standardBorder);
 		if (eintrag.getAusgeliehen_an().isEmpty())
 			txt_leihAn.setVisible(false);
@@ -552,13 +551,15 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_south.add(btn_abort);
 		
 		JLabel lbl_desc = new JLabel();
-		lbl_desc.setFont(descFont);
+		lbl_desc.setFont(Mainframe.descSchrift);
 		if (eintrag.getDesc() != null) {
 			lbl_desc.setText("<html>" + eintrag.getDesc() + "</html");
-			int anz_zeichen = eintrag.getDesc().length();
-			int heigth = anz_zeichen/3;
+//			int anz_zeichen = eintrag.getDesc().length();
+//			System.out.println("Zeichen: " + anz_zeichen);
+			lbl_desc.setVerticalAlignment(SwingConstants.TOP);
+			int heigth = Mainframe.descSchrift.getSize() * 40;
 			lbl_desc.setPreferredSize(new Dimension(120,heigth));
-			this.setSize(new Dimension(500, 405+heigth));
+			this.setSize(new Dimension(500, (405+heigth)));
 		}
 		
 		lbl_desc.addMouseListener(new MouseAdapter() {
