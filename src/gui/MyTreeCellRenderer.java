@@ -17,10 +17,10 @@ public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
         openIcon = createImageIcon("resources/User.png"); 
         closedIcon = createImageIcon("resources/User.png");
         textNonSelectionColor=Color.BLACK;
-        textSelectionColor=Color.BLACK;
+        textSelectionColor=Color.WHITE;
         backgroundNonSelectionColor=Color.WHITE;
-        backgroundSelectionColor=Color.LIGHT_GRAY;
-        borderSelectionColor=Color.DARK_GRAY;
+        backgroundSelectionColor=Color.DARK_GRAY;
+        borderSelectionColor=Color.BLACK;
         setFont(new Font("Roboto", Font.PLAIN, 16));
     } 
 	

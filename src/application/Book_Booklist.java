@@ -1,7 +1,6 @@
 package application;
 
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
@@ -19,10 +18,11 @@ public class Book_Booklist {
 	private String seriePart;
 	private Image pic;
 	private String desc;
+	private String isbn;
 	private Timestamp datum;
 
 	public Book_Booklist(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
-			String bemerkung, String serie,String seriePart, Image pic, String desc,Timestamp datum, boolean db) throws SQLException {
+			String bemerkung, String serie,String seriePart, Image pic, String desc, String isbn,Timestamp datum, boolean db) throws SQLException {
 		super();
 		this.autor = autor;
 		this.titel = titel;
@@ -32,6 +32,7 @@ public class Book_Booklist {
 		this.seriePart = seriePart;
 		this.pic = pic;
 		this.desc = desc;
+		this.isbn = isbn;
 		this.datum = datum;
 		if (ausgeliehen) {
 			this.ausgeliehen_an = ausgeliehen_an;
@@ -51,8 +52,8 @@ public class Book_Booklist {
 		}
 	}
 
-	public Book_Booklist(String autor, String titel, String bemerkung, String serie,String seriePart, Image pic, String desc, boolean ausgeliehen,Timestamp datum, boolean db) throws SQLException {
-		this(autor, titel, ausgeliehen, "", "", bemerkung, serie, seriePart, pic, desc, datum, db);
+	public Book_Booklist(String autor, String titel, String bemerkung, String serie,String seriePart, Image pic, String desc,String isbn, Timestamp datum, boolean db) throws SQLException {
+		this(autor, titel, false, "", "", bemerkung, serie, seriePart, pic, desc, isbn, datum, db);
 	}
 
 	@Override
@@ -177,6 +178,14 @@ public class Book_Booklist {
 
 	public void setDesc(String desc) {
 		this.desc = desc;
+	}
+
+	public String getIsbn() {
+		return isbn;
+	}
+
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
 	}
 	
 	

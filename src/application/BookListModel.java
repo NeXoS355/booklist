@@ -39,6 +39,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					Timestamp datum = rs.getTimestamp("date");
 					Blob picture = rs.getBlob("pic");
 					String desc = rs.getString("description");
+					String isbn = rs.getString("isbn");
 					Image buf_pic = null;
 					if (picture != null) {
 						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
@@ -48,14 +49,14 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						ausgeliehen = true;
 						String ausgeliehen_an = rs.getString("name").trim();
 						getBücher().add(new Book_Booklist(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung, serie, seriePart,
-								buf_pic,desc, datum, false));
+								buf_pic,desc,isbn, datum, false));
 					} else if (rs.getString(3).equals("von")) {
 						ausgeliehen = true;
 						String ausgeliehen_von = rs.getString("name").trim();
 						getBücher().add(new Book_Booklist(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung, serie, seriePart,
-								buf_pic,desc, datum, false));
+								buf_pic,desc,isbn, datum, false));
 					} else {
-						getBücher().add(new Book_Booklist(autor, titel, bemerkung, serie, seriePart, buf_pic, desc, ausgeliehen, datum,
+						getBücher().add(new Book_Booklist(autor, titel, bemerkung, serie, seriePart, buf_pic, desc, isbn, datum,
 								false));
 					}
 				} catch (DateTimeParseException ex1) {

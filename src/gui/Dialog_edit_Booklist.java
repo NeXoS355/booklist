@@ -32,6 +32,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -64,7 +67,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		
 		this.setTitle("Buch bearbeiten");
 		this.setResizable(true);
-		this.setSize(new Dimension(500, 405));
+		this.setSize(new Dimension(500, 605));
 		this.setLocation(Mainframe.getInstance().getX()+500, Mainframe.getInstance().getY()+200);
 		this.setAlwaysOnTop(true);
 
@@ -78,7 +81,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		this.setLayout(new BorderLayout(10, 10));
 
 		JPanel panel_north = new JPanel();
-		panel_north.setLayout(new GridLayout(1, 1));
+		panel_north.setLayout(new GridLayout(1, 2));
 
 		JPanel panel_west = new JPanel();
 		panel_west.setLayout(new GridLayout(4, 1, 10, 20));
@@ -109,7 +112,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		ImageIcon imgIcn = showImg(eintrag);
 		if (imgIcn != null) {
 			Image img = imgIcn.getImage();
-			Image newimg = img.getScaledInstance(180, 200,  java.awt.Image.SCALE_SMOOTH);
+			Image newimg = img.getScaledInstance(128, 192,  java.awt.Image.SCALE_SMOOTH);
 			imgIcn = new ImageIcon(newimg);
 			lbl_pic = new JLabel(imgIcn);
 			lbl_pic.setPreferredSize(new Dimension(160,280));
@@ -187,6 +190,9 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		JLabel lbl_datum = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
 		panel_north.add(lbl_datum);
+		
+		JLabel lbl_isbn = new JLabel("ISBN: " + eintrag.getIsbn(),SwingConstants.RIGHT);
+		panel_north.add(lbl_isbn);
 
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.schrift);
@@ -550,19 +556,18 @@ public class Dialog_edit_Booklist extends JDialog {
 		});
 		panel_south.add(btn_abort);
 		
-		JLabel lbl_desc = new JLabel();
-		lbl_desc.setFont(Mainframe.descSchrift);
-		if (eintrag.getDesc() != null) {
-			lbl_desc.setText("<html>" + eintrag.getDesc() + "</html");
-//			int anz_zeichen = eintrag.getDesc().length();
-//			System.out.println("Zeichen: " + anz_zeichen);
-			lbl_desc.setVerticalAlignment(SwingConstants.TOP);
-			int heigth = Mainframe.descSchrift.getSize() * 40;
-			lbl_desc.setPreferredSize(new Dimension(120,heigth));
-			this.setSize(new Dimension(500, (405+heigth)));
-		}
-		
-		lbl_desc.addMouseListener(new MouseAdapter() {
+		JTextArea txt_desc = new JTextArea(10,30);
+		txt_desc.setText(eintrag.getDesc());
+		txt_desc.setEnabled(false);
+		txt_desc.setLineWrap(true);
+		txt_desc.setWrapStyleWord(true);
+		txt_desc.setFont(Mainframe.descSchrift);
+		txt_desc.setDisabledTextColor(Color.BLACK);
+		this.setSize(this.getWidth(), this.getHeight()+(Mainframe.descSchrift.getSize()-16)*14);
+		JScrollPane scroll_desc = new JScrollPane(txt_desc, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+		txt_desc.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -576,7 +581,7 @@ public class Dialog_edit_Booklist extends JDialog {
 				JPopupMenu menu = new JPopupMenu();
 				JMenuItem itemDelDesc = new JMenuItem("Beschreibung löschen");
 				menu.add(itemDelDesc);
-				menu.show(lbl_desc, e.getX(), e.getY());
+				menu.show(txt_desc, e.getX(), e.getY());
 				itemDelDesc.addActionListener(new ActionListener() {
 
 					@Override
@@ -596,8 +601,8 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			}
 		});
-
-		panel_south_border.add(lbl_desc, BorderLayout.SOUTH);
+		
+		panel_south_border.add(scroll_desc, BorderLayout.SOUTH);
 		panel_south_border.add(panel_south,BorderLayout.CENTER);
 
 		this.add(panel_north, BorderLayout.NORTH);

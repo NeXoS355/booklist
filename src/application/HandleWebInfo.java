@@ -82,6 +82,14 @@ public class HandleWebInfo {
 									System.out.println("ImageLink nicht gefunden.");
 									i++;
 								}
+								if (volumeInfo.has("industryIdentifiers")) {
+									var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
+									var isbnidentifiers13 = isbnidentifiers.get(0).getAsJsonObject();
+									if (isbnidentifiers13.has("identifier")) {
+										String isbn = isbnidentifiers13.get("identifier").getAsString();
+										saveIsbn(isbn, eintrag);
+									}
+								}
 								if (volumeInfo.has("description")) {
 									String description = volumeInfo.get("description").getAsString();
 									eintrag.setDesc(description);
@@ -175,6 +183,12 @@ public class HandleWebInfo {
 			}
 
 		}
+		return true;
+	}
+	
+	private static boolean saveIsbn(String isbn, Book_Booklist eintrag) {
+		Database.addIsbn(eintrag.getAutor(), eintrag.getTitel(), isbn);
+		eintrag.setIsbn(isbn);
 		return true;
 	}
 

@@ -63,7 +63,7 @@ public class Mainframe extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	public static int autoDownload = 1;
-	public static Font schrift = new Font("Roboto", Font.BOLD, 14);
+	public static Font schrift = new Font("Roboto", Font.PLAIN, 14);
 	public static Font descSchrift = new Font("Roboto", Font.PLAIN, 16);
 	private static JTable table = new JTable();
 	public static BookListModel einträge;
@@ -78,8 +78,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.4.3  (01.2024)  ";
-	private int pressedVersionCount = 0;
+	private String version = "Ver. 2.4.4  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -283,32 +282,13 @@ public class Mainframe extends JFrame {
 		Font newLabelFont = new Font(lblVersion.getFont().getName(), Font.BOLD, lblVersion.getFont().getSize());
 		lblVersion.setFont(newLabelFont);
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblVersion.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				pressedVersionCount = 0;
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				pressedVersionCount = 0;
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				pressedVersionCount++;
-				if (pressedVersionCount == 5) {
-					JOptionPane.showMessageDialog(null, Database.readCurrentLayoutVersion());
-				}
-			}
-		});
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
 
 		table.setModel(anzeige);
 		table.setFont(schrift);
 		table.setShowVerticalLines(false);
-		table.setSelectionBackground(Color.LIGHT_GRAY);
+		table.setSelectionBackground(Color.DARK_GRAY);
+		table.setSelectionForeground(Color.WHITE);
 		table.setRowHeight(table.getRowHeight() + 6);
 		table.addMouseListener(new MouseAdapter() {
 
