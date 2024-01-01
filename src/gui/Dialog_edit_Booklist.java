@@ -57,6 +57,7 @@ public class Dialog_edit_Booklist extends JDialog {
 	private RoundJTextField txt_seriePart;
 	private JLabel lbl_pic;
 	private Font standardFont = new Font("standard", Font.BOLD, 14);
+	private Font descFont = new Font("Serif", Font.PLAIN, 16);
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
@@ -151,9 +152,10 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							boolean state = HandleWebInfo.deletePic(txt_author.getText(), txt_title.getText());
 							if (state == true) {
-								JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
+								//JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
 								eintrag.setPic(null);
 								dispose();
+								new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
 							} else {
 								JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten");
 							}
@@ -175,6 +177,8 @@ public class Dialog_edit_Booklist extends JDialog {
 					if (downloaded) {
 						btn_downloadInfo.setText("Downloaded!");
 						btn_downloadInfo.setEnabled(false);
+						dispose();
+						new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
 					}
 					
 				}
@@ -548,13 +552,49 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_south.add(btn_abort);
 		
 		JLabel lbl_desc = new JLabel();
+		lbl_desc.setFont(descFont);
 		if (eintrag.getDesc() != null) {
 			lbl_desc.setText("<html>" + eintrag.getDesc() + "</html");
 			int anz_zeichen = eintrag.getDesc().length();
-			int heigth = anz_zeichen/5;
+			int heigth = anz_zeichen/3;
 			lbl_desc.setPreferredSize(new Dimension(120,heigth));
 			this.setSize(new Dimension(500, 405+heigth));
 		}
+		
+		lbl_desc.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (SwingUtilities.isRightMouseButton(e)) {
+					e.getPoint();
+					showMenu(e);
+				}
+			}
+
+			private void showMenu(MouseEvent e) {
+				JPopupMenu menu = new JPopupMenu();
+				JMenuItem itemDelDesc = new JMenuItem("Beschreibung löschen");
+				menu.add(itemDelDesc);
+				menu.show(lbl_desc, e.getX(), e.getY());
+				itemDelDesc.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						boolean state = Database.delDesc(txt_author.getText(), txt_title.getText());
+						if (state == true) {
+							//JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich gelöscht");
+							eintrag.setDesc(null);
+							dispose();
+							new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+						} else {
+							JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten");
+						}
+					}
+
+				});
+
+			}
+		});
 
 		panel_south_border.add(lbl_desc, BorderLayout.SOUTH);
 		panel_south_border.add(panel_south,BorderLayout.CENTER);
