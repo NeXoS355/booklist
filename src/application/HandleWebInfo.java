@@ -25,14 +25,13 @@ import com.google.gson.JsonParser;
 
 public class HandleWebInfo {
 
-	public static boolean DownloadWebPage(Book_Booklist eintrag) {
+	public static boolean DownloadWebPage(Book_Booklist eintrag, int maxResults) {
 		boolean ret = false;
 		try {
 			String titel = eintrag.getTitel().replace(" ", "+");
-//			String autor = eintrag.getAutor().replace(" ", "+");
 
 			// Die URL der REST-API
-			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + titel + "&maxResults=2&printType=books";
+			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + titel + "&maxResults=" + maxResults + "&printType=books";
 
 			System.out.println(apiUrl);
 
@@ -57,66 +56,7 @@ public class HandleWebInfo {
 
 				// JSON-Antwort in ein JsonObject umwandeln
 				JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
-
-				// Auf den Titel zugreifen
-				int i = 0;
-				int cCover=0;
-				int cDesc=0;
-				int cIsbn=0;
-				while (i < 2 && cCover+cDesc+cIsbn<3) {
-					if (jsonObject.has("items")) {
-						var itemsArray = jsonObject.getAsJsonArray("items");
-						if (itemsArray.size() > 0) {
-							var firstItem = itemsArray.get(i).getAsJsonObject();
-							if (firstItem.has("volumeInfo")) {
-								var volumeInfo = firstItem.getAsJsonObject("volumeInfo");
-								if (volumeInfo.has("imageLinks")) {
-									var imageLinks = volumeInfo.getAsJsonObject("imageLinks");
-									if (imageLinks.has("smallThumbnail")) {
-										cCover=1;
-										String link = imageLinks.get("smallThumbnail").getAsString();
-										System.out.println("Link: " + link);
-										// Downloading Image
-										savePic(link, eintrag);
-									} else {
-										System.out.println("smallThumbnail nicht gefunden");
-									}
-								} else {
-									System.out.println("ImageLink nicht gefunden.");
-									i++;
-								}
-								if (volumeInfo.has("industryIdentifiers")) {
-									cIsbn = 1;
-									var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
-									var isbnidentifiers13 = isbnidentifiers.get(0).getAsJsonObject();
-									if (isbnidentifiers13.has("identifier")) {
-										String isbn = isbnidentifiers13.get("identifier").getAsString();
-										saveIsbn(isbn, eintrag);
-									}
-								}
-								if (volumeInfo.has("description")) {
-									cDesc=1;
-									String description = volumeInfo.get("description").getAsString();
-									eintrag.setDesc(description);
-									Database.addDesc(eintrag.getAutor(), eintrag.getTitel(), description);
-								} else {
-									System.out.println("Description nicht gefunden.");
-									i++;
-								}
-							} else {
-								System.out.println("Feld 'volumeInfo' nicht gefunden.");
-								i++;
-							}
-						} else {
-							System.out.println("Keine Elemente in 'items' gefunden.");
-							i++;
-						}
-					} else {
-						System.out.println("Feld 'items' nicht gefunden.");
-						i++;
-					}
-					i++;
-				}
+				analyseApiRequst(jsonObject, eintrag);
 			}
 			// Verbindung schlie√üen
 			connection.disconnect();
@@ -126,6 +66,80 @@ public class HandleWebInfo {
 		ret = true;
 		return ret;
 
+	}
+
+	private static void analyseApiRequst(JsonObject jsonObject, Book_Booklist eintrag) {
+		// Auf den Titel zugreifen
+		int i = 0;
+		int cCover = 0;
+		int cDesc = 0;
+		int cIsbn = 0;
+		while (i < 2 && cCover + cDesc + cIsbn < 3) {
+			if (jsonObject.has("items")) {
+				var itemsArray = jsonObject.getAsJsonArray("items");
+				if (itemsArray.size() > 0) {
+					var firstItem = itemsArray.get(i).getAsJsonObject();
+					if (firstItem.has("volumeInfo")) {
+						var volumeInfo = firstItem.getAsJsonObject("volumeInfo");
+						if (volumeInfo.has("imageLinks") && cCover == 0) {
+							var imageLinks = volumeInfo.getAsJsonObject("imageLinks");
+							if (imageLinks.has("smallThumbnail")) {
+								cCover = 1;
+								String link = imageLinks.get("smallThumbnail").getAsString();
+								System.out.println("Link: " + link);
+								// Downloading Image
+								savePic(link, eintrag);
+							} else {
+								System.out.println("smallThumbnail nicht gefunden");
+							}
+						} else {
+							System.out.println("ImageLink nicht gefunden.");
+						}
+						if (volumeInfo.has("industryIdentifiers") && cIsbn == 0) {
+							var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
+							for (int j = 0; j < isbnidentifiers.size(); j++) {
+								var isbnidentifiers13 = isbnidentifiers.get(j).getAsJsonObject();
+								if (isbnidentifiers13.has("identifier")) {
+									String type = isbnidentifiers13.get("type").getAsString();
+									if (type.equals("ISBN_13")) {
+										cIsbn = 1;
+										String isbn = isbnidentifiers13.get("identifier").getAsString();
+										saveIsbn(isbn, eintrag);
+									} else {
+										System.out.println("industryIdentifiers nicht gefunden");
+									}
+								}
+							}
+
+						}
+
+						if (volumeInfo.has("description") && cDesc == 0) {
+							cDesc = 1;
+							String description = volumeInfo.get("description").getAsString();
+							eintrag.setDesc(description);
+							Database.addDesc(eintrag.getAutor(), eintrag.getTitel(), description);
+						} else {
+							System.out.println("Description nicht gefunden.");
+						}
+					} else {
+						System.out.println("Feld 'volumeInfo' nicht gefunden.");
+					}
+				} else {
+					System.out.println("Keine Elemente in 'items' gefunden.");
+				}
+			} else {
+				System.out.println("Feld 'items' nicht gefunden.");
+			}
+			i++;
+		}
+		if 	(cCover + cDesc + cIsbn < 3) {
+			int antwort = JOptionPane.showConfirmDialog(null,
+					"Es konnten nicht alle Informationen gefunden werden.\nKriterien erweitern?", "Warnung",
+					JOptionPane.YES_NO_OPTION);
+			if (antwort == JOptionPane.YES_OPTION) {
+				DownloadWebPage(eintrag,5);
+			}
+		}
 	}
 
 	public static boolean deletePic(String autor, String titel) {
@@ -185,13 +199,13 @@ public class HandleWebInfo {
 			e.printStackTrace();
 			weblink = JOptionPane.showInputDialog(null, "Kein Bild gefunden. Bitte manuell einf¸gen");
 			if (weblink != "") {
-				DownloadWebPage(eintrag);
+				DownloadWebPage(eintrag,2);
 			}
 
 		}
 		return true;
 	}
-	
+
 	private static boolean saveIsbn(String isbn, Book_Booklist eintrag) {
 		Database.addIsbn(eintrag.getAutor(), eintrag.getTitel(), isbn);
 		eintrag.setIsbn(isbn);

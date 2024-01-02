@@ -483,7 +483,7 @@ public class Dialog_add_Booklist extends JDialog {
 						Mainframe.einträge.add(book);
 					}
 					if (Mainframe.autoDownload == 1)
-						HandleWebInfo.DownloadWebPage(book);
+						HandleWebInfo.DownloadWebPage(book,2);
 
 					dispose();
 				} else {

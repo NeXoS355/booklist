@@ -176,7 +176,7 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
 							if (webpage != null && webpage != "") {
-								HandleWebInfo.DownloadWebPage(eintrag);	
+								HandleWebInfo.DownloadWebPage(eintrag,2);	
 								lbl_pic = new JLabel(showImg(eintrag));
 							}
 						}
@@ -208,7 +208,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					boolean downloaded = HandleWebInfo.DownloadWebPage(eintrag);
+					boolean downloaded = HandleWebInfo.DownloadWebPage(eintrag,2);
 					if (downloaded) {
 						btn_downloadInfo.setText("Downloaded!");
 						btn_downloadInfo.setEnabled(false);
