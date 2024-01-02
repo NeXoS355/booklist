@@ -22,6 +22,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
@@ -62,6 +64,7 @@ public class Mainframe extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	public static ExecutorService executor = Executors.newFixedThreadPool(10);
 	public static int autoDownload = 0;
 	public static int loadOnDemand = 1;
 	public static Font schrift = new Font("Roboto", Font.PLAIN, 16);
@@ -79,7 +82,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.4.5  (01.2024)  ";
+	private String version = "Ver. 2.4.6  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -88,7 +91,10 @@ public class Mainframe extends JFrame {
 		this.setLocation(100, 100);
 		this.setSize(1300, 1000);
 		this.setResizable(true);
-		readConfig();
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		executor.submit(() -> {
+			readConfig();
+		});
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
@@ -99,10 +105,12 @@ public class Mainframe extends JFrame {
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
-
 		einträge = new BookListModel();
-		filter = new DefaultListModel<Book_Booklist>();
-		anzeige = new SimpleTableModel(einträge);
+		executor.submit(() -> {
+			
+			filter = new DefaultListModel<Book_Booklist>();
+			anzeige = new SimpleTableModel(einträge);
+		});
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(5, 5));
@@ -199,11 +207,13 @@ public class Mainframe extends JFrame {
 					String StrTime = Long.toString(LongTime).substring(0, LongTime.toString().length() - 3);
 					copyFilesInDirectory(new File("BooklistDB"), new File("Sicherung/" + StrTime + "/BooklistDB"));
 					copyFileToDirectory(new File("derby.log"), new File("Sicherung/" + StrTime));
+					copyFileToDirectory(new File("config.conf"), new File("Sicherung/" + StrTime));
+					copyFileToDirectory(new File("Bücherliste.jar"), new File("Sicherung/" + StrTime));
 					JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
 
 				} catch (IOException e1) {
 					e1.printStackTrace();
-					JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen.");
+					JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen oder nicht vollständig.");
 				}
 			}
 		});
@@ -245,34 +255,18 @@ public class Mainframe extends JFrame {
 				}
 			}
 		});
-//		JMenuItem settings = new JMenuItem("Einstellungen");
-//		settings.addActionListener(new ActionListener() {
-//
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				JDialog settings = new JDialog();
-//				settings.setTitle("Einstellungen");
-//				settings.setModal(true);
-//				settings.setLayout(new GridBagLayout());
-//				GridBagConstraints c = new GridBagConstraints();
-//				c.fill = GridBagConstraints.HORIZONTAL;
-//				c.gridx = 0;
-//				c.gridy = 0;
-//
-//				Integer[] settings_fontSizes = new Integer[4];
-//				settings_fontSizes[0] = 12;
-//				settings_fontSizes[1] = 14;
-//				settings_fontSizes[2] = 16;
-//				settings_fontSizes[3] = 18;
-//				JComboBox cmb_fontSize = new JComboBox(settings_fontSizes);
-//				settings.add(cmb_fontSize);
-//
-//				settings.setVisible(true);
-//			}
-//		});
+		JMenuItem settings = new JMenuItem("Einstellungen");
+		settings.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new Dialog_settings();
+			}
+		});
 
 		menue.add(datei);
 		datei.add(wishlist);
+		datei.add(settings);
 		datei.add(backup);
 		datei.add(dbVersion);
 		datei.add(ExcelExport);
@@ -438,6 +432,8 @@ public class Mainframe extends JFrame {
 		updateModel();
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setVisible(true);
+		System.out.println(autoDownload);
+		System.out.println(loadOnDemand);
 	}
 
 	private void readConfig() {
