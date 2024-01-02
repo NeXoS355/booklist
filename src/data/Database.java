@@ -72,7 +72,7 @@ public class Database {
 					"CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
 			createVersions = con.createStatement();
 			createVersions.execute("CREATE TABLE versions (version VARCHAR(10) NOT NULL, date timestamp NOT NULL)");
-			String sql = "INSERT INTO versions (version ,date) VALUES ('2.4.0','" + datum + "')";
+			String sql = "INSERT INTO versions (version ,date) VALUES ('2.4.4','" + datum + "')";
 			pst = con.prepareStatement(sql);
 			pst.execute();
 			pst.close();
