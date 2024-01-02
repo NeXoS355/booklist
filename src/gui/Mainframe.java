@@ -63,6 +63,7 @@ public class Mainframe extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	public static int autoDownload = 1;
+	public static int loadOnDemand = 0;
 	public static Font schrift = new Font("Roboto", Font.PLAIN, 14);
 	public static Font descSchrift = new Font("Roboto", Font.PLAIN, 16);
 	private static JTable table = new JTable();
@@ -78,7 +79,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.4.4  (01.2024)  ";
+	private String version = "Ver. 2.4.5  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -470,7 +471,9 @@ public class Mainframe extends JFrame {
 						size = Integer.parseInt(value.trim());
 						descSchrift = new Font("Roboto", Font.PLAIN, size);
 					case "autoDownload":
-							autoDownload= Integer.parseInt(value.trim());						
+						autoDownload= Integer.parseInt(value.trim());
+					case "loadOnDemand":
+						loadOnDemand= Integer.parseInt(value.trim());
 					}
 				}
 			} catch (FileNotFoundException e) {
@@ -488,6 +491,7 @@ public class Mainframe extends JFrame {
 				out.println("fontSize=16");
 				out.println("descFontSize=16");
 				out.println("autoDownload=0");
+				out.println("loadOnDemand=0");
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -547,7 +551,7 @@ public class Mainframe extends JFrame {
 		tree.setModel(treeModel);
 		tree.revalidate();
 		tree.repaint();
-		System.out.println("Mainframe Node updated");
+//		System.out.println("Mainframe Node updated");
 	}
 
 	public static void copyFilesInDirectory(File from, File to) {
@@ -606,7 +610,7 @@ public class Mainframe extends JFrame {
 	}
 
 	public static void search(String text) {
-		System.out.println("Mainframe search for: " + text);
+//		System.out.println("Mainframe search for: " + text);
 		filter.clear();
 		text = text.toUpperCase();
 		for (int i = 0; i < einträge.getSize(); i++) {

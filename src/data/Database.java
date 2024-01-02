@@ -23,6 +23,7 @@ import application.Book_Booklist;
 public class Database {
 
 	private static Connection con = null;
+	public static int highestBid = 100000;
 
 	public static Connection createConnection() {
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
@@ -66,13 +67,13 @@ public class Database {
 		try {
 			createBooklist = con.createStatement();
 			createBooklist.execute(
-					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),pic blob,description clob (64 M), isbn varchar(13),date timestamp, CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
+					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),pic blob,description clob (64 M), isbn varchar(13),date timestamp,bid numeric(6,0), CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
 			createWishlist = con.createStatement();
 			createWishlist.execute(
 					"CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
 			createVersions = con.createStatement();
 			createVersions.execute("CREATE TABLE versions (version VARCHAR(10) NOT NULL, date timestamp NOT NULL)");
-			String sql = "INSERT INTO versions (version ,date) VALUES ('2.4.4','" + datum + "')";
+			String sql = "INSERT INTO versions (version ,date) VALUES ('2.4.5','" + datum + "')";
 			pst = con.prepareStatement(sql);
 			pst.execute();
 			pst.close();
@@ -117,6 +118,30 @@ public class Database {
 		return rs;
 	}
 
+	public static ResultSet readDbBooklistLite() {
+		ResultSet rs = null;
+		try {
+			Statement st = con.createStatement();
+			rs = st.executeQuery(
+					"SELECT autor,titel,ausgeliehen,name, bemerkung,serie,seriePart,date,isbn,bid FROM bücher ORDER BY autor");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+
+	public static ResultSet selectFromBooklist(int bid) {
+		String sql = "SELECT * FROM bücher WHERE bid=" + bid;
+		ResultSet rs = null;
+		try {
+			Statement st = con.createStatement();
+			rs = st.executeQuery(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+
 	public static void checkUpdate() {
 
 		String currentVersion = checkVersion();
@@ -154,14 +179,47 @@ public class Database {
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
-			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.4 aktualisiert!");
+		case "2.4.4":
+			try {
+				String sql = "ALTER TABLE bücher ADD bid numeric(6,0)";
+				PreparedStatement st;
+//				st = con.prepareStatement(sql);
+//				st.execute();
+//				st.close();
+				int bid = 100000;
+				ResultSet rs = null;
+				rs = Database.readDbBooklist();
+				while (rs.next()) {
+					String autor = rs.getString("autor").trim();
+					String titel = rs.getString("titel").trim();
+					sql = "UPDATE bücher set bid= ? WHERE autor = ? AND titel = ?";
+					st = con.prepareStatement(sql);
+					st.setInt(1, bid);
+					st.setString(2, autor);
+					st.setString(3, titel);
+					st.execute();
+					st.close();
+					bid++;
+				}
+
+				sql = "UPDATE versions set version='2.4.5'";
+				st = con.prepareStatement(sql);
+				st.execute();
+				st.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
+				JOptionPane.showMessageDialog(null, e.getMessage());
+			}
+			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.5 aktualisiert!");
 		}
-		
-			
+
 		String version_new = checkVersion();
 
-		if (!version_new.equals("2.4.4")) {
+		if (!version_new.equals("2.4.5")) {
 			JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell!");
+			checkUpdate();
 		}
 
 	}
@@ -281,7 +339,7 @@ public class Database {
 
 	public static void addToBooklist(String autor, String titel, String ausgeliehen, String name, String bemerkung,
 			String serie, String seriePart, String datum) throws SQLException {
-		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?,?,?)";
+		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,date,bid) VALUES(?,?,?,?,?,?,?,?,?)";
 		PreparedStatement st = con.prepareStatement(sql);
 		st.setString(1, autor);
 		st.setString(2, titel);
@@ -291,10 +349,12 @@ public class Database {
 		st.setString(6, serie);
 		st.setString(7, seriePart);
 		st.setString(8, datum);
+		st.setInt(9, highestBid + 1);
 		st.executeUpdate();
 		st.close();
+		highestBid++;
 		System.out.println("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + ","
-				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum);
+				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + (highestBid - 1));
 	}
 
 	public static void addToWishlist(String autor, String titel, String bemerkung, String serie, String seriePart,
@@ -311,16 +371,6 @@ public class Database {
 		st.close();
 		System.out.println("Wishlist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + bemerkung + "," + serie
 				+ "," + seriePart + "," + datum);
-	}
-
-	public static void selectFromBooklist(String autor, String titel) throws SQLException {
-		String sql = "SELECT * FROM bücher WHERE autor=? and titel=?";
-		PreparedStatement st = con.prepareStatement(sql);
-		st.setString(1, autor);
-		st.setString(2, titel);
-		st.executeUpdate();
-		st.close();
-		System.out.println("Datenbank durchsucht: " + autor + "," + titel);
 	}
 
 	public static void addPic(String autor, String titel, InputStream photo) {
@@ -358,7 +408,7 @@ public class Database {
 		}
 
 	}
-	
+
 	public static ResultSet getPic(String autor, String titel) {
 		ResultSet rs = null;
 		String sql = "SELECT * FROM bücher WHERE autor=? and titel=?";
@@ -409,7 +459,7 @@ public class Database {
 		}
 
 	}
-	
+
 	public static void addIsbn(String autor, String titel, String isbn) {
 		String sql = "update bücher set isbn=? where autor=? and titel=?";
 		PreparedStatement st;

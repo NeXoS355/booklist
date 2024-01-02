@@ -60,7 +60,10 @@ public class HandleWebInfo {
 
 				// Auf den Titel zugreifen
 				int i = 0;
-				while (i < 2) {
+				int cCover=0;
+				int cDesc=0;
+				int cIsbn=0;
+				while (i < 2 && cCover+cDesc+cIsbn<3) {
 					if (jsonObject.has("items")) {
 						var itemsArray = jsonObject.getAsJsonArray("items");
 						if (itemsArray.size() > 0) {
@@ -68,9 +71,9 @@ public class HandleWebInfo {
 							if (firstItem.has("volumeInfo")) {
 								var volumeInfo = firstItem.getAsJsonObject("volumeInfo");
 								if (volumeInfo.has("imageLinks")) {
-									i = 99;
 									var imageLinks = volumeInfo.getAsJsonObject("imageLinks");
 									if (imageLinks.has("smallThumbnail")) {
+										cCover=1;
 										String link = imageLinks.get("smallThumbnail").getAsString();
 										System.out.println("Link: " + link);
 										// Downloading Image
@@ -83,6 +86,7 @@ public class HandleWebInfo {
 									i++;
 								}
 								if (volumeInfo.has("industryIdentifiers")) {
+									cIsbn = 1;
 									var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
 									var isbnidentifiers13 = isbnidentifiers.get(0).getAsJsonObject();
 									if (isbnidentifiers13.has("identifier")) {
@@ -91,6 +95,7 @@ public class HandleWebInfo {
 									}
 								}
 								if (volumeInfo.has("description")) {
+									cDesc=1;
 									String description = volumeInfo.get("description").getAsString();
 									eintrag.setDesc(description);
 									Database.addDesc(eintrag.getAutor(), eintrag.getTitel(), description);
@@ -110,6 +115,7 @@ public class HandleWebInfo {
 						System.out.println("Feld 'items' nicht gefunden.");
 						i++;
 					}
+					i++;
 				}
 			}
 			// Verbindung schließen

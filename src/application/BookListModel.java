@@ -26,20 +26,35 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	public BookListModel() {
 		Database.createConnection();
-		ResultSet rs = Database.readDbBooklist();
+		ResultSet rs = null;
+		if (Mainframe.loadOnDemand == 1) {
+			rs = Database.readDbBooklistLite();
+			System.out.println("loading on Demand");
+		} else {
+			rs = Database.readDbBooklist();
+			System.out.println("load All");
+		}
 		try {
 			while (rs.next()) {
 				try {
+					Book_Booklist book = null;
 					String autor = rs.getString("autor").trim();
 					String titel = rs.getString("titel").trim();
-					String bemerkung = rs.getString("bemerkung").trim();
+					String bemerkung = rs.getString("bemerkung");
 					String serie = rs.getString("serie").trim();
 					String seriePart = rs.getString("seriePart");
 					boolean ausgeliehen = false;
 					Timestamp datum = rs.getTimestamp("date");
-					Blob picture = rs.getBlob("pic");
-					String desc = rs.getString("description");
 					String isbn = rs.getString("isbn");
+					int bid = Integer.parseInt(rs.getString("bid"));
+
+					Blob picture = null;
+					String desc = "";
+
+					if (Mainframe.loadOnDemand == 0) {
+						picture = rs.getBlob("pic");
+						desc = rs.getString("description");
+					}
 					Image buf_pic = null;
 					if (picture != null) {
 						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
@@ -48,24 +63,58 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					if (rs.getString(3).equals("an")) {
 						ausgeliehen = true;
 						String ausgeliehen_an = rs.getString("name").trim();
-						getBücher().add(new Book_Booklist(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung, serie, seriePart,
-								buf_pic,desc,isbn, datum, false));
+						book = new Book_Booklist(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung,
+								serie, seriePart, buf_pic, desc, isbn, datum, false);
+						book.setBid(bid);
+						getBücher().add(book);
 					} else if (rs.getString(3).equals("von")) {
 						ausgeliehen = true;
 						String ausgeliehen_von = rs.getString("name").trim();
-						getBücher().add(new Book_Booklist(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung, serie, seriePart,
-								buf_pic,desc,isbn, datum, false));
+						book = new Book_Booklist(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung,
+								serie, seriePart, buf_pic, desc, isbn, datum, false);
+						book.setBid(bid);
+						getBücher().add(book);
 					} else {
-						getBücher().add(new Book_Booklist(autor, titel, bemerkung, serie, seriePart, buf_pic, desc, isbn, datum,
-								false));
+						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, buf_pic, desc,
+								isbn, datum, false);
+						book.setBid(bid);
+						getBücher().add(book);
+					}
+					if (bid > Database.highestBid) {
+						Database.highestBid = bid;
 					}
 				} catch (DateTimeParseException ex1) {
 					System.err.println("Datum falsch während DB auslesen");
 				}
-
 			}
 		} catch (SQLException | IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public static void loadOnDemand(Book_Booklist buch) {
+		if (buch.getDesc() == "" && buch.getPic() == null) {
+			System.out.println("loading Image and Description");
+			try {
+				ResultSet rs = Database.selectFromBooklist(buch.getBid());
+				while (rs.next()) {
+					Blob picture = rs.getBlob("pic");
+					String desc = rs.getString("description");
+					Image buf_pic = null;
+					if (picture != null) {
+						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
+						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
+					}
+					buch.setPic(buf_pic);
+					buch.setDesc(desc);
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -98,17 +147,19 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	public static String[] getSerienVonAutor(String autor) {
 		ArrayList<String> serien = new ArrayList<String>();
-		
+
 		for (int i = 0; i < getBücher().size(); i++) {
 			Book_Booklist buch = getBücher().get(i);
 			if (buch.getAutor().contains(autor)) {
 				if (!buch.getSerie().trim().equals("")) {
 					boolean newSerie = true;
-					for(int j=0;j < serien.size();j++) {
-						if(serien.get(j).equals(buch.getSerie())) newSerie=false;
+					for (int j = 0; j < serien.size(); j++) {
+						if (serien.get(j).equals(buch.getSerie()))
+							newSerie = false;
 					}
-					if (newSerie) serien.add(buch.getSerie());
-					
+					if (newSerie)
+						serien.add(buch.getSerie());
+
 				}
 			}
 

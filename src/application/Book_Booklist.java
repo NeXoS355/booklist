@@ -20,6 +20,7 @@ public class Book_Booklist {
 	private String desc;
 	private String isbn;
 	private Timestamp datum;
+	private int bid;
 
 	public Book_Booklist(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
 			String bemerkung, String serie,String seriePart, Image pic, String desc, String isbn,Timestamp datum, boolean db) throws SQLException {
@@ -186,6 +187,14 @@ public class Book_Booklist {
 
 	public void setIsbn(String isbn) {
 		this.isbn = isbn;
+	}
+
+	public int getBid() {
+		return bid;
+	}
+
+	public void setBid(int bid) {
+		this.bid = bid;
 	}
 	
 	

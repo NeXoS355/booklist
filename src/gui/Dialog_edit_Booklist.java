@@ -76,7 +76,9 @@ public class Dialog_edit_Booklist extends JDialog {
 		
 		Book_Booklist eintrag = einträge.getElementAt(index);
 		
-		
+		if (Mainframe.loadOnDemand == 1) {
+			BookListModel.loadOnDemand(eintrag);
+		}
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
