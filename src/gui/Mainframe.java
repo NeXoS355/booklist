@@ -91,8 +91,7 @@ public class Mainframe extends JFrame {
 		this.setLocation(100, 100);
 		this.setSize(1300, 1000);
 		this.setResizable(true);
-		ExecutorService executor = Executors.newFixedThreadPool(10);
-		executor.submit(() -> {
+		Mainframe.executor.submit(() -> {
 			readConfig();
 		});
 		URL iconURL = getClass().getResource("/resources/Icon.png");
@@ -105,12 +104,10 @@ public class Mainframe extends JFrame {
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
+		
 		einträge = new BookListModel();
-		executor.submit(() -> {
-			
-			filter = new DefaultListModel<Book_Booklist>();
-			anzeige = new SimpleTableModel(einträge);
-		});
+		filter = new DefaultListModel<Book_Booklist>();
+		anzeige = new SimpleTableModel(einträge);
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(5, 5));
@@ -196,6 +193,9 @@ public class Mainframe extends JFrame {
 
 		JMenuBar menue = new JMenuBar();
 		JMenu datei = new JMenu("Datei");
+		JMenu extras = new JMenu("Extras");
+		JMenu hilfe = new JMenu("Hilfe");
+		
 		JMenuItem backup = new JMenuItem("DB Backup");
 		backup.addActionListener(new ActionListener() {
 
@@ -265,12 +265,15 @@ public class Mainframe extends JFrame {
 		});
 
 		menue.add(datei);
-		datei.add(wishlist);
+		menue.add(extras);
+		menue.add(hilfe);
+		
 		datei.add(settings);
-		datei.add(backup);
-		datei.add(dbVersion);
-		datei.add(ExcelExport);
 		datei.add(close);
+		extras.add(ExcelExport);
+		extras.add(backup);
+		extras.add(wishlist);
+		hilfe.add(dbVersion);
 		pnlMenü.add(menue, BorderLayout.WEST);
 
 		JLabel lblVersion = new JLabel(version);
@@ -432,12 +435,10 @@ public class Mainframe extends JFrame {
 		updateModel();
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setVisible(true);
-		System.out.println(autoDownload);
-		System.out.println(loadOnDemand);
+
 	}
 
 	private void readConfig() {
-
 		File f = new File("config.conf");
 		if (f.exists() && !f.isDirectory()) {
 			try (BufferedReader br = new BufferedReader(new FileReader("config.conf"))) {
@@ -458,41 +459,40 @@ public class Mainframe extends JFrame {
 				for (int i = 0; i < settings.length; i++) {
 					setting = settings[i].split("=")[0];
 					value = settings[i].split("=")[1];
-					
-					switch (setting) {
-					case "fontSize":
+
+					if (setting.equals("fontSize")) {
 						size = Integer.parseInt(value.trim());
 						schrift = new Font("Roboto", Font.BOLD, size);
-					case "descFontSize":
+					} else if (setting.equals("descFontSize")) {
 						size = Integer.parseInt(value.trim());
 						descSchrift = new Font("Roboto", Font.PLAIN, size);
-					case "autoDownload":
-						autoDownload= Integer.parseInt(value.trim());
-					case "loadOnDemand":
-						loadOnDemand= Integer.parseInt(value.trim());
+					}  else if (setting.equals("autoDownload")) {
+						autoDownload = Integer.parseInt(value.trim());
+					}  else if (setting.equals("loadOnDemand")) {
+						loadOnDemand = Integer.parseInt(value.trim());
 					}
+
 				}
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Fehler in der config: Falsches Format - erwartet integer" );
+				JOptionPane.showMessageDialog(null, "Fehler in der config: Falsches Format - erwartet integer");
 			}
-		} else {
-			try (PrintWriter out = new PrintWriter("config.conf")) {
-				out.println("fontSize=" + schrift.getSize());
-				out.println("descFontSize=" + descSchrift.getSize());
-				out.println("autoDownload=" + autoDownload);
-				out.println("loadOnDemand=" + loadOnDemand);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		}else
+
+	{
+		try (PrintWriter out = new PrintWriter("config.conf")) {
+			out.println("fontSize=" + schrift.getSize());
+			out.println("descFontSize=" + descSchrift.getSize());
+			out.println("autoDownload=" + autoDownload);
+			out.println("loadOnDemand=" + loadOnDemand);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
+	}
 
 	}
 
