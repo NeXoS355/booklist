@@ -47,7 +47,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					Timestamp datum = rs.getTimestamp("date");
 					String isbn = rs.getString("isbn");
 					int bid = Integer.parseInt(rs.getString("bid"));
-
+					
 					Blob picture = null;
 					String desc = "";
 

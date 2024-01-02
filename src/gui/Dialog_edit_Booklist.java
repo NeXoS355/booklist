@@ -69,10 +69,9 @@ public class Dialog_edit_Booklist extends JDialog {
 			DefaultMutableTreeNode rootNode) {
 		
 		this.setTitle("Buch bearbeiten");
-		this.setResizable(true);
 		this.setSize(new Dimension(600, 605));
 		this.setLocation(Mainframe.getInstance().getX()+500, Mainframe.getInstance().getY()+200);
-		this.setAlwaysOnTop(true);
+		this.setAlwaysOnTop(false);
 		
 		Book_Booklist eintrag = einträge.getElementAt(index);
 		
@@ -437,7 +436,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		c.gridx = 1;
 		c.gridy = 0;
 		c.weightx = 0.5;
-		c.gridwidth = 1;
+		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel_center.add(txt_author,c);
 		c.gridx = 0;
@@ -449,7 +448,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		c.gridx = 1;
 		c.gridy = 1;
 		c.weightx = 0.5;
-		c.gridwidth = 1;
+		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel_center.add(txt_title,c);
 		c.gridx = 0;
@@ -460,7 +459,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		c.gridx = 1;
 		c.gridy = 2;
 		c.weightx = 0.5;
-		c.gridwidth = 1;
+		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel_center.add(txt_merk,c);
 		c.gridx = 0;

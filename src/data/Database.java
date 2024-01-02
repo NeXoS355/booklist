@@ -67,7 +67,7 @@ public class Database {
 		try {
 			createBooklist = con.createStatement();
 			createBooklist.execute(
-					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),pic blob,description clob (64 M), isbn varchar(13),date timestamp,bid numeric(6,0), CONSTRAINT buecher_pk PRIMARY KEY (autor,titel))");
+					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),pic blob,description clob (64 M), isbn varchar(13),date timestamp,bid numeric(6,0) NOT NULL, CONSTRAINT buecher_pk PRIMARY KEY (bid))");
 			createWishlist = con.createStatement();
 			createWishlist.execute(
 					"CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
@@ -173,6 +173,7 @@ public class Database {
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
+				JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.4 aktualisiert!");
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -181,11 +182,11 @@ public class Database {
 			}
 		case "2.4.4":
 			try {
-				String sql = "ALTER TABLE bücher ADD bid numeric(6,0)";
+				String sql = "ALTER TABLE bücher ADD bid numeric(6,0) NOT NULL DEFAULT 0";
 				PreparedStatement st;
-//				st = con.prepareStatement(sql);
-//				st.execute();
-//				st.close();
+				st = con.prepareStatement(sql);
+				st.execute();
+				st.close();
 				int bid = 100000;
 				ResultSet rs = null;
 				rs = Database.readDbBooklist();
@@ -200,26 +201,36 @@ public class Database {
 					st.execute();
 					st.close();
 					bid++;
+					System.out.println("BID set " + autor + " - " + titel + ", " + bid);
 				}
-
+				rs.close();
+				sql = "ALTER TABLE bücher DROP CONSTRAINT buecher_pk";
+				st = con.prepareStatement(sql);
+				st.execute();
+				st.close();
+				sql = "ALTER TABLE bücher ADD CONSTRAINT buecher_pk PRIMARY KEY (bid)";
+				st = con.prepareStatement(sql);
+				st.execute();
+				st.close();
 				sql = "UPDATE versions set version='2.4.5'";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
+				JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.5 aktualisiert!");
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
-			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.5 aktualisiert!");
-		}
+			String version_new = checkVersion();
 
-		String version_new = checkVersion();
-
-		if (!version_new.equals("2.4.5")) {
-			JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell!");
-			checkUpdate();
+			if (!version_new.equals("2.4.5")) {
+				JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell! Bitte Prozess wiederholen!");
+				System.exit(1);
+			}
+		case "2.4.5":
+			// all good
 		}
 
 	}

@@ -62,9 +62,9 @@ public class Mainframe extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public static int autoDownload = 1;
+	public static int autoDownload = 0;
 	public static int loadOnDemand = 0;
-	public static Font schrift = new Font("Roboto", Font.PLAIN, 14);
+	public static Font schrift = new Font("Roboto", Font.PLAIN, 16);
 	public static Font descSchrift = new Font("Roboto", Font.PLAIN, 16);
 	private static JTable table = new JTable();
 	public static BookListModel einträge;
@@ -488,10 +488,10 @@ public class Mainframe extends JFrame {
 			}
 		} else {
 			try (PrintWriter out = new PrintWriter("config.conf")) {
-				out.println("fontSize=16");
-				out.println("descFontSize=16");
-				out.println("autoDownload=0");
-				out.println("loadOnDemand=0");
+				out.println("fontSize=" + schrift.getSize());
+				out.println("descFontSize=" + descSchrift.getSize());
+				out.println("autoDownload=" + autoDownload);
+				out.println("loadOnDemand=" + loadOnDemand);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
