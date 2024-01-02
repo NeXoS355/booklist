@@ -1,10 +1,11 @@
 package application;
 
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,14 +13,17 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Blob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
 import data.Database;
+import gui.Mainframe;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -31,7 +35,8 @@ public class HandleWebInfo {
 			String titel = eintrag.getTitel().replace(" ", "+");
 
 			// Die URL der REST-API
-			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + titel + "&maxResults=" + maxResults + "&printType=books";
+			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + titel + "&maxResults=" + maxResults
+					+ "&printType=books";
 
 			System.out.println(apiUrl);
 
@@ -89,6 +94,7 @@ public class HandleWebInfo {
 								System.out.println("Link: " + link);
 								// Downloading Image
 								savePic(link, eintrag);
+
 							} else {
 								System.out.println("smallThumbnail nicht gefunden");
 							}
@@ -104,7 +110,10 @@ public class HandleWebInfo {
 									if (type.equals("ISBN_13")) {
 										cIsbn = 1;
 										String isbn = isbnidentifiers13.get("identifier").getAsString();
-										saveIsbn(isbn, eintrag);
+										eintrag.setIsbn(isbn);
+										Mainframe.executor.submit(() -> {
+											Database.addIsbn(eintrag.getBid(), isbn);
+										});
 									} else {
 										System.out.println("industryIdentifiers nicht gefunden");
 									}
@@ -117,7 +126,9 @@ public class HandleWebInfo {
 							cDesc = 1;
 							String description = volumeInfo.get("description").getAsString();
 							eintrag.setDesc(description);
-							Database.addDesc(eintrag.getBid(), description);
+							Mainframe.executor.submit(() -> {
+								Database.addDesc(eintrag.getBid(), description);
+							});
 						} else {
 							System.out.println("Description nicht gefunden.");
 						}
@@ -132,12 +143,12 @@ public class HandleWebInfo {
 			}
 			i++;
 		}
-		if 	(cCover + cDesc + cIsbn < 3) {
+		if (cCover + cDesc + cIsbn < 3) {
 			int antwort = JOptionPane.showConfirmDialog(null,
 					"Es konnten nicht alle Informationen gefunden werden.\nKriterien erweitern?", "Warnung",
 					JOptionPane.YES_NO_OPTION);
 			if (antwort == JOptionPane.YES_OPTION) {
-				DownloadWebPage(eintrag,5);
+				DownloadWebPage(eintrag, 5);
 			}
 		}
 	}
@@ -158,38 +169,36 @@ public class HandleWebInfo {
 			while (-1 != (n = in.read(buf))) {
 				out.write(buf, 0, n);
 			}
+
+			byte[] response = out.toByteArray();
+			ByteArrayInputStream inStreambj = new ByteArrayInputStream(response);
+			BufferedImage newImage = ImageIO.read(inStreambj);
+			Image img = newImage;
+			eintrag.setPic(img);
+
+			BufferedInputStream photoStream = new BufferedInputStream(inStreambj);
+			photoStream.close();
 			out.close();
 			in.close();
-			byte[] response = out.toByteArray();
+
 			String path = "tmp.jpg";
 			FileOutputStream fos = new FileOutputStream(path);
 			fos.write(response);
 			fos.close();
-			BufferedInputStream photoStream = new BufferedInputStream(new FileInputStream(path));
-			Database.addPic(eintrag.getBid(), photoStream);
-			photoStream.close();
-			out.close();
-			in.close();
-			File file = new File(path);
-			if (file.exists()) {
-				file.delete();
-				System.out.println("Temp File deleted");
-			}
-			ResultSet rs = Database.getPic(eintrag.getBid());
-			try {
-				while (rs.next()) {
-					Blob picture = rs.getBlob("pic");
-					Image buf_pic = null;
-					if (picture != null) {
-						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
-						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
-					}
-					eintrag.setPic(buf_pic);
+			BufferedInputStream stream = new BufferedInputStream(new FileInputStream(path));
+
+			Mainframe.executor.submit(() -> {
+				try {
+					Database.addPic(eintrag.getBid(), stream);
+					stream.close();
+					Path file = Paths.get(path);
+					Files.delete(file);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			});
+
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -198,16 +207,10 @@ public class HandleWebInfo {
 			e.printStackTrace();
 			weblink = JOptionPane.showInputDialog(null, "Kein Bild gefunden. Bitte manuell einfügen");
 			if (weblink != "") {
-				DownloadWebPage(eintrag,2);
+				DownloadWebPage(eintrag, 2);
 			}
 
 		}
-		return true;
-	}
-
-	private static boolean saveIsbn(String isbn, Book_Booklist eintrag) {
-		Database.addIsbn(eintrag.getBid(), isbn);
-		eintrag.setIsbn(isbn);
 		return true;
 	}
 
