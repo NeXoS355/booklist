@@ -153,6 +153,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		
 		panel_north.add(lbl_datum);
 		panel_north.add(lbl_isbn);
+		panel_north.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 		
 		/*
 		 create and add components to Panel East
@@ -436,7 +437,6 @@ public class Dialog_edit_Booklist extends JDialog {
 		/*
 		 * Set Center Layout
 		 */
-
 		GridBagConstraints c = new GridBagConstraints();		
 		
 		c.gridx = 0;
@@ -493,6 +493,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(10,10,0,0);
 		panel_center.add(txt_seriePart, c);
+		panel_center.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
 		/*
 		 * create components for Panel South
@@ -605,6 +606,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 
 		JButton btn_add = new JButton("Speichern");
+		btn_add.setFont(Mainframe.schrift);
 		btn_add.addActionListener(new ActionListener() {
 
 			@Override
@@ -615,6 +617,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 
 		JButton btn_abort = new JButton("Abbrechen");
+		btn_abort.setFont(Mainframe.schrift);
 		btn_abort.addActionListener(new ActionListener() {
 
 			@Override
@@ -626,18 +629,17 @@ public class Dialog_edit_Booklist extends JDialog {
 		/*
 		 * add components into Panel South
 		 */
-		
-		panel_south.add(btn_add);
-		panel_south.add(btn_abort);
 		panel_south.add(check_von);
 		panel_south.add(check_an);
 		panel_south.add(txt_leihVon);
 		panel_south.add(txt_leihAn);
+		panel_south.add(btn_add);
+		panel_south.add(btn_abort);
+		panel_south.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 		
 		/*
 		 * create TextArea for Description
 		 */
-		
 		JTextArea txt_desc = new JTextArea(10,30);
 		txt_desc.setText(eintrag.getDesc());
 		txt_desc.setEnabled(false);
