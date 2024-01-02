@@ -9,6 +9,9 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -67,11 +70,13 @@ public class Dialog_edit_Booklist extends JDialog {
 		
 		this.setTitle("Buch bearbeiten");
 		this.setResizable(true);
-		this.setSize(new Dimension(500, 605));
+		this.setSize(new Dimension(600, 605));
 		this.setLocation(Mainframe.getInstance().getX()+500, Mainframe.getInstance().getY()+200);
 		this.setAlwaysOnTop(true);
-
+		
 		Book_Booklist eintrag = einträge.getElementAt(index);
+		
+		
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
@@ -87,17 +92,10 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_west.setLayout(new GridLayout(4, 1, 10, 20));
 
 		JPanel panel_center = new JPanel();
-		panel_center.setLayout(new GridBagLayout());
-		GridBagConstraints center_c = new GridBagConstraints();
-		center_c.ipady = 10;
-		int padding_c = 10;
+		panel_center.setLayout(new GridBagLayout());		
 
 		JPanel panel_east_border = new JPanel();
 		panel_east_border.setLayout(new BorderLayout(10, 10));
-
-		JPanel panel_east_grid = new JPanel();
-		panel_east_grid.setLayout(new GridLayout(4, 1, 10, 20));
-		panel_east_border.add(panel_east_grid, BorderLayout.WEST);
 
 		JPanel panel_south_border = new JPanel();
 		panel_south_border.setLayout(new BorderLayout(10,10));
@@ -108,7 +106,44 @@ public class Dialog_edit_Booklist extends JDialog {
 		int höhe = 60;
 		int breite = 100;
 
-		// Bild anzeigen
+		/*
+		create and add components to Panel North
+		*/
+		JLabel lbl_datum = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
+		JLabel lbl_isbn = new JLabel("ISBN: " + eintrag.getIsbn(),SwingConstants.RIGHT);
+		lbl_isbn.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (SwingUtilities.isRightMouseButton(e)) {
+					e.getPoint();
+					showMenu(e);
+				}
+			}
+
+			private void showMenu(MouseEvent e) {
+				JPopupMenu menu = new JPopupMenu();
+				JMenuItem itemCopy = new JMenuItem("kopieren");
+				menu.add(itemCopy);
+				menu.show(lbl_isbn, e.getX(), e.getY());
+				itemCopy.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+						StringSelection selection = new StringSelection(eintrag.getIsbn());
+						cb.setContents(selection, null);
+					}
+				});
+			}
+		});
+		
+		panel_north.add(lbl_datum);
+		panel_north.add(lbl_isbn);
+		
+		/*
+		 create and add components to Panel East
+		*/
 		ImageIcon imgIcn = showImg(eintrag);
 		if (imgIcn != null) {
 			Image img = imgIcn.getImage();
@@ -124,10 +159,6 @@ public class Dialog_edit_Booklist extends JDialog {
 						e.getPoint();
 						showMenu(e);
 					}
-				}
-				
-				public void mouseEntered(MouseEvent e) {
-					
 				}
 
 				private void showMenu(MouseEvent e) {
@@ -188,17 +219,9 @@ public class Dialog_edit_Booklist extends JDialog {
 			panel_east_border.add(btn_downloadInfo, BorderLayout.CENTER);
 		}
 
-		JLabel lbl_datum = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
-		panel_north.add(lbl_datum);
-		
-		JLabel lbl_isbn = new JLabel("ISBN: " + eintrag.getIsbn(),SwingConstants.RIGHT);
-		panel_north.add(lbl_isbn);
-
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.schrift);
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_author);
-
 		txt_author = new RoundJTextField(eintrag.getAutor());
 		txt_author.setFont(Mainframe.schrift);
 		txt_author.setPreferredSize(new Dimension(50, höhe));
@@ -231,19 +254,11 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		center_c.fill = GridBagConstraints.HORIZONTAL;
-		center_c.gridx = 0;
-		center_c.gridy = 0;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 4;
-		center_c.insets = new Insets(0, 0, padding_c, 0);
-		panel_center.add(txt_author, center_c);
+
 
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(Mainframe.schrift);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_title);
-
 		txt_title = new RoundJTextField(eintrag.getTitel());
 		txt_title.setFont(Mainframe.schrift);
 		txt_title.setPreferredSize(new Dimension(50, höhe));
@@ -295,17 +310,10 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 0;
-		center_c.gridy = 1;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 4;
-		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
-		panel_center.add(txt_title, center_c);
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
 		lbl_merk.setFont(Mainframe.schrift);
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_merk);
 
 		txt_merk = new RoundJTextField(eintrag.getBemerkung());
 		txt_merk.setFont(Mainframe.schrift);
@@ -337,17 +345,11 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 0;
-		center_c.gridy = 2;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 4;
-		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
-		panel_center.add(txt_merk, center_c);
+
 
 		JLabel lbl_serie = new JLabel("Serie | Band:");
 		lbl_serie.setFont(Mainframe.schrift);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_serie);
 
 		txt_serie = new RoundJTextField(eintrag.getSerie());
 		txt_serie.setFont(Mainframe.schrift);
@@ -380,13 +382,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 0;
-		center_c.gridy = 3;
-		center_c.weightx = 4;
-		center_c.gridwidth = 3;
-		center_c.insets = new Insets(padding_c, 0, 0, 0);
-		panel_center.add(txt_serie, center_c);
-
+		
 		txt_seriePart = new RoundJTextField(eintrag.getSeriePart());
 		txt_seriePart.setFont(Mainframe.schrift);
 		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
@@ -422,12 +418,72 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 3;
-		center_c.gridy = 3;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 1;
-		panel_center.add(txt_seriePart, center_c);
+		
+		/*
+		 * Set Center Layout
+		 */
 
+		GridBagConstraints c = new GridBagConstraints();		
+		
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.ipady = 15;
+		panel_center.add(lbl_author,c);
+		c.gridx = 1;
+		c.gridy = 0;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_author,c);
+		c.gridx = 0;
+		c.gridy = 1;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		c.insets = new Insets(10,0,0,0);
+		panel_center.add(lbl_title,c);
+		c.gridx = 1;
+		c.gridy = 1;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_title,c);
+		c.gridx = 0;
+		c.gridy = 2;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		panel_center.add(lbl_merk,c);
+		c.gridx = 1;
+		c.gridy = 2;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_merk,c);
+		c.gridx = 0;
+		c.gridy = 3;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		panel_center.add(lbl_serie,c);
+		c.gridx = 1;
+		c.gridy = 3;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_serie,c);		
+		c.gridx = 2;
+		c.gridy = 3;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(10,10,0,0);
+		panel_center.add(txt_seriePart, c);
+
+		/*
+		 * create components for Panel South
+		 */
+		
 		check_von = new JCheckBox("ausgeliehen von");
 		check_von.setFont(Mainframe.schrift);
 		if (!eintrag.getAusgeliehen_von().isEmpty())
@@ -447,7 +503,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			}
 		});
-		panel_south.add(check_von);
+
 
 		check_an = new JCheckBox("ausgeliehen an");
 		check_an.setFont(Mainframe.schrift);
@@ -467,7 +523,7 @@ public class Dialog_edit_Booklist extends JDialog {
 				}
 			}
 		});
-		panel_south.add(check_an);
+
 
 		txt_leihVon = new RoundJTextField(eintrag.getAusgeliehen_von());
 		txt_leihVon.setFont(Mainframe.schrift);
@@ -500,7 +556,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		panel_south.add(txt_leihVon);
+
 
 		txt_leihAn = new RoundJTextField(eintrag.getAusgeliehen_an());
 		txt_leihAn.setFont(Mainframe.schrift);
@@ -533,7 +589,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		panel_south.add(txt_leihAn);
+
 
 		JButton btn_add = new JButton("Speichern");
 		btn_add.addActionListener(new ActionListener() {
@@ -541,10 +597,9 @@ public class Dialog_edit_Booklist extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				speichern(eintrag);
-//				Mainframe.search(Mainframe.getLastSearch());
 			}
 		});
-		panel_south.add(btn_add);
+
 
 		JButton btn_abort = new JButton("Abbrechen");
 		btn_abort.addActionListener(new ActionListener() {
@@ -554,7 +609,21 @@ public class Dialog_edit_Booklist extends JDialog {
 				dispose();
 			}
 		});
+		
+		/*
+		 * add components into Panel South
+		 */
+		
+		panel_south.add(btn_add);
 		panel_south.add(btn_abort);
+		panel_south.add(check_von);
+		panel_south.add(check_an);
+		panel_south.add(txt_leihVon);
+		panel_south.add(txt_leihAn);
+		
+		/*
+		 * create TextArea for Description
+		 */
 		
 		JTextArea txt_desc = new JTextArea(10,30);
 		txt_desc.setText(eintrag.getDesc());
@@ -606,7 +675,6 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_south_border.add(panel_south,BorderLayout.CENTER);
 
 		this.add(panel_north, BorderLayout.NORTH);
-		this.add(panel_west, BorderLayout.WEST);
 		this.add(panel_center, BorderLayout.CENTER);
 		this.add(panel_east_border, BorderLayout.EAST);
 		this.add(panel_south_border, BorderLayout.SOUTH);
