@@ -125,7 +125,9 @@ public class Dialog_edit_Booklist extends JDialog {
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
 				JMenuItem itemCopy = new JMenuItem("kopieren");
+				JMenuItem itemDel = new JMenuItem("löschen");
 				menu.add(itemCopy);
+				menu.add(itemDel);
 				menu.show(lbl_isbn, e.getX(), e.getY());
 				itemCopy.addActionListener(new ActionListener() {
 
@@ -134,6 +136,16 @@ public class Dialog_edit_Booklist extends JDialog {
 						Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
 						StringSelection selection = new StringSelection(eintrag.getIsbn());
 						cb.setContents(selection, null);
+					}
+				});
+				itemDel.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						eintrag.setIsbn(null);
+						Database.delIsbn(eintrag.getBid());
+						dispose();
+						new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
 					}
 				});
 			}
@@ -184,7 +196,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							boolean state = HandleWebInfo.deletePic(txt_author.getText(), txt_title.getText());
+							boolean state = HandleWebInfo.deletePic(eintrag.getBid());
 							if (state == true) {
 								//JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
 								eintrag.setPic(null);
@@ -209,8 +221,6 @@ public class Dialog_edit_Booklist extends JDialog {
 				public void actionPerformed(ActionEvent arg0) {
 					boolean downloaded = HandleWebInfo.DownloadWebPage(eintrag,2);
 					if (downloaded) {
-						btn_downloadInfo.setText("Downloaded!");
-						btn_downloadInfo.setEnabled(false);
 						dispose();
 						new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
 					}
@@ -256,6 +266,9 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
+		/*
+		 * Create Components for Panel Center
+		 */
 
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(Mainframe.schrift);
@@ -484,7 +497,6 @@ public class Dialog_edit_Booklist extends JDialog {
 		/*
 		 * create components for Panel South
 		 */
-		
 		check_von = new JCheckBox("ausgeliehen von");
 		check_von.setFont(Mainframe.schrift);
 		if (!eintrag.getAusgeliehen_von().isEmpty())
@@ -656,7 +668,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						boolean state = Database.delDesc(txt_author.getText(), txt_title.getText());
+						boolean state = Database.delDesc(eintrag.getBid());
 						if (state == true) {
 							//JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich gelöscht");
 							eintrag.setDesc(null);

@@ -3,7 +3,6 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -48,11 +47,8 @@ public class Dialog_add_Booklist extends JDialog {
 	private RoundJTextField txt_merk;
 	private RoundJTextField txt_serie;
 	private RoundJTextField txt_seriePart;
-	private Font standardFont = new Font("standard", Font.BOLD, 14);
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
-//	private Color backgroundColor=Color.DARK_GRAY;
-//	private Color foregroundColor=Color.WHITE;
 
 	public Dialog_add_Booklist(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch hinzufügen");
@@ -67,31 +63,30 @@ public class Dialog_add_Booklist extends JDialog {
 
 		this.setLayout(new BorderLayout(10, 10));
 
-		JPanel panel_west = new JPanel();
-		panel_west.setLayout(new GridLayout(4, 1, 10, 10));
-//		panel_west.setBackground(backgroundColor);
-
 		JPanel panel_center = new JPanel();
 		panel_center.setLayout(new GridBagLayout());
-//		panel_center.setBackground(backgroundColor);
-		GridBagConstraints center_c = new GridBagConstraints();
-		center_c.ipady = 10;
-		int padding_c = 10;
-
-		JPanel panel_south = new JPanel();
-		panel_south.setLayout(new GridLayout(3, 2, 10, 10));
-//		panel_south.setBackground(backgroundColor);
 
 		int höhe = 60;
 		int breite = 100;
 
+		/*
+		 * Create Components for Panel West
+		 */
 		JLabel lbl_author = new JLabel("Autor:");
-		lbl_author.setFont(standardFont);
+		lbl_author.setFont(Mainframe.schrift);
 		lbl_author.setSize(new Dimension(breite, höhe));
+		
+		JPanel panel_west = new JPanel();
+		panel_west.setLayout(new GridLayout(4, 1, 10, 10));
 		panel_west.add(lbl_author);
+		
 
+		
+		/*
+		 * Create Components for Panel Center
+		 */
 		txt_author = new RoundJTextField();
-		txt_author.setFont(standardFont);
+		txt_author.setFont(Mainframe.schrift);
 		txt_author.setText(Mainframe.getTreeSelection());
 		txt_author.setPreferredSize(new Dimension(50, höhe));
 		txt_author.setBorder(standardBorder);
@@ -124,21 +119,14 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 
 		});
-		center_c.fill = GridBagConstraints.HORIZONTAL;
-		center_c.gridx = 0;
-		center_c.gridy = 0;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 4;
-		center_c.insets = new Insets(0, 0, padding_c, 0);
-		panel_center.add(txt_author, center_c);
 
 		JLabel lbl_title = new JLabel("Titel:");
-		lbl_title.setFont(standardFont);
+		lbl_title.setFont(Mainframe.schrift);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_title);
 
 		txt_title = new RoundJTextField();
-		txt_title.setFont(standardFont);
+		txt_title.setFont(Mainframe.schrift);
 		txt_title.setPreferredSize(new Dimension(50, höhe));
 		txt_title.setBorder(standardBorder);
 		txt_title.addKeyListener(new KeyAdapter() {
@@ -188,20 +176,14 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 0;
-		center_c.gridy = 1;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 4;
-		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
-		panel_center.add(txt_title, center_c);
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
-		lbl_merk.setFont(standardFont);
+		lbl_merk.setFont(Mainframe.schrift);
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_merk);
 
 		txt_merk = new RoundJTextField();
-		txt_merk.setFont(standardFont);
+		txt_merk.setFont(Mainframe.schrift);
 		txt_merk.setPreferredSize(new Dimension(50, höhe));
 		txt_merk.setBorder(standardBorder);
 		txt_merk.addKeyListener(new KeyAdapter() {
@@ -231,20 +213,14 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 0;
-		center_c.gridy = 2;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 4;
-		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
-		panel_center.add(txt_merk, center_c);
 
 		JLabel lbl_serie = new JLabel("Serie | Band:");
-		lbl_serie.setFont(standardFont);
+		lbl_serie.setFont(Mainframe.schrift);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_serie);
 
 		txt_serie = new RoundJTextField();
-		txt_serie.setFont(standardFont);
+		txt_serie.setFont(Mainframe.schrift);
 		txt_serie.setPreferredSize(new Dimension(50, höhe));
 		txt_serie.setBorder(standardBorder);
 		txt_serie.addKeyListener(new KeyAdapter() {
@@ -274,15 +250,9 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 0;
-		center_c.gridy = 3;
-		center_c.weightx = 4;
-		center_c.gridwidth = 2;
-		center_c.insets = new Insets(padding_c, 0, 0, 0);
-		panel_center.add(txt_serie, center_c);
 
 		txt_seriePart = new RoundJTextField();
-		txt_seriePart.setFont(standardFont);
+		txt_seriePart.setFont(Mainframe.schrift);
 		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
 		txt_seriePart.setBorder(standardBorder);
 		txt_seriePart.addKeyListener(new KeyAdapter() {
@@ -314,14 +284,74 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 2;
-		center_c.gridy = 3;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 1;
-		panel_center.add(txt_seriePart, center_c);
+		
+		/*
+		 * Set Center Layout
+		 */
+		GridBagConstraints c = new GridBagConstraints();		
+		panel_center.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.ipady = 15;
+//		c.insets = new Insets(0,0,0,10);
+		panel_center.add(lbl_author,c);
+		c.gridx = 1;
+		c.gridy = 0;
+		c.weightx = 0.5;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_author,c);
+		c.gridx = 0;
+		c.gridy = 1;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		c.insets = new Insets(10,0,0,0);
+		panel_center.add(lbl_title,c);
+		c.gridx = 1;
+		c.gridy = 1;
+		c.weightx = 0.5;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_title,c);
+		c.gridx = 0;
+		c.gridy = 2;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		panel_center.add(lbl_merk,c);
+		c.gridx = 1;
+		c.gridy = 2;
+		c.weightx = 0.5;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_merk,c);
+		c.gridx = 0;
+		c.gridy = 3;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		panel_center.add(lbl_serie,c);
+		c.gridx = 1;
+		c.gridy = 3;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_serie,c);		
+		c.gridx = 2;
+		c.gridy = 3;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(10,10,0,0);
+		panel_center.add(txt_seriePart, c);
 
+		
+		/*
+		 * create components for Panel South
+		 */
 		check_von = new JCheckBox("ausgeliehen von");
-		check_von.setFont(standardFont);
+		check_von.setFont(Mainframe.schrift);
 		check_von.setSelected(false);
 		check_von.addActionListener(new ActionListener() {
 
@@ -336,10 +366,10 @@ public class Dialog_add_Booklist extends JDialog {
 				}
 			}
 		});
-		panel_south.add(check_von);
+
 
 		check_an = new JCheckBox("ausgeliehen an");
-		check_an.setFont(standardFont);
+		check_an.setFont(Mainframe.schrift);
 		check_an.setSelected(false);
 		check_an.addActionListener(new ActionListener() {
 
@@ -354,10 +384,10 @@ public class Dialog_add_Booklist extends JDialog {
 				}
 			}
 		});
-		panel_south.add(check_an);
+
 
 		txt_leihVon = new RoundJTextField();
-		txt_leihVon.setFont(standardFont);
+		txt_leihVon.setFont(Mainframe.schrift);
 		txt_leihVon.setVisible(false);
 		txt_leihVon.setBorder(standardBorder);
 		txt_leihVon.addKeyListener(new KeyAdapter() {
@@ -386,10 +416,10 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 
 		});
-		panel_south.add(txt_leihVon);
+
 
 		txt_leihAn = new RoundJTextField();
-		txt_leihAn.setFont(standardFont);
+		txt_leihAn.setFont(Mainframe.schrift);
 		txt_leihAn.setVisible(false);
 		txt_leihAn.setBorder(standardBorder);
 		txt_leihAn.addKeyListener(new KeyAdapter() {
@@ -419,10 +449,10 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 
 		});
-		panel_south.add(txt_leihAn);
+
 
 		JButton btn_add = new JButton("hinzufügen");
-		btn_add.setFont(standardFont);
+		btn_add.setFont(Mainframe.schrift);
 		btn_add.addActionListener(new ActionListener() {
 
 			@Override
@@ -430,10 +460,10 @@ public class Dialog_add_Booklist extends JDialog {
 				addBuch();
 			}
 		});
-		panel_south.add(btn_add);
+
 
 		JButton btn_abort = new JButton("abbrechen");
-		btn_abort.setFont(standardFont);
+		btn_abort.setFont(Mainframe.schrift);
 		btn_abort.addActionListener(new ActionListener() {
 
 			@Override
@@ -441,12 +471,23 @@ public class Dialog_add_Booklist extends JDialog {
 				dispose();
 			}
 		});
+
+		/*
+		 * add components to Panel South
+		 */
+		JPanel panel_south = new JPanel();
+		panel_south.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+		panel_south.setLayout(new GridLayout(3, 2, 10, 10));
+		panel_south.add(check_von);
+		panel_south.add(check_an);
+		panel_south.add(txt_leihVon);
+		panel_south.add(txt_leihAn);
+		panel_south.add(btn_add);
 		panel_south.add(btn_abort);
 
 		this.add(panel_west, BorderLayout.WEST);
 		this.add(panel_center, BorderLayout.CENTER);
 		this.add(panel_south, BorderLayout.SOUTH);
-		this.add(new JLabel(""), BorderLayout.NORTH); // oberer Abstand vom JFrame
 
 		this.setVisible(true);
 		this.setModal(true);

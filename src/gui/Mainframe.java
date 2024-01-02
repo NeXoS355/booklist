@@ -63,7 +63,7 @@ public class Mainframe extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	public static int autoDownload = 0;
-	public static int loadOnDemand = 0;
+	public static int loadOnDemand = 1;
 	public static Font schrift = new Font("Roboto", Font.PLAIN, 16);
 	public static Font descSchrift = new Font("Roboto", Font.PLAIN, 16);
 	private static JTable table = new JTable();

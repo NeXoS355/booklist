@@ -45,11 +45,11 @@ public class Book_Booklist {
 
 		if (db) {
 			if (!ausgeliehen_an.isEmpty())
-				Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, datum.toString());
+				bid = Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, datum.toString());
 			else if (!ausgeliehen_von.isEmpty())
-				Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, datum.toString());
+				bid = Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, datum.toString());
 			else
-				Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, datum.toString());
+				bid = Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, datum.toString());
 		}
 	}
 

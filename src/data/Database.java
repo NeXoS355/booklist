@@ -13,8 +13,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-
 import com.opencsv.CSVWriter;
 
 import application.BookListModel;
@@ -33,7 +31,7 @@ public class Database {
 				con = DriverManager.getConnection("jdbc:derby:BooklistDB;create=true;upgrade=true");
 				createTable(con);
 			}
-			checkUpdate();
+			Updater.checkUpdate(con);
 		} catch (SQLException e) {
 			System.err.println("Verbindung konnte nicht hergestellt werden");
 			e.printStackTrace();
@@ -142,116 +140,7 @@ public class Database {
 		return rs;
 	}
 
-	public static void checkUpdate() {
-
-		String currentVersion = checkVersion();
-		switch (currentVersion) {
-		case "2.2.0":
-			try {
-				String sql = "ALTER TABLE bücher ADD description clob (64 M)";
-				PreparedStatement st;
-				st = con.prepareStatement(sql);
-				st.execute();
-				st.close();
-				sql = "UPDATE versions set version='2.4.0'";
-				st = con.prepareStatement(sql);
-				st.execute();
-				st.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.0 aktualisiert!");
-		case "2.4.0":
-			try {
-				String sql = "ALTER TABLE bücher ADD isbn varchar(13)";
-				PreparedStatement st;
-				st = con.prepareStatement(sql);
-				st.execute();
-				st.close();
-				sql = "UPDATE versions set version='2.4.4'";
-				st = con.prepareStatement(sql);
-				st.execute();
-				st.close();
-				JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.4 aktualisiert!");
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
-				JOptionPane.showMessageDialog(null, e.getMessage());
-			}
-		case "2.4.4":
-			try {
-				String sql = "ALTER TABLE bücher ADD bid numeric(6,0) NOT NULL DEFAULT 0";
-				PreparedStatement st;
-				st = con.prepareStatement(sql);
-				st.execute();
-				st.close();
-				int bid = 100000;
-				ResultSet rs = null;
-				rs = Database.readDbBooklist();
-				while (rs.next()) {
-					String autor = rs.getString("autor").trim();
-					String titel = rs.getString("titel").trim();
-					sql = "UPDATE bücher set bid= ? WHERE autor = ? AND titel = ?";
-					st = con.prepareStatement(sql);
-					st.setInt(1, bid);
-					st.setString(2, autor);
-					st.setString(3, titel);
-					st.execute();
-					st.close();
-					bid++;
-					System.out.println("BID set " + autor + " - " + titel + ", " + bid);
-				}
-				rs.close();
-				sql = "ALTER TABLE bücher DROP CONSTRAINT buecher_pk";
-				st = con.prepareStatement(sql);
-				st.execute();
-				st.close();
-				sql = "ALTER TABLE bücher ADD CONSTRAINT buecher_pk PRIMARY KEY (bid)";
-				st = con.prepareStatement(sql);
-				st.execute();
-				st.close();
-				sql = "UPDATE versions set version='2.4.5'";
-				st = con.prepareStatement(sql);
-				st.execute();
-				st.close();
-				JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.5 aktualisiert!");
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
-				JOptionPane.showMessageDialog(null, e.getMessage());
-			}
-			String version_new = checkVersion();
-
-			if (!version_new.equals("2.4.5")) {
-				JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell! Bitte Prozess wiederholen!");
-				System.exit(1);
-			}
-		case "2.4.5":
-			// all good
-		}
-
-	}
-
-	public static String checkVersion() {
-		Statement st = null;
-		ResultSet rs = null;
-		String version = "";
-		try {
-			st = con.createStatement();
-			rs = st.executeQuery("SELECT version from versions");
-			while (rs.next()) {
-				version = rs.getString("version").trim();
-
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return version;
-	}
+	
 
 	public static int CSVExport() {
 		int returnValue = 2;
@@ -348,10 +237,11 @@ public class Database {
 		}
 	}
 
-	public static void addToBooklist(String autor, String titel, String ausgeliehen, String name, String bemerkung,
+	public static int addToBooklist(String autor, String titel, String ausgeliehen, String name, String bemerkung,
 			String serie, String seriePart, String datum) throws SQLException {
 		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,date,bid) VALUES(?,?,?,?,?,?,?,?,?)";
 		PreparedStatement st = con.prepareStatement(sql);
+		highestBid++;
 		st.setString(1, autor);
 		st.setString(2, titel);
 		st.setString(3, ausgeliehen);
@@ -360,12 +250,13 @@ public class Database {
 		st.setString(6, serie);
 		st.setString(7, seriePart);
 		st.setString(8, datum);
-		st.setInt(9, highestBid + 1);
+		st.setInt(9, highestBid);
 		st.executeUpdate();
 		st.close();
-		highestBid++;
+
 		System.out.println("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + ","
 				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + (highestBid - 1));
+		return highestBid;
 	}
 
 	public static void addToWishlist(String autor, String titel, String bemerkung, String serie, String seriePart,
@@ -384,14 +275,13 @@ public class Database {
 				+ "," + seriePart + "," + datum);
 	}
 
-	public static void addPic(String autor, String titel, InputStream photo) {
-		String sql = "update bücher set pic=? where autor=? and titel=?";
+	public static void addPic(int bid, InputStream photo) {
+		String sql = "update bücher set pic=? where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
 			st.setBinaryStream(1, photo);
-			st.setString(2, autor);
-			st.setString(3, titel);
+			st.setInt(2, bid);
 			st.execute();
 			st.close();
 		} catch (SQLException e) {
@@ -401,16 +291,14 @@ public class Database {
 
 	}
 
-	public static boolean delPic(String autor, String titel) {
-		String sql = "update bücher set pic=null where autor=? and titel=?";
+	public static boolean delPic(int bid) {
+		String sql = "update bücher set pic=null where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
-			st.setString(1, autor);
-			st.setString(2, titel);
+			st.setInt(1, bid);
 			st.execute();
 			st.close();
-			System.out.println("Bild gelöscht " + autor + " - " + titel);
 			return true;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -420,13 +308,12 @@ public class Database {
 
 	}
 
-	public static ResultSet getPic(String autor, String titel) {
+	public static ResultSet getPic(int bid) {
 		ResultSet rs = null;
-		String sql = "SELECT * FROM bücher WHERE autor=? and titel=?";
+		String sql = "SELECT * FROM bücher WHERE bid=?";
 		try {
 			PreparedStatement pst = con.prepareStatement(sql);
-			pst.setString(1, autor);
-			pst.setString(2, titel);
+			pst.setInt(1, bid);
 			rs = pst.executeQuery();
 		} catch (SQLException e) {
 			System.out.println("Fehler beim auslesen des Bildes");
@@ -435,14 +322,13 @@ public class Database {
 		return rs;
 	}
 
-	public static void addDesc(String autor, String titel, String desc) {
-		String sql = "update bücher set description=? where autor=? and titel=?";
+	public static void addDesc(int bid, String desc) {
+		String sql = "update bücher set description=? where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
 			st.setString(1, desc);
-			st.setString(2, autor);
-			st.setString(3, titel);
+			st.setInt(2, bid);
 			st.execute();
 			st.close();
 		} catch (SQLException e) {
@@ -452,16 +338,14 @@ public class Database {
 
 	}
 
-	public static boolean delDesc(String autor, String titel) {
-		String sql = "update bücher set description=null where autor=? and titel=?";
+	public static boolean delDesc(int bid) {
+		String sql = "update bücher set description=null where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
-			st.setString(1, autor);
-			st.setString(2, titel);
+			st.setInt(1, bid);
 			st.execute();
 			st.close();
-			System.out.println("Bild gelöscht " + autor + " - " + titel);
 			return true;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -471,14 +355,13 @@ public class Database {
 
 	}
 
-	public static void addIsbn(String autor, String titel, String isbn) {
-		String sql = "update bücher set isbn=? where autor=? and titel=?";
+	public static void addIsbn(int bid, String isbn) {
+		String sql = "update bücher set isbn=? where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
 			st.setString(1, isbn);
-			st.setString(2, autor);
-			st.setString(3, titel);
+			st.setInt(2, bid);
 			st.execute();
 			st.close();
 		} catch (SQLException e) {
@@ -488,16 +371,14 @@ public class Database {
 
 	}
 
-	public static boolean delIsbn(String autor, String titel) {
-		String sql = "update bücher set isbn=null where autor=? and titel=?";
+	public static boolean delIsbn(int bid) {
+		String sql = "update bücher set isbn='' where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
-			st.setString(1, autor);
-			st.setString(2, titel);
+			st.setInt(1, bid);
 			st.execute();
 			st.close();
-			System.out.println("isbn gelöscht " + autor + " - " + titel);
 			return true;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -505,14 +386,6 @@ public class Database {
 			return false;
 		}
 
-	}
-
-	public static void alterTableAdd(String spaltenName) throws SQLException {
-		String sql = "ALTER TABLE bücher ADD ? VARCHAR(100)";
-		PreparedStatement st = con.prepareStatement(sql);
-		st.setString(1, spaltenName);
-		st.execute();
-		st.close();
 	}
 
 }

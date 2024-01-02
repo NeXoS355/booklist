@@ -117,7 +117,7 @@ public class HandleWebInfo {
 							cDesc = 1;
 							String description = volumeInfo.get("description").getAsString();
 							eintrag.setDesc(description);
-							Database.addDesc(eintrag.getAutor(), eintrag.getTitel(), description);
+							Database.addDesc(eintrag.getBid(), description);
 						} else {
 							System.out.println("Description nicht gefunden.");
 						}
@@ -142,9 +142,8 @@ public class HandleWebInfo {
 		}
 	}
 
-	public static boolean deletePic(String autor, String titel) {
-		return Database.delPic(autor, titel);
-
+	public static boolean deletePic(int bid) {
+		return Database.delPic(bid);
 	}
 
 	public static boolean savePic(String weblink, Book_Booklist eintrag) {
@@ -167,7 +166,7 @@ public class HandleWebInfo {
 			fos.write(response);
 			fos.close();
 			BufferedInputStream photoStream = new BufferedInputStream(new FileInputStream(path));
-			Database.addPic(eintrag.getAutor(), eintrag.getTitel(), photoStream);
+			Database.addPic(eintrag.getBid(), photoStream);
 			photoStream.close();
 			out.close();
 			in.close();
@@ -176,7 +175,7 @@ public class HandleWebInfo {
 				file.delete();
 				System.out.println("Temp File deleted");
 			}
-			ResultSet rs = Database.getPic(eintrag.getAutor(), eintrag.getTitel());
+			ResultSet rs = Database.getPic(eintrag.getBid());
 			try {
 				while (rs.next()) {
 					Blob picture = rs.getBlob("pic");
@@ -207,7 +206,7 @@ public class HandleWebInfo {
 	}
 
 	private static boolean saveIsbn(String isbn, Book_Booklist eintrag) {
-		Database.addIsbn(eintrag.getAutor(), eintrag.getTitel(), isbn);
+		Database.addIsbn(eintrag.getBid(), isbn);
 		eintrag.setIsbn(isbn);
 		return true;
 	}
