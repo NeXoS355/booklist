@@ -136,7 +136,7 @@ public class Database {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			JOptionPane.showMessageDialog(null, "Datenbank aktualisiert!");
+			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.0 aktualisiert!");
 		case "2.4.0":
 			try {
 				String sql = "ALTER TABLE bücher ADD isbn varchar(13)";
@@ -151,8 +151,10 @@ public class Database {
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
+				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
-			JOptionPane.showMessageDialog(null, "Datenbank aktualisiert!");
+			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.4 aktualisiert!");
 		}
 		
 			
