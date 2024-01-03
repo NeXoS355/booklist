@@ -774,10 +774,10 @@ public class Dialog_edit_Booklist extends JDialog {
 				}
 				if (oldEbook != newEbook) {
 					eintrag.setEbook(newEbook);
-					int ebook_int = 0;
+					String ebook_str = "0";
 					if (newEbook)
-						ebook_int = 1;
-					Database.updateBooklistEntry(bid, "ebook", ebook_int);
+						ebook_str = "1";
+					Database.updateBooklistEntry(bid, "ebook", ebook_str);
 				}
 				if (oldAusgeliehen == true) {
 					if (newAusgAn && oldNameAusgAn.length() == 0) {

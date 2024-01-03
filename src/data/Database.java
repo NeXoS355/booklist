@@ -140,8 +140,6 @@ public class Database {
 		return rs;
 	}
 
-	
-
 	public static int CSVExport() {
 		int returnValue = 2;
 		System.out.println("CSV Export");
@@ -174,17 +172,6 @@ public class Database {
 		return returnValue;
 	}
 
-	public static ResultSet readDbWishlist() {
-		ResultSet rs = null;
-		try {
-			Statement st = con.createStatement();
-			rs = st.executeQuery("SELECT * FROM wishlist ORDER BY autor");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return rs;
-	}
-
 	public static String readCurrentLayoutVersion() {
 		ResultSet rs = null;
 		String version = "";
@@ -213,22 +200,6 @@ public class Database {
 			st.executeUpdate();
 			st.close();
 			System.out.println("Booklist Datenbank Eintrag gelöscht - " + bid);
-		} catch (
-
-		SQLException ex) {
-			System.err.println("Buch wurde nicht gelöscht");
-		}
-	}
-
-	public static void deleteFromWishlist(String autor, String titel) {
-		try {
-			String sql = "DELETE FROM wishlist WHERE autor = ? AND titel = ?";
-			PreparedStatement st = con.prepareStatement(sql);
-			st.setString(1, autor);
-			st.setString(2, titel);
-			st.executeUpdate();
-			st.close();
-			System.out.println("Wishlist Datenbank Eintrag gelöscht: " + autor + "," + titel);
 		} catch (
 
 		SQLException ex) {
@@ -278,37 +249,7 @@ public class Database {
 			e.printStackTrace();
 		}
 	}
-	public static void updateBooklistEntry(int bid, String colName, int value) {
-		String sql = "update bücher set "+ colName +"=? where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
-			st.setInt(1, value);
-			st.setInt(2, bid);
-			st.execute();
-			st.close();
-			System.out.println("Table updated - " + bid + " - " + colName + "=" + value);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
-	public static void addToWishlist(String autor, String titel, String bemerkung, String serie, String seriePart,
-			String datum) throws SQLException {
-		String sql = "INSERT INTO wishlist(autor,titel,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?)";
-		PreparedStatement st = con.prepareStatement(sql);
-		st.setString(1, autor);
-		st.setString(2, titel);
-		st.setString(3, bemerkung);
-		st.setString(4, serie);
-		st.setString(5, seriePart);
-		st.setString(6, datum);
-		st.executeUpdate();
-		st.close();
-		System.out.println("Wishlist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + bemerkung + "," + serie
-				+ "," + seriePart + "," + datum);
-	}
 
 	public static void addPic(int bid, InputStream photo) {
 		String sql = "update bücher set pic=? where bid=?";
@@ -421,6 +362,50 @@ public class Database {
 			return false;
 		}
 
+	}
+	
+	public static ResultSet readDbWishlist() {
+		ResultSet rs = null;
+		try {
+			Statement st = con.createStatement();
+			rs = st.executeQuery("SELECT * FROM wishlist ORDER BY autor");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return rs;
+	}
+
+	public static void addToWishlist(String autor, String titel, String bemerkung, String serie, String seriePart,
+			String datum) throws SQLException {
+		String sql = "INSERT INTO wishlist(autor,titel,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?)";
+		PreparedStatement st = con.prepareStatement(sql);
+		st.setString(1, autor);
+		st.setString(2, titel);
+		st.setString(3, bemerkung);
+		st.setString(4, serie);
+		st.setString(5, seriePart);
+		st.setString(6, datum);
+		st.executeUpdate();
+		st.close();
+		System.out.println("Wishlist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + bemerkung + "," + serie
+				+ "," + seriePart + "," + datum);
+	}
+
+	
+	public static void deleteFromWishlist(String autor, String titel) {
+		try {
+			String sql = "DELETE FROM wishlist WHERE autor = ? AND titel = ?";
+			PreparedStatement st = con.prepareStatement(sql);
+			st.setString(1, autor);
+			st.setString(2, titel);
+			st.executeUpdate();
+			st.close();
+			System.out.println("Wishlist Datenbank Eintrag gelöscht: " + autor + "," + titel);
+		} catch (
+
+		SQLException ex) {
+			System.err.println("Buch wurde nicht gelöscht");
+		}
 	}
 
 }

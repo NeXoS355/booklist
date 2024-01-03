@@ -11,12 +11,12 @@ import javax.swing.JOptionPane;
 public class Updater {
 
 	public static void checkUpdate(Connection con) {
-		
+
 		String sql = "";
 		PreparedStatement st;
 		String currentVersion = checkVersion(con);
 		String version_new = "";
-		
+
 		switch (currentVersion) {
 		case "2.2.0":
 			try {
@@ -109,7 +109,7 @@ public class Updater {
 					JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 					JOptionPane.showMessageDialog(null, e.getMessage());
 				}
-			} else 
+			} else
 				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die version nicht erhöht");
 
 			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.5 aktualisiert!");
@@ -132,7 +132,7 @@ public class Updater {
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
-			
+
 			if (success == 1) {
 				try {
 					sql = "UPDATE versions set version='2.5.0'";
@@ -144,7 +144,7 @@ public class Updater {
 					JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 					JOptionPane.showMessageDialog(null, e.getMessage());
 				}
-			} else 
+			} else
 				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die Version nicht erhöht");
 
 			version_new = checkVersion(con);
@@ -152,9 +152,34 @@ public class Updater {
 				JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell! Bitte Prozess wiederholen!");
 				System.exit(1);
 			}
-			
+
+			// Start Migration of E-Book Data
+			ResultSet rs = null;
+			rs = Database.readDbBooklist();
+
+			try {
+				int counter = 0;
+				String bemerkung = "";
+				while (rs.next()) {
+					bemerkung = rs.getString("bemerkung").trim();
+					int bid = Integer.parseInt(rs.getString("bid"));
+
+					bemerkung = bemerkung.toLowerCase().replace("-", "").replace(" ", "").replace("_", "");
+
+					if (bemerkung.contains("ebook")) {
+						Database.updateBooklistEntry(bid, "ebook", "1");
+						counter++;
+					}
+				}
+				rs.close();
+				JOptionPane.showMessageDialog(null, counter + " Bücher wurden als E-Book markiert");
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		case "2.5.0":
-			//all good
+			// all good
 		}
 
 	}
