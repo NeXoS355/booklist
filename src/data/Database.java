@@ -262,6 +262,37 @@ public class Database {
 				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + int_ebook + "," +(highestBid));
 		return highestBid;
 	}
+	
+	public static void updateBooklistEntry(int bid, String colName, String value) {
+		String sql = "update bücher set "+ colName +"=? where bid=?";
+		PreparedStatement st;
+		try {
+			st = con.prepareStatement(sql);
+			st.setString(1, value);
+			st.setInt(2, bid);
+			st.execute();
+			st.close();
+			System.out.println("Table updated - " + bid + " - " + colName + "=" + value);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public static void updateBooklistEntry(int bid, String colName, int value) {
+		String sql = "update bücher set "+ colName +"=? where bid=?";
+		PreparedStatement st;
+		try {
+			st = con.prepareStatement(sql);
+			st.setInt(1, value);
+			st.setInt(2, bid);
+			st.execute();
+			st.close();
+			System.out.println("Table updated - " + bid + " - " + colName + "=" + value);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	public static void addToWishlist(String autor, String titel, String bemerkung, String serie, String seriePart,
 			String datum) throws SQLException {

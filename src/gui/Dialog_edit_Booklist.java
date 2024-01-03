@@ -21,8 +21,6 @@ import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
@@ -68,14 +66,14 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	public Dialog_edit_Booklist(BookListModel einträge, int index, DefaultTreeModel treeModel,
 			DefaultMutableTreeNode rootNode) {
-		
+
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(600, 645));
-		this.setLocation(Mainframe.getInstance().getX()+500, Mainframe.getInstance().getY()+200);
+		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 		this.setAlwaysOnTop(false);
-		
+
 		Book_Booklist eintrag = einträge.getElementAt(index);
-		
+
 		if (HandleConfig.loadOnDemand == 1) {
 			BookListModel.loadOnDemand(eintrag);
 		}
@@ -94,14 +92,14 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_west.setLayout(new GridLayout(4, 1, 10, 20));
 
 		JPanel panel_center = new JPanel();
-		panel_center.setLayout(new GridBagLayout());		
+		panel_center.setLayout(new GridBagLayout());
 
 		JPanel panel_east_border = new JPanel();
 		panel_east_border.setLayout(new BorderLayout(10, 10));
 
 		JPanel panel_south_border = new JPanel();
-		panel_south_border.setLayout(new BorderLayout(10,10));
-		
+		panel_south_border.setLayout(new BorderLayout(10, 10));
+
 		JPanel panel_south = new JPanel();
 		panel_south.setLayout(new GridLayout(3, 2, 10, 10));
 
@@ -109,10 +107,11 @@ public class Dialog_edit_Booklist extends JDialog {
 		int breite = 100;
 
 		/*
-		create and add components to Panel North
-		*/
-		JLabel lbl_datum = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
-		JLabel lbl_isbn = new JLabel("ISBN: " + eintrag.getIsbn(),SwingConstants.RIGHT);
+		 * create and add components to Panel North
+		 */
+		JLabel lbl_datum = new JLabel(
+				"hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
+		JLabel lbl_isbn = new JLabel("ISBN: " + eintrag.getIsbn(), SwingConstants.RIGHT);
 		lbl_isbn.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -151,21 +150,21 @@ public class Dialog_edit_Booklist extends JDialog {
 				});
 			}
 		});
-		
+
 		panel_north.add(lbl_datum);
 		panel_north.add(lbl_isbn);
 		panel_north.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-		
+
 		/*
-		 create and add components to Panel East
-		*/
+		 * create and add components to Panel East
+		 */
 		ImageIcon imgIcn = showImg(eintrag);
 		if (imgIcn != null) {
 			Image img = imgIcn.getImage();
-			Image newimg = img.getScaledInstance(128, 192,  java.awt.Image.SCALE_SMOOTH);
+			Image newimg = img.getScaledInstance(128, 192, java.awt.Image.SCALE_SMOOTH);
 			imgIcn = new ImageIcon(newimg);
 			lbl_pic = new JLabel(imgIcn);
-			lbl_pic.setPreferredSize(new Dimension(160,280));
+			lbl_pic.setPreferredSize(new Dimension(160, 280));
 			lbl_pic.addMouseListener(new MouseAdapter() {
 
 				@Override
@@ -189,7 +188,7 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
 							if (webpage != null && webpage != "") {
-								HandleWebInfo.DownloadWebPage(eintrag,2, false);	
+								HandleWebInfo.DownloadWebPage(eintrag, 2, false);
 								lbl_pic = new JLabel(showImg(eintrag));
 							}
 						}
@@ -200,7 +199,7 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							boolean state = HandleWebInfo.deletePic(eintrag.getBid());
 							if (state == true) {
-								//JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
+								// JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
 								eintrag.setPic(null);
 								dispose();
 								new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
@@ -221,18 +220,18 @@ public class Dialog_edit_Booklist extends JDialog {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					boolean downloaded = HandleWebInfo.DownloadWebPage(eintrag,2,false);
+					boolean downloaded = HandleWebInfo.DownloadWebPage(eintrag, 2, false);
 					if (downloaded) {
 						dispose();
 						Dialog_edit_Booklist dialog = new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
 						boolean answer = HandleWebInfo.checkDownload();
 						if (answer) {
-							downloaded = HandleWebInfo.DownloadWebPage(eintrag,2,true);
+							downloaded = HandleWebInfo.DownloadWebPage(eintrag, 2, true);
 							dialog.dispose();
 							new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
 						}
 					}
-					
+
 				}
 			});
 			panel_east_border.add(btn_downloadInfo, BorderLayout.CENTER);
@@ -368,7 +367,6 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-
 		JLabel lbl_serie = new JLabel("Serie | Band:");
 		lbl_serie.setFont(Mainframe.schrift);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
@@ -404,7 +402,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		
+
 		txt_seriePart = new RoundJTextField(eintrag.getSeriePart());
 		txt_seriePart.setFont(Mainframe.schrift);
 		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
@@ -440,82 +438,82 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		
+
 		JLabel lbl_ebook = new JLabel("E-Book:");
 		lbl_ebook.setFont(Mainframe.schrift);
 		lbl_ebook.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_ebook);
-		
+
 		check_ebook = new JCheckBox();
 		check_ebook.setFont(Mainframe.schrift);
 		check_ebook.setSelected(eintrag.isEbook());
-		
+
 		System.out.println(eintrag.getBid());
-		
+
 		/*
 		 * Set Center Layout
 		 */
-		GridBagConstraints c = new GridBagConstraints();		
-		
+		GridBagConstraints c = new GridBagConstraints();
+
 		c.gridx = 0;
 		c.gridy = 0;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.ipady = 15;
-		panel_center.add(lbl_author,c);
+		panel_center.add(lbl_author, c);
 		c.gridx = 1;
 		c.gridy = 0;
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_author,c);
+		panel_center.add(txt_author, c);
 		c.gridx = 0;
 		c.gridy = 1;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		c.insets = new Insets(10,0,0,0);
-		panel_center.add(lbl_title,c);
+		c.insets = new Insets(10, 0, 0, 0);
+		panel_center.add(lbl_title, c);
 		c.gridx = 1;
 		c.gridy = 1;
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_title,c);
+		panel_center.add(txt_title, c);
 		c.gridx = 0;
 		c.gridy = 2;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		panel_center.add(lbl_merk,c);
+		panel_center.add(lbl_merk, c);
 		c.gridx = 1;
 		c.gridy = 2;
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_merk,c);
+		panel_center.add(txt_merk, c);
 		c.gridx = 0;
 		c.gridy = 3;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		panel_center.add(lbl_serie,c);
+		panel_center.add(lbl_serie, c);
 		c.gridx = 1;
 		c.gridy = 3;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_serie,c);		
+		panel_center.add(txt_serie, c);
 		c.gridx = 2;
 		c.gridy = 3;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(10,10,0,0);
+		c.insets = new Insets(10, 10, 0, 0);
 		panel_center.add(txt_seriePart, c);
 		c.gridx = 0;
 		c.gridy = 4;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
-		c.insets = new Insets(10,0,0,0);
+		c.insets = new Insets(10, 0, 0, 0);
 		panel_center.add(lbl_ebook, c);
 		c.gridx = 1;
 		c.gridy = 4;
@@ -548,7 +546,6 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		});
 
-
 		check_an = new JCheckBox("ausgeliehen an");
 		check_an.setFont(Mainframe.schrift);
 		if (!eintrag.getAusgeliehen_an().isEmpty())
@@ -567,7 +564,6 @@ public class Dialog_edit_Booklist extends JDialog {
 				}
 			}
 		});
-
 
 		txt_leihVon = new RoundJTextField(eintrag.getAusgeliehen_von());
 		txt_leihVon.setFont(Mainframe.schrift);
@@ -601,7 +597,6 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-
 		txt_leihAn = new RoundJTextField(eintrag.getAusgeliehen_an());
 		txt_leihAn.setFont(Mainframe.schrift);
 		txt_leihAn.setBorder(standardBorder);
@@ -634,7 +629,6 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-
 		JButton btn_add = new JButton("Speichern");
 		btn_add.setFont(Mainframe.schrift);
 		btn_add.addActionListener(new ActionListener() {
@@ -645,7 +639,6 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		});
 
-
 		JButton btn_abort = new JButton("Abbrechen");
 		btn_abort.setFont(Mainframe.schrift);
 		btn_abort.addActionListener(new ActionListener() {
@@ -655,7 +648,7 @@ public class Dialog_edit_Booklist extends JDialog {
 				dispose();
 			}
 		});
-		
+
 		/*
 		 * add components into Panel South
 		 */
@@ -666,18 +659,18 @@ public class Dialog_edit_Booklist extends JDialog {
 		panel_south.add(btn_add);
 		panel_south.add(btn_abort);
 		panel_south.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-		
+
 		/*
 		 * create TextArea for Description
 		 */
-		JTextArea txt_desc = new JTextArea(10,30);
+		JTextArea txt_desc = new JTextArea(10, 30);
 		txt_desc.setText(eintrag.getDesc());
 		txt_desc.setEnabled(false);
 		txt_desc.setLineWrap(true);
 		txt_desc.setWrapStyleWord(true);
 		txt_desc.setFont(Mainframe.descSchrift);
 		txt_desc.setDisabledTextColor(Color.BLACK);
-		this.setSize(this.getWidth(), this.getHeight()+(Mainframe.descSchrift.getSize()-16)*14);
+		this.setSize(this.getWidth(), this.getHeight() + (Mainframe.descSchrift.getSize() - 16) * 14);
 		JScrollPane scroll_desc = new JScrollPane(txt_desc, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -702,7 +695,7 @@ public class Dialog_edit_Booklist extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						boolean state = Database.delDesc(eintrag.getBid());
 						if (state == true) {
-							//JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich gelöscht");
+							// JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich gelöscht");
 							eintrag.setDesc(null);
 							dispose();
 							new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
@@ -715,9 +708,9 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			}
 		});
-		
+
 		panel_south_border.add(scroll_desc, BorderLayout.SOUTH);
-		panel_south_border.add(panel_south,BorderLayout.CENTER);
+		panel_south_border.add(panel_south, BorderLayout.CENTER);
 
 		this.add(panel_north, BorderLayout.NORTH);
 		this.add(panel_center, BorderLayout.CENTER);
@@ -729,74 +722,107 @@ public class Dialog_edit_Booklist extends JDialog {
 		} else {
 			Mainframe.search(Mainframe.getTreeSelection());
 		}
-		
+
 		this.setVisible(true);
 		this.setResizable(false);
 
 	}
 
 	public void speichern(Book_Booklist eintrag) {
-		try {
-			int newBid = 0;
-			int oldBid = eintrag.getBid();
-			String oldAutor = eintrag.getAutor();
-			String oldTitel = eintrag.getTitel();
-			String newAutor = txt_author.getText().trim();
-			String newTitel = txt_title.getText().trim();
-			String newBemerkung = txt_merk.getText().trim();
-			String newSerie = txt_serie.getText().trim();
-			String newSeriePart = txt_seriePart.getText();
-			boolean ebook = check_ebook.isSelected();
-			Timestamp datum = new Timestamp(System.currentTimeMillis());
-			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
-				if (checkInput(newAutor, newTitel, Mainframe.einträge.getIndexOf(oldAutor, oldTitel))) {
+		int bid = eintrag.getBid();
+		String oldAutor = eintrag.getAutor();
+		String oldTitel = eintrag.getTitel();
+		String oldMerk = eintrag.getBemerkung();
+		String oldSerie = eintrag.getSerie();
+		String oldSeriePart = eintrag.getSeriePart();
+		boolean oldEbook = eintrag.isEbook();
+		boolean oldAusgeliehen = eintrag.isAusgeliehen();
 
-					if (check_an.isSelected()) {
-						eintrag.setAusgeliehen(true);
-						eintrag.setAusgeliehen_an(txt_leihAn.getText().trim());
-						eintrag.setAusgeliehen_von("");
-						Database.deleteFromBooklist(oldBid);
-						newBid = Database.addToBooklist(newAutor, newTitel, "an", txt_leihAn.getText().trim(), newBemerkung,
-								newSerie, newSeriePart, ebook, datum.toString());
-					} else if (check_von.isSelected()) {
-						eintrag.setAusgeliehen(true);
-						eintrag.setAusgeliehen_von(txt_leihVon.getText().trim());
-						eintrag.setAusgeliehen_an("");
-						Database.deleteFromBooklist(oldBid);
-						newBid = Database.addToBooklist(newAutor, newTitel, "von", txt_leihVon.getText().trim(), newBemerkung,
-								newSerie, newSeriePart, ebook, datum.toString());
+		String oldNameAusgVon = eintrag.getAusgeliehen_von();
+		String oldNameAusgAn = eintrag.getAusgeliehen_an();
 
-					} else {
-						eintrag.setAusgeliehen(false);
-						eintrag.setAusgeliehen_an("");
-						eintrag.setAusgeliehen_von("");
-						Database.deleteFromBooklist(oldBid);
-						newBid = Database.addToBooklist(newAutor, newTitel, "nein", "", newBemerkung, newSerie, newSeriePart,ebook,
-								datum.toString());
-					}
+		String newAutor = txt_author.getText().trim();
+		String newTitel = txt_title.getText().trim();
+		String newBemerkung = txt_merk.getText().trim();
+		String newSerie = txt_serie.getText().trim();
+		String newSeriePart = txt_seriePart.getText();
+		boolean newEbook = check_ebook.isSelected();
+		boolean newAusgAn = check_an.isSelected();
+		boolean newAusgVon = check_von.isSelected();
+
+		if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
+			if (checkInput(newAutor, newTitel, Mainframe.einträge.getIndexOf(oldAutor, oldTitel))) {
+				if (!oldAutor.equals(newAutor)) {
 					eintrag.setAutor(newAutor);
+					Database.updateBooklistEntry(bid, "autor", newAutor);
+				}
+				if (!oldTitel.equals(newTitel)) {
 					eintrag.setTitel(newTitel);
+					Database.updateBooklistEntry(bid, "titel", newTitel);
+				}
+				if (!oldMerk.equals(newBemerkung)) {
 					eintrag.setBemerkung(newBemerkung);
+					Database.updateBooklistEntry(bid, "bemerkung", newBemerkung);
+				}
+				if (!oldSerie.equals(newSerie)) {
 					eintrag.setSerie(newSerie);
+					Database.updateBooklistEntry(bid, "serie", newSerie);
+				}
+				if (!oldSeriePart.equals(newSeriePart)) {
 					eintrag.setSeriePart(newSeriePart);
-					eintrag.setEbook(ebook);
-					eintrag.setDatum(datum);
-					eintrag.setBid(newBid);
-					dispose();
-				} else {
-					txt_title.setText("Buch bereits vorhanden!");
-					txt_title.setBackground(new Color(255, 105, 105));
+					Database.updateBooklistEntry(bid, "seriePart", newSeriePart);
 				}
+				if (oldEbook != newEbook) {
+					eintrag.setEbook(newEbook);
+					int ebook_int = 0;
+					if (newEbook)
+						ebook_int = 1;
+					Database.updateBooklistEntry(bid, "ebook", ebook_int);
+				}
+				if (oldAusgeliehen == true) {
+					if (newAusgAn && oldNameAusgAn.length() == 0) {
+						eintrag.setAusgeliehen_an(txt_leihAn.getText());
+						Database.updateBooklistEntry(bid, "ausgeliehen", "an");
+						Database.updateBooklistEntry(bid, "name", txt_leihAn.getText());
+					}
+					if (newAusgVon && oldNameAusgVon.length() == 0) {
+						eintrag.setAusgeliehen_von(txt_leihVon.getText());
+						Database.updateBooklistEntry(bid, "ausgeliehen", "von");
+						Database.updateBooklistEntry(bid, "name", txt_leihVon.getText());
+					}
+					if (!newAusgAn && !newAusgVon) {
+						eintrag.setAusgeliehen(false);
+						eintrag.setAusgeliehen_von("");
+						eintrag.setAusgeliehen_an("");
+						Database.updateBooklistEntry(bid, "ausgeliehen", "nein");
+						Database.updateBooklistEntry(bid, "name", "");
+					}
+				}
+				if (oldAusgeliehen == false) {
+					if (newAusgAn) {
+						eintrag.setAusgeliehen(true);
+						eintrag.setAusgeliehen_an(txt_leihAn.getText());
+						Database.updateBooklistEntry(bid, "ausgeliehen", "an");
+						Database.updateBooklistEntry(bid, "name", txt_leihAn.getText());
+					} else if (newAusgVon) {
+						eintrag.setAusgeliehen(true);
+						eintrag.setAusgeliehen_von(txt_leihVon.getText());
+						Database.updateBooklistEntry(bid, "ausgeliehen", "von");
+						Database.updateBooklistEntry(bid, "name", txt_leihVon.getText());
+					}
+				}
+				dispose();
 			} else {
-				if (txt_author.getText().isEmpty()) {
-					txt_author.setBackground(new Color(255, 105, 105));
-				}
-				if (txt_title.getText().isEmpty()) {
-					txt_title.setBackground(new Color(255, 105, 105));
-				}
+				txt_title.setText("Buch bereits vorhanden!");
+				txt_title.setBackground(new Color(255, 105, 105));
 			}
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} else {
+			if (txt_author.getText().isEmpty()) {
+				txt_author.setBackground(new Color(255, 105, 105));
+			}
+			if (txt_title.getText().isEmpty()) {
+				txt_title.setBackground(new Color(255, 105, 105));
+			}
 		}
 		BookListModel.autorenPrüfen();
 		Mainframe.updateModel();
