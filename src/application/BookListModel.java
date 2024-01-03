@@ -39,10 +39,14 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					Book_Booklist book = null;
 					String autor = rs.getString("autor").trim();
 					String titel = rs.getString("titel").trim();
+					boolean ausgeliehen = false;
 					String bemerkung = rs.getString("bemerkung");
 					String serie = rs.getString("serie").trim();
 					String seriePart = rs.getString("seriePart");
-					boolean ausgeliehen = false;
+					int int_ebook = rs.getInt("ebook");
+					boolean ebook = false;
+					if (int_ebook == 1)
+						ebook = true;
 					Timestamp datum = rs.getTimestamp("date");
 					String isbn = rs.getString("isbn");
 					int bid = Integer.parseInt(rs.getString("bid"));
@@ -63,18 +67,18 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						ausgeliehen = true;
 						String ausgeliehen_an = rs.getString("name").trim();
 						book = new Book_Booklist(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung,
-								serie, seriePart, buf_pic, desc, isbn, datum, false);
+								serie, seriePart,ebook, buf_pic, desc, isbn, datum, false);
 						book.setBid(bid);
 						getBücher().add(book);
 					} else if (rs.getString(3).equals("von")) {
 						ausgeliehen = true;
 						String ausgeliehen_von = rs.getString("name").trim();
 						book = new Book_Booklist(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung,
-								serie, seriePart, buf_pic, desc, isbn, datum, false);
+								serie, seriePart,ebook, buf_pic, desc, isbn, datum, false);
 						book.setBid(bid);
 						getBücher().add(book);
 					} else {
-						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, buf_pic, desc,
+						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart,ebook, buf_pic, desc,
 								isbn, datum, false);
 						book.setBid(bid);
 						getBücher().add(book);
@@ -137,7 +141,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	}
 
 	public void delete(int index) {
-		Database.deleteFromBooklist(getBücher().get(index).getAutor(), getBücher().get(index).getTitel());
+		Database.deleteFromBooklist(getBücher().get(index).getBid());
 		getBücher().remove(index);
 		fireIntervalRemoved(this, index, index);
 	}

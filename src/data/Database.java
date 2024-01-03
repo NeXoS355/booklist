@@ -65,13 +65,13 @@ public class Database {
 		try {
 			createBooklist = con.createStatement();
 			createBooklist.execute(
-					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),pic blob,description clob (64 M), isbn varchar(13),date timestamp,bid numeric(6,0) NOT NULL, CONSTRAINT buecher_pk PRIMARY KEY (bid))");
+					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),ebook NUMERIC(1,0),pic blob,description clob (64 M), isbn varchar(13),date timestamp,bid NUMERIC(6,0) NOT NULL, CONSTRAINT buecher_pk PRIMARY KEY (bid))");
 			createWishlist = con.createStatement();
 			createWishlist.execute(
 					"CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
 			createVersions = con.createStatement();
 			createVersions.execute("CREATE TABLE versions (version VARCHAR(10) NOT NULL, date timestamp NOT NULL)");
-			String sql = "INSERT INTO versions (version ,date) VALUES ('2.4.5','" + datum + "')";
+			String sql = "INSERT INTO versions (version ,date) VALUES ('2.5.0','" + datum + "')";
 			pst = con.prepareStatement(sql);
 			pst.execute();
 			pst.close();
@@ -121,7 +121,7 @@ public class Database {
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery(
-					"SELECT autor,titel,ausgeliehen,name, bemerkung,serie,seriePart,date,isbn,bid FROM bücher ORDER BY autor");
+					"SELECT autor,titel,ausgeliehen,name, bemerkung,serie,seriePart,ebook,date,isbn,bid FROM bücher ORDER BY autor");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -205,15 +205,14 @@ public class Database {
 		return "DB Layout Version:" + version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);
 	}
 
-	public static void deleteFromBooklist(String autor, String titel) {
+	public static void deleteFromBooklist(int bid) {
 		try {
-			String sql = "DELETE FROM bücher WHERE autor = ? AND titel = ?";
+			String sql = "DELETE FROM bücher WHERE bid = ?";
 			PreparedStatement st = con.prepareStatement(sql);
-			st.setString(1, autor);
-			st.setString(2, titel);
+			st.setInt(1, bid);
 			st.executeUpdate();
 			st.close();
-			System.out.println("Booklist Datenbank Eintrag gelöscht: " + autor + "," + titel);
+			System.out.println("Booklist Datenbank Eintrag gelöscht - " + bid);
 		} catch (
 
 		SQLException ex) {
@@ -238,10 +237,14 @@ public class Database {
 	}
 
 	public static int addToBooklist(String autor, String titel, String ausgeliehen, String name, String bemerkung,
-			String serie, String seriePart, String datum) throws SQLException {
-		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,date,bid) VALUES(?,?,?,?,?,?,?,?,?)";
+			String serie, String seriePart,boolean ebook, String datum) throws SQLException {
+		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,ebook,date,bid) VALUES(?,?,?,?,?,?,?,?,?,?)";
 		PreparedStatement st = con.prepareStatement(sql);
 		highestBid++;
+		int int_ebook = 0;
+		if (ebook)
+			int_ebook=1;
+			
 		st.setString(1, autor);
 		st.setString(2, titel);
 		st.setString(3, ausgeliehen);
@@ -249,13 +252,14 @@ public class Database {
 		st.setString(5, bemerkung);
 		st.setString(6, serie);
 		st.setString(7, seriePart);
-		st.setString(8, datum);
-		st.setInt(9, highestBid);
+		st.setInt(8, int_ebook);
+		st.setString(9, datum);
+		st.setInt(10, highestBid);
 		st.executeUpdate();
 		st.close();
 
 		System.out.println("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + ","
-				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + (highestBid - 1));
+				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + int_ebook + "," +(highestBid));
 		return highestBid;
 	}
 

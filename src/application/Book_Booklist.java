@@ -16,6 +16,7 @@ public class Book_Booklist {
 	private String bemerkung;
 	private String serie;
 	private String seriePart;
+	private boolean ebook;
 	private Image pic;
 	private String desc;
 	private String isbn;
@@ -23,7 +24,7 @@ public class Book_Booklist {
 	private int bid;
 
 	public Book_Booklist(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
-			String bemerkung, String serie,String seriePart, Image pic, String desc, String isbn,Timestamp datum, boolean db) throws SQLException {
+			String bemerkung, String serie,String seriePart, boolean ebook, Image pic, String desc, String isbn,Timestamp datum, boolean db) throws SQLException {
 		super();
 		this.autor = autor;
 		this.titel = titel;
@@ -31,6 +32,7 @@ public class Book_Booklist {
 		this.bemerkung = bemerkung;
 		this.serie = serie;
 		this.seriePart = seriePart;
+		this.setEbook(ebook);
 		this.pic = pic;
 		this.desc = desc;
 		this.isbn = isbn;
@@ -45,16 +47,16 @@ public class Book_Booklist {
 
 		if (db) {
 			if (!ausgeliehen_an.isEmpty())
-				bid = Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, datum.toString());
+				bid = Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, ebook, datum.toString());
 			else if (!ausgeliehen_von.isEmpty())
-				bid = Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, datum.toString());
+				bid = Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, ebook,  datum.toString());
 			else
-				bid = Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, datum.toString());
+				bid = Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, ebook, datum.toString());
 		}
 	}
 
-	public Book_Booklist(String autor, String titel, String bemerkung, String serie,String seriePart, Image pic, String desc,String isbn, Timestamp datum, boolean db) throws SQLException {
-		this(autor, titel, false, "", "", bemerkung, serie, seriePart, pic, desc, isbn, datum, db);
+	public Book_Booklist(String autor, String titel, String bemerkung, String serie,String seriePart, boolean ebook, Image pic, String desc,String isbn, Timestamp datum, boolean db) throws SQLException {
+		this(autor, titel, false, "", "", bemerkung, serie, seriePart, ebook, pic, desc, isbn, datum, db);
 	}
 
 	@Override
@@ -195,6 +197,14 @@ public class Book_Booklist {
 
 	public void setBid(int bid) {
 		this.bid = bid;
+	}
+
+	public boolean isEbook() {
+		return ebook;
+	}
+
+	public void setEbook(boolean ebook) {
+		this.ebook = ebook;
 	}
 	
 	

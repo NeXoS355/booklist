@@ -77,14 +77,14 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.4.7  (01.2024)  ";
+	private String version = "Ver. 2.5.0  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
 
 		this.setLayout(new BorderLayout(10, 10));
 		this.setLocation(100, 100);
-		this.setSize(1300, 1000);
+		this.setSize(1300, 800);
 		this.setResizable(true);
 		Mainframe.executor.submit(() -> {
 			HandleConfig.readConfig();

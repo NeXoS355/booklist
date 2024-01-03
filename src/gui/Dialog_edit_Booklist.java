@@ -61,6 +61,7 @@ public class Dialog_edit_Booklist extends JDialog {
 	private RoundJTextField txt_merk;
 	private RoundJTextField txt_serie;
 	private RoundJTextField txt_seriePart;
+	private JCheckBox check_ebook;
 	private JLabel lbl_pic;
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
@@ -69,7 +70,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			DefaultMutableTreeNode rootNode) {
 		
 		this.setTitle("Buch bearbeiten");
-		this.setSize(new Dimension(600, 605));
+		this.setSize(new Dimension(600, 645));
 		this.setLocation(Mainframe.getInstance().getX()+500, Mainframe.getInstance().getY()+200);
 		this.setAlwaysOnTop(false);
 		
@@ -440,6 +441,17 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 		
+		JLabel lbl_ebook = new JLabel("E-Book:");
+		lbl_ebook.setFont(Mainframe.schrift);
+		lbl_ebook.setPreferredSize(new Dimension(breite, höhe));
+		panel_west.add(lbl_ebook);
+		
+		check_ebook = new JCheckBox();
+		check_ebook.setFont(Mainframe.schrift);
+		check_ebook.setSelected(eintrag.isEbook());
+		
+		System.out.println(eintrag.getBid());
+		
 		/*
 		 * Set Center Layout
 		 */
@@ -499,6 +511,18 @@ public class Dialog_edit_Booklist extends JDialog {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(10,10,0,0);
 		panel_center.add(txt_seriePart, c);
+		c.gridx = 0;
+		c.gridy = 4;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		c.insets = new Insets(10,0,0,0);
+		panel_center.add(lbl_ebook, c);
+		c.gridx = 1;
+		c.gridy = 4;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(check_ebook, c);
 		panel_center.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
 		/*
@@ -713,6 +737,8 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	public void speichern(Book_Booklist eintrag) {
 		try {
+			int newBid = 0;
+			int oldBid = eintrag.getBid();
 			String oldAutor = eintrag.getAutor();
 			String oldTitel = eintrag.getTitel();
 			String newAutor = txt_author.getText().trim();
@@ -720,6 +746,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			String newBemerkung = txt_merk.getText().trim();
 			String newSerie = txt_serie.getText().trim();
 			String newSeriePart = txt_seriePart.getText();
+			boolean ebook = check_ebook.isSelected();
 			Timestamp datum = new Timestamp(System.currentTimeMillis());
 			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
 				if (checkInput(newAutor, newTitel, Mainframe.einträge.getIndexOf(oldAutor, oldTitel))) {
@@ -728,23 +755,23 @@ public class Dialog_edit_Booklist extends JDialog {
 						eintrag.setAusgeliehen(true);
 						eintrag.setAusgeliehen_an(txt_leihAn.getText().trim());
 						eintrag.setAusgeliehen_von("");
-						Database.deleteFromBooklist(oldAutor, oldTitel);
-						Database.addToBooklist(newAutor, newTitel, "an", txt_leihAn.getText().trim(), newBemerkung,
-								newSerie, newSeriePart, datum.toString());
+						Database.deleteFromBooklist(oldBid);
+						newBid = Database.addToBooklist(newAutor, newTitel, "an", txt_leihAn.getText().trim(), newBemerkung,
+								newSerie, newSeriePart, ebook, datum.toString());
 					} else if (check_von.isSelected()) {
 						eintrag.setAusgeliehen(true);
 						eintrag.setAusgeliehen_von(txt_leihVon.getText().trim());
 						eintrag.setAusgeliehen_an("");
-						Database.deleteFromBooklist(oldAutor, oldTitel);
-						Database.addToBooklist(newAutor, newTitel, "von", txt_leihVon.getText().trim(), newBemerkung,
-								newSerie, newSeriePart, datum.toString());
+						Database.deleteFromBooklist(oldBid);
+						newBid = Database.addToBooklist(newAutor, newTitel, "von", txt_leihVon.getText().trim(), newBemerkung,
+								newSerie, newSeriePart, ebook, datum.toString());
 
 					} else {
 						eintrag.setAusgeliehen(false);
 						eintrag.setAusgeliehen_an("");
 						eintrag.setAusgeliehen_von("");
-						Database.deleteFromBooklist(oldAutor, oldTitel);
-						Database.addToBooklist(newAutor, newTitel, "nein", "", newBemerkung, newSerie, newSeriePart,
+						Database.deleteFromBooklist(oldBid);
+						newBid = Database.addToBooklist(newAutor, newTitel, "nein", "", newBemerkung, newSerie, newSeriePart,ebook,
 								datum.toString());
 					}
 					eintrag.setAutor(newAutor);
@@ -752,7 +779,9 @@ public class Dialog_edit_Booklist extends JDialog {
 					eintrag.setBemerkung(newBemerkung);
 					eintrag.setSerie(newSerie);
 					eintrag.setSeriePart(newSeriePart);
+					eintrag.setEbook(ebook);
 					eintrag.setDatum(datum);
+					eintrag.setBid(newBid);
 					dispose();
 				} else {
 					txt_title.setText("Buch bereits vorhanden!");
@@ -773,10 +802,11 @@ public class Dialog_edit_Booklist extends JDialog {
 		Mainframe.updateModel();
 	}
 
-	public boolean checkInput(String autor, String titel, int index) {
+	// Check New Autor & Titel if there already exists the same
+	public boolean checkInput(String newAutor, String newTitel, int index) {
 		for (int i = 0; i < Mainframe.einträge.getSize(); i++) {
 			Book_Booklist eintrag = Mainframe.einträge.getElementAt(i);
-			if (eintrag.getAutor().equals(autor) && eintrag.getTitel().equals(titel)) {
+			if (eintrag.getAutor().equals(newAutor) && eintrag.getTitel().equals(newTitel)) {
 				if (i != index)
 					return false;
 			}

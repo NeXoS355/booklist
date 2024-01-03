@@ -47,12 +47,13 @@ public class Dialog_add_Booklist extends JDialog {
 	private RoundJTextField txt_merk;
 	private RoundJTextField txt_serie;
 	private RoundJTextField txt_seriePart;
+	private JCheckBox check_ebook;
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	public Dialog_add_Booklist(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
 		this.setTitle("Buch hinzufügen");
-		this.setSize(new Dimension(500, 365));
+		this.setSize(new Dimension(500, 400));
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 		this.setAlwaysOnTop(true);
 
@@ -285,6 +286,15 @@ public class Dialog_add_Booklist extends JDialog {
 
 		});
 		
+		JLabel lbl_ebook = new JLabel("E-Book:");
+		lbl_ebook.setFont(Mainframe.schrift);
+		lbl_ebook.setPreferredSize(new Dimension(breite, höhe));
+		panel_west.add(lbl_ebook);
+		
+		check_ebook = new JCheckBox();
+		check_ebook.setFont(Mainframe.schrift);
+		check_ebook.setSelected(true);
+		
 		/*
 		 * Set Center Layout
 		 */
@@ -296,7 +306,6 @@ public class Dialog_add_Booklist extends JDialog {
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.ipady = 15;
-//		c.insets = new Insets(0,0,0,10);
 		panel_center.add(lbl_author,c);
 		c.gridx = 1;
 		c.gridy = 0;
@@ -345,6 +354,18 @@ public class Dialog_add_Booklist extends JDialog {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(10,10,0,0);
 		panel_center.add(txt_seriePart, c);
+		c.gridx = 0;
+		c.gridy = 4;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		c.insets = new Insets(10,0,0,0);
+		panel_center.add(lbl_ebook, c);
+		c.gridx = 1;
+		c.gridy = 4;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(check_ebook, c);
 
 		
 		/*
@@ -508,18 +529,19 @@ public class Dialog_add_Booklist extends JDialog {
 				String bemerkung = txt_merk.getText();
 				String serie = txt_serie.getText();
 				String seriePart = txt_seriePart.getText();
+				boolean ebook = check_ebook.isSelected();
 				Timestamp datum = new Timestamp(System.currentTimeMillis());
 				if (checkInput(autor, titel)) {
 					if (check_an.isSelected()) {
 						book = new Book_Booklist(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,
-								seriePart, null, null, null, datum, true);
+								seriePart,ebook, null, null, null, datum, true);
 						Mainframe.einträge.add(book);
 					} else if (check_von.isSelected()) {
 						book = new Book_Booklist(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,
-								seriePart, null, null, null, datum, true);
+								seriePart,ebook, null, null, null, datum, true);
 						Mainframe.einträge.add(book);
 					} else {
-						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, null, null, null, datum,
+						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart,ebook, null, null, null, datum,
 								true);
 						Mainframe.einträge.add(book);
 					}

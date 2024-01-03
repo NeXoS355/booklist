@@ -11,13 +11,16 @@ import javax.swing.JOptionPane;
 public class Updater {
 
 	public static void checkUpdate(Connection con) {
-
+		
+		String sql = "";
+		PreparedStatement st;
 		String currentVersion = checkVersion(con);
+		String version_new = "";
+		
 		switch (currentVersion) {
 		case "2.2.0":
 			try {
-				String sql = "ALTER TABLE bücher ADD description clob (64 M)";
-				PreparedStatement st;
+				sql = "ALTER TABLE bücher ADD description clob (64 M)";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
@@ -26,14 +29,12 @@ public class Updater {
 				st.execute();
 				st.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.0 aktualisiert!");
 		case "2.4.0":
 			try {
-				String sql = "ALTER TABLE bücher ADD isbn varchar(13)";
-				PreparedStatement st;
+				sql = "ALTER TABLE bücher ADD isbn varchar(13)";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
@@ -43,15 +44,12 @@ public class Updater {
 				st.close();
 				JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.4 aktualisiert!");
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
 		case "2.4.4":
 			int success = 0;
-			String sql = "";
-			PreparedStatement st;
 			try {
 				sql = "ALTER TABLE bücher ADD bid numeric(6,0) NOT NULL DEFAULT 0";
 				st = con.prepareStatement(sql);
@@ -76,7 +74,6 @@ public class Updater {
 				rs.close();
 				success++;
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
@@ -116,14 +113,48 @@ public class Updater {
 				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die version nicht erhöht");
 
 			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.5 aktualisiert!");
-			String version_new = checkVersion(con);
+			version_new = checkVersion(con);
 
 			if (!version_new.equals("2.4.5")) {
 				JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell! Bitte Prozess wiederholen!");
 				System.exit(1);
 			}
 		case "2.4.5":
-			// all good
+			success = 0;
+			try {
+				sql = "ALTER TABLE bücher ADD ebook NUMERIC(1,0)";
+				st = con.prepareStatement(sql);
+				st.execute();
+				st.close();
+				success++;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
+				JOptionPane.showMessageDialog(null, e.getMessage());
+			}
+			
+			if (success == 1) {
+				try {
+					sql = "UPDATE versions set version='2.5.0'";
+					st = con.prepareStatement(sql);
+					st.execute();
+					st.close();
+					JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.5.0 aktualisiert!");
+				} catch (SQLException e) {
+					JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
+					JOptionPane.showMessageDialog(null, e.getMessage());
+				}
+			} else 
+				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die Version nicht erhöht");
+
+			version_new = checkVersion(con);
+			if (!version_new.equals("2.5.0")) {
+				JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell! Bitte Prozess wiederholen!");
+				System.exit(1);
+			}
+			
+		case "2.5.0":
+			//all good
 		}
 
 	}
@@ -140,7 +171,6 @@ public class Updater {
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return version;
