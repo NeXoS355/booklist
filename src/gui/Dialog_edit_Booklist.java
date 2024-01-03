@@ -75,7 +75,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		
 		Book_Booklist eintrag = einträge.getElementAt(index);
 		
-		if (Mainframe.loadOnDemand == 1) {
+		if (HandleConfig.loadOnDemand == 1) {
 			BookListModel.loadOnDemand(eintrag);
 		}
 
@@ -188,7 +188,7 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
 							if (webpage != null && webpage != "") {
-								HandleWebInfo.DownloadWebPage(eintrag,2);	
+								HandleWebInfo.DownloadWebPage(eintrag,2, false);	
 								lbl_pic = new JLabel(showImg(eintrag));
 							}
 						}
@@ -220,10 +220,16 @@ public class Dialog_edit_Booklist extends JDialog {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					boolean downloaded = HandleWebInfo.DownloadWebPage(eintrag,2);
+					boolean downloaded = HandleWebInfo.DownloadWebPage(eintrag,2,false);
 					if (downloaded) {
 						dispose();
-						new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+						Dialog_edit_Booklist dialog = new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+						boolean answer = HandleWebInfo.checkDownload();
+						if (answer) {
+							downloaded = HandleWebInfo.DownloadWebPage(eintrag,2,true);
+							dialog.dispose();
+							new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+						}
 					}
 					
 				}

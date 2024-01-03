@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.HeadlessException;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -12,12 +13,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -65,8 +62,6 @@ public class Mainframe extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	public static ExecutorService executor = Executors.newFixedThreadPool(10);
-	public static int autoDownload = 0;
-	public static int loadOnDemand = 1;
 	public static Font schrift = new Font("Roboto", Font.PLAIN, 16);
 	public static Font descSchrift = new Font("Roboto", Font.PLAIN, 16);
 	private static JTable table = new JTable();
@@ -82,7 +77,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.4.6  (01.2024)  ";
+	private String version = "Ver. 2.4.7  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -92,7 +87,7 @@ public class Mainframe extends JFrame {
 		this.setSize(1300, 1000);
 		this.setResizable(true);
 		Mainframe.executor.submit(() -> {
-			readConfig();
+			HandleConfig.readConfig();
 		});
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
@@ -117,6 +112,7 @@ public class Mainframe extends JFrame {
 		txt_search.setText("Suche ... (" + einträge.getSize() + ")");
 		txt_search.setForeground(Color.gray);
 		txt_search.setFont(schrift);
+		txt_search.setMargin(new Insets(0,10,0,0));
 		txt_search.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -438,63 +434,7 @@ public class Mainframe extends JFrame {
 
 	}
 
-	private void readConfig() {
-		File f = new File("config.conf");
-		if (f.exists() && !f.isDirectory()) {
-			try (BufferedReader br = new BufferedReader(new FileReader("config.conf"))) {
-				StringBuilder sb = new StringBuilder();
-				String line = br.readLine();
 
-				while (line != null) {
-					sb.append(line);
-					sb.append(System.lineSeparator());
-					line = br.readLine();
-				}
-				String everything = sb.toString();
-				String[] settings = everything.split("\n");
-				String value = "";
-				String setting = "";
-				int size = 14;
-
-				for (int i = 0; i < settings.length; i++) {
-					setting = settings[i].split("=")[0];
-					value = settings[i].split("=")[1];
-
-					if (setting.equals("fontSize")) {
-						size = Integer.parseInt(value.trim());
-						schrift = new Font("Roboto", Font.BOLD, size);
-					} else if (setting.equals("descFontSize")) {
-						size = Integer.parseInt(value.trim());
-						descSchrift = new Font("Roboto", Font.PLAIN, size);
-					}  else if (setting.equals("autoDownload")) {
-						autoDownload = Integer.parseInt(value.trim());
-					}  else if (setting.equals("loadOnDemand")) {
-						loadOnDemand = Integer.parseInt(value.trim());
-					}
-
-				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Fehler in der config: Falsches Format - erwartet integer");
-			}
-		}else
-
-	{
-		try (PrintWriter out = new PrintWriter("config.conf")) {
-			out.println("fontSize=" + schrift.getSize());
-			out.println("descFontSize=" + descSchrift.getSize());
-			out.println("autoDownload=" + autoDownload);
-			out.println("loadOnDemand=" + loadOnDemand);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
-
-	}
 
 	public static void deleteBuch() {
 		int[] selected = table.getSelectedRows();

@@ -523,8 +523,8 @@ public class Dialog_add_Booklist extends JDialog {
 								true);
 						Mainframe.einträge.add(book);
 					}
-					if (Mainframe.autoDownload == 1)
-						HandleWebInfo.DownloadWebPage(book,2);
+					if (HandleConfig.autoDownload == 1)
+						HandleWebInfo.DownloadWebPage(book,2,false);
 
 					dispose();
 				} else {

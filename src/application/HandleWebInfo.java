@@ -21,6 +21,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
 import data.Database;
+import gui.HandleConfig;
 import gui.Mainframe;
 
 import com.google.gson.JsonObject;
@@ -28,14 +29,18 @@ import com.google.gson.JsonParser;
 
 public class HandleWebInfo {
 
-	public static boolean DownloadWebPage(Book_Booklist eintrag, int maxResults) {
+	public static boolean DownloadWebPage(Book_Booklist eintrag, int maxResults, boolean retry) {
 		boolean ret = false;
 		try {
-			String titel = eintrag.getTitel().replace(" ", "+");
+			StringBuilder str = new StringBuilder();
+			if (HandleConfig.searchParam.equals("at")) {
+				str.append(sanitizeString(eintrag.getAutor()) + "+");
+			}
+			str.append(sanitizeString(eintrag.getTitel()));
 
 			// Die URL der REST-API
-			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + titel + "&maxResults=" + maxResults
-					+ "&printType=books";
+			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str.toString() + "&maxResults="
+					+ maxResults + "&printType=books";
 
 			System.out.println(apiUrl);
 
@@ -64,10 +69,22 @@ public class HandleWebInfo {
 			}
 			// Verbindung schlieÃŸen
 			connection.disconnect();
+
+			if (retry) {
+				if (HandleConfig.searchParam.equals("t")) {
+					HandleConfig.searchParam = "at";
+					System.out.println("changed searchParam to " + HandleConfig.searchParam);
+				} else if (HandleConfig.searchParam.equals("at")) {
+					HandleConfig.searchParam = "t";
+					System.out.println("changed searchParam to " + HandleConfig.searchParam);
+				}
+			}
+
+			ret = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		ret = true;
+
 		return ret;
 
 	}
@@ -88,17 +105,16 @@ public class HandleWebInfo {
 						if (volumeInfo.has("imageLinks") && cCover == 0) {
 							var imageLinks = volumeInfo.getAsJsonObject("imageLinks");
 							if (imageLinks.has("smallThumbnail")) {
-								cCover = 1;
 								String link = imageLinks.get("smallThumbnail").getAsString();
-								System.out.println("Link: " + link);
+//								System.out.println("Link: " + link);
 								// Downloading Image
 								savePic(link, eintrag);
-
+								cCover = 1;
 							} else {
-								System.out.println("smallThumbnail nicht gefunden");
+//								System.out.println("smallThumbnail nicht gefunden");
 							}
 						} else {
-							System.out.println("ImageLink nicht gefunden.");
+//							System.out.println("ImageLink nicht gefunden.");
 						}
 						if (volumeInfo.has("industryIdentifiers") && cIsbn == 0) {
 							var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
@@ -107,14 +123,14 @@ public class HandleWebInfo {
 								if (isbnidentifiers13.has("identifier")) {
 									String type = isbnidentifiers13.get("type").getAsString();
 									if (type.equals("ISBN_13")) {
-										cIsbn = 1;
 										String isbn = isbnidentifiers13.get("identifier").getAsString();
 										eintrag.setIsbn(isbn);
+										cIsbn = 1;
 										Mainframe.executor.submit(() -> {
 											Database.addIsbn(eintrag.getBid(), isbn);
 										});
 									} else {
-										System.out.println("industryIdentifiers nicht gefunden");
+//										System.out.println("industryIdentifiers nicht gefunden");
 									}
 								}
 							}
@@ -122,34 +138,43 @@ public class HandleWebInfo {
 						}
 
 						if (volumeInfo.has("description") && cDesc == 0) {
-							cDesc = 1;
 							String description = volumeInfo.get("description").getAsString();
 							eintrag.setDesc(description);
+							cDesc = 1;
 							Mainframe.executor.submit(() -> {
 								Database.addDesc(eintrag.getBid(), description);
 							});
 						} else {
-							System.out.println("Description nicht gefunden.");
+//							System.out.println("Description nicht gefunden.");
 						}
 					} else {
-						System.out.println("Feld 'volumeInfo' nicht gefunden.");
+//						System.out.println("Feld 'volumeInfo' nicht gefunden.");
 					}
 				} else {
-					System.out.println("Keine Elemente in 'items' gefunden.");
+//					System.out.println("Keine Elemente in 'items' gefunden.");
 				}
 			} else {
-				System.out.println("Feld 'items' nicht gefunden.");
+//				System.out.println("Feld 'items' nicht gefunden.");
 			}
 			i++;
 		}
-		if (cCover + cDesc + cIsbn < 3) {
-			int antwort = JOptionPane.showConfirmDialog(null,
-					"Es konnten nicht alle Informationen gefunden werden.\nKriterien erweitern?", "Warnung",
-					JOptionPane.YES_NO_OPTION);
-			if (antwort == JOptionPane.YES_OPTION) {
-				DownloadWebPage(eintrag, 5);
+
+	}
+
+	public static boolean checkDownload() {
+		int antwort = JOptionPane.showConfirmDialog(null, "Ist das Buch korrekt?", "Warnung",
+				JOptionPane.YES_NO_OPTION);
+		boolean ret = (antwort == JOptionPane.NO_OPTION);
+		if (ret) {
+			if (HandleConfig.searchParam.equals("t")) {
+				HandleConfig.searchParam = "at";
+				System.out.println("changed searchParam to " + HandleConfig.searchParam);
+			} else if (HandleConfig.searchParam.equals("at")) {
+				HandleConfig.searchParam = "t";
+				System.out.println("changed searchParam to " + HandleConfig.searchParam);
 			}
 		}
+		return ret;
 	}
 
 	public static boolean deletePic(int bid) {
@@ -206,11 +231,26 @@ public class HandleWebInfo {
 			e.printStackTrace();
 			weblink = JOptionPane.showInputDialog(null, "Kein Bild gefunden. Bitte manuell einfügen");
 			if (weblink != "") {
-				DownloadWebPage(eintrag, 2);
+				DownloadWebPage(eintrag, 2, false);
 			}
 
 		}
 		return true;
+	}
+	
+	private static String sanitizeString(String input) {
+	    String newString = input.replace("\u00fc", "ue")
+	            .replace("\u00f6", "oe")
+	            .replace("\u00e4", "ae")
+	            .replace("\u00df", "ss")
+	            .replaceAll("\u00dc(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Ue")
+	            .replaceAll("\u00d6(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Oe")
+	            .replaceAll("\u00c4(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Ae")
+	            .replace("\u00dc", "UE")
+	            .replace("\u00d6", "OE")
+	            .replace("\u00c4", "AE")
+	            .replace(" ", "+");
+	    return newString;
 	}
 
 }

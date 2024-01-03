@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
 
 import data.Database;
+import gui.HandleConfig;
 import gui.Mainframe;
 
 public class BookListModel extends AbstractListModel<Book_Booklist> {
@@ -27,12 +28,10 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	public BookListModel() {
 		Database.createConnection();
 		ResultSet rs = null;
-		if (Mainframe.loadOnDemand == 1) {
+		if (HandleConfig.loadOnDemand == 1) {
 			rs = Database.readDbBooklistLite();
-			System.out.println("loading on Demand");
 		} else {
 			rs = Database.readDbBooklist();
-			System.out.println("load All");
 		}
 		try {
 			while (rs.next()) {
@@ -51,7 +50,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					Blob picture = null;
 					String desc = "";
 
-					if (Mainframe.loadOnDemand == 0) {
+					if (HandleConfig.loadOnDemand == 0) {
 						picture = rs.getBlob("pic");
 						desc = rs.getString("description");
 					}
@@ -109,10 +108,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					buch.setDesc(desc);
 				}
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

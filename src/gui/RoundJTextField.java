@@ -77,12 +77,12 @@ public class RoundJTextField extends JTextField {
     
     protected void paintComponent(Graphics g) {
          g.setColor(getBackground());
-         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+         g.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
          super.paintComponent(g);
     }
     protected void paintBorder(Graphics g) {
          g.setColor(getForeground());
-         g.drawRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+         g.drawRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
     }
     public boolean contains(int x, int y) {
          if (shape == null || !shape.getBounds().equals(getBounds())) {
