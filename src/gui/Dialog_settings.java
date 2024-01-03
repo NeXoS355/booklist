@@ -25,7 +25,7 @@ public class Dialog_settings extends JDialog {
 		this.setTitle("Einstellungen");
 		this.setModal(true);
 		this.setLayout(new GridBagLayout());
-		this.setSize(300, 340);
+		this.setSize(300, 360);
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -114,12 +114,13 @@ public class Dialog_settings extends JDialog {
 		JComboBox<Integer> cmb_onDemand = new JComboBox<Integer>(array_onDemand);
 		cmb_onDemand.setSelectedItem(HandleConfig.loadOnDemand);
 		this.add(cmb_onDemand, c);
+		
 		c.gridx = 0;
 		c.gridy = 6;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		JLabel lbl_searchParam = new JLabel("Search Parameter");
-		lbl_searchParam.setToolTipText("Google API Suchparameter");
+		lbl_searchParam.setToolTipText("Google API Suchparameter. t=Titel, at=Autor+Titel");
 		this.add(lbl_searchParam, c);
 		c.gridx = 1;
 		c.gridy = 6;
@@ -129,6 +130,21 @@ public class Dialog_settings extends JDialog {
 		JComboBox<String> cmb_searchParam = new JComboBox<String>(array_searchParam);
 		cmb_searchParam.setSelectedItem(HandleConfig.searchParam);
 		this.add(cmb_searchParam, c);
+		c.gridx = 0;
+		c.gridy = 7;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		JLabel lbl_debugTimings = new JLabel("Show Debug Timings");
+		lbl_debugTimings.setToolTipText("zeigt Ausführungsdauer nach dem Laden der Anwendung an");
+		this.add(lbl_debugTimings, c);
+		c.gridx = 1;
+		c.gridy = 7;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		Integer[] array_debugTimings = { 0, 1};
+		JComboBox<Integer> cmb_debugTimings = new JComboBox<Integer>(array_debugTimings);
+		cmb_debugTimings.setSelectedItem(HandleConfig.debug_timings);
+		this.add(cmb_debugTimings, c);
 
 		JButton btn_save = new JButton("Speichern");
 		btn_save.setFont(Mainframe.schrift);

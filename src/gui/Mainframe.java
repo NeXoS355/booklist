@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -82,12 +84,18 @@ public class Mainframe extends JFrame {
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
 
+		Instant startFrame = Instant.now();
+
 		this.setLayout(new BorderLayout(10, 10));
 		this.setLocation(100, 100);
 		this.setSize(1300, 800);
 		this.setResizable(true);
 		Mainframe.executor.submit(() -> {
+//			Instant startReadConfig = Instant.now();
 			HandleConfig.readConfig();
+//			Instant endReadConfig = Instant.now();
+//			Duration timeConfig = Duration.between(startReadConfig, endReadConfig);
+//			System.out.println("readConfig:" + timeConfig);
 		});
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
@@ -99,10 +107,19 @@ public class Mainframe extends JFrame {
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
-		
+
+		Instant startCreateListAndDB = null;
+		if (HandleConfig.debug_timings == 1) {
+			startCreateListAndDB = Instant.now();
+		}
 		einträge = new BookListModel();
 		filter = new DefaultListModel<Book_Booklist>();
 		anzeige = new SimpleTableModel(einträge);
+
+		Instant startCreateGUIComponents = null;
+		if (HandleConfig.debug_timings == 1) {
+			startCreateGUIComponents = Instant.now();
+		}
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(5, 5));
@@ -112,7 +129,7 @@ public class Mainframe extends JFrame {
 		txt_search.setText("Suche ... (" + einträge.getSize() + ")");
 		txt_search.setForeground(Color.gray);
 		txt_search.setFont(schrift);
-		txt_search.setMargin(new Insets(0,10,0,0));
+		txt_search.setMargin(new Insets(0, 10, 0, 0));
 		txt_search.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -183,6 +200,11 @@ public class Mainframe extends JFrame {
 		});
 		panel.add(btn_search, BorderLayout.EAST);
 
+		Instant startCreateMenu = null;
+		if (HandleConfig.debug_timings == 1) {
+			startCreateMenu = Instant.now();
+		}
+
 		JPanel pnlMenü = new JPanel();
 		pnlMenü.setLayout(new BorderLayout());
 		panel.add(pnlMenü, BorderLayout.NORTH);
@@ -191,7 +213,7 @@ public class Mainframe extends JFrame {
 		JMenu datei = new JMenu("Datei");
 		JMenu extras = new JMenu("Extras");
 		JMenu hilfe = new JMenu("Hilfe");
-		
+
 		JMenuItem backup = new JMenuItem("DB Backup");
 		backup.addActionListener(new ActionListener() {
 
@@ -263,7 +285,7 @@ public class Mainframe extends JFrame {
 		menue.add(datei);
 		menue.add(extras);
 		menue.add(hilfe);
-		
+
 		datei.add(settings);
 		datei.add(close);
 		extras.add(ExcelExport);
@@ -273,10 +295,15 @@ public class Mainframe extends JFrame {
 		pnlMenü.add(menue, BorderLayout.WEST);
 
 		JLabel lblVersion = new JLabel(version);
-		Font newLabelFont = new Font(lblVersion.getFont().getName(), Font.BOLD, lblVersion.getFont().getSize());
-		lblVersion.setFont(newLabelFont);
+
+		lblVersion.setFont(new Font(lblVersion.getFont().getName(), Font.BOLD, lblVersion.getFont().getSize()));
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
+
+		Instant startCreateTable = null;
+		if (HandleConfig.debug_timings == 1) {
+			startCreateTable = Instant.now();
+		}
 
 		table.setModel(anzeige);
 		table.setFont(schrift);
@@ -359,6 +386,11 @@ public class Mainframe extends JFrame {
 			}
 		});
 
+		Instant startCreateTree = null;
+		if (HandleConfig.debug_timings == 1) {
+			startCreateTree = Instant.now();
+		}
+
 		JPanel pnl_mid = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -370,6 +402,7 @@ public class Mainframe extends JFrame {
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		tree.setFont(schrift);
 		tree.setShowsRootHandles(false);
+
 		tree.setCellRenderer(new MyTreeCellRenderer());
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
@@ -428,13 +461,41 @@ public class Mainframe extends JFrame {
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, listScrollPane);
 		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
+
+		Instant startUpdateModelAfterCreation = null;
+		if (HandleConfig.debug_timings == 1) {
+			startUpdateModelAfterCreation = Instant.now();
+		}
+
 		updateModel();
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setVisible(true);
 
+		Instant endFrame = Instant.now();
+		
+		
+		Duration timeElapsed = Duration.between(startFrame, endFrame);
+		System.out.println("0: WholeFrame:" + timeElapsed);
+		if (HandleConfig.debug_timings==1) {
+			timeElapsed = Duration.between(startFrame, startCreateListAndDB);
+			System.out.println("1: -Create List and DB " + timeElapsed);
+			timeElapsed = Duration.between(startFrame, startCreateGUIComponents);
+			System.out.println("2: -Create GUI Components " + timeElapsed);
+			timeElapsed = Duration.between(startFrame, startCreateMenu);
+			System.out.println("3: -Create Menu " + timeElapsed);
+			timeElapsed = Duration.between(startFrame, startCreateTable);
+			System.out.println("4: -Create Table " + timeElapsed);
+			timeElapsed = Duration.between(startFrame, startCreateTree);
+			System.out.println("5: -Create Tree " + timeElapsed);
+			timeElapsed = Duration.between(startFrame, startUpdateModelAfterCreation);
+			System.out.println("6: -UpdateModel " + timeElapsed);
+		}
+
+
+		
+		
+
 	}
-
-
 
 	public static void deleteBuch() {
 		int[] selected = table.getSelectedRows();
@@ -487,7 +548,7 @@ public class Mainframe extends JFrame {
 		tree.setModel(treeModel);
 		tree.revalidate();
 		tree.repaint();
-//		System.out.println("Mainframe Node updated");
+		System.out.println("Mainframe Node updated");
 	}
 
 	public static void copyFilesInDirectory(File from, File to) {

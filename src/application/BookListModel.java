@@ -36,23 +36,22 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		try {
 			while (rs.next()) {
 				try {
+					// necessary Variables cannot be loaded onDemand
 					Book_Booklist book = null;
 					String autor = rs.getString("autor").trim();
 					String titel = rs.getString("titel").trim();
-					boolean ausgeliehen = false;
 					String bemerkung = rs.getString("bemerkung");
 					String serie = rs.getString("serie").trim();
 					String seriePart = rs.getString("seriePart");
-					int int_ebook = rs.getInt("ebook");
-					boolean ebook = false;
-					if (int_ebook == 1)
-						ebook = true;
-					Timestamp datum = rs.getTimestamp("date");
-					String isbn = rs.getString("isbn");
 					int bid = Integer.parseInt(rs.getString("bid"));
-					
+
+					// Variables for LoadOnDemand
 					Blob picture = null;
 					String desc = "";
+					String isbn = "";
+					Timestamp datum = null;
+					boolean ebook = false;
+					boolean ausgeliehen = false;
 
 					if (HandleConfig.loadOnDemand == 0) {
 						picture = rs.getBlob("pic");
@@ -63,26 +62,11 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
-					if (rs.getString(3).equals("an")) {
-						ausgeliehen = true;
-						String ausgeliehen_an = rs.getString("name").trim();
-						book = new Book_Booklist(autor, titel, ausgeliehen, ausgeliehen_an, "", bemerkung,
-								serie, seriePart,ebook, buf_pic, desc, isbn, datum, false);
-						book.setBid(bid);
-						getBücher().add(book);
-					} else if (rs.getString(3).equals("von")) {
-						ausgeliehen = true;
-						String ausgeliehen_von = rs.getString("name").trim();
-						book = new Book_Booklist(autor, titel, ausgeliehen, "", ausgeliehen_von, bemerkung,
-								serie, seriePart,ebook, buf_pic, desc, isbn, datum, false);
-						book.setBid(bid);
-						getBücher().add(book);
-					} else {
-						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart,ebook, buf_pic, desc,
-								isbn, datum, false);
-						book.setBid(bid);
-						getBücher().add(book);
-					}
+					book = new Book_Booklist(autor, titel, ausgeliehen, "", "", bemerkung, serie, seriePart,
+							ebook, buf_pic, desc, isbn, datum, false);
+					book.setBid(bid);
+					getBücher().add(book);
+
 					if (bid > Database.highestBid) {
 						Database.highestBid = bid;
 					}
@@ -103,13 +87,39 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				while (rs.next()) {
 					Blob picture = rs.getBlob("pic");
 					String desc = rs.getString("description");
+					int int_ebook = rs.getInt("ebook");
+					boolean ebook = false;
+					if (int_ebook == 1)
+						ebook = true;
+					Timestamp datum = rs.getTimestamp("date");
+					String isbn = rs.getString("isbn");
+
 					Image buf_pic = null;
 					if (picture != null) {
 						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
+
 					buch.setPic(buf_pic);
 					buch.setDesc(desc);
+					buch.setEbook(ebook);
+					buch.setDatum(datum);
+					buch.setIsbn(isbn);
+					
+					String ausgeliehen = rs.getString("ausgeliehen");
+					boolean boolAusgeliehen = false;
+					if (ausgeliehen.equals("an")) {
+						boolAusgeliehen = true;
+						String ausgeliehen_an = rs.getString("name").trim();
+						buch.setAusgeliehen_an(ausgeliehen_an);
+						buch.setAusgeliehen(boolAusgeliehen);
+					} else if (ausgeliehen.equals("von")) {
+						boolAusgeliehen = true;
+						String ausgeliehen_von = rs.getString("name").trim();
+						buch.setAusgeliehen_von(ausgeliehen_von);
+						buch.setAusgeliehen(boolAusgeliehen);
+					}
+					
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();

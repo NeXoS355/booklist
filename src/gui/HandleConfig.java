@@ -14,6 +14,7 @@ public class HandleConfig {
 	
 	public static int autoDownload = 0;
 	public static int loadOnDemand = 1;
+	public static int debug_timings = 0;
 	public static String searchParam= "at";
 
 	static void readConfig() {
@@ -55,6 +56,9 @@ public class HandleConfig {
 					} else if (setting.equals("searchParam")) {
 						searchParam = value.trim();
 						System.out.println("searchParam: " + searchParam);
+					} else if (setting.equals("debug_timings")) {
+						debug_timings = Integer.parseInt(value.trim());
+						System.out.println("debug_timings: " + debug_timings);
 					}
 
 				}
@@ -74,7 +78,8 @@ public class HandleConfig {
 			out.println("descFontSize=" + Mainframe.descSchrift.getSize());
 			out.println("autoDownload=" + autoDownload);
 			out.println("loadOnDemand=" + loadOnDemand);
-			out.println("loadOnDemand=" + searchParam);
+			out.println("searchParam=" + searchParam);
+			out.println("debug_timings=" + debug_timings);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

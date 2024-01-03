@@ -564,11 +564,11 @@ public class Dialog_add_Booklist extends JDialog {
 			Mainframe.setLastSearch(txt_author.getText());
 		} catch (SQLException ex) {
 			ex.printStackTrace();
-//			txt_title.setForeground(Color.white);
-//			txt_title.setBackground(new Color(255, 105, 105));
-//			if (ex.getSQLState() == "23505") {
-//				txt_title.setText("Buch bereits vorhanden!");
-//			}
+			txt_title.setForeground(Color.white);
+			txt_title.setBackground(new Color(255, 105, 105));
+			if (ex.getSQLState() == "23505") {
+				txt_title.setText("Buch bereits vorhanden!");
+			}
 		}
 		Mainframe.updateModel();
 		if (Mainframe.getTreeSelection() == "") {
