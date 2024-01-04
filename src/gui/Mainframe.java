@@ -91,11 +91,7 @@ public class Mainframe extends JFrame {
 		this.setSize(1300, 800);
 		this.setResizable(true);
 		Mainframe.executor.submit(() -> {
-//			Instant startReadConfig = Instant.now();
 			HandleConfig.readConfig();
-//			Instant endReadConfig = Instant.now();
-//			Duration timeConfig = Duration.between(startReadConfig, endReadConfig);
-//			System.out.println("readConfig:" + timeConfig);
 		});
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
