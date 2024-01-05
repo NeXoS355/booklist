@@ -8,6 +8,8 @@ import java.sql.Statement;
 
 import javax.swing.JOptionPane;
 
+import gui.Mainframe;
+
 public class Updater {
 
 	public static void checkUpdate(Connection con) {
@@ -30,6 +32,7 @@ public class Updater {
 				st.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+				Mainframe.logger.error("Fehler bei Aktualisierung auf 2.4.0");
 			}
 			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.0 aktualisiert!");
 		case "2.4.0":

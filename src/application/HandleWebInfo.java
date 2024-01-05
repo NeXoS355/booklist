@@ -41,7 +41,8 @@ public class HandleWebInfo {
 			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str.toString() + "&maxResults="
 					+ maxResults + "&printType=books";
 
-			System.out.println(apiUrl);
+			Mainframe.logger.info("Search API: " + eintrag.toString().toString());
+			Mainframe.logger.info("Search API URL: " + apiUrl);
 
 			// HttpURLConnection erstellen
 			URL url = new URL(apiUrl);
@@ -72,16 +73,16 @@ public class HandleWebInfo {
 			if (retry) {
 				if (HandleConfig.searchParam.equals("t")) {
 					HandleConfig.searchParam = "at";
-					System.out.println("changed searchParam to " + HandleConfig.searchParam);
+					Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
 				} else if (HandleConfig.searchParam.equals("at")) {
 					HandleConfig.searchParam = "t";
-					System.out.println("changed searchParam to " + HandleConfig.searchParam);
+					Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
 				}
 			}
 
 			ret = true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 
 		return ret;
@@ -167,10 +168,10 @@ public class HandleWebInfo {
 		if (ret) {
 			if (HandleConfig.searchParam.equals("t")) {
 				HandleConfig.searchParam = "at";
-				System.out.println("changed searchParam to " + HandleConfig.searchParam);
+				Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
 			} else if (HandleConfig.searchParam.equals("at")) {
 				HandleConfig.searchParam = "t";
-				System.out.println("changed searchParam to " + HandleConfig.searchParam);
+				Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
 			}
 		}
 		return ret;
@@ -223,15 +224,10 @@ public class HandleWebInfo {
 			});
 
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-			weblink = JOptionPane.showInputDialog(null, "Kein Bild gefunden. Bitte manuell einfügen");
-			if (weblink != "") {
-				DownloadWebPage(eintrag, 2, false);
-			}
+			Mainframe.logger.error(e.getMessage());
 
 		}
 		return true;

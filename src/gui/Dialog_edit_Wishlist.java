@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
@@ -415,40 +414,36 @@ public class Dialog_edit_Wishlist extends JDialog {
 	}
 
 	public void speichern(Book_Wishlist eintrag) {
-		try {
-			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
-				String oldAutor = eintrag.getAutor();
-				String oldTitel = eintrag.getTitel();
-				String newAutor = txt_author.getText().trim();
-				String newTitel = txt_title.getText().trim();
-				String newBemerkung = txt_merk.getText().trim();
-				String newSerie = txt_serie.getText().trim();
-				String newSeriePart = txt_seriePart.getText();
-				Timestamp datum = new Timestamp(System.currentTimeMillis());
-				if (!Duplicant(newAutor, newTitel, wishlist.Wishlisteinträge.getIndexOf(newAutor, newTitel))) {
-					Database.deleteFromWishlist(oldAutor, oldTitel);
-					Database.addToWishlist(newAutor, newTitel, newBemerkung, newSerie, newSeriePart, datum.toString());
-					eintrag.setAutor(newAutor);
-					eintrag.setTitel(newTitel);
-					eintrag.setBemerkung(newBemerkung);
-					eintrag.setSerie(newSerie);
-					eintrag.setSeriePart(newSeriePart);
-					eintrag.setDatum(datum);
-					dispose();
-				} else {
-					txt_title.setText("Buch bereits vorhanden!");
-					txt_title.setBackground(new Color(255, 105, 105));
-				}
+		if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
+			String oldAutor = eintrag.getAutor();
+			String oldTitel = eintrag.getTitel();
+			String newAutor = txt_author.getText().trim();
+			String newTitel = txt_title.getText().trim();
+			String newBemerkung = txt_merk.getText().trim();
+			String newSerie = txt_serie.getText().trim();
+			String newSeriePart = txt_seriePart.getText();
+			Timestamp datum = new Timestamp(System.currentTimeMillis());
+			if (!Duplicant(newAutor, newTitel, wishlist.Wishlisteinträge.getIndexOf(newAutor, newTitel))) {
+				Database.deleteFromWishlist(oldAutor, oldTitel);
+				Database.addToWishlist(newAutor, newTitel, newBemerkung, newSerie, newSeriePart, datum.toString());
+				eintrag.setAutor(newAutor);
+				eintrag.setTitel(newTitel);
+				eintrag.setBemerkung(newBemerkung);
+				eintrag.setSerie(newSerie);
+				eintrag.setSeriePart(newSeriePart);
+				eintrag.setDatum(datum);
+				dispose();
 			} else {
-				if (txt_author.getText().isEmpty()) {
-					txt_author.setBackground(new Color(255, 105, 105));
-				}
-				if (txt_title.getText().isEmpty()) {
-					txt_title.setBackground(new Color(255, 105, 105));
-				}
+				txt_title.setText("Buch bereits vorhanden!");
+				txt_title.setBackground(new Color(255, 105, 105));
 			}
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} else {
+			if (txt_author.getText().isEmpty()) {
+				txt_author.setBackground(new Color(255, 105, 105));
+			}
+			if (txt_title.getText().isEmpty()) {
+				txt_title.setBackground(new Color(255, 105, 105));
+			}
 		}
 		wishlist.updateModel();
 	}

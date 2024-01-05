@@ -17,6 +17,7 @@ import com.opencsv.CSVWriter;
 
 import application.BookListModel;
 import application.Book_Booklist;
+import gui.Mainframe;
 
 public class Database {
 
@@ -34,23 +35,25 @@ public class Database {
 			Updater.checkUpdate(con);
 		} catch (SQLException e) {
 			System.err.println("Verbindung konnte nicht hergestellt werden");
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		} catch (ClassNotFoundException e) {
 			System.err.println("Verbindung konnte nicht hergestellt werden. Class not found");
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 		return con;
+
 	}
 
 	public static void closeConnection() {
 		try {
 			DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		} catch (SQLException se) {
-			if (((se.getErrorCode() == 50000) && ("XJ015".equals(se.getSQLState())))) {
-				System.out.println("Derby shut down normally");
+		} catch (SQLException e) {
+			if (((e.getErrorCode() == 50000) && ("XJ015".equals(e.getSQLState())))) {
+				Mainframe.logger.info("Derby shut down normally");
 			} else {
 				System.err.println("Derby did not shut down normally");
-				printSQLException(se);
+				Mainframe.logger.error("Derby did not shut down normally");
+				printSQLException(e);
 			}
 		}
 
@@ -77,8 +80,7 @@ public class Database {
 			pst.close();
 		} catch (SQLException e) {
 			if ("X0Y32".equals(e.getSQLState())) {
-				System.out.println("Tabelle existiert schon.");
-//				e.printStackTrace();
+				Mainframe.logger.info("Datenbank existiert bereits");
 			} else {
 				printSQLException(e);
 			}
@@ -89,8 +91,9 @@ public class Database {
 					createWishlist.close();
 					createVersions.close();
 					System.out.println("DB closed");
+					Mainframe.logger.info("DB closed");
 				} catch (SQLException e) {
-					e.printStackTrace();
+					Mainframe.logger.error(e.getMessage());
 				}
 			}
 		}
@@ -102,7 +105,7 @@ public class Database {
 		System.err.println("  Error Code: " + e.getErrorCode());
 		System.err.println("  Message:    " + e.getMessage());
 		// for stack traces, refer to derby.log or uncomment this:
-		e.printStackTrace(System.err);
+		Mainframe.logger.error(e.getMessage());
 	}
 
 	public static ResultSet readDbBooklist() {
@@ -111,7 +114,7 @@ public class Database {
 			Statement st = con.createStatement();
 			rs = st.executeQuery("SELECT * FROM bücher ORDER BY autor");
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 		return rs;
 	}
@@ -123,7 +126,7 @@ public class Database {
 			rs = st.executeQuery(
 					"SELECT autor,titel,ausgeliehen,name, bemerkung,serie,seriePart,ebook,date,isbn,bid FROM bücher ORDER BY autor");
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 		return rs;
 	}
@@ -135,7 +138,7 @@ public class Database {
 			Statement st = con.createStatement();
 			rs = st.executeQuery(sql);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 		return rs;
 	}
@@ -165,9 +168,7 @@ public class Database {
 			returnValue = 1;
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-
+			Mainframe.logger.error(e.getMessage());
 		}
 		return returnValue;
 	}
@@ -186,8 +187,7 @@ public class Database {
 			}
 			st.close();
 		} catch (SQLException e) {
-			System.out.println("Fehler beim auslesen der DB Version");
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim auslesen der DB Version");
 		}
 		return "DB Layout Version:" + version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);
 	}
@@ -200,22 +200,21 @@ public class Database {
 			st.executeUpdate();
 			st.close();
 			System.out.println("Booklist Datenbank Eintrag gelöscht - " + bid);
-		} catch (
-
-		SQLException ex) {
-			System.err.println("Buch wurde nicht gelöscht");
+			Mainframe.logger.info("Booklist Datenbank Eintrag gelöscht - " + bid);
+		} catch (SQLException e) {
+			Mainframe.logger.error("Fehler beim löschen des Buchs (Booklist)");
 		}
 	}
 
 	public static int addToBooklist(String autor, String titel, String ausgeliehen, String name, String bemerkung,
-			String serie, String seriePart,boolean ebook, String datum) throws SQLException {
+			String serie, String seriePart, boolean ebook, String datum) throws SQLException {
 		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,ebook,date,bid) VALUES(?,?,?,?,?,?,?,?,?,?)";
 		PreparedStatement st = con.prepareStatement(sql);
 		highestBid++;
 		int int_ebook = 0;
 		if (ebook)
-			int_ebook=1;
-			
+			int_ebook = 1;
+
 		st.setString(1, autor);
 		st.setString(2, titel);
 		st.setString(3, ausgeliehen);
@@ -230,12 +229,16 @@ public class Database {
 		st.close();
 
 		System.out.println("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + ","
-				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + int_ebook + "," +(highestBid));
+				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + int_ebook + ","
+				+ (highestBid));
+		Mainframe.logger.info("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + ","
+				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + int_ebook + ","
+				+ (highestBid));
 		return highestBid;
 	}
-	
+
 	public static void updateBooklistEntry(int bid, String colName, String value) {
-		String sql = "update bücher set "+ colName +"=? where bid=?";
+		String sql = "update bücher set " + colName + "=? where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
@@ -243,13 +246,11 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
-			System.out.println("Table updated - " + bid + " - " + colName + "=" + value);
+			Mainframe.logger.info("Table updated - " + bid + " - " + colName + "=" + value);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim aktualisieren des Buchs: " + bid + " - " + colName + "=" + value);
 		}
 	}
-
 
 	public static void addPic(int bid, InputStream photo) {
 		String sql = "update bücher set pic=? where bid=?";
@@ -260,9 +261,9 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
+			Mainframe.logger.info("Cover gespeichert: " + bid);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim speichern des Covers: " + bid);
 		}
 
 	}
@@ -275,10 +276,10 @@ public class Database {
 			st.setInt(1, bid);
 			st.execute();
 			st.close();
+			Mainframe.logger.info("Cover gelöscht: " + bid);
 			return true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim löschen des Covers: " + bid);
 			return false;
 		}
 
@@ -291,9 +292,9 @@ public class Database {
 			PreparedStatement pst = con.prepareStatement(sql);
 			pst.setInt(1, bid);
 			rs = pst.executeQuery();
+			Mainframe.logger.info("Cover ausgelesen: " + bid);
 		} catch (SQLException e) {
-			System.out.println("Fehler beim auslesen des Bildes");
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim auslesen des Covers: " + bid);
 		}
 		return rs;
 	}
@@ -307,9 +308,9 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
+			Mainframe.logger.info("Description gespeichert: " + bid);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim speichern der Beschreibung: " + bid);
 		}
 
 	}
@@ -322,10 +323,10 @@ public class Database {
 			st.setInt(1, bid);
 			st.execute();
 			st.close();
+			Mainframe.logger.info("Description gelöscht: " + bid);
 			return true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim löschen der Beschreibung: " + bid);
 			return false;
 		}
 
@@ -340,9 +341,9 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
+			Mainframe.logger.info("ISBN gespeichert: " + bid);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim speichern der ISBN: " + bid);
 		}
 
 	}
@@ -355,43 +356,48 @@ public class Database {
 			st.setInt(1, bid);
 			st.execute();
 			st.close();
+			Mainframe.logger.info("ISBN gelöscht: " + bid);
 			return true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim löschen der ISBN: " + bid);
 			return false;
 		}
 
 	}
-	
+
 	public static ResultSet readDbWishlist() {
 		ResultSet rs = null;
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery("SELECT * FROM wishlist ORDER BY autor");
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Mainframe.logger.error("Fehler beim auslesen der Wunschliste");
 		}
 		return rs;
 	}
 
 	public static void addToWishlist(String autor, String titel, String bemerkung, String serie, String seriePart,
-			String datum) throws SQLException {
-		String sql = "INSERT INTO wishlist(autor,titel,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?)";
-		PreparedStatement st = con.prepareStatement(sql);
-		st.setString(1, autor);
-		st.setString(2, titel);
-		st.setString(3, bemerkung);
-		st.setString(4, serie);
-		st.setString(5, seriePart);
-		st.setString(6, datum);
-		st.executeUpdate();
-		st.close();
-		System.out.println("Wishlist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + bemerkung + "," + serie
-				+ "," + seriePart + "," + datum);
+			String datum) {
+		try {
+			String sql = "INSERT INTO wishlist(autor,titel,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?)";
+			PreparedStatement st = con.prepareStatement(sql);
+			st.setString(1, autor);
+			st.setString(2, titel);
+			st.setString(3, bemerkung);
+			st.setString(4, serie);
+			st.setString(5, seriePart);
+			st.setString(6, datum);
+			st.executeUpdate();
+			st.close();
+			System.out.println("Wishlist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + bemerkung + ","
+					+ serie + "," + seriePart + "," + datum);
+			Mainframe.logger.info("Wishlist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + bemerkung + ","
+					+ serie + "," + seriePart + "," + datum);
+		} catch (SQLException e) {
+			Mainframe.logger.error("Fehler beim speichern des Buchs (Wunschliste): " + autor + "-" + titel);
+		}
 	}
 
-	
 	public static void deleteFromWishlist(String autor, String titel) {
 		try {
 			String sql = "DELETE FROM wishlist WHERE autor = ? AND titel = ?";
@@ -403,8 +409,8 @@ public class Database {
 			System.out.println("Wishlist Datenbank Eintrag gelöscht: " + autor + "," + titel);
 		} catch (
 
-		SQLException ex) {
-			System.err.println("Buch wurde nicht gelöscht");
+		SQLException e) {
+			Mainframe.logger.error("Fehler beim löschen des Buchs (Wunschliste): " + autor + "-" + titel);
 		}
 	}
 

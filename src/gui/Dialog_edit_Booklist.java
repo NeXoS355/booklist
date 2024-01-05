@@ -810,16 +810,20 @@ public class Dialog_edit_Booklist extends JDialog {
 						Database.updateBooklistEntry(bid, "name", txt_leihVon.getText());
 					}
 				}
+				Mainframe.logger.info("Buch geändert: " + eintrag.getAutor() + "-" + eintrag.getTitel());
 				dispose();
 			} else {
+				Mainframe.logger.info("Buch ändern: Bereits vorhanden!");
 				txt_title.setText("Buch bereits vorhanden!");
 				txt_title.setBackground(new Color(255, 105, 105));
 			}
 		} else {
 			if (txt_author.getText().isEmpty()) {
+				Mainframe.logger.info("Buch ändern: Autor nicht gesetzt!");
 				txt_author.setBackground(new Color(255, 105, 105));
 			}
 			if (txt_title.getText().isEmpty()) {
+				Mainframe.logger.info("Buch ändern: Titel nicht gesetzt!");
 				txt_title.setBackground(new Color(255, 105, 105));
 			}
 		}
@@ -832,8 +836,10 @@ public class Dialog_edit_Booklist extends JDialog {
 		for (int i = 0; i < Mainframe.einträge.getSize(); i++) {
 			Book_Booklist eintrag = Mainframe.einträge.getElementAt(i);
 			if (eintrag.getAutor().equals(newAutor) && eintrag.getTitel().equals(newTitel)) {
-				if (i != index)
+				if (i != index) {
+					Mainframe.logger.info("Buch ändern: Autor & Titel bereits vorhanden");
 					return false;
+				}
 			}
 		}
 		return true;
@@ -846,7 +852,7 @@ public class Dialog_edit_Booklist extends JDialog {
 				desktop.browse(uri);
 				return true;
 			} catch (Exception e) {
-				e.printStackTrace();
+				Mainframe.logger.trace(e.getMessage());
 			}
 		}
 		return false;
@@ -856,7 +862,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		try {
 			return openWebpage(url.toURI());
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 		return false;
 	}
@@ -866,7 +872,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		try {
 			img = eintrag.getPic();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 		if (img != null) {
 			return new ImageIcon(img);

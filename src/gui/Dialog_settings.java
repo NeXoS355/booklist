@@ -143,10 +143,10 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 7;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		Integer[] array_debugTimings = { 0, 1};
-		JComboBox<Integer> cmb_debugTimings = new JComboBox<Integer>(array_debugTimings);
-		cmb_debugTimings.setSelectedItem(HandleConfig.debug_timings);
-		this.add(cmb_debugTimings, c);
+		Integer[] array_debug = { 0, 1};
+		JComboBox<Integer> cmb_debug = new JComboBox<Integer>(array_debug);
+		cmb_debug.setSelectedItem(HandleConfig.debug);
+		this.add(cmb_debug, c);
 
 		JButton btn_save = new JButton("Speichern");
 		btn_save.setFont(Mainframe.schrift);
@@ -155,21 +155,23 @@ public class Dialog_settings extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try (PrintWriter out = new PrintWriter("config.conf")) {
-
+					Mainframe.logger.info("Save Settings");
+					//set Parameters which can be changed on the fly
 					HandleConfig.loadOnDemand = (int) cmb_onDemand.getSelectedItem();
 					HandleConfig.autoDownload = (int) cmb_autoDownload.getSelectedItem();
 					HandleConfig.searchParam = (String) cmb_searchParam.getSelectedItem();
 
+					//write new config file
 					out.println("fontSize=" + cmb_font.getSelectedItem());
 					out.println("descFontSize=" + cmb_fontDesc.getSelectedItem());
 					out.println("autoDownload=" + cmb_autoDownload.getSelectedItem());
 					out.println("loadOnDemand=" + cmb_onDemand.getSelectedItem());
 					out.println("searchParam=" + cmb_searchParam.getSelectedItem());
+					out.println("debug=" + cmb_debug.getSelectedItem());
 				} catch (FileNotFoundException ex) {
-					// TODO Auto-generated catch block
 					ex.printStackTrace();
+					Mainframe.logger.error("Fehler beim speichern der Einstellungen");
 				}
-//				JOptionPane.showMessageDialog(null, "Die Änderungen werden nach einem Neustart übernommen");
 				dispose();
 			}
 		});

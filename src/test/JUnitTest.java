@@ -26,22 +26,29 @@ class JUnitTest {
 			book = new Book_Booklist("Testautor", "Testtitel", true, "", "", "", "",
 						"",false, null, null,null, new Timestamp(System.currentTimeMillis()), false);
 			BookEinträge.add(book);
+		    //Is Book added?
+		    int anzahl = BookEinträge.getSize();
+		    assertTrue(anzahl > 0);
+		    
+		    //Is Book deleted?
+		    BookEinträge.delete(book);
+		    assertTrue(BookEinträge.getSize() == anzahl-1);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		//Is Book correctly saved?
 	    assertEquals("Testautor", book.getAutor());
 	    assertEquals("Testtitel", book.getTitel());
 	    
+	    //Is Book editable?
 	    book.setAutor("EditTest");
 	    book.setAusgeliehen(true);
 	    book.setAusgeliehen_an("TestAusleihe");
 	    assertEquals("EditTest", book.getAutor());
 	    assertEquals("TestAusleihe", book.getAusgeliehen_an());
-	    
-	    assertEquals(1, BookEinträge.getSize());
-	    BookEinträge.delete(book);
-	    assertEquals(0, BookEinträge.getSize());
+	   
 	  }
 	  
 	  

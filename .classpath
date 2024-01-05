@@ -7,10 +7,12 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
-	<classpathentry kind="lib" path="opencsv-5.7.1.jar"/>
-	<classpathentry kind="lib" path="gson-2.10.1.jar"/>
-	<classpathentry kind="lib" path="derby.jar"/>
-	<classpathentry kind="lib" path="derbyshared.jar"/>
-	<classpathentry kind="lib" path="derbytools.jar"/>
+	<classpathentry kind="lib" path="dependencies/derby.jar"/>
+	<classpathentry kind="lib" path="dependencies/derbyshared.jar"/>
+	<classpathentry kind="lib" path="dependencies/derbytools.jar"/>
+	<classpathentry kind="lib" path="dependencies/gson-2.10.1.jar"/>
+	<classpathentry kind="lib" path="dependencies/log4j-api-2.22.1.jar"/>
+	<classpathentry kind="lib" path="dependencies/log4j-core-2.22.1.jar"/>
+	<classpathentry kind="lib" path="dependencies/opencsv-5.7.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

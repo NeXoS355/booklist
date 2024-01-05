@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -12,14 +13,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,6 +53,11 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
+
 import application.BookListModel;
 import application.Book_Booklist;
 import application.HandleConfig;
@@ -64,7 +70,9 @@ public class Mainframe extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	public static Logger logger = null;
 	public static ExecutorService executor = Executors.newFixedThreadPool(10);
+
 	public static Font schrift = new Font("Roboto", Font.PLAIN, 16);
 	public static Font descSchrift = new Font("Roboto", Font.PLAIN, 16);
 	private static JTable table = new JTable();
@@ -80,18 +88,23 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.5.1  (01.2024)  ";
+	private String version = "Ver. 2.5.2  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
 
-		Instant startFrame = Instant.now();
+		logger = LogManager.getLogger(getClass());
+		logger.info("start creating Frame & readConfig");
+		HandleConfig.readConfig();
+		if (HandleConfig.debug == 0) {
+			Configurator.setLevel(logger, Level.WARN);
+		}
 
 		this.setLayout(new BorderLayout(10, 10));
 		this.setLocation(100, 100);
 		this.setSize(1300, 800);
 		this.setResizable(true);
-		HandleConfig.readConfig();
+
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
@@ -100,21 +113,15 @@ public class Mainframe extends JFrame {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 
-		Instant startCreateListAndDB = null;
-		if (HandleConfig.debug_timings == 1) {
-			startCreateListAndDB = Instant.now();
-		}
+		logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
 		einträge = new BookListModel();
 		filter = new DefaultListModel<Book_Booklist>();
 		anzeige = new SimpleTableModel(einträge);
 
-		Instant startCreateGUIComponents = null;
-		if (HandleConfig.debug_timings == 1) {
-			startCreateGUIComponents = Instant.now();
-		}
+		logger.info("Finished creating List & DB. Start creating GUI Components");
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(5, 5));
@@ -194,11 +201,6 @@ public class Mainframe extends JFrame {
 			}
 		});
 		panel.add(btn_search, BorderLayout.EAST);
-
-		Instant startCreateMenu = null;
-		if (HandleConfig.debug_timings == 1) {
-			startCreateMenu = Instant.now();
-		}
 
 		JPanel pnlMenü = new JPanel();
 		pnlMenü.setLayout(new BorderLayout());
@@ -295,10 +297,7 @@ public class Mainframe extends JFrame {
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
 
-		Instant startCreateTable = null;
-		if (HandleConfig.debug_timings == 1) {
-			startCreateTable = Instant.now();
-		}
+		logger.info("Finished creating GUI Components. Start creating Table Contents");
 
 		table.setModel(anzeige);
 		table.setFont(schrift);
@@ -381,10 +380,7 @@ public class Mainframe extends JFrame {
 			}
 		});
 
-		Instant startCreateTree = null;
-		if (HandleConfig.debug_timings == 1) {
-			startCreateTree = Instant.now();
-		}
+		logger.info("end creating Table content. Start creating Tree Contents + ScrollPane");
 
 		JPanel pnl_mid = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -457,34 +453,21 @@ public class Mainframe extends JFrame {
 		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
 
-		Instant startUpdateModelAfterCreation = null;
-		if (HandleConfig.debug_timings == 1) {
-			startUpdateModelAfterCreation = Instant.now();
-		}
+		logger.info("Finished creating Tree Contents + ScrollPane. Start Update Model & show GUI");
 
 		updateModel();
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setVisible(true);
+		addWindowListener(new WindowAdapter() {
 
-		Instant endFrame = Instant.now();
-
-		Duration timeElapsed = Duration.between(startFrame, endFrame);
-		System.out.println("0: WholeFrame:" + timeElapsed);
-		if (HandleConfig.debug_timings == 1) {
-			timeElapsed = Duration.between(startFrame, startCreateListAndDB);
-			System.out.println("1: -Create List and DB " + timeElapsed);
-			timeElapsed = Duration.between(startFrame, startCreateGUIComponents);
-			System.out.println("2: -Create GUI Components " + timeElapsed);
-			timeElapsed = Duration.between(startFrame, startCreateMenu);
-			System.out.println("3: -Create Menu " + timeElapsed);
-			timeElapsed = Duration.between(startFrame, startCreateTable);
-			System.out.println("4: -Create Table " + timeElapsed);
-			timeElapsed = Duration.between(startFrame, startCreateTree);
-			System.out.println("5: -Create Tree " + timeElapsed);
-			timeElapsed = Duration.between(startFrame, startUpdateModelAfterCreation);
-			System.out.println("6: -UpdateModel " + timeElapsed);
-		}
-
+			@Override
+			public void windowClosing(WindowEvent et) {
+				logger.info("Close Database");
+				Database.closeConnection();
+				logger.info("Window closing");
+			}
+		});
+		logger.info("Init completed");
 	}
 
 	public static void deleteBuch() {
@@ -538,7 +521,6 @@ public class Mainframe extends JFrame {
 		tree.setModel(treeModel);
 		tree.revalidate();
 		tree.repaint();
-		System.out.println("Mainframe Node updated");
 	}
 
 	public static void copyFilesInDirectory(File from, File to) {
@@ -571,7 +553,6 @@ public class Mainframe extends JFrame {
 		anzeige = new SimpleTableModel(einträge);
 		table.setModel(anzeige);
 		treeSelection = "";
-		System.out.println("Mainframe Model updated");
 	}
 
 	public static int anz_bücherAutor(String text) {

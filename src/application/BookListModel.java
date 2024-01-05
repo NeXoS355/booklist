@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+
 import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
 
@@ -28,8 +29,10 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		Database.createConnection();
 		ResultSet rs = null;
 		if (HandleConfig.loadOnDemand == 1) {
+			Mainframe.logger.info("Reading Database Lite");
 			rs = Database.readDbBooklistLite();
 		} else {
+			Mainframe.logger.info("Reading Database Full");
 			rs = Database.readDbBooklist();
 		}
 		try {
@@ -65,24 +68,23 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 							buf_pic, desc, isbn, datum, false);
 					book.setBid(bid);
 					getBücher().add(book);
-
+					Mainframe.logger.info("Buch ausgelesen: " + book.getAutor() + "-" + book.getTitel());
 					if (bid > Database.highestBid) {
 						Database.highestBid = bid;
 					}
-				} catch (DateTimeParseException ex1) {
-					System.err.println("Datum falsch während DB auslesen");
+				} catch (DateTimeParseException e) {
+					Mainframe.logger.error(e.getMessage());
 				}
 			}
 		} catch (SQLException | IOException e) {
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 	}
 
-	public static void loadOnDemand(Book_Booklist buch) {
-		if (buch.getDesc() == "" && buch.getPic() == null) {
-			System.out.println("loading Image and Description");
+	public static void loadOnDemand(Book_Booklist book) {
+		if (book.getDesc() == "" && book.getPic() == null) {
 			try {
-				ResultSet rs = Database.selectFromBooklist(buch.getBid());
+				ResultSet rs = Database.selectFromBooklist(book.getBid());
 				while (rs.next()) {
 					Blob picture = rs.getBlob("pic");
 					String desc = rs.getString("description");
@@ -99,31 +101,31 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
 
-					buch.setPic(buf_pic);
-					buch.setDesc(desc);
-					buch.setEbook(ebook);
-					buch.setDatum(datum);
-					buch.setIsbn(isbn);
+					book.setPic(buf_pic);
+					book.setDesc(desc);
+					book.setEbook(ebook);
+					book.setDatum(datum);
+					book.setIsbn(isbn);
 
 					String ausgeliehen = rs.getString("ausgeliehen");
 					boolean boolAusgeliehen = false;
 					if (ausgeliehen.equals("an")) {
 						boolAusgeliehen = true;
 						String ausgeliehen_an = rs.getString("name").trim();
-						buch.setAusgeliehen_an(ausgeliehen_an);
-						buch.setAusgeliehen(boolAusgeliehen);
+						book.setAusgeliehen_an(ausgeliehen_an);
+						book.setAusgeliehen(boolAusgeliehen);
 					} else if (ausgeliehen.equals("von")) {
 						boolAusgeliehen = true;
 						String ausgeliehen_von = rs.getString("name").trim();
-						buch.setAusgeliehen_von(ausgeliehen_von);
-						buch.setAusgeliehen(boolAusgeliehen);
+						book.setAusgeliehen_von(ausgeliehen_von);
+						book.setAusgeliehen(boolAusgeliehen);
 					}
-
+					Mainframe.logger.info("loading Book info: " + book.getAutor() + "-" + book.getTitel());
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
+				Mainframe.logger.error(e.getMessage());
 			} catch (IOException e) {
-				e.printStackTrace();
+				Mainframe.logger.error(e.getMessage());
 			}
 		}
 	}
