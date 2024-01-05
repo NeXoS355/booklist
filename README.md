@@ -5,11 +5,11 @@ This is just a small Project which i did for my family. We couldn't get track of
 Features:
 
 - Add Books with author, title, series info
-- add Remarks to specif Books
+- add Remarks to specific Books
 - keep track of borrowed books
 - declare if it is a physical copy or an ebook
-- get Book Cover, Description and other Infos via GoogleBooks API
-- search your Books with fulltext, author or series
+- get Book Cover, Long Descriptions and other Infos via GoogleBooks API
+- filter your list via author, series or search with fulltext
 - export your list to an csv file
 - add Books to your Wishlist
 
