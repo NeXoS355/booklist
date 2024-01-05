@@ -4,14 +4,14 @@ This is just a small Project which i did for my family. We couldn't get track of
 
 Features:
 
-    Add Books with author, title, series info
-    add Remarks to specif Books
-    keep track of borrowed books
-    declare if it is a physical copy or an ebook
-    get Book Cover, Description and other Infos via GoogleBooks API
-    search your Books with fulltext, author or series
-    export your list to an csv file
-    add Books to your Wishlist
+- Add Books with author, title, series info
+- add Remarks to specif Books
+- keep track of borrowed books
+- declare if it is a physical copy or an ebook
+- get Book Cover, Description and other Infos via GoogleBooks API
+- search your Books with fulltext, author or series
+- export your list to an csv file
+- add Books to your Wishlist
 
 Compiled with jdk17 and the following dependencies
 - derby 10.16.1.1
