@@ -14,10 +14,10 @@ Features:
     add Books to your Wishlist
 
 Compiled with jdk17 and the following dependencies
-	derby 10.16.1.1
-	derbyshared 10.16.1.1
-	derbytools 10.16.1.1
-	gson 2.10.1
-	log4j-core 2.22.1
-	log4j-api 2.22.1
-	opencsv 5.7.1
+- derby 10.16.1.1
+- derbyshared 10.16.1.1
+- derbytools 10.16.1.1
+- gson 2.10.1
+- log4j-core 2.22.1
+- log4j-api 2.22.1
+- opencsv 5.7.1
