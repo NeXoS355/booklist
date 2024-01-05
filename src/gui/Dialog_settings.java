@@ -13,6 +13,8 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 
+import application.HandleConfig;
+
 public class Dialog_settings extends JDialog {
 
 	/**

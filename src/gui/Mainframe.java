@@ -54,6 +54,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import application.BookListModel;
 import application.Book_Booklist;
+import application.HandleConfig;
 import application.SimpleTableModel;
 import data.Database;
 
@@ -79,7 +80,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.5.0  (01.2024)  ";
+	private String version = "Ver. 2.5.1  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -90,9 +91,7 @@ public class Mainframe extends JFrame {
 		this.setLocation(100, 100);
 		this.setSize(1300, 800);
 		this.setResizable(true);
-		Mainframe.executor.submit(() -> {
-			HandleConfig.readConfig();
-		});
+		HandleConfig.readConfig();
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
@@ -468,11 +467,10 @@ public class Mainframe extends JFrame {
 		this.setVisible(true);
 
 		Instant endFrame = Instant.now();
-		
-		
+
 		Duration timeElapsed = Duration.between(startFrame, endFrame);
 		System.out.println("0: WholeFrame:" + timeElapsed);
-		if (HandleConfig.debug_timings==1) {
+		if (HandleConfig.debug_timings == 1) {
 			timeElapsed = Duration.between(startFrame, startCreateListAndDB);
 			System.out.println("1: -Create List and DB " + timeElapsed);
 			timeElapsed = Duration.between(startFrame, startCreateGUIComponents);
@@ -486,10 +484,6 @@ public class Mainframe extends JFrame {
 			timeElapsed = Duration.between(startFrame, startUpdateModelAfterCreation);
 			System.out.println("6: -UpdateModel " + timeElapsed);
 		}
-
-
-		
-		
 
 	}
 

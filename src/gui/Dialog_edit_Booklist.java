@@ -43,6 +43,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import application.Book_Booklist;
+import application.HandleConfig;
 import application.BookListModel;
 import application.HandleWebInfo;
 import data.Database;
@@ -447,8 +448,6 @@ public class Dialog_edit_Booklist extends JDialog {
 		check_ebook = new JCheckBox();
 		check_ebook.setFont(Mainframe.schrift);
 		check_ebook.setSelected(eintrag.isEbook());
-
-		System.out.println(eintrag.getBid());
 
 		/*
 		 * Set Center Layout

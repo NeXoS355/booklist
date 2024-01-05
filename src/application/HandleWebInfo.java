@@ -21,7 +21,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
 import data.Database;
-import gui.HandleConfig;
 import gui.Mainframe;
 
 import com.google.gson.JsonObject;

@@ -13,7 +13,6 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
 
 import data.Database;
-import gui.HandleConfig;
 import gui.Mainframe;
 
 public class BookListModel extends AbstractListModel<Book_Booklist> {
@@ -62,8 +61,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
-					book = new Book_Booklist(autor, titel, ausgeliehen, "", "", bemerkung, serie, seriePart,
-							ebook, buf_pic, desc, isbn, datum, false);
+					book = new Book_Booklist(autor, titel, ausgeliehen, "", "", bemerkung, serie, seriePart, ebook,
+							buf_pic, desc, isbn, datum, false);
 					book.setBid(bid);
 					getBücher().add(book);
 
@@ -105,7 +104,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					buch.setEbook(ebook);
 					buch.setDatum(datum);
 					buch.setIsbn(isbn);
-					
+
 					String ausgeliehen = rs.getString("ausgeliehen");
 					boolean boolAusgeliehen = false;
 					if (ausgeliehen.equals("an")) {
@@ -119,7 +118,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						buch.setAusgeliehen_von(ausgeliehen_von);
 						buch.setAusgeliehen(boolAusgeliehen);
 					}
-					
+
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -181,6 +180,24 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		}
 		return returnArr;
 	}
+
+	public static int[] getBuecherVonAutor(String autor) {
+		ArrayList<Integer> buecher = new ArrayList<Integer>();
+
+		for (int i = 0; i < getBücher().size(); i++) {
+			Book_Booklist buch = getBücher().get(i);
+			if (buch.getAutor().contains(autor)) {
+				buecher.add(buch.getBid());
+			}
+		}
+		int[] returnArr = new int[buecher.size()];
+		for (int i = 0; i < buecher.size(); i++) {
+			returnArr[i] = buecher.get(i);
+		}
+		return returnArr;
+
+	}
+
 
 	public static boolean hatAutorSerie(String autor) {
 		for (int i = 0; i < getBücher().size(); i++) {
