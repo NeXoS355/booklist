@@ -112,7 +112,7 @@ public class Database {
 		ResultSet rs = null;
 		try {
 			Statement st = con.createStatement();
-			rs = st.executeQuery("SELECT * FROM bücher ORDER BY autor");
+			rs = st.executeQuery("SELECT * FROM bücher ORDER BY autor, serie, seriePart");
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
@@ -124,7 +124,7 @@ public class Database {
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery(
-					"SELECT autor,titel,ausgeliehen,name, bemerkung,serie,seriePart,ebook,date,isbn,bid FROM bücher ORDER BY autor");
+					"SELECT autor,titel,ausgeliehen,name, bemerkung,serie,seriePart,ebook,date,isbn,bid FROM bücher ORDER BY autor, serie, seriePart");
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
