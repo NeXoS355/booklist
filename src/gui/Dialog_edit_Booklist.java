@@ -14,6 +14,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -70,7 +72,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(600, 645));
-		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
+		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 100);
 		this.setAlwaysOnTop(false);
 
 		Book_Booklist eintrag = einträge.getElementAt(index);
@@ -238,29 +240,62 @@ public class Dialog_edit_Booklist extends JDialog {
 			});
 			panel_east_border.add(btn_downloadInfo, BorderLayout.CENTER);
 		}
-		
+
 		/*
 		 * create and add components to Panel Center
 		 */
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.schrift);
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
+
+		JDialog complFrame = new JDialog();
+
 		txt_author = new RoundJTextField(eintrag.getAutor());
 		txt_author.setFont(Mainframe.schrift);
 		txt_author.setPreferredSize(new Dimension(50, höhe));
 		txt_author.setBorder(standardBorder);
+
 		txt_author.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				int typed = txt_author.getCaretPosition();
+
+				if (e.getKeyCode() >= 65 && e.getKeyCode() <= 105) {
+
+					String typedString = txt_author.getText().substring(0, typed);
+
+					if (!txt_author.getText().equals("")) {
+						String[] autoren = autoCompletion(typedString, "autor");
+						for (int i = 0; i < autoren.length && autoren[i] != null; i++) {
+							int autorenLength = autoren[i].length();
+							String setText = autoren[i].substring(typed, autorenLength);
+							txt_author.setText(typedString + setText);
+							txt_author.setCaretPosition(typed);
+							txt_author.setSelectionStart(typed);
+							txt_author.setSelectionEnd(autoren[i].length());
+
+						}
+					}
+				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+					typed = txt_author.getCaretPosition();
+					txt_author.setText(txt_author.getText().substring(0, typed));
+				} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					typed = txt_author.getCaretPosition();
+					txt_author.setText(txt_author.getText().substring(0, typed));
+				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					speichern(eintrag);
-				else if (!e.isActionKey()) {
+				} else if (!e.isActionKey()) {
 					txt_author.setBackground(Color.white);
-				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+				} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
+
 			}
+
+			public void keyPressed(KeyEvent e) {
+
+			}
+
 		});
 		txt_author.addMouseListener(new MouseAdapter() {
 
@@ -274,6 +309,15 @@ public class Dialog_edit_Booklist extends JDialog {
 			public void mouseEntered(MouseEvent e) {
 				txt_author.setBorder(activeBorder);
 
+			}
+		});
+
+		txt_author.addFocusListener(new FocusAdapter() {
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				complFrame.removeAll();
+				complFrame.setVisible(false);
 			}
 
 		});
@@ -380,7 +424,31 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				int typed = txt_serie.getCaretPosition();
+
+				if (e.getKeyCode() >= 65 && e.getKeyCode() <= 105) {
+
+					String typedString = txt_serie.getText().substring(0, typed);
+
+					if (!txt_serie.getText().equals("")) {
+						String[] serien = autoCompletion(typedString, "serie");
+						for (int i = 0; i < serien.length && serien[i] != null; i++) {
+							int autorenLength = serien[i].length();
+							String setText = serien[i].substring(typed, autorenLength);
+							txt_serie.setText(typedString + setText);
+							txt_serie.setCaretPosition(typed);
+							txt_serie.setSelectionStart(typed);
+							txt_serie.setSelectionEnd(serien[i].length());
+
+						}
+					}
+				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+					typed = txt_serie.getCaretPosition();
+					txt_serie.setText(txt_serie.getText().substring(0, typed));
+				} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					typed = txt_serie.getCaretPosition();
+					txt_serie.setText(txt_serie.getText().substring(0, typed));
+				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					speichern(eintrag);
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
@@ -725,6 +793,46 @@ public class Dialog_edit_Booklist extends JDialog {
 		this.setVisible(true);
 		this.setResizable(false);
 
+	}
+
+	public String[] autoCompletion(String search, String field) {
+		String[] returnArray = null;
+		if (field.equals("autor")) {
+			int j = 0;
+			int anz_autoren = BookListModel.autoren.size();
+			String[] result = new String[anz_autoren];
+			for (int i = 0; i < anz_autoren; i++) {
+				if (BookListModel.autoren.get(i).startsWith(search)) {
+					result[j] = BookListModel.autoren.get(i);
+					j++;
+				}
+			}
+			returnArray = new String[j];
+			for (int i = 0; i < j; i++) {
+				if (result[i] != null) {
+					returnArray[i] = result[i];
+				}
+
+			}
+		} else if (field.equals("serie")) {
+			int j = 0;
+			String[] serien = BookListModel.getSerienVonAutor(txt_author.getText());
+			String[] result = new String[serien.length];
+			for (int i = 0; i < serien.length; i++) {
+				if (serien[i].startsWith(search)) {
+					result[j] = serien[i];
+					j++;
+				}
+			}
+			returnArray = new String[j];
+			for (int i = 0; i < j; i++) {
+				if (result[i] != null) {
+					returnArray[i] = result[i];
+				}
+
+			}
+		}
+		return returnArray;
 	}
 
 	public void speichern(Book_Booklist eintrag) {

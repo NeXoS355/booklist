@@ -77,13 +77,11 @@ public class Dialog_add_Booklist extends JDialog {
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.schrift);
 		lbl_author.setSize(new Dimension(breite, höhe));
-		
+
 		JPanel panel_west = new JPanel();
 		panel_west.setLayout(new GridLayout(4, 1, 10, 10));
 		panel_west.add(lbl_author);
-		
 
-		
 		/*
 		 * Create Components for Panel Center
 		 */
@@ -96,7 +94,32 @@ public class Dialog_add_Booklist extends JDialog {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				int typed = txt_author.getCaretPosition();
+
+				if (e.getKeyCode() >= 65 && e.getKeyCode() <= 105) {
+
+					String typedString = txt_author.getText().substring(0, typed);
+
+					if (!txt_author.getText().equals("")) {
+						String[] autoren = autoCompletion(typedString, "autor");
+						for (int i = 0; i < autoren.length && autoren[i] != null; i++) {
+							int autorenLength = autoren[i].length();
+							String setText = autoren[i].substring(typed, autorenLength);
+							txt_author.setText(typedString + setText);
+							txt_author.setCaretPosition(typed);
+							txt_author.setSelectionStart(typed);
+							txt_author.setSelectionEnd(autoren[i].length());
+
+						}
+					}
+				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+					typed = txt_author.getCaretPosition();
+					txt_author.setText(txt_author.getText().substring(0, typed));
+				} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					typed = txt_author.getCaretPosition();
+					txt_author.setText(txt_author.getText().substring(0, typed));
+					System.out.println(txt_author.getText().substring(0, typed));
+				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					addBuch();
 				} else if (!e.isActionKey()) {
 					txt_author.setBackground(Color.white);
@@ -229,7 +252,30 @@ public class Dialog_add_Booklist extends JDialog {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				int typed = txt_serie.getCaretPosition();
+
+				if (e.getKeyCode() >= 65 && e.getKeyCode() <= 105) {
+
+					String typedString = txt_serie.getText().substring(0, typed);
+
+					if (!txt_serie.getText().equals("")) {
+						String[] serien = autoCompletion(typedString, "serie");
+						for (int i = 0; i < serien.length && serien[i] != null; i++) {
+							int autorenLength = serien[i].length();
+							String setText = serien[i].substring(typed, autorenLength);
+							txt_serie.setText(typedString + setText);
+							txt_serie.setCaretPosition(typed);
+							txt_serie.setSelectionStart(typed);
+							txt_serie.setSelectionEnd(serien[i].length());
+						}
+					}
+				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+					typed = txt_serie.getCaretPosition();
+					txt_serie.setText(txt_serie.getText().substring(0, typed));
+				} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					typed = txt_serie.getCaretPosition();
+					txt_serie.setText(txt_serie.getText().substring(0, typed));
+				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					addBuch();
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
@@ -286,20 +332,20 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 
 		});
-		
+
 		JLabel lbl_ebook = new JLabel("E-Book:");
 		lbl_ebook.setFont(Mainframe.schrift);
 		lbl_ebook.setPreferredSize(new Dimension(breite, höhe));
 		panel_west.add(lbl_ebook);
-		
+
 		check_ebook = new JCheckBox();
 		check_ebook.setFont(Mainframe.schrift);
 		check_ebook.setSelected(true);
-		
+
 		/*
 		 * Set Center Layout
 		 */
-		GridBagConstraints c = new GridBagConstraints();		
+		GridBagConstraints c = new GridBagConstraints();
 		panel_center.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 		c.gridx = 0;
 		c.gridy = 0;
@@ -307,59 +353,59 @@ public class Dialog_add_Booklist extends JDialog {
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.ipady = 15;
-		panel_center.add(lbl_author,c);
+		panel_center.add(lbl_author, c);
 		c.gridx = 1;
 		c.gridy = 0;
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_author,c);
+		panel_center.add(txt_author, c);
 		c.gridx = 0;
 		c.gridy = 1;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		c.insets = new Insets(10,0,0,0);
-		panel_center.add(lbl_title,c);
+		c.insets = new Insets(10, 0, 0, 0);
+		panel_center.add(lbl_title, c);
 		c.gridx = 1;
 		c.gridy = 1;
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_title,c);
+		panel_center.add(txt_title, c);
 		c.gridx = 0;
 		c.gridy = 2;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		panel_center.add(lbl_merk,c);
+		panel_center.add(lbl_merk, c);
 		c.gridx = 1;
 		c.gridy = 2;
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_merk,c);
+		panel_center.add(txt_merk, c);
 		c.gridx = 0;
 		c.gridy = 3;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		panel_center.add(lbl_serie,c);
+		panel_center.add(lbl_serie, c);
 		c.gridx = 1;
 		c.gridy = 3;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_serie,c);		
+		panel_center.add(txt_serie, c);
 		c.gridx = 2;
 		c.gridy = 3;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(10,10,0,0);
+		c.insets = new Insets(10, 10, 0, 0);
 		panel_center.add(txt_seriePart, c);
 		c.gridx = 0;
 		c.gridy = 4;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
-		c.insets = new Insets(10,0,0,0);
+		c.insets = new Insets(10, 0, 0, 0);
 		panel_center.add(lbl_ebook, c);
 		c.gridx = 1;
 		c.gridy = 4;
@@ -368,7 +414,6 @@ public class Dialog_add_Booklist extends JDialog {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel_center.add(check_ebook, c);
 
-		
 		/*
 		 * create components for Panel South
 		 */
@@ -389,7 +434,6 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 		});
 
-
 		check_an = new JCheckBox("ausgeliehen an");
 		check_an.setFont(Mainframe.schrift);
 		check_an.setSelected(false);
@@ -406,7 +450,6 @@ public class Dialog_add_Booklist extends JDialog {
 				}
 			}
 		});
-
 
 		txt_leihVon = new RoundJTextField();
 		txt_leihVon.setFont(Mainframe.schrift);
@@ -438,7 +481,6 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 
 		});
-
 
 		txt_leihAn = new RoundJTextField();
 		txt_leihAn.setFont(Mainframe.schrift);
@@ -472,7 +514,6 @@ public class Dialog_add_Booklist extends JDialog {
 
 		});
 
-
 		JButton btn_add = new JButton("hinzufügen");
 		btn_add.setFont(Mainframe.schrift);
 		btn_add.addActionListener(new ActionListener() {
@@ -482,7 +523,6 @@ public class Dialog_add_Booklist extends JDialog {
 				addBuch();
 			}
 		});
-
 
 		JButton btn_abort = new JButton("abbrechen");
 		btn_abort.setFont(Mainframe.schrift);
@@ -535,19 +575,19 @@ public class Dialog_add_Booklist extends JDialog {
 				if (checkInput(autor, titel)) {
 					if (check_an.isSelected()) {
 						book = new Book_Booklist(autor, titel, true, txt_leihAn.getText(), "", bemerkung, serie,
-								seriePart,ebook, null, null, null, datum, true);
+								seriePart, ebook, null, null, null, datum, true);
 						Mainframe.einträge.add(book);
 					} else if (check_von.isSelected()) {
 						book = new Book_Booklist(autor, titel, true, "", txt_leihVon.getText(), bemerkung, serie,
-								seriePart,ebook, null, null, null, datum, true);
+								seriePart, ebook, null, null, null, datum, true);
 						Mainframe.einträge.add(book);
 					} else {
-						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart,ebook, null, null, null, datum,
-								true);
+						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, ebook, null, null, null,
+								datum, true);
 						Mainframe.einträge.add(book);
 					}
 					if (HandleConfig.autoDownload == 1)
-						HandleWebInfo.DownloadWebPage(book,2,false);
+						HandleWebInfo.DownloadWebPage(book, 2, false);
 
 					dispose();
 				} else {
@@ -578,6 +618,46 @@ public class Dialog_add_Booklist extends JDialog {
 			Mainframe.search(Mainframe.getTreeSelection());
 		}
 		BookListModel.autorenPrüfen();
+	}
+
+	public String[] autoCompletion(String search, String field) {
+		String[] returnArray = null;
+		if (field.equals("autor")) {
+			int j = 0;
+			int anz_autoren = BookListModel.autoren.size();
+			String[] result = new String[anz_autoren];
+			for (int i = 0; i < anz_autoren; i++) {
+				if (BookListModel.autoren.get(i).startsWith(search)) {
+					result[j] = BookListModel.autoren.get(i);
+					j++;
+				}
+			}
+			returnArray = new String[j];
+			for (int i = 0; i < j; i++) {
+				if (result[i] != null) {
+					returnArray[i] = result[i];
+				}
+
+			}
+		} else if (field.equals("serie")) {
+			int j = 0;
+			String[] serien = BookListModel.getSerienVonAutor(txt_author.getText());
+			String[] result = new String[serien.length];
+			for (int i = 0; i < serien.length; i++) {
+				if (serien[i].startsWith(search)) {
+					result[j] = serien[i];
+					j++;
+				}
+			}
+			returnArray = new String[j];
+			for (int i = 0; i < j; i++) {
+				if (result[i] != null) {
+					returnArray[i] = result[i];
+				}
+
+			}
+		}
+		return returnArray;
 	}
 
 	public boolean checkInput(String autor, String titel) {
