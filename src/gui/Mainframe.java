@@ -9,6 +9,8 @@ import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -450,6 +452,14 @@ public class Mainframe extends JFrame {
 			}
 
 		});
+		tree.addFocusListener(new FocusAdapter() {
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				tree.setSelectionPath(null);
+			}
+			
+		});
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
@@ -593,18 +603,34 @@ public class Mainframe extends JFrame {
 			String leihVon = eintrag.getAusgeliehen_von().toUpperCase();
 			String leihAn = eintrag.getAusgeliehen_an().toUpperCase();
 			String serie = eintrag.getSerie().toUpperCase();
-			if (autor.contains(text)) {
-				filter.addElement(einträge.getElementAt(i));
-			} else if (titel.contains(text)) {
-				filter.addElement(einträge.getElementAt(i));
-			} else if (bemerkung.contains(text)) {
-				filter.addElement(einträge.getElementAt(i));
-			} else if (leihVon.contains(text)) {
-				filter.addElement(einträge.getElementAt(i));
-			} else if (leihAn.contains(text)) {
-				filter.addElement(einträge.getElementAt(i));
-			} else if (serie.contains(text)) {
-				filter.addElement(einträge.getElementAt(i));
+			if (tree.getSelectionCount() == 0) {
+				if (autor.contains(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (titel.contains(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (bemerkung.contains(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (leihVon.contains(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (leihAn.contains(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (serie.contains(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				}
+			} else {
+				if (autor.equals(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (titel.equals(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (bemerkung.equals(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (leihVon.equals(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (leihAn.equals(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				} else if (serie.equals(text)) {
+					filter.addElement(einträge.getElementAt(i));
+				}
 			}
 		}
 		if (filter.getSize() > 0) {
