@@ -136,14 +136,14 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 7;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
-		JLabel lbl_debugTimings = new JLabel("Show Debug Timings");
-		lbl_debugTimings.setToolTipText("zeigt Ausführungsdauer nach dem Laden der Anwendung an");
+		JLabel lbl_debugTimings = new JLabel("Debug");
+		lbl_debugTimings.setToolTipText("Ausführlichkeit der Logging Aktivität 0=WARN,1=INFO,2=TRACE");
 		this.add(lbl_debugTimings, c);
 		c.gridx = 1;
 		c.gridy = 7;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		Integer[] array_debug = { 0, 1};
+		Integer[] array_debug = { 0, 1, 2};
 		JComboBox<Integer> cmb_debug = new JComboBox<Integer>(array_debug);
 		cmb_debug.setSelectedItem(HandleConfig.debug);
 		this.add(cmb_debug, c);

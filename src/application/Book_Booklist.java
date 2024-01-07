@@ -24,7 +24,8 @@ public class Book_Booklist {
 	private int bid;
 
 	public Book_Booklist(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
-			String bemerkung, String serie,String seriePart, boolean ebook, Image pic, String desc, String isbn,Timestamp datum, boolean db) throws SQLException {
+			String bemerkung, String serie, String seriePart, boolean ebook, Image pic, String desc, String isbn,
+			Timestamp datum, boolean db) throws SQLException {
 		super();
 		this.autor = autor;
 		this.titel = titel;
@@ -47,15 +48,19 @@ public class Book_Booklist {
 
 		if (db) {
 			if (!ausgeliehen_an.isEmpty())
-				bid = Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, ebook, datum.toString());
+				bid = Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, ebook,
+						datum.toString());
 			else if (!ausgeliehen_von.isEmpty())
-				bid = Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, ebook,  datum.toString());
+				bid = Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, ebook,
+						datum.toString());
 			else
-				bid = Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, ebook, datum.toString());
+				bid = Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, ebook,
+						datum.toString());
 		}
 	}
 
-	public Book_Booklist(String autor, String titel, String bemerkung, String serie,String seriePart, boolean ebook, Image pic, String desc,String isbn, Timestamp datum, boolean db) throws SQLException {
+	public Book_Booklist(String autor, String titel, String bemerkung, String serie, String seriePart, boolean ebook,
+			Image pic, String desc, String isbn, Timestamp datum, boolean db) throws SQLException {
 		this(autor, titel, false, "", "", bemerkung, serie, seriePart, ebook, pic, desc, isbn, datum, db);
 	}
 
@@ -206,7 +211,5 @@ public class Book_Booklist {
 	public void setEbook(boolean ebook) {
 		this.ebook = ebook;
 	}
-	
-	
 
 }

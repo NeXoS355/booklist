@@ -88,16 +88,20 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.5.2  (01.2024)  ";
+	private String version = "Ver. 2.5.3  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
 
 		logger = LogManager.getLogger(getClass());
-		logger.info("start creating Frame & readConfig");
+		logger.trace("start creating Frame & readConfig");
 		HandleConfig.readConfig();
 		if (HandleConfig.debug == 0) {
 			Configurator.setLevel(logger, Level.WARN);
+		} else if (HandleConfig.debug == 1) {
+			Configurator.setLevel(logger, Level.INFO);
+		} else if (HandleConfig.debug == 2) {
+			Configurator.setLevel(logger, Level.TRACE);
 		}
 
 		this.setLayout(new BorderLayout(10, 10));
@@ -116,12 +120,12 @@ public class Mainframe extends JFrame {
 			logger.error(e.getMessage());
 		}
 
-		logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
+		logger.trace("Finished create Frame & readConfig. Start creating Lists and readDB");
 		einträge = new BookListModel();
 		filter = new DefaultListModel<Book_Booklist>();
 		anzeige = new SimpleTableModel(einträge);
 
-		logger.info("Finished creating List & DB. Start creating GUI Components");
+		logger.trace("Finished creating List & DB. Start creating GUI Components");
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(5, 5));
@@ -297,7 +301,7 @@ public class Mainframe extends JFrame {
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
 
-		logger.info("Finished creating GUI Components. Start creating Table Contents");
+		logger.trace("Finished creating GUI Components. Start creating Table Contents");
 
 		table.setModel(anzeige);
 		table.setFont(schrift);
@@ -380,7 +384,7 @@ public class Mainframe extends JFrame {
 			}
 		});
 
-		logger.info("end creating Table content. Start creating Tree Contents + ScrollPane");
+		logger.trace("end creating Table content. Start creating Tree Contents + ScrollPane");
 
 		JPanel pnl_mid = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -453,7 +457,7 @@ public class Mainframe extends JFrame {
 		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
 
-		logger.info("Finished creating Tree Contents + ScrollPane. Start Update Model & show GUI");
+		logger.trace("Finished creating Tree Contents + ScrollPane. Start Update Model & show GUI");
 
 		updateModel();
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -467,7 +471,7 @@ public class Mainframe extends JFrame {
 				logger.info("Window closing");
 			}
 		});
-		logger.info("Init completed");
+		logger.trace("Init completed");
 	}
 
 	public static void deleteBuch() {

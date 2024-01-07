@@ -64,12 +64,19 @@ public class wishlist extends JFrame {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-//				if (e.getClickCount() >= 2 && SwingUtilities.isLeftMouseButton(e)) {
-//					String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
-//					String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
-//					int index = Wishlisteinträge.getIndexOf(searchAutor, searchTitel);
-//						new Dialog_edit_Wishlist(Wishlisteinträge, index);
-//				}
+				if (e.getClickCount() >= 2 && SwingUtilities.isLeftMouseButton(e)) {
+					String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
+					String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
+					int index = Wishlisteinträge.getIndexOf(searchAutor, searchTitel);
+					new Dialog_edit_Wishlist(Wishlisteinträge, index);
+				}
+				if (SwingUtilities.isRightMouseButton(e)) {
+					JTable table2 = (JTable) e.getSource();
+					int row = table2.rowAtPoint(e.getPoint());
+					if (row > -1)
+						table2.setRowSelectionInterval(row, row);
+					showMenu(e);
+				}
 				if (SwingUtilities.isRightMouseButton(e)) {
 					JTable table2 = (JTable) e.getSource();
 					int row = table2.rowAtPoint(e.getPoint());
@@ -139,6 +146,7 @@ public class wishlist extends JFrame {
 		table.setModel(anzeige);
 		table.setFont(schrift);
 		table.setRowHeight(22);
+
 		JPanel mid_panel = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);

@@ -53,27 +53,45 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					String isbn = "";
 					Timestamp datum = null;
 					boolean ebook = false;
-					boolean ausgeliehen = false;
+					String ausgeliehen = "";
+					String ausgeliehen_an = "";
+					String ausgeliehen_von = "";
+					boolean boolAusgeliehen = false;
 
 					if (HandleConfig.loadOnDemand == 0) {
 						picture = rs.getBlob("pic");
 						desc = rs.getString("description");
+						int int_ebook = rs.getInt("ebook");
+						ebook = false;
+						if (int_ebook == 1)
+							ebook = true;
+						datum = rs.getTimestamp("date");
+						isbn = rs.getString("isbn");
+						ausgeliehen = rs.getString("ausgeliehen");
+						boolAusgeliehen = false;
+						if (ausgeliehen.equals("an")) {
+							boolAusgeliehen = true;
+							ausgeliehen_an = rs.getString("name").trim();
+						} else if (ausgeliehen.equals("von")) {
+							boolAusgeliehen = true;
+							ausgeliehen_von = rs.getString("name").trim();
+						}
 					}
 					Image buf_pic = null;
 					if (picture != null) {
 						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
-					book = new Book_Booklist(autor, titel, ausgeliehen, "", "", bemerkung, serie, seriePart, ebook,
+					book = new Book_Booklist(autor, titel, boolAusgeliehen, ausgeliehen_an, ausgeliehen_von, bemerkung, serie, seriePart, ebook,
 							buf_pic, desc, isbn, datum, false);
 					book.setBid(bid);
 					getBücher().add(book);
-					Mainframe.logger.info("Buch ausgelesen: " + book.getAutor() + "-" + book.getTitel());
+					Mainframe.logger.trace("Buch ausgelesen: " + book.getAutor() + "-" + book.getTitel());
 					if (bid > Database.highestBid) {
 						Database.highestBid = bid;
 					}
 				} catch (DateTimeParseException e) {
-					Mainframe.logger.error(e.getMessage());
+					Mainframe.logger.error(e);
 				}
 			}
 		} catch (SQLException | IOException e) {

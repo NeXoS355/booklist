@@ -81,7 +81,7 @@ public class HandleConfig {
 								Mainframe.logger.info("loadOnDemand: " + loadOnDemand);
 							} else
 								JOptionPane.showMessageDialog(null,
-										"Fehler in der config (loadOnDemand): Falscher Wert - erwartet 1 oder 0");
+										"Fehler in der config (loadOnDemand): Falscher Wert - erwartet 0 oder 1");
 
 						} catch (NumberFormatException e) {
 							JOptionPane.showMessageDialog(null,
@@ -100,12 +100,12 @@ public class HandleConfig {
 
 						try {
 							int tmp = Integer.parseInt(value.trim());
-							if (tmp >= 0 && tmp < 2) {
+							if (tmp >= 0 && tmp < 3) {
 								debug = tmp;
 								Mainframe.logger.info("debug: " + debug);
 							} else
 								JOptionPane.showMessageDialog(null,
-										"Fehler in der config (debug): Falscher Wert - erwartet 1 oder 0");
+										"Fehler in der config (debug): Falscher Wert - erwartet 0-2");
 
 						} catch (NumberFormatException e) {
 							JOptionPane.showMessageDialog(null,

@@ -112,6 +112,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		 */
 		JLabel lbl_datum = new JLabel(
 				"hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
+
 		JLabel lbl_isbn = new JLabel("ISBN: " + eintrag.getIsbn(), SwingConstants.RIGHT);
 		lbl_isbn.addMouseListener(new MouseAdapter() {
 
@@ -237,7 +238,10 @@ public class Dialog_edit_Booklist extends JDialog {
 			});
 			panel_east_border.add(btn_downloadInfo, BorderLayout.CENTER);
 		}
-
+		
+		/*
+		 * create and add components to Panel Center
+		 */
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.schrift);
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
@@ -273,10 +277,6 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-
-		/*
-		 * Create Components for Panel Center
-		 */
 
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(Mainframe.schrift);

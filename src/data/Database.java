@@ -77,6 +77,7 @@ public class Database {
 			String sql = "INSERT INTO versions (version ,date) VALUES ('2.5.0','" + datum + "')";
 			pst = con.prepareStatement(sql);
 			pst.execute();
+			Mainframe.logger.info("Datenbanken erstellt");
 			pst.close();
 		} catch (SQLException e) {
 			if ("X0Y32".equals(e.getSQLState())) {
@@ -90,7 +91,6 @@ public class Database {
 					createBooklist.close();
 					createWishlist.close();
 					createVersions.close();
-					System.out.println("DB closed");
 					Mainframe.logger.info("DB closed");
 				} catch (SQLException e) {
 					Mainframe.logger.error(e.getMessage());

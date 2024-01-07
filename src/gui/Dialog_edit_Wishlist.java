@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -15,15 +14,11 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -46,14 +41,13 @@ public class Dialog_edit_Wishlist extends JDialog {
 	private RoundJTextField txt_merk;
 	private RoundJTextField txt_serie;
 	private RoundJTextField txt_seriePart;
-	private Font standardFont = new Font("standard", Font.BOLD, 14);
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	public Dialog_edit_Wishlist(WishlistListModel einträge, int index) {
 
 		this.setTitle("Buch bearbeiten");
-		this.setSize(new Dimension(500, 365));
+		this.setSize(new Dimension(500, 300));
 		this.setLocation(200, 200);
 		this.setAlwaysOnTop(true);
 
@@ -68,15 +62,13 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		JPanel panel_north = new JPanel();
 		panel_north.setLayout(new GridLayout(1, 1));
+		panel_north.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
 		JPanel panel_west = new JPanel();
 		panel_west.setLayout(new GridLayout(4, 1, 10, 20));
 
 		JPanel panel_center = new JPanel();
 		panel_center.setLayout(new GridBagLayout());
-		GridBagConstraints center_c = new GridBagConstraints();
-		center_c.ipady = 20;
-		int padding_c = 16;
 
 		JPanel panel_east_border = new JPanel();
 		panel_east_border.setLayout(new BorderLayout(10, 10));
@@ -87,74 +79,29 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		JPanel panel_south = new JPanel();
 		panel_south.setLayout(new GridLayout(1, 2, 10, 10));
+		panel_south.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
 		int höhe = 60;
 		int breite = 100;
 
-		BufferedImage image = null;
-		JButton btn_browseAuthor = new JButton();
-		try {
-			image = ImageIO.read(getClass().getResource("/resources/amazon.png"));
-			btn_browseAuthor.setIcon(new ImageIcon(image));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		btn_browseAuthor.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try {
-					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+");
-					openWebpage(new URI(amazonUrl));
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		panel_east_grid.add(btn_browseAuthor);
-
 		JLabel lbl_datum = new JLabel("Datum: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
 		panel_north.add(lbl_datum);
 
-		// empty Label amazon Button
-		JLabel lbl_emptySearch1 = new JLabel("");
-		panel_east_grid.add(lbl_emptySearch1);
-		JLabel lbl_emptySearch2 = new JLabel("");
-		panel_east_grid.add(lbl_emptySearch2);
-		// End empty Label
-
-		JButton btn_browseSeries = new JButton();
-		btn_browseSeries.setIcon(new ImageIcon(image));
-		btn_browseSeries.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try {
-					String amazonUrl = "www.amazon.de/s?k=" + txt_author.getText().replaceAll(" ", "+") + "+"
-							+ txt_serie.getText().replaceAll(" ", "+");
-					openWebpage(new URI(amazonUrl));
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		panel_east_grid.add(btn_browseSeries);
-
 		// Empty Panel top Gap
 		JLabel lbl_empty1 = new JLabel("");
-		lbl_empty1.setFont(standardFont);
+		lbl_empty1.setFont(Mainframe.schrift);
 		lbl_empty1.setPreferredSize(new Dimension(breite, 10));
 		panel_north.add(lbl_empty1);
 		// Ende topGap
 
+		/*
+		 * create and add components to Panel Center
+		 */
 		JLabel lbl_author = new JLabel("Autor:");
-		lbl_author.setFont(standardFont);
+		lbl_author.setFont(Mainframe.schrift);
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_author);
-
 		txt_author = new RoundJTextField(eintrag.getAutor());
-		txt_author.setFont(standardFont);
+		txt_author.setFont(Mainframe.schrift);
 		txt_author.setPreferredSize(new Dimension(50, höhe));
 		txt_author.setBorder(standardBorder);
 		txt_author.addKeyListener(new KeyAdapter() {
@@ -185,21 +132,11 @@ public class Dialog_edit_Wishlist extends JDialog {
 			}
 
 		});
-		center_c.fill = GridBagConstraints.HORIZONTAL;
-		center_c.gridx = 0;
-		center_c.gridy = 0;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 4;
-		center_c.insets = new Insets(0, 0, padding_c, 0);
-		panel_center.add(txt_author, center_c);
-
 		JLabel lbl_title = new JLabel("Titel:");
-		lbl_title.setFont(standardFont);
+		lbl_title.setFont(Mainframe.schrift);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_title);
-
 		txt_title = new RoundJTextField(eintrag.getTitel());
-		txt_title.setFont(standardFont);
+		txt_title.setFont(Mainframe.schrift);
 		txt_title.setPreferredSize(new Dimension(50, höhe));
 		txt_title.setBorder(standardBorder);
 		txt_title.addKeyListener(new KeyAdapter() {
@@ -249,20 +186,13 @@ public class Dialog_edit_Wishlist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 0;
-		center_c.gridy = 1;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 4;
-		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
-		panel_center.add(txt_title, center_c);
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
-		lbl_merk.setFont(standardFont);
+		lbl_merk.setFont(Mainframe.schrift);
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_merk);
 
 		txt_merk = new RoundJTextField(eintrag.getBemerkung());
-		txt_merk.setFont(standardFont);
+		txt_merk.setFont(Mainframe.schrift);
 		txt_merk.setPreferredSize(new Dimension(50, höhe));
 		txt_merk.setBorder(standardBorder);
 		txt_merk.addKeyListener(new KeyAdapter() {
@@ -291,20 +221,13 @@ public class Dialog_edit_Wishlist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 0;
-		center_c.gridy = 2;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 4;
-		center_c.insets = new Insets(padding_c, 0, padding_c, 0);
-		panel_center.add(txt_merk, center_c);
 
 		JLabel lbl_serie = new JLabel("Serie | Band:");
-		lbl_serie.setFont(standardFont);
+		lbl_serie.setFont(Mainframe.schrift);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_serie);
 
 		txt_serie = new RoundJTextField(eintrag.getSerie());
-		txt_serie.setFont(standardFont);
+		txt_serie.setFont(Mainframe.schrift);
 		txt_serie.setPreferredSize(new Dimension(50, höhe));
 		txt_serie.setBorder(standardBorder);
 		txt_serie.addKeyListener(new KeyAdapter() {
@@ -334,15 +257,9 @@ public class Dialog_edit_Wishlist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 0;
-		center_c.gridy = 3;
-		center_c.weightx = 4;
-		center_c.gridwidth = 3;
-		center_c.insets = new Insets(padding_c, 0, 0, 0);
-		panel_center.add(txt_serie, center_c);
 
 		txt_seriePart = new RoundJTextField(eintrag.getSeriePart());
-		txt_seriePart.setFont(standardFont);
+		txt_seriePart.setFont(Mainframe.schrift);
 		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
 		txt_seriePart.setBorder(standardBorder);
 		txt_seriePart.addKeyListener(new KeyAdapter() {
@@ -376,11 +293,72 @@ public class Dialog_edit_Wishlist extends JDialog {
 			}
 
 		});
-		center_c.gridx = 3;
-		center_c.gridy = 3;
-		center_c.weightx = 0.5;
-		center_c.gridwidth = 1;
-		panel_center.add(txt_seriePart, center_c);
+
+		/*
+		 * Set Center Layout
+		 */
+		GridBagConstraints c = new GridBagConstraints();
+
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.ipady = 15;
+		panel_center.add(lbl_author, c);
+		c.gridx = 1;
+		c.gridy = 0;
+		c.weightx = 0.5;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_author, c);
+		c.gridx = 0;
+		c.gridy = 1;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		c.insets = new Insets(10, 0, 0, 0);
+		panel_center.add(lbl_title, c);
+		c.gridx = 1;
+		c.gridy = 1;
+		c.weightx = 0.5;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_title, c);
+		c.gridx = 0;
+		c.gridy = 2;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		panel_center.add(lbl_merk, c);
+		c.gridx = 1;
+		c.gridy = 2;
+		c.weightx = 0.5;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_merk, c);
+		c.gridx = 0;
+		c.gridy = 3;
+		c.weightx = 0.05;
+		c.gridwidth = 1;
+		panel_center.add(lbl_serie, c);
+		c.gridx = 1;
+		c.gridy = 3;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel_center.add(txt_serie, c);
+		c.gridx = 2;
+		c.gridy = 3;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(10, 10, 0, 0);
+		panel_center.add(txt_seriePart, c);
+		c.gridx = 0;
+		c.gridy = 4;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		c.insets = new Insets(10, 0, 0, 0);
+		panel_center.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
 		JButton btn_add = new JButton("Speichern");
 		btn_add.addActionListener(new ActionListener() {
