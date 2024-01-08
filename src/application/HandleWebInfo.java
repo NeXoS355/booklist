@@ -18,7 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
-import javax.swing.JOptionPane;
 
 import data.Database;
 import gui.Mainframe;
@@ -28,9 +27,20 @@ import com.google.gson.JsonParser;
 
 public class HandleWebInfo {
 
-	public static boolean DownloadWebPage(Book_Booklist eintrag, int maxResults, boolean retry) {
-		boolean ret = false;
+	public static int DownloadWebPage(Book_Booklist eintrag, int maxResults, boolean retry) {
+		int compareReturn = 0;
 		try {
+
+			if (retry) {
+				if (HandleConfig.searchParam.equals("t")) {
+					HandleConfig.searchParam = "at";
+					Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
+				} else if (HandleConfig.searchParam.equals("at")) {
+					HandleConfig.searchParam = "t";
+					Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
+				}
+			}
+
 			StringBuilder str = new StringBuilder();
 			if (HandleConfig.searchParam.equals("at")) {
 				str.append(sanitizeString(eintrag.getAutor()) + "+");
@@ -65,36 +75,29 @@ public class HandleWebInfo {
 
 				// JSON-Antwort in ein JsonObject umwandeln
 				JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
-				analyseApiRequst(jsonObject, eintrag);
+				compareReturn = analyseApiRequst(jsonObject, eintrag);
 			}
 			// Verbindung schließen
 			connection.disconnect();
 
-			if (retry) {
-				if (HandleConfig.searchParam.equals("t")) {
-					HandleConfig.searchParam = "at";
-					Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
-				} else if (HandleConfig.searchParam.equals("at")) {
-					HandleConfig.searchParam = "t";
-					Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
-				}
-			}
-
-			ret = true;
 		} catch (Exception e) {
 			Mainframe.logger.error(e.getMessage());
 		}
-
-		return ret;
+		Mainframe.logger.info("checkWebInfo " + "Retry: " + retry);
+		Mainframe.logger.info("checkWebInfo " + "Overall Score: " + eintrag.getAutor() + "-" + eintrag.getTitel() + ":"
+				+ compareReturn);
+		return compareReturn;
 
 	}
 
-	private static void analyseApiRequst(JsonObject jsonObject, Book_Booklist eintrag) {
+	private static int analyseApiRequst(JsonObject jsonObject, Book_Booklist eintrag) {
 		// Auf den Titel zugreifen
 		int i = 0;
 		int cCover = 0;
 		int cDesc = 0;
 		int cIsbn = 0;
+		int cCompAuthor = 0;
+		int cCompTitle = 0;
 		while (i < 2 && cCover + cDesc + cIsbn < 3) {
 			if (jsonObject.has("items")) {
 				var itemsArray = jsonObject.getAsJsonArray("items");
@@ -106,15 +109,14 @@ public class HandleWebInfo {
 							var imageLinks = volumeInfo.getAsJsonObject("imageLinks");
 							if (imageLinks.has("smallThumbnail")) {
 								String link = imageLinks.get("smallThumbnail").getAsString();
-//								System.out.println("Link: " + link);
 								// Downloading Image
 								savePic(link, eintrag);
 								cCover = 1;
 							} else {
-//								System.out.println("smallThumbnail nicht gefunden");
+								Mainframe.logger.info("WebInfo Download: 'smallThumbnail' not found!");
 							}
 						} else {
-//							System.out.println("ImageLink nicht gefunden.");
+							Mainframe.logger.info("WebInfo Download: 'ImageLink' not found!");
 						}
 						if (volumeInfo.has("industryIdentifiers") && cIsbn == 0) {
 							var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
@@ -129,12 +131,21 @@ public class HandleWebInfo {
 										Mainframe.executor.submit(() -> {
 											Database.addIsbn(eintrag.getBid(), isbn);
 										});
-									} else {
-//										System.out.println("industryIdentifiers nicht gefunden");
 									}
 								}
 							}
 
+						} else {
+							Mainframe.logger.info("WebInfo Download: 'industryIdentifiers' not found!");
+						}
+						if (volumeInfo.has("title")) {
+							String title = volumeInfo.get("title").getAsString();
+							cCompTitle = compareString(title, eintrag.getTitel());
+						}
+						if (volumeInfo.has("authors")) {
+							var authors = volumeInfo.getAsJsonArray("authors");
+							String author = authors.get(0).getAsString();
+							cCompAuthor = compareString(author, eintrag.getAutor());
 						}
 
 						if (volumeInfo.has("description") && cDesc == 0) {
@@ -145,36 +156,71 @@ public class HandleWebInfo {
 								Database.addDesc(eintrag.getBid(), description);
 							});
 						} else {
-//							System.out.println("Description nicht gefunden.");
+							Mainframe.logger.info("WebInfo Download: 'description' not found!");
 						}
 					} else {
-//						System.out.println("Feld 'volumeInfo' nicht gefunden.");
+						Mainframe.logger.info("WebInfo Download: 'VolumeInfo' not found!");
 					}
 				} else {
-//					System.out.println("Keine Elemente in 'items' gefunden.");
+					Mainframe.logger.info("WebInfo Download: no elements found in 'items'!");
 				}
 			} else {
-//				System.out.println("Feld 'items' nicht gefunden.");
+				Mainframe.logger.info("WebInfo Download: 'items' not found!");
 			}
 			i++;
 		}
-
+		return (cCompAuthor + cCompTitle) / 2;
 	}
 
-	public static boolean checkDownload() {
-		int antwort = JOptionPane.showConfirmDialog(null, "Ist das Buch korrekt?", "Warnung",
-				JOptionPane.YES_NO_OPTION);
-		boolean ret = (antwort == JOptionPane.NO_OPTION);
-		if (ret) {
-			if (HandleConfig.searchParam.equals("t")) {
-				HandleConfig.searchParam = "at";
-				Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
-			} else if (HandleConfig.searchParam.equals("at")) {
-				HandleConfig.searchParam = "t";
-				Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
+	public static int compareString(String str1, String str2) {
+		int equalPercentage = 0;
+		int hit = 0;
+		int counterBig = 0;
+		int counterSmall = 0;
+		boolean newWord = true;
+		String small = "";
+		String big = "";
+
+		if (str1.length() > str2.length()) {
+			big = str1;
+			small = str2;
+		} else {
+			big = str2;
+			small = str1;
+		}
+
+		int anzahl = big.length();
+		for (; counterSmall < small.length();) {
+			char smallChar = small.charAt(counterSmall);
+			char bigChar = big.charAt(counterBig);
+			while (smallChar == ' ' && bigChar != ' ') {
+				counterBig++;
+				bigChar = big.charAt(counterBig);
+				newWord = true;
+			}
+			while (smallChar != ' ' && bigChar == ' ') {
+				counterBig++;
+				bigChar = big.charAt(counterBig);
+				newWord = true;
+			}
+
+			if (newWord && smallChar != bigChar) {
+				counterBig++;
+			} else if (smallChar == bigChar) {
+				counterBig++;
+				counterSmall++;
+				hit++;
+				newWord = false;
+			} else {
+				counterBig++;
+				counterSmall++;
+				newWord = false;
 			}
 		}
-		return ret;
+		equalPercentage = hit * 100 / anzahl;
+		Mainframe.logger.trace("checkWebInfo " + str1 + "-" + str2 + ": " + equalPercentage);
+
+		return equalPercentage;
 	}
 
 	public static boolean deletePic(int bid) {
@@ -232,20 +278,14 @@ public class HandleWebInfo {
 		}
 		return true;
 	}
-	
+
 	private static String sanitizeString(String input) {
-	    String newString = input.replace("\u00fc", "ue")
-	            .replace("\u00f6", "oe")
-	            .replace("\u00e4", "ae")
-	            .replace("\u00df", "ss")
-	            .replaceAll("\u00dc(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Ue")
-	            .replaceAll("\u00d6(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Oe")
-	            .replaceAll("\u00c4(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Ae")
-	            .replace("\u00dc", "UE")
-	            .replace("\u00d6", "OE")
-	            .replace("\u00c4", "AE")
-	            .replace(" ", "+");
-	    return newString;
+		String newString = input.replace("\u00fc", "ue").replace("\u00f6", "oe").replace("\u00e4", "ae")
+				.replace("\u00df", "ss").replaceAll("\u00dc(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Ue")
+				.replaceAll("\u00d6(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Oe")
+				.replaceAll("\u00c4(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Ae").replace("\u00dc", "UE")
+				.replace("\u00d6", "OE").replace("\u00c4", "AE").replace(" ", "+");
+		return newString;
 	}
 
 }

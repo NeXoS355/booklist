@@ -14,8 +14,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -224,18 +222,19 @@ public class Dialog_edit_Booklist extends JDialog {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					boolean downloaded = HandleWebInfo.DownloadWebPage(eintrag, 2, false);
-					if (downloaded) {
-						dispose();
-						Dialog_edit_Booklist dialog = new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
-						boolean answer = HandleWebInfo.checkDownload();
-						if (answer) {
-							downloaded = HandleWebInfo.DownloadWebPage(eintrag, 2, true);
-							dialog.dispose();
-							new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+					int compResult1 = 0;
+					int compResult2 = 0;
+
+					compResult1 = HandleWebInfo.DownloadWebPage(eintrag, 2, false);
+					if (compResult1 < 75) {
+						compResult2 = HandleWebInfo.DownloadWebPage(eintrag, 2, true);
+						if (compResult1 > compResult2) {
+							HandleWebInfo.DownloadWebPage(eintrag, 2, false);
 						}
 					}
 
+					dispose();
+					new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
 				}
 			});
 			panel_east_border.add(btn_downloadInfo, BorderLayout.CENTER);
@@ -247,8 +246,6 @@ public class Dialog_edit_Booklist extends JDialog {
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.schrift);
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
-
-		JDialog complFrame = new JDialog();
 
 		txt_author = new RoundJTextField(eintrag.getAutor());
 		txt_author.setFont(Mainframe.schrift);
@@ -310,16 +307,6 @@ public class Dialog_edit_Booklist extends JDialog {
 				txt_author.setBorder(activeBorder);
 
 			}
-		});
-
-		txt_author.addFocusListener(new FocusAdapter() {
-
-			@Override
-			public void focusLost(FocusEvent e) {
-				complFrame.removeAll();
-				complFrame.setVisible(false);
-			}
-
 		});
 
 		JLabel lbl_title = new JLabel("Titel:");
