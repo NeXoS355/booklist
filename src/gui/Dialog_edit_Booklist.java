@@ -9,6 +9,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -84,7 +85,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		this.setSize(new Dimension(600, 645));
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 100);
 		this.setAlwaysOnTop(false);
-
+		
 		eintrag = einträge.getElementAt(index);
 
 		if (HandleConfig.loadOnDemand == 1) {
@@ -258,7 +259,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			});
 			panel_east_border.add(btn_downloadInfo, BorderLayout.CENTER);
 		}
-		
+
 		panel_east_rating = new JPanel(new GridLayout());
 
 		lbl_firstStar = new JLabel(noStar);
@@ -274,19 +275,21 @@ public class Dialog_edit_Booklist extends JDialog {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				int half = lbl_firstStar.getWidth() / 2;
-				if (currentShownRating != 2 || currentShownRating != 1) {
+				int mouse = e.getX();
+				if (mouse > half && currentShownRating != 2) {
 					lbl_secondStar.setIcon(noStar);
 					lbl_thirdStar.setIcon(noStar);
 					lbl_fourthStar.setIcon(noStar);
 					lbl_fifthStar.setIcon(noStar);
-					int mouse = e.getX();
-					if (mouse > half) {
-						lbl_firstStar.setIcon(fullStar);
-						currentShownRating = 2;
-					} else {
-						lbl_firstStar.setIcon(halfStar);
-						currentShownRating = 1;
-					}
+					lbl_firstStar.setIcon(fullStar);
+					currentShownRating = 2;
+				} else if (mouse < half && currentShownRating != 1) {
+					lbl_secondStar.setIcon(noStar);
+					lbl_thirdStar.setIcon(noStar);
+					lbl_fourthStar.setIcon(noStar);
+					lbl_fifthStar.setIcon(noStar);
+					lbl_firstStar.setIcon(halfStar);
+					currentShownRating = 1;
 				}
 
 			}
@@ -309,21 +312,22 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				if (currentShownRating != 3 || currentShownRating != 4) {
-					int half = lbl_secondStar.getWidth() / 2;
+				int half = lbl_firstStar.getWidth() / 2;
+				int mouse = e.getX();
+				if (mouse > half && currentShownRating != 4) {
 					lbl_firstStar.setIcon(fullStar);
 					lbl_thirdStar.setIcon(noStar);
 					lbl_fourthStar.setIcon(noStar);
 					lbl_fifthStar.setIcon(noStar);
-					int mouse = e.getX();
-					if (mouse > half) {
-						lbl_secondStar.setIcon(fullStar);
-						currentShownRating = 4;
-
-					} else {
-						lbl_secondStar.setIcon(halfStar);
-						currentShownRating = 3;
-					}
+					lbl_secondStar.setIcon(fullStar);
+					currentShownRating = 4;
+				} else if (mouse < half && currentShownRating != 3) {
+					lbl_firstStar.setIcon(fullStar);
+					lbl_thirdStar.setIcon(noStar);
+					lbl_fourthStar.setIcon(noStar);
+					lbl_fifthStar.setIcon(noStar);
+					lbl_secondStar.setIcon(halfStar);
+					currentShownRating = 3;
 				}
 
 			}
@@ -346,21 +350,23 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				if (currentShownRating != 5 || currentShownRating != 6) {
-					int half = lbl_secondStar.getWidth() / 2;
+
+				int half = lbl_firstStar.getWidth() / 2;
+				int mouse = e.getX();
+				if (mouse > half && currentShownRating != 6) {
 					lbl_firstStar.setIcon(fullStar);
 					lbl_secondStar.setIcon(fullStar);
 					lbl_fourthStar.setIcon(noStar);
 					lbl_fifthStar.setIcon(noStar);
-					int mouse = e.getX();
-					if (mouse > half) {
-						lbl_thirdStar.setIcon(fullStar);
-						currentShownRating = 6;
-
-					} else {
-						lbl_thirdStar.setIcon(halfStar);
-						currentShownRating = 5;
-					}
+					lbl_thirdStar.setIcon(fullStar);
+					currentShownRating = 6;
+				} else if (mouse < half && currentShownRating != 5) {
+					lbl_firstStar.setIcon(fullStar);
+					lbl_secondStar.setIcon(fullStar);
+					lbl_fourthStar.setIcon(noStar);
+					lbl_fifthStar.setIcon(noStar);
+					lbl_thirdStar.setIcon(halfStar);
+					currentShownRating = 5;
 				}
 			}
 		});
@@ -382,21 +388,23 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				if (currentShownRating != 7 || currentShownRating != 8) {
-					int half = lbl_secondStar.getWidth() / 2;
+
+				int half = lbl_firstStar.getWidth() / 2;
+				int mouse = e.getX();
+				if (mouse > half && currentShownRating != 8) {
 					lbl_firstStar.setIcon(fullStar);
 					lbl_secondStar.setIcon(fullStar);
 					lbl_thirdStar.setIcon(fullStar);
 					lbl_fifthStar.setIcon(noStar);
-					int mouse = e.getX();
-					if (mouse > half) {
-						lbl_fourthStar.setIcon(fullStar);
-						currentShownRating = 7;
-
-					} else {
-						lbl_fourthStar.setIcon(halfStar);
-						currentShownRating = 8;
-					}
+					lbl_fourthStar.setIcon(fullStar);
+					currentShownRating = 8;
+				} else if (mouse < half && currentShownRating != 7) {
+					lbl_firstStar.setIcon(fullStar);
+					lbl_secondStar.setIcon(fullStar);
+					lbl_thirdStar.setIcon(fullStar);
+					lbl_fifthStar.setIcon(noStar);
+					lbl_fourthStar.setIcon(halfStar);
+					currentShownRating = 7;
 				}
 			}
 		});
@@ -417,21 +425,46 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				if (currentShownRating != 9 || currentShownRating != 10) {
-					int half = lbl_secondStar.getWidth() / 2;
-					lbl_firstStar.setIcon(fullStar);
-					lbl_secondStar.setIcon(fullStar);
-					lbl_thirdStar.setIcon(fullStar);
-					lbl_fourthStar.setIcon(fullStar);
-					int mouse = e.getX();
-					if (mouse > half) {
-						lbl_fifthStar.setIcon(fullStar);
-						currentShownRating = 9;
 
-					} else {
-						lbl_fifthStar.setIcon(halfStar);
-						currentShownRating = 10;
-					}
+				int half = lbl_firstStar.getWidth() / 2;
+				int mouse = e.getX();
+				int delay = 25;
+				if (mouse > half && currentShownRating != 10) {
+					Mainframe.executor.submit(() -> {
+						try {
+							lbl_firstStar.setIcon(fullStar);
+							Thread.sleep(delay);
+							lbl_secondStar.setIcon(fullStar);
+							Thread.sleep(delay);
+							lbl_thirdStar.setIcon(fullStar);
+							Thread.sleep(delay);
+							lbl_fourthStar.setIcon(fullStar);
+							Thread.sleep(delay);
+							lbl_fifthStar.setIcon(fullStar);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					});
+					currentShownRating = 10;
+				} else if (mouse < half && currentShownRating != 9) {
+					Mainframe.executor.submit(() -> {
+						try {
+							lbl_firstStar.setIcon(fullStar);
+							Thread.sleep(delay);
+							lbl_secondStar.setIcon(fullStar);
+							Thread.sleep(delay);
+							lbl_thirdStar.setIcon(fullStar);
+							Thread.sleep(delay);
+							lbl_fourthStar.setIcon(fullStar);
+							Thread.sleep(delay);
+							lbl_fifthStar.setIcon(halfStar);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					});
+					currentShownRating = 9;
 				}
 			}
 		});
@@ -447,15 +480,15 @@ public class Dialog_edit_Booklist extends JDialog {
 				setRating(e, 5);
 			}
 
-		});		
-		
+		});
+
 		panel_east_rating.add(lbl_firstStar);
 		panel_east_rating.add(lbl_secondStar);
 		panel_east_rating.add(lbl_thirdStar);
 		panel_east_rating.add(lbl_fourthStar);
 		panel_east_rating.add(lbl_fifthStar);
 
-		panel_east_border.add(panel_east_rating,BorderLayout.SOUTH);
+		panel_east_border.add(panel_east_rating, BorderLayout.SOUTH);
 
 		/*
 		 * create and add components to Panel Center
@@ -793,7 +826,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		panel_center.add(check_ebook, c);
 		panel_center.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-		
+
 		/*
 		 * create components for Panel South
 		 */
@@ -1195,73 +1228,74 @@ public class Dialog_edit_Booklist extends JDialog {
 	}
 
 	private void setRatingGUI() {
-		if (eintrag.getRating() == 1) {
-			lbl_firstStar.setIcon(halfStar);
-			lbl_secondStar.setIcon(noStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 2) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(noStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 3) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(halfStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 4) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 5) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(halfStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 6) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 7) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(halfStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 8) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(fullStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 9) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(fullStar);
-			lbl_fifthStar.setIcon(halfStar);
-		} else if (eintrag.getRating() == 10) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(fullStar);
-			lbl_fifthStar.setIcon(fullStar);
-		} else {
-			lbl_firstStar.setIcon(noStar);
-			lbl_secondStar.setIcon(noStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		}
+			if (eintrag.getRating() == 1) {
+				lbl_firstStar.setIcon(halfStar);
+				lbl_secondStar.setIcon(noStar);
+				lbl_thirdStar.setIcon(noStar);
+				lbl_fourthStar.setIcon(noStar);
+				lbl_fifthStar.setIcon(noStar);
+			} else if (eintrag.getRating() == 2) {
+				lbl_firstStar.setIcon(fullStar);
+				lbl_secondStar.setIcon(noStar);
+				lbl_thirdStar.setIcon(noStar);
+				lbl_fourthStar.setIcon(noStar);
+				lbl_fifthStar.setIcon(noStar);
+			} else if (eintrag.getRating() == 3) {
+				lbl_firstStar.setIcon(fullStar);
+				lbl_secondStar.setIcon(halfStar);
+				lbl_thirdStar.setIcon(noStar);
+				lbl_fourthStar.setIcon(noStar);
+				lbl_fifthStar.setIcon(noStar);
+			} else if (eintrag.getRating() == 4) {
+				lbl_firstStar.setIcon(fullStar);
+				lbl_secondStar.setIcon(fullStar);
+				lbl_thirdStar.setIcon(noStar);
+				lbl_fourthStar.setIcon(noStar);
+				lbl_fifthStar.setIcon(noStar);
+			} else if (eintrag.getRating() == 5) {
+				lbl_firstStar.setIcon(fullStar);
+				lbl_secondStar.setIcon(fullStar);
+				lbl_thirdStar.setIcon(halfStar);
+				lbl_fourthStar.setIcon(noStar);
+				lbl_fifthStar.setIcon(noStar);
+			} else if (eintrag.getRating() == 6) {
+				lbl_firstStar.setIcon(fullStar);
+				lbl_secondStar.setIcon(fullStar);
+				lbl_thirdStar.setIcon(fullStar);
+				lbl_fourthStar.setIcon(noStar);
+				lbl_fifthStar.setIcon(noStar);
+			} else if (eintrag.getRating() == 7) {
+				lbl_firstStar.setIcon(fullStar);
+				lbl_secondStar.setIcon(fullStar);
+				lbl_thirdStar.setIcon(fullStar);
+				lbl_fourthStar.setIcon(halfStar);
+				lbl_fifthStar.setIcon(noStar);
+			} else if (eintrag.getRating() == 8) {
+				lbl_firstStar.setIcon(fullStar);
+				lbl_secondStar.setIcon(fullStar);
+				lbl_thirdStar.setIcon(fullStar);
+				lbl_fourthStar.setIcon(fullStar);
+				lbl_fifthStar.setIcon(noStar);
+			} else if (eintrag.getRating() == 9) {
+				lbl_firstStar.setIcon(fullStar);
+				lbl_secondStar.setIcon(fullStar);
+				lbl_thirdStar.setIcon(fullStar);
+				lbl_fourthStar.setIcon(fullStar);
+				lbl_fifthStar.setIcon(halfStar);
+			} else if (eintrag.getRating() == 10) {
+				lbl_firstStar.setIcon(fullStar);
+				lbl_secondStar.setIcon(fullStar);
+				lbl_thirdStar.setIcon(fullStar);
+				lbl_fourthStar.setIcon(fullStar);
+				lbl_fifthStar.setIcon(fullStar);
+			} else {
+				lbl_firstStar.setIcon(noStar);
+				lbl_secondStar.setIcon(noStar);
+				lbl_thirdStar.setIcon(noStar);
+				lbl_fourthStar.setIcon(noStar);
+				lbl_fifthStar.setIcon(noStar);
+			}
+			currentShownRating = 0;
 
 	}
 
@@ -1281,8 +1315,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		Mainframe.executor.submit(() -> {
 			try {
-				
-				setAck();
+				panel_east_rating.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(25,153,22,255)));
 				Thread.sleep(1000);
 				panel_east_rating.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 0, Color.BLACK));
 			} catch (InterruptedException e1) {
@@ -1290,9 +1323,4 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		});
 	}
-
-	private void setAck() {
-		panel_east_rating.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
-	}
-
 }
