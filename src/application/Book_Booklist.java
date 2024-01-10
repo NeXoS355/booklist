@@ -22,6 +22,7 @@ public class Book_Booklist {
 	private String isbn;
 	private Timestamp datum;
 	private int bid;
+	private int rating;
 
 	public Book_Booklist(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
 			String bemerkung, String serie, String seriePart, boolean ebook, Image pic, String desc, String isbn,
@@ -210,6 +211,14 @@ public class Book_Booklist {
 
 	public void setEbook(boolean ebook) {
 		this.ebook = ebook;
+	}
+
+	public int getRating() {
+		return rating;
+	}
+
+	public void setRating(int rating) {
+		this.rating = rating;
 	}
 
 }
