@@ -112,6 +112,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						ebook = true;
 					Timestamp datum = rs.getTimestamp("date");
 					String isbn = rs.getString("isbn");
+					int rating = rs.getInt("rating");
 
 					Image buf_pic = null;
 					if (picture != null) {
@@ -124,6 +125,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					book.setEbook(ebook);
 					book.setDatum(datum);
 					book.setIsbn(isbn);
+					book.setRating(rating);
 
 					String ausgeliehen = rs.getString("ausgeliehen");
 					boolean boolAusgeliehen = false;

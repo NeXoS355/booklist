@@ -182,7 +182,40 @@ public class Updater {
 			}
 
 		case "2.5.0":
-			// all good
+			success = 0;
+			try {
+				sql = "ALTER TABLE bücher ADD rating NUMERIC(2,0)";
+				st = con.prepareStatement(sql);
+				st.execute();
+				st.close();
+				success++;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
+				JOptionPane.showMessageDialog(null, e.getMessage());
+			}
+
+			if (success == 1) {
+				try {
+					sql = "UPDATE versions set version='2.6.0'";
+					st = con.prepareStatement(sql);
+					st.execute();
+					st.close();
+					JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.6.0 aktualisiert!");
+				} catch (SQLException e) {
+					JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
+					JOptionPane.showMessageDialog(null, e.getMessage());
+				}
+			} else
+				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die Version nicht erhöht");
+
+			version_new = checkVersion(con);
+			if (!version_new.equals("2.6.0")) {
+				JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell! Bitte Prozess wiederholen!");
+				System.exit(1);
+			}
+		case "2.6.0":
+			//all good
 		}
 
 	}

@@ -68,13 +68,13 @@ public class Database {
 		try {
 			createBooklist = con.createStatement();
 			createBooklist.execute(
-					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),ebook NUMERIC(1,0),pic blob,description clob (64 M), isbn varchar(13),date timestamp,bid NUMERIC(6,0) NOT NULL, CONSTRAINT buecher_pk PRIMARY KEY (bid))");
+					"CREATE TABLE bücher (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),ebook NUMERIC(1,0),rating NUMERIC(2,0),pic blob,description clob (64 M), isbn varchar(13),date timestamp,bid NUMERIC(6,0) NOT NULL, CONSTRAINT buecher_pk PRIMARY KEY (bid))");
 			createWishlist = con.createStatement();
 			createWishlist.execute(
 					"CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
 			createVersions = con.createStatement();
 			createVersions.execute("CREATE TABLE versions (version VARCHAR(10) NOT NULL, date timestamp NOT NULL)");
-			String sql = "INSERT INTO versions (version ,date) VALUES ('2.5.0','" + datum + "')";
+			String sql = "INSERT INTO versions (version ,date) VALUES ('2.6.0','" + datum + "')";
 			pst = con.prepareStatement(sql);
 			pst.execute();
 			Mainframe.logger.info("Datenbanken erstellt");
@@ -124,7 +124,7 @@ public class Database {
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery(
-					"SELECT autor,titel,ausgeliehen,name, bemerkung,serie,seriePart,ebook,date,isbn,bid FROM bücher ORDER BY autor, serie, seriePart");
+					"SELECT autor,titel, bemerkung,serie,seriePart,bid FROM bücher ORDER BY autor, serie, seriePart");
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
@@ -228,9 +228,6 @@ public class Database {
 		st.executeUpdate();
 		st.close();
 
-		System.out.println("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + ","
-				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + int_ebook + ","
-				+ (highestBid));
 		Mainframe.logger.info("Booklist Datenbank Eintrag erstellt: " + autor + "," + titel + "," + ausgeliehen + ","
 				+ name + "," + bemerkung + "," + serie + "," + seriePart + "," + datum + "," + int_ebook + ","
 				+ (highestBid));
@@ -252,7 +249,7 @@ public class Database {
 		}
 	}
 
-	public static void addPic(int bid, InputStream photo) {
+	public static void updatePic(int bid, InputStream photo) {
 		String sql = "update bücher set pic=? where bid=?";
 		PreparedStatement st;
 		try {
@@ -299,7 +296,7 @@ public class Database {
 		return rs;
 	}
 
-	public static void addDesc(int bid, String desc) {
+	public static void updateDesc(int bid, String desc) {
 		String sql = "update bücher set description=? where bid=?";
 		PreparedStatement st;
 		try {
@@ -332,7 +329,7 @@ public class Database {
 
 	}
 
-	public static void addIsbn(int bid, String isbn) {
+	public static void updateIsbn(int bid, String isbn) {
 		String sql = "update bücher set isbn=? where bid=?";
 		PreparedStatement st;
 		try {
@@ -361,6 +358,22 @@ public class Database {
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim löschen der ISBN: " + bid);
 			return false;
+		}
+
+	}
+	
+	public static void updateRating(int bid, int rating) {
+		String sql = "update bücher set rating=? where bid=?";
+		PreparedStatement st;
+		try {
+			st = con.prepareStatement(sql);
+			st.setInt(1, rating);
+			st.setInt(2, bid);
+			st.execute();
+			st.close();
+			Mainframe.logger.info("Rating gespeichert: " + bid);
+		} catch (SQLException e) {
+			Mainframe.logger.error("Fehler beim speichern des Ratings: " + bid);
 		}
 
 	}

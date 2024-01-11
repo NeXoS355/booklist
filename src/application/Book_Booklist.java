@@ -187,6 +187,7 @@ public class Book_Booklist {
 
 	public void setDesc(String desc) {
 		this.desc = desc;
+		Database.updateDesc(this.getBid(), desc);
 	}
 
 	public String getIsbn() {
@@ -195,6 +196,7 @@ public class Book_Booklist {
 
 	public void setIsbn(String isbn) {
 		this.isbn = isbn;
+		Database.updateIsbn(this.getBid(), isbn);
 	}
 
 	public int getBid() {
@@ -219,6 +221,7 @@ public class Book_Booklist {
 
 	public void setRating(int rating) {
 		this.rating = rating;
+		Database.updateRating(this.getBid(),rating);
 	}
 
 }

@@ -126,10 +126,9 @@ public class HandleWebInfo {
 									String type = isbnidentifiers13.get("type").getAsString();
 									if (type.equals("ISBN_13")) {
 										String isbn = isbnidentifiers13.get("identifier").getAsString();
-										eintrag.setIsbn(isbn);
 										cIsbn = 1;
 										Mainframe.executor.submit(() -> {
-											Database.addIsbn(eintrag.getBid(), isbn);
+											eintrag.setIsbn(isbn);
 										});
 									}
 								}
@@ -150,10 +149,9 @@ public class HandleWebInfo {
 
 						if (volumeInfo.has("description") && cDesc == 0) {
 							String description = volumeInfo.get("description").getAsString();
-							eintrag.setDesc(description);
 							cDesc = 1;
 							Mainframe.executor.submit(() -> {
-								Database.addDesc(eintrag.getBid(), description);
+								eintrag.setDesc(description);
 							});
 						} else {
 							Mainframe.logger.info("WebInfo Download: 'description' not found!");
@@ -259,7 +257,7 @@ public class HandleWebInfo {
 
 			Mainframe.executor.submit(() -> {
 				try {
-					Database.addPic(eintrag.getBid(), stream);
+					Database.updatePic(eintrag.getBid(), stream);
 					stream.close();
 					Path file = Paths.get(path);
 					Files.delete(file);

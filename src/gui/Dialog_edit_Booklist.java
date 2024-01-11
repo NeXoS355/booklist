@@ -9,7 +9,6 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -1315,7 +1314,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		Mainframe.executor.submit(() -> {
 			try {
-				panel_east_rating.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(25,153,22,255)));
+				panel_east_rating.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0,Color.black));
 				Thread.sleep(1000);
 				panel_east_rating.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 0, Color.BLACK));
 			} catch (InterruptedException e1) {
