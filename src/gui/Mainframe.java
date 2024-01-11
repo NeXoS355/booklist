@@ -90,7 +90,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.6.0  (01.2024)  ";
+	private String version = "Ver. 2.6.1  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -325,8 +325,9 @@ public class Mainframe extends JFrame {
 				if (SwingUtilities.isRightMouseButton(e)) {
 					JTable table2 = (JTable) e.getSource();
 					int row = table2.rowAtPoint(e.getPoint());
-					if (row > -1)
+					if (row > -1) {
 						table2.setRowSelectionInterval(row, row);
+					}
 					showMenu(e);
 				}
 			}
@@ -336,9 +337,11 @@ public class Mainframe extends JFrame {
 				JMenuItem itemAddBuch = new JMenuItem("Buch hinzufügen");
 				JMenuItem itemDelBuch = new JMenuItem("Buch löschen");
 				JMenuItem itemChanBuch = new JMenuItem("Buch bearbeiten");
+				JMenuItem itemAnalyzeAuthor = new JMenuItem("Autor analysieren (Beta)");
 				menu.add(itemAddBuch);
 				menu.add(itemChanBuch);
 				menu.add(itemDelBuch);
+				menu.add(itemAnalyzeAuthor);
 				menu.show(table, e.getX(), e.getY());
 				itemAddBuch.addActionListener(new ActionListener() {
 
@@ -367,6 +370,17 @@ public class Mainframe extends JFrame {
 							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
 							int index = einträge.getIndexOf(searchAutor, searchTitel);
 							new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+						}
+					}
+				});
+				itemAnalyzeAuthor.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						if (e.getActionCommand() == "Autor analysieren (Beta)") {
+							new wishlist();
+							BookListModel.analyseAuthor((String) table.getValueAt(table.getSelectedRow(), 0));
+							gui.wishlist.updateModel();
 						}
 					}
 				});
@@ -453,12 +467,12 @@ public class Mainframe extends JFrame {
 
 		});
 		tree.addFocusListener(new FocusAdapter() {
-			
+
 			@Override
 			public void focusLost(FocusEvent e) {
 				tree.setSelectionPath(null);
 			}
-			
+
 		});
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);

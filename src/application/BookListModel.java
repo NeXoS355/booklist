@@ -15,6 +15,7 @@ import javax.swing.AbstractListModel;
 
 import data.Database;
 import gui.Mainframe;
+import gui.wishlist;
 
 public class BookListModel extends AbstractListModel<Book_Booklist> {
 
@@ -82,8 +83,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
-					book = new Book_Booklist(autor, titel, boolAusgeliehen, ausgeliehen_an, ausgeliehen_von, bemerkung, serie, seriePart, ebook,
-							buf_pic, desc, isbn, datum, false);
+					book = new Book_Booklist(autor, titel, boolAusgeliehen, ausgeliehen_an, ausgeliehen_von, bemerkung,
+							serie, seriePart, ebook, buf_pic, desc, isbn, datum, false);
 					book.setBid(bid);
 					getBücher().add(book);
 					Mainframe.logger.trace("Buch ausgelesen: " + book.getAutor() + "-" + book.getTitel());
@@ -220,7 +221,6 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	}
 
-
 	public static boolean hatAutorSerie(String autor) {
 		for (int i = 0; i < getBücher().size(); i++) {
 			Book_Booklist buch = getBücher().get(i);
@@ -262,6 +262,71 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	public static ArrayList<Book_Booklist> getBücher() {
 		return bücher;
+	}
+
+	public static void analyseAuthor(String author) {
+		ResultSet rs = Database.analyzeAuthor(author);
+		String[] serien = new String[10];
+		int[] minPart = new int[30];
+		int[] maxPart = new int[30];
+		String oldSerie = "";
+		int newSerie = 1;
+		int i = 0;
+		int rowCount = 0;
+
+		try {
+			while (rs.next()) {
+				String serie = rs.getString("serie").trim();
+				int seriePart = rs.getInt("seriePart");
+
+				if (!serie.equals(oldSerie) && rowCount != 0) {
+					i++;
+					newSerie = 1;
+				}
+
+				serien[i] = serie;
+				if (seriePart > maxPart[i] || newSerie == 1) {
+					maxPart[i] = seriePart;
+
+				}
+				if (seriePart < minPart[i] || newSerie == 1) {
+					minPart[i] = seriePart;
+				}
+
+				newSerie = 0;
+				oldSerie = serie;
+				rowCount++;
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		boolean found = false;
+		for (i = 0; i < serien.length; i++) {
+			if (serien[i] != null) {
+				for (int j = minPart[i] + 1; j < maxPart[i]; j++) {
+					for (int k = 0; k < bücher.size(); k++) {
+						Book_Booklist buch = bücher.get(k);
+						if (buch.getSerie().equals(serien[i]) && Integer.parseInt(buch.getSeriePart()) == j) {
+							found = true;
+						}
+
+					}
+					if (!found) {
+						try {
+							System.out.println("Serie: " + serien[i] + " fehlender Part: " + j);
+							wishlist.Wishlisteinträge.add(new Book_Wishlist(author, "Temp Titel "+j, "", serien[i],
+									String.valueOf(j), new Timestamp(System.currentTimeMillis()), true));
+						} catch (SQLException e) {
+							Mainframe.logger.info(e.getMessage());
+						}
+					}
+					found = false;
+				}
+
+			}
+		}
 	}
 
 }

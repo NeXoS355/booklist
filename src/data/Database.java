@@ -248,6 +248,20 @@ public class Database {
 			Mainframe.logger.error("Fehler beim aktualisieren des Buchs: " + bid + " - " + colName + "=" + value);
 		}
 	}
+	
+	public static ResultSet analyzeAuthor(String author) {
+		ResultSet rs = null;
+		String sql = "SELECT serie, seriePart FROM bücher WHERE autor=? ORDER BY serie";
+		try {
+			PreparedStatement pst = con.prepareStatement(sql);
+			pst.setString(1, author);
+			rs = pst.executeQuery();
+			Mainframe.logger.info("Autor analysiert:" + author);
+		} catch (SQLException e) {
+			Mainframe.logger.error("Fehler beim analysieren: " + author);
+		}
+		return rs;
+	}
 
 	public static void updatePic(int bid, InputStream photo) {
 		String sql = "update bücher set pic=? where bid=?";

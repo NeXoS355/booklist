@@ -34,7 +34,7 @@ public class wishlist extends JFrame {
 	private static JTable table = new JTable();
 	Font schrift = new Font("Roboto", Font.BOLD, 16);
 
-	wishlist() {
+	public wishlist() {
 		super("Wunschliste");
 		this.setLayout(new BorderLayout(10, 10));
 		this.setSize(700, 700);

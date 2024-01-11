@@ -113,10 +113,10 @@ public class HandleWebInfo {
 								savePic(link, eintrag);
 								cCover = 1;
 							} else {
-								Mainframe.logger.info("WebInfo Download: 'smallThumbnail' not found!");
+								Mainframe.logger.trace("WebInfo Download: 'smallThumbnail' not found!");
 							}
 						} else {
-							Mainframe.logger.info("WebInfo Download: 'ImageLink' not found!");
+							Mainframe.logger.trace("WebInfo Download: 'ImageLink' not found!");
 						}
 						if (volumeInfo.has("industryIdentifiers") && cIsbn == 0) {
 							var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
@@ -135,7 +135,7 @@ public class HandleWebInfo {
 							}
 
 						} else {
-							Mainframe.logger.info("WebInfo Download: 'industryIdentifiers' not found!");
+							Mainframe.logger.trace("WebInfo Download: 'industryIdentifiers' not found!");
 						}
 						if (volumeInfo.has("title")) {
 							String title = volumeInfo.get("title").getAsString();
@@ -154,16 +154,16 @@ public class HandleWebInfo {
 								eintrag.setDesc(description);
 							});
 						} else {
-							Mainframe.logger.info("WebInfo Download: 'description' not found!");
+							Mainframe.logger.trace("WebInfo Download: 'description' not found!");
 						}
 					} else {
-						Mainframe.logger.info("WebInfo Download: 'VolumeInfo' not found!");
+						Mainframe.logger.trace("WebInfo Download: 'VolumeInfo' not found!");
 					}
 				} else {
-					Mainframe.logger.info("WebInfo Download: no elements found in 'items'!");
+					Mainframe.logger.trace("WebInfo Download: no elements found in 'items'!");
 				}
 			} else {
-				Mainframe.logger.info("WebInfo Download: 'items' not found!");
+				Mainframe.logger.trace("WebInfo Download: 'items' not found!");
 			}
 			i++;
 		}
