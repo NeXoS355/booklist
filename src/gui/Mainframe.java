@@ -117,8 +117,7 @@ public class Mainframe extends JFrame {
 		this.setIconImage(icon.getImage());
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-				| UnsupportedLookAndFeelException e) {
+		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			logger.error(e.getMessage());
 		}
 
@@ -305,6 +304,23 @@ public class Mainframe extends JFrame {
 
 		logger.trace("Finished creating GUI Components. Start creating Table Contents");
 
+//		table = new JTable() {
+//			/**
+//			 * 
+//			 */
+//			private static final long serialVersionUID = 1L;
+//
+//			@Override
+//			public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
+//				Component comp = super.prepareRenderer(renderer, row, col);
+//				String cellValue = (String) getModel().getValueAt(row, col); // get the value from the cell
+//				if (cellValue.equals("Frank Schätzing"))
+//					comp.setBackground(Color.red);
+//				else
+//					comp.setBackground(Color.green);
+//				return comp;
+//			}
+//		};
 		table.setModel(anzeige);
 		table.setFont(schrift);
 		table.setShowVerticalLines(false);
@@ -411,9 +427,7 @@ public class Mainframe extends JFrame {
 		BookListModel.autorenPrüfen();
 		tree.setEditable(false);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		tree.setFont(schrift);
 		tree.setShowsRootHandles(false);
-
 		tree.setCellRenderer(new MyTreeCellRenderer());
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
