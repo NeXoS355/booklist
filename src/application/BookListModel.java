@@ -316,7 +316,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					if (!found) {
 						try {
 							System.out.println("Serie: " + serien[i] + " fehlender Part: " + j);
-							wishlist.Wishlisteinträge.add(new Book_Wishlist(author, "Temp Titel "+j, "", serien[i],
+							wishlist.Wishlisteinträge.add(new Book_Wishlist(author, "Titel "+j, "", serien[i],
 									String.valueOf(j), new Timestamp(System.currentTimeMillis()), true));
 						} catch (SQLException e) {
 							Mainframe.logger.info(e.getMessage());
