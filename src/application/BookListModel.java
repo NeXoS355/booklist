@@ -17,11 +17,11 @@ import data.Database;
 import gui.Mainframe;
 import gui.wishlist;
 
+/**
+ *  Manages the Booklist and Authorlist
+ */
 public class BookListModel extends AbstractListModel<Book_Booklist> {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private static ArrayList<Book_Booklist> books = new ArrayList<Book_Booklist>();
 	public static ArrayList<String> authors = new ArrayList<String>();
@@ -100,6 +100,11 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		}
 	}
 
+	/** This method loads the extended informations which are not loaded on Startup if "loadOnDemand = 1".
+	 * 
+	 * @param book - load values of this Book Entry
+	 *  
+	*/
 	public static void loadOnDemand(Book_Booklist book) {
 		if (book.getDesc() == "" && book.getPic() == null) {
 			try {
@@ -151,6 +156,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		}
 	}
 
+	/** updates the author list and updates the displayed Tree
+	 * 
+	*/
 	public static void checkAuthors() {
 		authors.clear();
 		for (int i = 0; i < getBooks().size(); i++) {
@@ -160,24 +168,45 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		Mainframe.updateNode();
 	}
 
-	public void add(Book_Booklist buch) {
-		books.add(buch);
+	/** Adds book to Booklist
+	 * 
+	 * @param book - Book Object
+	 *  
+	*/
+	public void add(Book_Booklist book) {
+		books.add(book);
 		fireIntervalAdded(this, 0, books.size());
-		System.out.println("Booklist Buch hinzugefügt: " + buch.getAuthor() + "," + buch.getTitle());
+		System.out.println("Booklist Buch hinzugefügt: " + book.getAuthor() + "," + book.getTitle());
 	}
 
-	public void delete(Book_Booklist buch) {
-		getBooks().remove(buch);
+	/** Deletes book from Booklist
+	 * 
+	 * @param book - Book Object
+	 *  
+	*/
+	public void delete(Book_Booklist book) {
+		getBooks().remove(book);
 		fireIntervalRemoved(this, 0, getBooks().size());
-		System.out.println("Booklist Buch gelöscht: " + buch.getAuthor() + "," + buch.getTitle());
+		System.out.println("Booklist Buch gelöscht: " + book.getAuthor() + "," + book.getTitle());
 	}
 
+	/** Deletes book from Booklist
+	 * 
+	 * @param index - index of Book in List
+	 *  
+	*/
 	public void delete(int index) {
 		Database.deleteFromBooklist(getBooks().get(index).getBid());
 		getBooks().remove(index);
 		fireIntervalRemoved(this, index, index);
 	}
 
+	/** Gets all distinct series from a specific author
+	 * 
+	 * @param author - Full name of Author
+	 *  
+	 *  @return String Array with all distinct series of the specified author
+	*/
 	public static String[] getSeriesFromAuthor(String author) {
 		ArrayList<String> series = new ArrayList<String>();
 
@@ -204,6 +233,12 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		return returnArr;
 	}
 
+	/** Gets all Books from a specific author
+	 * 
+	 * @param author - Full name of Author
+	 *  
+	 *  @return Int Array with all Books of the specified author
+	*/
 	public static int[] getBooksFromAuthor(String author) {
 		ArrayList<Integer> books = new ArrayList<Integer>();
 
@@ -221,6 +256,12 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	}
 
+	/** checks if an author has a series
+	 * 
+	 * @param author - Full name of Author
+	 *  
+	 *  @return "true" of has series else "false"
+	*/
 	public static boolean authorHasSeries(String author) {
 		for (int i = 0; i < getBooks().size(); i++) {
 			Book_Booklist book = getBooks().get(i);
@@ -233,6 +274,12 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		return false;
 	}
 
+	/** get Element at specific index
+	 * 
+	 * @param arg0 - index which to get
+	 *  
+	 *  @return Book Object at specified index
+	*/
 	@Override
 	public Book_Booklist getElementAt(int arg0) {
 		return getBooks().get(arg0);
@@ -251,19 +298,35 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	}
 
+	/** get size of Booklist
+	 *  
+	 *  @return size of Booklist
+	*/
 	@Override
 	public int getSize() {
 		return getBooks().size();
 	}
 
+	/** get index of specific Book
+	 *  
+	 *  @return index of Book in list
+	*/
 	public int indexOf(Book_Booklist book) {
 		return getBooks().indexOf(book);
 	}
 
+	/** get whole Booklist
+	 *  
+	 *  @return ArrayList with all Books
+	*/
 	public static ArrayList<Book_Booklist> getBooks() {
 		return books;
 	}
 
+	/** check all series from author and add missing entries to wishlist
+	 *  
+	 *  @param author - Full name of author
+	*/
 	public static void analyzeAuthor(String author) {
 		ResultSet rs = Database.getSeriesInfo(author);
 		String[] series = new String[10];
@@ -298,8 +361,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				rowCount++;
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 
 		boolean found = false;

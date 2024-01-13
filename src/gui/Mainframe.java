@@ -66,11 +66,11 @@ import application.HandleConfig;
 import application.SimpleTableModel;
 import data.Database;
 
+/**
+ * Main Window to show Table of Entries and Tree of authors
+ */
 public class Mainframe extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	public static Logger logger = null;
 	public static ExecutorService executor = Executors.newFixedThreadPool(10);
@@ -512,6 +512,9 @@ public class Mainframe extends JFrame {
 		logger.trace("Init completed");
 	}
 
+	/** deletes the currently selected entry from Booklist
+	  * 
+	*/
 	public static void deleteBuch() {
 		int[] selected = table.getSelectedRows();
 		for (int i = 0; i < selected.length; i++) {
@@ -537,6 +540,9 @@ public class Mainframe extends JFrame {
 		updateModel();
 	}
 
+	/** updates the JTree
+	  * 
+	*/
 	public static void updateNode() {
 		rootNode = new DefaultMutableTreeNode("Autoren (" + BookListModel.authors.size() + ")");
 		treeModel = new DefaultTreeModel(rootNode);
@@ -565,6 +571,11 @@ public class Mainframe extends JFrame {
 		tree.repaint();
 	}
 
+	/** copy multiple files to specified directory
+	  * 
+	  * @param from - Source file or Directory
+	  * @param to - Destination Directory
+	*/
 	public static void copyFilesInDirectory(File from, File to) {
 		if (!to.exists()) {
 			to.mkdirs();
@@ -583,6 +594,11 @@ public class Mainframe extends JFrame {
 		}
 	}
 
+	/** copy single specified file to specified directory
+	  * 
+	  * @param file - file to copy
+	  * @param to - path where to save the file
+	*/
 	private static void copyFileToDirectory(File file, File to) throws IOException {
 		if (!to.exists()) {
 			to.mkdirs();
@@ -591,34 +607,19 @@ public class Mainframe extends JFrame {
 		Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
 	}
 
+	/** updates the table with current model
+	  * 
+	*/
 	public static void updateModel() {
 		tableDisplay = new SimpleTableModel(entries);
 		table.setModel(tableDisplay);
 		treeSelection = "";
 	}
 
-	public static int anz_bücherAutor(String text) {
-		int anz = 0;
-		for (int i = 0; i < entries.getSize(); i++) {
-			Book_Booklist eintrag = entries.getElementAt(i);
-			String autor = eintrag.getAuthor();
-			if (autor.equals(text))
-				anz += 1;
-		}
-		return anz;
-	}
-
-	public static int anz_bücherSerie(String text) {
-		int anz = 0;
-		for (int i = 0; i < entries.getSize(); i++) {
-			Book_Booklist eintrag = entries.getElementAt(i);
-			String serie = eintrag.getSeries();
-			if (serie.equals(text))
-				anz += 1;
-		}
-		return anz;
-	}
-
+	/** search table entries with specified String
+	  * 
+	  * @param text - search String
+	*/
 	public static void search(String text) {
 		filter.clear();
 		text = text.toUpperCase();
@@ -668,28 +669,49 @@ public class Mainframe extends JFrame {
 		}
 	}
 
+	/** get current Tree Selection for other Classes
+	  * 
+	  * @return current Tree Selection
+	*/
+	public static String getTreeSelection() {
+		System.out.println(treeSelection);
+		return treeSelection;
+	}
+
+	/** get last searched text for other classes
+	  * 
+	  * @return last searched text
+	*/
+	public static String getLastSearch() {
+		return lastSearch;
+	}
+
+	/** sets global Variable to the last searched String
+	  * 
+	  * @param lastSearch - String of last searched text
+	*/
+	public static void setLastSearch(String lastSearch) {
+		Mainframe.lastSearch = lastSearch;
+	}
+	
+	/** start Instance of Mainframe
+	  * 
+	  * @param args - 
+	*/
+	public static void main(String[] args) {
+		getInstance();
+	}
+	
+	/** startr Mainframe for instance
+	  * 
+	  * @return Mainframe Object
+	*/
 	public static Mainframe getInstance() {
 		if (instance == null) {
 			instance = new Mainframe();
 		}
 
 		return instance;
-	}
-
-	public static void main(String[] args) {
-		getInstance();
-	}
-
-	public static String getTreeSelection() {
-		return treeSelection;
-	}
-
-	public static String getLastSearch() {
-		return lastSearch;
-	}
-
-	public static void setLastSearch(String lastSearch) {
-		Mainframe.lastSearch = lastSearch;
 	}
 
 }

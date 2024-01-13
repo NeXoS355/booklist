@@ -2,7 +2,6 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -19,8 +18,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 
@@ -49,6 +46,9 @@ import application.BookListModel;
 import application.HandleWebInfo;
 import data.Database;
 
+/**
+ *  Dialog to change Entry in Booklist Table and DB
+ */
 public class Dialog_edit_Booklist extends JDialog {
 
 	private static final long serialVersionUID = 1L;
@@ -1042,6 +1042,14 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	}
 
+	/** add the autoComplete feature to "autor" and "serie"
+	 * 
+	 * @param search - currently typed String
+	 * @param field - sets variable based on which field is active
+	 * 
+	 * @return String array with matching authors or series
+	 *  
+	*/
 	public String[] autoCompletion(String search, String field) {
 		String[] returnArray = null;
 		if (field.equals("autor")) {
@@ -1082,6 +1090,10 @@ public class Dialog_edit_Booklist extends JDialog {
 		return returnArray;
 	}
 
+	/** save new or updates Entry in Booklist and DB
+	 * 
+	 * @param entry - new Booklist entry
+	*/
 	public void save(Book_Booklist entry) {
 		int bid = entry.getBid();
 		String oldAutor = entry.getAuthor();
@@ -1186,7 +1198,14 @@ public class Dialog_edit_Booklist extends JDialog {
 		Mainframe.updateModel();
 	}
 
-	// Check New Autor & Titel if there already exists the same
+	/** Check New Autor & Titel if there already exists the same
+	 * 
+	 * @param newAuthor - full author name
+	 * @param newTitle - book title
+	 * @param index - index of the Book to update
+	 *  
+	 * @return "false" if already exists else "true"
+	*/
 	public boolean checkInput(String newAuthor, String newTitle, int index) {
 		for (int i = 0; i < Mainframe.entries.getSize(); i++) {
 			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
@@ -1200,28 +1219,12 @@ public class Dialog_edit_Booklist extends JDialog {
 		return true;
 	}
 
-	public static boolean openWebpage(URI uri) {
-		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-		if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-			try {
-				desktop.browse(uri);
-				return true;
-			} catch (Exception e) {
-				Mainframe.logger.trace(e.getMessage());
-			}
-		}
-		return false;
-	}
-
-	public static boolean openWebpage(URL url) {
-		try {
-			return openWebpage(url.toURI());
-		} catch (URISyntaxException e) {
-			Mainframe.logger.error(e.getMessage());
-		}
-		return false;
-	}
-
+	/** shows the image from an Booklist Entry
+	 * 
+	 * @param entry - Booklist Entry
+	 *  
+	 * @return ImageIcon of saved Bookcover 
+	*/
 	public ImageIcon showImg(Book_Booklist entry) {
 		Image img = null;
 		try {
@@ -1237,6 +1240,9 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	}
 
+	/** sets the correct Star Icons according to current Rating
+	 *  
+	*/
 	private void setRatingGUI() {
 		if (entry.getRating() == 1) {
 			lblFirstStar.setIcon(halfStar);
@@ -1309,6 +1315,12 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	}
 
+	/** sets the definied Rating of Booklist entry and shows Acknowldge Icon
+	 * 
+	 * @param e - MouseEvent to get Mouse Position
+	 * @param i - value of pressed Star 1-5
+	 *  
+	*/
 	private void setRating(MouseEvent e, int i) {
 		int half = lblFirstStar.getWidth() / 2;
 		int mouse = e.getX();

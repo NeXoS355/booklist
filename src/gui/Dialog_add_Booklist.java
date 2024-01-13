@@ -33,11 +33,11 @@ import application.HandleConfig;
 import application.HandleWebInfo;
 import application.BookListModel;
 
+/**
+ *  Dialog to add new Book to Booklist Table and DB
+ */
 public class Dialog_add_Booklist extends JDialog {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private RoundJTextField txtAuthor;
 	private RoundJTextField txtTitle;
@@ -120,7 +120,7 @@ public class Dialog_add_Booklist extends JDialog {
 					txtAuthor.setText(txtAuthor.getText().substring(0, typed));
 					System.out.println(txtAuthor.getText().substring(0, typed));
 				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
+					addBook();
 				} else if (!e.isActionKey()) {
 					txtAuthor.setBackground(Color.white);
 				}
@@ -159,7 +159,7 @@ public class Dialog_add_Booklist extends JDialog {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
+					addBook();
 				} else if (!e.isActionKey()) {
 					if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
 						txtTitle.setText("");
@@ -216,7 +216,7 @@ public class Dialog_add_Booklist extends JDialog {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
+					addBook();
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
@@ -276,7 +276,7 @@ public class Dialog_add_Booklist extends JDialog {
 					typed = txtSerie.getCaretPosition();
 					txtSerie.setText(txtSerie.getText().substring(0, typed));
 				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
+					addBook();
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
@@ -308,7 +308,7 @@ public class Dialog_add_Booklist extends JDialog {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
+					addBook();
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
@@ -460,7 +460,7 @@ public class Dialog_add_Booklist extends JDialog {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
+					addBook();
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
@@ -491,7 +491,7 @@ public class Dialog_add_Booklist extends JDialog {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
+					addBook();
 					Mainframe.updateModel();
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
@@ -520,7 +520,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				addBuch();
+				addBook();
 			}
 		});
 
@@ -561,7 +561,10 @@ public class Dialog_add_Booklist extends JDialog {
 
 	}
 
-	public void addBuch() {
+	/** adds the Book to Booklist
+	  * 
+	*/
+	public void addBook() {
 		try {
 			if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
 				Book_Booklist book = null;
@@ -620,6 +623,14 @@ public class Dialog_add_Booklist extends JDialog {
 		BookListModel.checkAuthors();
 	}
 
+	/** add the autoComplete feature to "autor" and "serie"
+	 * 
+	 * @param search - currently typed String
+	 * @param field - sets variable based on which field is active
+	 * 
+	 * @return String array with matching authors or series
+	 *  
+	*/
 	public String[] autoCompletion(String search, String field) {
 		String[] returnArray = null;
 		if (field.equals("autor")) {
@@ -660,10 +671,18 @@ public class Dialog_add_Booklist extends JDialog {
 		return returnArray;
 	}
 
-	public boolean checkInput(String autor, String titel) {
+	/** checks if author with the same title already exists
+	 * 
+	 * @param author - name of Author
+	 * @param title - Book title
+	 * 
+	 * @return "false" if already exists else "true"
+	 *  
+	*/
+	public boolean checkInput(String author, String title) {
 		for (int i = 0; i < Mainframe.entries.getSize(); i++) {
 			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
-			if (eintrag.getAuthor().equals(autor) && eintrag.getTitle().equals(titel)) {
+			if (eintrag.getAuthor().equals(author) && eintrag.getTitle().equals(title)) {
 				return false;
 			}
 		}
