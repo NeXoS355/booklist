@@ -161,8 +161,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	}
 
 	public void add(Book_Booklist buch) {
-		getBücher().add(buch);
-		fireIntervalAdded(this, 0, getBücher().size());
+		bücher.add(buch);
+		fireIntervalAdded(this, 0, bücher.size());
 		System.out.println("Booklist Buch hinzugefügt: " + buch.getAutor() + "," + buch.getTitel());
 	}
 
@@ -316,7 +316,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					if (!found) {
 						try {
 							System.out.println("Serie: " + serien[i] + " fehlender Part: " + j);
-							wishlist.Wishlisteinträge.add(new Book_Wishlist(author, "Temp "+j, "", serien[i],
+							wishlist.Wishlisteinträge.add(new Book_Wishlist(author, Integer.toString(j), "", serien[i],
 									String.valueOf(j), new Timestamp(System.currentTimeMillis()), true));
 						} catch (SQLException e) {
 							Mainframe.logger.info(e.getMessage());

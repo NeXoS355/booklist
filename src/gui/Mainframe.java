@@ -90,7 +90,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.6.1  (01.2024)  ";
+	private String version = "Ver. 2.6.2  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -620,7 +620,6 @@ public class Mainframe extends JFrame {
 	}
 
 	public static void search(String text) {
-//		System.out.println("Mainframe search for: " + text);
 		filter.clear();
 		text = text.toUpperCase();
 		for (int i = 0; i < einträge.getSize(); i++) {

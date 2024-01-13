@@ -2,12 +2,14 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Timestamp;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,6 +22,8 @@ import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
+import application.Book_Booklist;
+import application.Book_Wishlist;
 import application.WishlistListModel;
 import application.WishlistTableModel;
 
@@ -88,14 +92,16 @@ public class wishlist extends JFrame {
 
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
-				JMenuItem itemAddBuch = new JMenuItem("Buch hinzufügen");
-				JMenuItem itemDelBuch = new JMenuItem("Buch löschen");
-				JMenuItem itemChanBuch = new JMenuItem("Buch bearbeiten");
-				menu.add(itemAddBuch);
-				menu.add(itemChanBuch);
-				menu.add(itemDelBuch);
+				JMenuItem itemAddBook = new JMenuItem("Buch hinzufügen");
+				JMenuItem itemDelBook = new JMenuItem("Buch löschen");
+				JMenuItem itemChanBook = new JMenuItem("Buch bearbeiten");
+				JMenuItem itemConvertBook = new JMenuItem("Buch konvertieren");
+				menu.add(itemAddBook);
+				menu.add(itemChanBook);
+				menu.add(itemDelBook);
+				menu.add(itemConvertBook);
 				menu.show(table, e.getX(), e.getY());
-				itemAddBuch.addActionListener(new ActionListener() {
+				itemAddBook.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
@@ -105,7 +111,7 @@ public class wishlist extends JFrame {
 						updateModel();
 					}
 				});
-				itemDelBuch.addActionListener(new ActionListener() {
+				itemDelBook.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
@@ -115,7 +121,7 @@ public class wishlist extends JFrame {
 						}
 					}
 				});
-				itemChanBuch.addActionListener(new ActionListener() {
+				itemChanBook.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
@@ -125,6 +131,39 @@ public class wishlist extends JFrame {
 							int index = Wishlisteinträge.getIndexOf(searchAutor, searchTitel);
 							new Dialog_edit_Wishlist(Wishlisteinträge, index);
 							updateModel();
+						}
+					}
+				});
+				itemConvertBook.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						if (e.getActionCommand() == "Buch konvertieren") {
+							String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
+							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
+							int index = Wishlisteinträge.getIndexOf(searchAutor, searchTitel);
+							Book_Wishlist wishBook = Wishlisteinträge.getElementAt(index);
+
+							String autor = wishBook.getAutor();
+							String titel = wishBook.getTitel();
+							String serie = wishBook.getSerie();
+							String vol = wishBook.getSeriePart();
+							String merk = wishBook.getBemerkung();
+
+							Image pic = null;
+							String desc = "";
+							String isbn = "";
+							Timestamp datum = new Timestamp(System.currentTimeMillis());;
+							boolean ebook = false;
+							String ausgeliehen_an = "";
+							String ausgeliehen_von = "";
+							boolean boolAusgeliehen = false;
+
+							Mainframe.einträge.add(new Book_Booklist(autor, titel, boolAusgeliehen, ausgeliehen_an,
+									ausgeliehen_von, merk, serie, vol, ebook, pic, desc, isbn, datum, true));
+							Wishlisteinträge.delete(index);
+							updateModel();
+							Mainframe.updateModel();
 						}
 					}
 				});

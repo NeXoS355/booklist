@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import data.Database;
+import gui.Mainframe;
 
 public class Book_Booklist {
 
@@ -26,7 +27,7 @@ public class Book_Booklist {
 
 	public Book_Booklist(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
 			String bemerkung, String serie, String seriePart, boolean ebook, Image pic, String desc, String isbn,
-			Timestamp datum, boolean db) throws SQLException {
+			Timestamp datum, boolean db) {
 		super();
 		this.autor = autor;
 		this.titel = titel;
@@ -46,17 +47,22 @@ public class Book_Booklist {
 			this.ausgeliehen_an = "";
 			this.ausgeliehen_von = "";
 		}
+		try {
+			if (db) {
+				if (!ausgeliehen_an.isEmpty())
 
-		if (db) {
-			if (!ausgeliehen_an.isEmpty())
-				bid = Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, ebook,
-						datum.toString());
-			else if (!ausgeliehen_von.isEmpty())
-				bid = Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart, ebook,
-						datum.toString());
-			else
-				bid = Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, ebook,
-						datum.toString());
+					bid = Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, ebook,
+							datum.toString());
+
+				else if (!ausgeliehen_von.isEmpty())
+					bid = Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart,
+							ebook, datum.toString());
+				else
+					bid = Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, ebook,
+							datum.toString());
+			}
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
 		}
 	}
 
@@ -221,7 +227,7 @@ public class Book_Booklist {
 
 	public void setRating(int rating) {
 		this.rating = rating;
-		Database.updateRating(this.getBid(),rating);
+		Database.updateRating(this.getBid(), rating);
 	}
 
 }
