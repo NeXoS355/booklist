@@ -47,7 +47,7 @@ import application.HandleWebInfo;
 import data.Database;
 
 /**
- *  Dialog to change Entry in Booklist Table and DB
+ * Dialog to change Entry in Booklist Table and DB
  */
 public class Dialog_edit_Booklist extends JDialog {
 
@@ -134,8 +134,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		/*
 		 * create and add components to Panel North
 		 */
-		JLabel lblDate = new JLabel(
-				"hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
+		JLabel lblDate = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
 
 		JLabel lblIsbn = new JLabel("ISBN: " + entry.getIsbn(), SwingConstants.RIGHT);
 		lblIsbn.addMouseListener(new MouseAdapter() {
@@ -169,7 +168,6 @@ public class Dialog_edit_Booklist extends JDialog {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						entry.setIsbn(null);
-						Database.delIsbn(entry.getBid());
 						dispose();
 						new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 					}
@@ -253,7 +251,7 @@ public class Dialog_edit_Booklist extends JDialog {
 					if (compResult1 < 75) {
 						compResult2 = HandleWebInfo.DownloadWebPage(entry, 2, true);
 						if (compResult1 > compResult2) {
-							HandleWebInfo.DownloadWebPage(entry, 2, false);
+							HandleWebInfo.DownloadWebPage(entry, 2, true);
 						}
 					}
 
@@ -1042,14 +1040,15 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	}
 
-	/** add the autoComplete feature to "autor" and "serie"
+	/**
+	 * add the autoComplete feature to "autor" and "serie"
 	 * 
 	 * @param search - currently typed String
-	 * @param field - sets variable based on which field is active
+	 * @param field  - sets variable based on which field is active
 	 * 
 	 * @return String array with matching authors or series
-	 *  
-	*/
+	 * 
+	 */
 	public String[] autoCompletion(String search, String field) {
 		String[] returnArray = null;
 		if (field.equals("autor")) {
@@ -1090,10 +1089,11 @@ public class Dialog_edit_Booklist extends JDialog {
 		return returnArray;
 	}
 
-	/** save new or updates Entry in Booklist and DB
+	/**
+	 * save new or updates Entry in Booklist and DB
 	 * 
 	 * @param entry - new Booklist entry
-	*/
+	 */
 	public void save(Book_Booklist entry) {
 		int bid = entry.getBid();
 		String oldAutor = entry.getAuthor();
@@ -1198,14 +1198,15 @@ public class Dialog_edit_Booklist extends JDialog {
 		Mainframe.updateModel();
 	}
 
-	/** Check New Autor & Titel if there already exists the same
+	/**
+	 * Check New Autor & Titel if there already exists the same
 	 * 
 	 * @param newAuthor - full author name
-	 * @param newTitle - book title
-	 * @param index - index of the Book to update
-	 *  
+	 * @param newTitle  - book title
+	 * @param index     - index of the Book to update
+	 * 
 	 * @return "false" if already exists else "true"
-	*/
+	 */
 	public boolean checkInput(String newAuthor, String newTitle, int index) {
 		for (int i = 0; i < Mainframe.entries.getSize(); i++) {
 			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
@@ -1219,12 +1220,13 @@ public class Dialog_edit_Booklist extends JDialog {
 		return true;
 	}
 
-	/** shows the image from an Booklist Entry
+	/**
+	 * shows the image from an Booklist Entry
 	 * 
 	 * @param entry - Booklist Entry
-	 *  
-	 * @return ImageIcon of saved Bookcover 
-	*/
+	 * 
+	 * @return ImageIcon of saved Bookcover
+	 */
 	public ImageIcon showImg(Book_Booklist entry) {
 		Image img = null;
 		try {
@@ -1240,9 +1242,10 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	}
 
-	/** sets the correct Star Icons according to current Rating
-	 *  
-	*/
+	/**
+	 * sets the correct Star Icons according to current Rating
+	 * 
+	 */
 	private void setRatingGUI() {
 		if (entry.getRating() == 1) {
 			lblFirstStar.setIcon(halfStar);
@@ -1315,12 +1318,13 @@ public class Dialog_edit_Booklist extends JDialog {
 
 	}
 
-	/** sets the definied Rating of Booklist entry and shows Acknowldge Icon
+	/**
+	 * sets the definied Rating of Booklist entry and shows Acknowldge Icon
 	 * 
 	 * @param e - MouseEvent to get Mouse Position
 	 * @param i - value of pressed Star 1-5
-	 *  
-	*/
+	 * 
+	 */
 	private void setRating(MouseEvent e, int i) {
 		int half = lblFirstStar.getWidth() / 2;
 		int mouse = e.getX();

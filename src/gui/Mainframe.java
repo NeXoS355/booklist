@@ -373,7 +373,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch löschen") {
-							deleteBuch();
+							deleteBook();
 						}
 					}
 				});
@@ -408,7 +408,7 @@ public class Mainframe extends JFrame {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-					deleteBuch();
+					deleteBook();
 					updateModel();
 				}
 				BookListModel.checkAuthors();
@@ -515,7 +515,7 @@ public class Mainframe extends JFrame {
 	/** deletes the currently selected entry from Booklist
 	  * 
 	*/
-	public static void deleteBuch() {
+	public static void deleteBook() {
 		int[] selected = table.getSelectedRows();
 		for (int i = 0; i < selected.length; i++) {
 			String searchAutor = (String) table.getValueAt(selected[i], 0);
