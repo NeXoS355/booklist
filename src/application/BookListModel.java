@@ -265,7 +265,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	}
 
 	public static void analyzeAuthor(String author) {
-		ResultSet rs = Database.analyzeAuthor(author);
+		ResultSet rs = Database.getSeriesInfo(author);
 		String[] series = new String[10];
 		int[] minPart = new int[30];
 		int[] maxPart = new int[30];

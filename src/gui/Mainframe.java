@@ -267,8 +267,8 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int check = Database.CSVExport();
-				if (check == 1) {
+				boolean check = Database.CSVExport();
+				if (check) {
 					JOptionPane.showMessageDialog(null, "Liste erfolgreich exportiert!");
 				} else {
 					JOptionPane.showMessageDialog(null, "Datei konnte nicht geschrieben werden!");
