@@ -7,37 +7,37 @@ import data.Database;
 
 public class Book_Wishlist {
 
-	private String autor;
-	private String titel;
-	private String bemerkung;
-	private String serie;
-	private String seriePart;
-	private Timestamp datum;
+	private String author;
+	private String title;
+	private String note;
+	private String series;
+	private String seriesVol;
+	private Timestamp date;
 
-	public Book_Wishlist(String autor, String titel, String bemerkung, String serie,String seriePart, Timestamp datum, boolean db) throws SQLException {
+	public Book_Wishlist(String author, String title, String note, String series,String seriesVol, Timestamp date, boolean db) throws SQLException {
 		super();
-		this.autor = autor;
-		this.titel = titel;
-		this.bemerkung = bemerkung;
-		this.serie = serie;
-		this.seriePart = seriePart;
-		this.datum = datum;
+		this.author = author;
+		this.title = title;
+		this.note = note;
+		this.series = series;
+		this.seriesVol = seriesVol;
+		this.date = date;
 		if (db) {
-				Database.addToWishlist(autor, titel, bemerkung, serie, seriePart, datum.toString());
+				Database.addToWishlist(author, title, note, series, seriesVol, date.toString());
 		}
 	}
 
 	@Override
 	public String toString() {
-		return autor + "    |    " + titel;
+		return author + "    |    " + title;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((autor == null) ? 0 : autor.hashCode());
-		result = prime * result + ((titel == null) ? 0 : titel.hashCode());
+		result = prime * result + ((author == null) ? 0 : author.hashCode());
+		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		return result;
 	}
 
@@ -50,65 +50,65 @@ public class Book_Wishlist {
 		if (getClass() != obj.getClass())
 			return false;
 		Book_Wishlist other = (Book_Wishlist) obj;
-		if (autor == null) {
-			if (other.autor != null)
+		if (author == null) {
+			if (other.author != null)
 				return false;
-		} else if (!autor.equals(other.autor))
+		} else if (!author.equals(other.author))
 			return false;
-		if (titel == null) {
-			if (other.titel != null)
+		if (title == null) {
+			if (other.title != null)
 				return false;
-		} else if (!titel.equals(other.titel))
+		} else if (!title.equals(other.title))
 			return false;
 		return true;
 	}
 
-	public String getAutor() {
-		return autor;
+	public String getAuthor() {
+		return author;
 	}
 
-	public void setAutor(String autor) {
-		this.autor = autor;
+	public void setAuthor(String author) {
+		this.author = author;
 	}
 
-	public String getTitel() {
-		return titel;
+	public String getTitle() {
+		return title;
 	}
 
-	public void setTitel(String titel) {
-		this.titel = titel;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
-	public String getBemerkung() {
-		return bemerkung;
+	public String getNote() {
+		return note;
 	}
 
-	public void setBemerkung(String bemerkung) {
-		this.bemerkung = bemerkung;
+	public void setNote(String note) {
+		this.note = note;
 	}
 
-	public String getSerie() {
-		return serie;
+	public String getSeries() {
+		return series;
 	}
 
-	public void setSerie(String serie) {
-		this.serie = serie;
+	public void setSeries(String series) {
+		this.series = series;
 	}
 
-	public Timestamp getDatum() {
-		return datum;
+	public Timestamp getDate() {
+		return date;
 	}
 
-	public void setDatum(Timestamp datum) {
-		this.datum = datum;
+	public void setDate(Timestamp date) {
+		this.date = date;
 	}
 
-	public String getSeriePart() {
-		return seriePart;
+	public String getSeriesVol() {
+		return seriesVol;
 	}
 
-	public void setSeriePart(String seriePart) {
-		this.seriePart = seriePart;
+	public void setSeriesVol(String seriesVol) {
+		this.seriesVol = seriesVol;
 	}
 	
 	

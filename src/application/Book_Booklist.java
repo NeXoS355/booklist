@@ -9,79 +9,79 @@ import gui.Mainframe;
 
 public class Book_Booklist {
 
-	private String autor;
-	private String titel;
-	private boolean ausgeliehen;
-	private String ausgeliehen_an;
-	private String ausgeliehen_von;
-	private String bemerkung;
-	private String serie;
-	private String seriePart;
+	private String author;
+	private String title;
+	private boolean borrowed;
+	private String borrowedTo;
+	private String borrowedFrom;
+	private String note;
+	private String series;
+	private String seriesVol;
 	private boolean ebook;
 	private Image pic;
 	private String desc;
 	private String isbn;
-	private Timestamp datum;
+	private Timestamp date;
 	private int bid;
 	private int rating;
 
-	public Book_Booklist(String autor, String titel, boolean ausgeliehen, String ausgeliehen_an, String ausgeliehen_von,
-			String bemerkung, String serie, String seriePart, boolean ebook, Image pic, String desc, String isbn,
-			Timestamp datum, boolean db) {
+	public Book_Booklist(String author, String title, boolean borrowed, String borrowedTo, String borrowedFrom,
+			String note, String series, String seriesVol, boolean ebook, Image pic, String desc, String isbn,
+			Timestamp date, boolean db) {
 		super();
-		this.autor = autor;
-		this.titel = titel;
-		this.ausgeliehen = ausgeliehen;
-		this.bemerkung = bemerkung;
-		this.serie = serie;
-		this.seriePart = seriePart;
+		this.author = author;
+		this.title = title;
+		this.borrowed = borrowed;
+		this.note = note;
+		this.series = series;
+		this.seriesVol = seriesVol;
 		this.setEbook(ebook);
 		this.pic = pic;
 		this.desc = desc;
 		this.isbn = isbn;
-		this.datum = datum;
-		if (ausgeliehen) {
-			this.ausgeliehen_an = ausgeliehen_an;
-			this.ausgeliehen_von = ausgeliehen_von;
+		this.date = date;
+		if (borrowed) {
+			this.borrowedTo = borrowedTo;
+			this.borrowedFrom = borrowedFrom;
 		} else {
-			this.ausgeliehen_an = "";
-			this.ausgeliehen_von = "";
+			this.borrowedTo = "";
+			this.borrowedFrom = "";
 		}
 		try {
 			if (db) {
-				if (!ausgeliehen_an.isEmpty())
+				if (!borrowedTo.isEmpty())
 
-					bid = Database.addToBooklist(autor, titel, "an", ausgeliehen_an, bemerkung, serie, seriePart, ebook,
-							datum.toString());
+					bid = Database.addToBooklist(author, title, "an", borrowedTo, note, series, seriesVol, ebook,
+							date.toString());
 
-				else if (!ausgeliehen_von.isEmpty())
-					bid = Database.addToBooklist(autor, titel, "von", ausgeliehen_von, bemerkung, serie, seriePart,
-							ebook, datum.toString());
+				else if (!borrowedFrom.isEmpty())
+					bid = Database.addToBooklist(author, title, "von", borrowedFrom, note, series, seriesVol,
+							ebook, date.toString());
 				else
-					bid = Database.addToBooklist(autor, titel, "nein", "", bemerkung, serie, seriePart, ebook,
-							datum.toString());
+					bid = Database.addToBooklist(author, title, "nein", "", note, series, seriesVol, ebook,
+							date.toString());
 			}
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
 	}
 
-	public Book_Booklist(String autor, String titel, String bemerkung, String serie, String seriePart, boolean ebook,
-			Image pic, String desc, String isbn, Timestamp datum, boolean db) throws SQLException {
-		this(autor, titel, false, "", "", bemerkung, serie, seriePart, ebook, pic, desc, isbn, datum, db);
+	public Book_Booklist(String author, String title, String note, String series, String seriesVol, boolean ebook,
+			Image pic, String desc, String isbn, Timestamp date, boolean db) throws SQLException {
+		this(author, title, false, "", "", note, series, seriesVol, ebook, pic, desc, isbn, date, db);
 	}
 
 	@Override
 	public String toString() {
-		return autor + "    |    " + titel;
+		return author + "    |    " + title;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((autor == null) ? 0 : autor.hashCode());
-		result = prime * result + ((titel == null) ? 0 : titel.hashCode());
+		result = prime * result + ((author == null) ? 0 : author.hashCode());
+		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		return result;
 	}
 
@@ -94,73 +94,73 @@ public class Book_Booklist {
 		if (getClass() != obj.getClass())
 			return false;
 		Book_Booklist other = (Book_Booklist) obj;
-		if (autor == null) {
-			if (other.autor != null)
+		if (author == null) {
+			if (other.author != null)
 				return false;
-		} else if (!autor.equals(other.autor))
+		} else if (!author.equals(other.author))
 			return false;
-		if (titel == null) {
-			if (other.titel != null)
+		if (title == null) {
+			if (other.title != null)
 				return false;
-		} else if (!titel.equals(other.titel))
+		} else if (!title.equals(other.title))
 			return false;
 		return true;
 	}
 
-	public String getAutor() {
-		return autor;
+	public String getAuthor() {
+		return author;
 	}
 
-	public void setAutor(String autor) {
-		this.autor = autor;
+	public void setAuthor(String author) {
+		this.author = author;
 	}
 
-	public String getTitel() {
-		return titel;
+	public String getTitle() {
+		return title;
 	}
 
-	public void setTitel(String titel) {
-		this.titel = titel;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
-	public boolean isAusgeliehen() {
-		return ausgeliehen;
+	public boolean isBorrowed() {
+		return borrowed;
 	}
 
-	public void setAusgeliehen(boolean ausgeliehen) {
-		this.ausgeliehen = ausgeliehen;
+	public void setBorrowed(boolean borrowed) {
+		this.borrowed = borrowed;
 	}
 
-	public String getAusgeliehen_an() {
-		return ausgeliehen_an;
+	public String getBorrowedTo() {
+		return borrowedTo;
 	}
 
-	public void setAusgeliehen_an(String ausgeliehen_an) {
-		this.ausgeliehen_an = ausgeliehen_an;
+	public void setBorrowedTo(String borrowedTo) {
+		this.borrowedTo = borrowedTo;
 	}
 
-	public String getAusgeliehen_von() {
-		return ausgeliehen_von;
+	public String getBorrowedFrom() {
+		return borrowedFrom;
 	}
 
-	public void setAusgeliehen_von(String ausgeliehen_von) {
-		this.ausgeliehen_von = ausgeliehen_von;
+	public void setBorrowedFrom(String borrowedFrom) {
+		this.borrowedFrom = borrowedFrom;
 	}
 
-	public String getBemerkung() {
-		return bemerkung;
+	public String getNote() {
+		return note;
 	}
 
-	public void setBemerkung(String bemerkung) {
-		this.bemerkung = bemerkung;
+	public void setNote(String note) {
+		this.note = note;
 	}
 
-	public String getSerie() {
-		return serie;
+	public String getSeries() {
+		return series;
 	}
 
-	public void setSerie(String serie) {
-		this.serie = serie;
+	public void setSeries(String series) {
+		this.series = series;
 	}
 
 	public Image getPic() {
@@ -171,20 +171,20 @@ public class Book_Booklist {
 		this.pic = pic;
 	}
 
-	public Timestamp getDatum() {
-		return datum;
+	public Timestamp getDate() {
+		return date;
 	}
 
-	public void setDatum(Timestamp datum) {
-		this.datum = datum;
+	public void setDate(Timestamp date) {
+		this.date = date;
 	}
 
-	public String getSeriePart() {
-		return seriePart;
+	public String getSeriesVol() {
+		return seriesVol;
 	}
 
-	public void setSeriePart(String seriePart) {
-		this.seriePart = seriePart;
+	public void setSeriesVol(String seriesVol) {
+		this.seriesVol = seriesVol;
 	}
 
 	public String getDesc() {

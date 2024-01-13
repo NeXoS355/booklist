@@ -84,12 +84,12 @@ public class Dialog_edit_Wishlist extends JDialog {
 		int höhe = 60;
 		int breite = 100;
 
-		JLabel lbl_datum = new JLabel("Datum: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
+		JLabel lbl_datum = new JLabel("Datum: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDate()));
 		panel_north.add(lbl_datum);
 
 		// Empty Panel top Gap
 		JLabel lbl_empty1 = new JLabel("");
-		lbl_empty1.setFont(Mainframe.schrift);
+		lbl_empty1.setFont(Mainframe.defaultFont);
 		lbl_empty1.setPreferredSize(new Dimension(breite, 10));
 		panel_north.add(lbl_empty1);
 		// Ende topGap
@@ -98,10 +98,10 @@ public class Dialog_edit_Wishlist extends JDialog {
 		 * create and add components to Panel Center
 		 */
 		JLabel lbl_author = new JLabel("Autor:");
-		lbl_author.setFont(Mainframe.schrift);
+		lbl_author.setFont(Mainframe.defaultFont);
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
-		txt_author = new RoundJTextField(eintrag.getAutor());
-		txt_author.setFont(Mainframe.schrift);
+		txt_author = new RoundJTextField(eintrag.getAuthor());
+		txt_author.setFont(Mainframe.defaultFont);
 		txt_author.setPreferredSize(new Dimension(50, höhe));
 		txt_author.setBorder(standardBorder);
 		txt_author.addKeyListener(new KeyAdapter() {
@@ -133,10 +133,10 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		});
 		JLabel lbl_title = new JLabel("Titel:");
-		lbl_title.setFont(Mainframe.schrift);
+		lbl_title.setFont(Mainframe.defaultFont);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
-		txt_title = new RoundJTextField(eintrag.getTitel());
-		txt_title.setFont(Mainframe.schrift);
+		txt_title = new RoundJTextField(eintrag.getTitle());
+		txt_title.setFont(Mainframe.defaultFont);
 		txt_title.setPreferredSize(new Dimension(50, höhe));
 		txt_title.setBorder(standardBorder);
 		txt_title.addKeyListener(new KeyAdapter() {
@@ -188,11 +188,11 @@ public class Dialog_edit_Wishlist extends JDialog {
 		});
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
-		lbl_merk.setFont(Mainframe.schrift);
+		lbl_merk.setFont(Mainframe.defaultFont);
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 
-		txt_merk = new RoundJTextField(eintrag.getBemerkung());
-		txt_merk.setFont(Mainframe.schrift);
+		txt_merk = new RoundJTextField(eintrag.getNote());
+		txt_merk.setFont(Mainframe.defaultFont);
 		txt_merk.setPreferredSize(new Dimension(50, höhe));
 		txt_merk.setBorder(standardBorder);
 		txt_merk.addKeyListener(new KeyAdapter() {
@@ -223,11 +223,11 @@ public class Dialog_edit_Wishlist extends JDialog {
 		});
 
 		JLabel lbl_serie = new JLabel("Serie | Band:");
-		lbl_serie.setFont(Mainframe.schrift);
+		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 
-		txt_serie = new RoundJTextField(eintrag.getSerie());
-		txt_serie.setFont(Mainframe.schrift);
+		txt_serie = new RoundJTextField(eintrag.getSeries());
+		txt_serie.setFont(Mainframe.defaultFont);
 		txt_serie.setPreferredSize(new Dimension(50, höhe));
 		txt_serie.setBorder(standardBorder);
 		txt_serie.addKeyListener(new KeyAdapter() {
@@ -258,8 +258,8 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		});
 
-		txt_seriePart = new RoundJTextField(eintrag.getSeriePart());
-		txt_seriePart.setFont(Mainframe.schrift);
+		txt_seriePart = new RoundJTextField(eintrag.getSeriesVol());
+		txt_seriePart.setFont(Mainframe.defaultFont);
 		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
 		txt_seriePart.setBorder(standardBorder);
 		txt_seriePart.addKeyListener(new KeyAdapter() {
@@ -393,23 +393,23 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 	public void speichern(Book_Wishlist eintrag) {
 		if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
-			String oldAutor = eintrag.getAutor();
-			String oldTitel = eintrag.getTitel();
+			String oldAutor = eintrag.getAuthor();
+			String oldTitel = eintrag.getTitle();
 			String newAutor = txt_author.getText().trim();
 			String newTitel = txt_title.getText().trim();
 			String newBemerkung = txt_merk.getText().trim();
 			String newSerie = txt_serie.getText().trim();
 			String newSeriePart = txt_seriePart.getText();
 			Timestamp datum = new Timestamp(System.currentTimeMillis());
-			if (!Duplicant(newAutor, newTitel, wishlist.Wishlisteinträge.getIndexOf(newAutor, newTitel))) {
+			if (!Duplicant(newAutor, newTitel, wishlist.wishlistEntries.getIndexOf(newAutor, newTitel))) {
 				Database.deleteFromWishlist(oldAutor, oldTitel);
 				Database.addToWishlist(newAutor, newTitel, newBemerkung, newSerie, newSeriePart, datum.toString());
-				eintrag.setAutor(newAutor);
-				eintrag.setTitel(newTitel);
-				eintrag.setBemerkung(newBemerkung);
-				eintrag.setSerie(newSerie);
-				eintrag.setSeriePart(newSeriePart);
-				eintrag.setDatum(datum);
+				eintrag.setAuthor(newAutor);
+				eintrag.setTitle(newTitel);
+				eintrag.setNote(newBemerkung);
+				eintrag.setSeries(newSerie);
+				eintrag.setSeriesVol(newSeriePart);
+				eintrag.setDate(datum);
 				dispose();
 			} else {
 				txt_title.setText("Buch bereits vorhanden!");
@@ -427,9 +427,9 @@ public class Dialog_edit_Wishlist extends JDialog {
 	}
 
 	public boolean Duplicant(String autor, String titel, int index) {
-		for (int i = 0; i < wishlist.Wishlisteinträge.getSize(); i++) {
-			Book_Wishlist eintrag = wishlist.Wishlisteinträge.getElementAt(i);
-			if (eintrag.getAutor().equals(autor) && eintrag.getTitel().equals(titel)) {
+		for (int i = 0; i < wishlist.wishlistEntries.getSize(); i++) {
+			Book_Wishlist eintrag = wishlist.wishlistEntries.getElementAt(i);
+			if (eintrag.getAuthor().equals(autor) && eintrag.getTitle().equals(titel)) {
 				return true;
 			}
 		}

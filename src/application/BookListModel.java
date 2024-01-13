@@ -23,8 +23,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static ArrayList<Book_Booklist> bücher = new ArrayList<Book_Booklist>();
-	public static ArrayList<String> autoren = new ArrayList<String>();
+	private static ArrayList<Book_Booklist> books = new ArrayList<Book_Booklist>();
+	public static ArrayList<String> authors = new ArrayList<String>();
 
 	public BookListModel() {
 		Database.createConnection();
@@ -41,23 +41,23 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				try {
 					// necessary Variables cannot be loaded onDemand
 					Book_Booklist book = null;
-					String autor = rs.getString("autor").trim();
-					String titel = rs.getString("titel").trim();
-					String bemerkung = rs.getString("bemerkung");
-					String serie = rs.getString("serie").trim();
-					String seriePart = rs.getString("seriePart");
+					String author = rs.getString("autor").trim();
+					String title = rs.getString("titel").trim();
+					String note = rs.getString("bemerkung");
+					String series = rs.getString("serie").trim();
+					String seriesVolume = rs.getString("seriePart");
 					int bid = Integer.parseInt(rs.getString("bid"));
 
 					// Variables for LoadOnDemand
 					Blob picture = null;
 					String desc = "";
 					String isbn = "";
-					Timestamp datum = null;
+					Timestamp date = null;
 					boolean ebook = false;
-					String ausgeliehen = "";
-					String ausgeliehen_an = "";
-					String ausgeliehen_von = "";
-					boolean boolAusgeliehen = false;
+					String borrowed = "";
+					String borrowedTo = "";
+					String borrowedFrom = "";
+					boolean boolBorrowed = false;
 
 					if (HandleConfig.loadOnDemand == 0) {
 						picture = rs.getBlob("pic");
@@ -66,16 +66,16 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						ebook = false;
 						if (int_ebook == 1)
 							ebook = true;
-						datum = rs.getTimestamp("date");
+						date = rs.getTimestamp("date");
 						isbn = rs.getString("isbn");
-						ausgeliehen = rs.getString("ausgeliehen");
-						boolAusgeliehen = false;
-						if (ausgeliehen.equals("an")) {
-							boolAusgeliehen = true;
-							ausgeliehen_an = rs.getString("name").trim();
-						} else if (ausgeliehen.equals("von")) {
-							boolAusgeliehen = true;
-							ausgeliehen_von = rs.getString("name").trim();
+						borrowed = rs.getString("ausgeliehen");
+						boolBorrowed = false;
+						if (borrowed.equals("an")) {
+							boolBorrowed = true;
+							borrowedTo = rs.getString("name").trim();
+						} else if (borrowed.equals("von")) {
+							boolBorrowed = true;
+							borrowedFrom = rs.getString("name").trim();
 						}
 					}
 					Image buf_pic = null;
@@ -83,11 +83,11 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
-					book = new Book_Booklist(autor, titel, boolAusgeliehen, ausgeliehen_an, ausgeliehen_von, bemerkung,
-							serie, seriePart, ebook, buf_pic, desc, isbn, datum, false);
+					book = new Book_Booklist(author, title, boolBorrowed, borrowedTo, borrowedFrom, note,
+							series, seriesVolume, ebook, buf_pic, desc, isbn, date, false);
 					book.setBid(bid);
-					getBücher().add(book);
-					Mainframe.logger.trace("Buch ausgelesen: " + book.getAutor() + "-" + book.getTitel());
+					getBooks().add(book);
+					Mainframe.logger.trace("Buch ausgelesen: " + book.getAuthor() + "-" + book.getTitle());
 					if (bid > Database.highestBid) {
 						Database.highestBid = bid;
 					}
@@ -124,24 +124,24 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					book.setPic(buf_pic);
 					book.setDesc(desc);
 					book.setEbook(ebook);
-					book.setDatum(datum);
+					book.setDate(datum);
 					book.setIsbn(isbn);
 					book.setRating(rating);
 
-					String ausgeliehen = rs.getString("ausgeliehen");
-					boolean boolAusgeliehen = false;
-					if (ausgeliehen.equals("an")) {
-						boolAusgeliehen = true;
-						String ausgeliehen_an = rs.getString("name").trim();
-						book.setAusgeliehen_an(ausgeliehen_an);
-						book.setAusgeliehen(boolAusgeliehen);
-					} else if (ausgeliehen.equals("von")) {
-						boolAusgeliehen = true;
-						String ausgeliehen_von = rs.getString("name").trim();
-						book.setAusgeliehen_von(ausgeliehen_von);
-						book.setAusgeliehen(boolAusgeliehen);
+					String borrowed = rs.getString("ausgeliehen");
+					boolean boolBorrowed = false;
+					if (borrowed.equals("an")) {
+						boolBorrowed = true;
+						String borrowedTo = rs.getString("name").trim();
+						book.setBorrowedTo(borrowedTo);
+						book.setBorrowed(boolBorrowed);
+					} else if (borrowed.equals("von")) {
+						boolBorrowed = true;
+						String borrowedFrom = rs.getString("name").trim();
+						book.setBorrowedFrom(borrowedFrom);
+						book.setBorrowed(boolBorrowed);
 					}
-					Mainframe.logger.info("loading Book info: " + book.getAutor() + "-" + book.getTitel());
+					Mainframe.logger.info("loading Book info: " + book.getAuthor() + "-" + book.getTitle());
 				}
 			} catch (SQLException e) {
 				Mainframe.logger.error(e.getMessage());
@@ -151,81 +151,81 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		}
 	}
 
-	public static void autorenPrüfen() {
-		autoren.clear();
-		for (int i = 0; i < getBücher().size(); i++) {
-			if (!autoren.contains(getBücher().get(i).getAutor()))
-				autoren.add(getBücher().get(i).getAutor());
+	public static void checkAuthors() {
+		authors.clear();
+		for (int i = 0; i < getBooks().size(); i++) {
+			if (!authors.contains(getBooks().get(i).getAuthor()))
+				authors.add(getBooks().get(i).getAuthor());
 		}
 		Mainframe.updateNode();
 	}
 
 	public void add(Book_Booklist buch) {
-		bücher.add(buch);
-		fireIntervalAdded(this, 0, bücher.size());
-		System.out.println("Booklist Buch hinzugefügt: " + buch.getAutor() + "," + buch.getTitel());
+		books.add(buch);
+		fireIntervalAdded(this, 0, books.size());
+		System.out.println("Booklist Buch hinzugefügt: " + buch.getAuthor() + "," + buch.getTitle());
 	}
 
 	public void delete(Book_Booklist buch) {
-		getBücher().remove(buch);
-		fireIntervalRemoved(this, 0, getBücher().size());
-		System.out.println("Booklist Buch gelöscht: " + buch.getAutor() + "," + buch.getTitel());
+		getBooks().remove(buch);
+		fireIntervalRemoved(this, 0, getBooks().size());
+		System.out.println("Booklist Buch gelöscht: " + buch.getAuthor() + "," + buch.getTitle());
 	}
 
 	public void delete(int index) {
-		Database.deleteFromBooklist(getBücher().get(index).getBid());
-		getBücher().remove(index);
+		Database.deleteFromBooklist(getBooks().get(index).getBid());
+		getBooks().remove(index);
 		fireIntervalRemoved(this, index, index);
 	}
 
-	public static String[] getSerienVonAutor(String autor) {
-		ArrayList<String> serien = new ArrayList<String>();
+	public static String[] getSeriesFromAuthor(String author) {
+		ArrayList<String> series = new ArrayList<String>();
 
-		for (int i = 0; i < getBücher().size(); i++) {
-			Book_Booklist buch = getBücher().get(i);
-			if (buch.getAutor().contains(autor)) {
-				if (!buch.getSerie().trim().equals("")) {
-					boolean newSerie = true;
-					for (int j = 0; j < serien.size(); j++) {
-						if (serien.get(j).equals(buch.getSerie()))
-							newSerie = false;
+		for (int i = 0; i < getBooks().size(); i++) {
+			Book_Booklist book = getBooks().get(i);
+			if (book.getAuthor().contains(author)) {
+				if (!book.getSeries().trim().equals("")) {
+					boolean newSeries = true;
+					for (int j = 0; j < series.size(); j++) {
+						if (series.get(j).equals(book.getSeries()))
+							newSeries = false;
 					}
-					if (newSerie)
-						serien.add(buch.getSerie());
+					if (newSeries)
+						series.add(book.getSeries());
 
 				}
 			}
 
 		}
-		String[] returnArr = new String[serien.size()];
-		for (int i = 0; i < serien.size(); i++) {
-			returnArr[i] = serien.get(i);
+		String[] returnArr = new String[series.size()];
+		for (int i = 0; i < series.size(); i++) {
+			returnArr[i] = series.get(i);
 		}
 		return returnArr;
 	}
 
-	public static int[] getBuecherVonAutor(String autor) {
-		ArrayList<Integer> buecher = new ArrayList<Integer>();
+	public static int[] getBooksFromAuthor(String author) {
+		ArrayList<Integer> books = new ArrayList<Integer>();
 
-		for (int i = 0; i < getBücher().size(); i++) {
-			Book_Booklist buch = getBücher().get(i);
-			if (buch.getAutor().contains(autor)) {
-				buecher.add(buch.getBid());
+		for (int i = 0; i < getBooks().size(); i++) {
+			Book_Booklist book = getBooks().get(i);
+			if (book.getAuthor().contains(author)) {
+				books.add(book.getBid());
 			}
 		}
-		int[] returnArr = new int[buecher.size()];
-		for (int i = 0; i < buecher.size(); i++) {
-			returnArr[i] = buecher.get(i);
+		int[] returnArr = new int[books.size()];
+		for (int i = 0; i < books.size(); i++) {
+			returnArr[i] = books.get(i);
 		}
 		return returnArr;
 
 	}
 
-	public static boolean hatAutorSerie(String autor) {
-		for (int i = 0; i < getBücher().size(); i++) {
-			Book_Booklist buch = getBücher().get(i);
-			if (buch.getAutor().contains(autor)) {
-				if (!buch.getSerie().trim().equals("")) {
+	public static boolean authorHasSeries(String author) {
+		for (int i = 0; i < getBooks().size(); i++) {
+			Book_Booklist book = getBooks().get(i);
+			if (book.getAuthor().contains(author)) {
+				if (!book.getSeries().trim().equals("")) {
 					return true;
 				}
 			}
@@ -235,15 +235,15 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	@Override
 	public Book_Booklist getElementAt(int arg0) {
-		return getBücher().get(arg0);
+		return getBooks().get(arg0);
 	}
 
-	public int getIndexOf(String searchAutor, String searchTitel) {
-		for (int i = 0; i < getBücher().size(); i++) {
-			Book_Booklist eintrag = getBücher().get(i);
-			String autor = eintrag.getAutor().toUpperCase();
-			String titel = eintrag.getTitel().toUpperCase();
-			if (autor.equals(searchAutor.toUpperCase()) && titel.equals(searchTitel.toUpperCase())) {
+	public int getIndexOf(String searchAuthor, String searchTitle) {
+		for (int i = 0; i < getBooks().size(); i++) {
+			Book_Booklist entry = getBooks().get(i);
+			String author = entry.getAuthor().toUpperCase();
+			String title = entry.getTitle().toUpperCase();
+			if (author.equals(searchAuthor.toUpperCase()) && title.equals(searchTitle.toUpperCase())) {
 				return i;
 			}
 		}
@@ -253,48 +253,48 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	@Override
 	public int getSize() {
-		return getBücher().size();
+		return getBooks().size();
 	}
 
-	public int indexOf(Book_Booklist buch) {
-		return getBücher().indexOf(buch);
+	public int indexOf(Book_Booklist book) {
+		return getBooks().indexOf(book);
 	}
 
-	public static ArrayList<Book_Booklist> getBücher() {
-		return bücher;
+	public static ArrayList<Book_Booklist> getBooks() {
+		return books;
 	}
 
-	public static void analyseAuthor(String author) {
+	public static void analyzeAuthor(String author) {
 		ResultSet rs = Database.analyzeAuthor(author);
-		String[] serien = new String[10];
+		String[] series = new String[10];
 		int[] minPart = new int[30];
 		int[] maxPart = new int[30];
-		String oldSerie = "";
-		int newSerie = 1;
+		String oldSeries = "";
+		int newSeries = 1;
 		int i = 0;
 		int rowCount = 0;
 
 		try {
 			while (rs.next()) {
-				String serie = rs.getString("serie").trim();
-				int seriePart = rs.getInt("seriePart");
+				String realSeries = rs.getString("serie").trim();
+				int seriesVolume = rs.getInt("seriePart");
 
-				if (!serie.equals(oldSerie) && rowCount != 0) {
+				if (!realSeries.equals(oldSeries) && rowCount != 0) {
 					i++;
-					newSerie = 1;
+					newSeries = 1;
 				}
 
-				serien[i] = serie;
-				if (seriePart > maxPart[i] || newSerie == 1) {
-					maxPart[i] = seriePart;
+				series[i] = realSeries;
+				if (seriesVolume > maxPart[i] || newSeries == 1) {
+					maxPart[i] = seriesVolume;
 
 				}
-				if (seriePart < minPart[i] || newSerie == 1) {
-					minPart[i] = seriePart;
+				if (seriesVolume < minPart[i] || newSeries == 1) {
+					minPart[i] = seriesVolume;
 				}
 
-				newSerie = 0;
-				oldSerie = serie;
+				newSeries = 0;
+				oldSeries = realSeries;
 				rowCount++;
 			}
 		} catch (SQLException e) {
@@ -303,20 +303,20 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		}
 
 		boolean found = false;
-		for (i = 0; i < serien.length; i++) {
-			if (serien[i] != null) {
+		for (i = 0; i < series.length; i++) {
+			if (series[i] != null) {
 				for (int j = minPart[i] + 1; j < maxPart[i]; j++) {
-					for (int k = 0; k < bücher.size(); k++) {
-						Book_Booklist buch = bücher.get(k);
-						if (buch.getSerie().equals(serien[i]) && Integer.parseInt(buch.getSeriePart()) == j) {
+					for (int k = 0; k < books.size(); k++) {
+						Book_Booklist book = books.get(k);
+						if (book.getSeries().equals(series[i]) && Integer.parseInt(book.getSeriesVol()) == j) {
 							found = true;
 						}
 
 					}
 					if (!found) {
 						try {
-							System.out.println("Serie: " + serien[i] + " fehlender Part: " + j);
-							wishlist.Wishlisteinträge.add(new Book_Wishlist(author, Integer.toString(j), "", serien[i],
+							System.out.println("Serie: " + series[i] + " fehlender Part: " + j);
+							wishlist.wishlistEntries.add(new Book_Wishlist(author, Integer.toString(j), "", series[i],
 									String.valueOf(j), new Timestamp(System.currentTimeMillis()), true));
 						} catch (SQLException e) {
 							Mainframe.logger.info(e.getMessage());

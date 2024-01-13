@@ -75,12 +75,12 @@ public class Mainframe extends JFrame {
 	public static Logger logger = null;
 	public static ExecutorService executor = Executors.newFixedThreadPool(10);
 
-	public static Font schrift = new Font("Roboto", Font.PLAIN, 16);
-	public static Font descSchrift = new Font("Roboto", Font.PLAIN, 16);
+	public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
+	public static Font descFont = new Font("Roboto", Font.PLAIN, 16);
 	private static JTable table = new JTable();
-	public static BookListModel einträge;
+	public static BookListModel entries;
 	private static DefaultListModel<Book_Booklist> filter;
-	private static SimpleTableModel anzeige;
+	private static SimpleTableModel tableDisplay;
 	private static DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("rootNode");
 	private static DefaultMutableTreeNode autorNode = new DefaultMutableTreeNode("AutorNode");
 	private static DefaultMutableTreeNode serieNode = new DefaultMutableTreeNode("SerieNode");
@@ -122,9 +122,9 @@ public class Mainframe extends JFrame {
 		}
 
 		logger.trace("Finished create Frame & readConfig. Start creating Lists and readDB");
-		einträge = new BookListModel();
+		entries = new BookListModel();
 		filter = new DefaultListModel<Book_Booklist>();
-		anzeige = new SimpleTableModel(einträge);
+		tableDisplay = new SimpleTableModel(entries);
 
 		logger.trace("Finished creating List & DB. Start creating GUI Components");
 
@@ -133,9 +133,9 @@ public class Mainframe extends JFrame {
 
 		txt_search = new JTextField();
 		txt_search.setToolTipText("Suchtext");
-		txt_search.setText("Suche ... (" + einträge.getSize() + ")");
+		txt_search.setText("Suche ... (" + entries.getSize() + ")");
 		txt_search.setForeground(Color.gray);
-		txt_search.setFont(schrift);
+		txt_search.setFont(defaultFont);
 		txt_search.setMargin(new Insets(0, 10, 0, 0));
 		txt_search.addMouseListener(new MouseAdapter() {
 
@@ -158,7 +158,7 @@ public class Mainframe extends JFrame {
 					txt_search.setForeground(Color.gray);
 					tree.clearSelection();
 					setLastSearch(txt_search.getText());
-					if (anzeige.getRowCount() == 0) {
+					if (tableDisplay.getRowCount() == 0) {
 						updateModel();
 						JOptionPane.showMessageDialog(getParent(), "Keine Übereinstimmung gefunden");
 					}
@@ -175,8 +175,8 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Dialog_add_Booklist(einträge, treeModel, rootNode);
-				txt_search.setText("Suche ... (" + einträge.getSize() + ")");
+				new Dialog_add_Booklist(entries, treeModel, rootNode);
+				txt_search.setText("Suche ... (" + entries.getSize() + ")");
 			}
 		});
 		panel.add(btn_add, BorderLayout.WEST);
@@ -199,7 +199,7 @@ public class Mainframe extends JFrame {
 				txt_search.setForeground(Color.gray);
 				tree.clearSelection();
 				setLastSearch(txt_search.getText());
-				if (einträge.getSize() == 0) {
+				if (entries.getSize() == 0) {
 					updateModel();
 					JOptionPane.showMessageDialog(getParent(), "Keine Übereinstimmung gefunden");
 				}
@@ -321,8 +321,8 @@ public class Mainframe extends JFrame {
 //				return comp;
 //			}
 //		};
-		table.setModel(anzeige);
-		table.setFont(schrift);
+		table.setModel(tableDisplay);
+		table.setFont(defaultFont);
 		table.setShowVerticalLines(false);
 		table.setSelectionBackground(Color.DARK_GRAY);
 		table.setSelectionForeground(Color.WHITE);
@@ -334,10 +334,10 @@ public class Mainframe extends JFrame {
 				if (e.getClickCount() >= 2 && SwingUtilities.isLeftMouseButton(e)) {
 					String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
 					String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
-					int index = einträge.getIndexOf(searchAutor, searchTitel);
-					new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+					int index = entries.getIndexOf(searchAutor, searchTitel);
+					new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 				}
-				txt_search.setText("Suche ... (" + einträge.getSize() + ")");
+				txt_search.setText("Suche ... (" + entries.getSize() + ")");
 				if (SwingUtilities.isRightMouseButton(e)) {
 					JTable table2 = (JTable) e.getSource();
 					int row = table2.rowAtPoint(e.getPoint());
@@ -364,7 +364,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch hinzufügen") {
-							new Dialog_add_Booklist(einträge, treeModel, rootNode);
+							new Dialog_add_Booklist(entries, treeModel, rootNode);
 						}
 					}
 				});
@@ -384,8 +384,8 @@ public class Mainframe extends JFrame {
 						if (e.getActionCommand() == "Buch bearbeiten") {
 							String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
 							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
-							int index = einträge.getIndexOf(searchAutor, searchTitel);
-							new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+							int index = entries.getIndexOf(searchAutor, searchTitel);
+							new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 						}
 					}
 				});
@@ -395,7 +395,7 @@ public class Mainframe extends JFrame {
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Autor analysieren (Beta)") {
 							new wishlist();
-							BookListModel.analyseAuthor((String) table.getValueAt(table.getSelectedRow(), 0));
+							BookListModel.analyzeAuthor((String) table.getValueAt(table.getSelectedRow(), 0));
 							gui.wishlist.updateModel();
 						}
 					}
@@ -411,8 +411,8 @@ public class Mainframe extends JFrame {
 					deleteBuch();
 					updateModel();
 				}
-				BookListModel.autorenPrüfen();
-				txt_search.setText("Suche ... (" + einträge.getSize() + ")");
+				BookListModel.checkAuthors();
+				txt_search.setText("Suche ... (" + entries.getSize() + ")");
 			}
 		});
 
@@ -424,7 +424,7 @@ public class Mainframe extends JFrame {
 		pnl_mid.add(listScrollPane, BorderLayout.CENTER);
 
 		rootNode.removeAllChildren();
-		BookListModel.autorenPrüfen();
+		BookListModel.checkAuthors();
 		tree.setEditable(false);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		tree.setShowsRootHandles(false);
@@ -459,7 +459,7 @@ public class Mainframe extends JFrame {
 					else
 						setLastSearch(text);
 					table.clearSelection();
-					txt_search.setText("Suche ... (" + einträge.getSize() + ")");
+					txt_search.setText("Suche ... (" + entries.getSize() + ")");
 				}
 			}
 
@@ -473,7 +473,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand().equals("Buch hinzufügen")) {
-							new Dialog_add_Booklist(einträge, treeModel, rootNode);
+							new Dialog_add_Booklist(entries, treeModel, rootNode);
 						}
 					}
 				});
@@ -517,15 +517,15 @@ public class Mainframe extends JFrame {
 		for (int i = 0; i < selected.length; i++) {
 			String searchAutor = (String) table.getValueAt(selected[i], 0);
 			String searchTitel = (String) table.getValueAt(selected[i], 1);
-			int index = einträge.getIndexOf(searchAutor, searchTitel);
+			int index = entries.getIndexOf(searchAutor, searchTitel);
 			if (selected.length != 0) {
 				int antwort = JOptionPane.showConfirmDialog(null,
 						"Wirklich '" + searchAutor + " - " + searchTitel + "' löschen?", "Löschen",
 						JOptionPane.YES_NO_OPTION);
 				if (antwort == JOptionPane.YES_OPTION) {
-					einträge.delete(index);
+					entries.delete(index);
 				}
-				BookListModel.autorenPrüfen();
+				BookListModel.checkAuthors();
 			} else {
 				JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
 			}
@@ -538,15 +538,15 @@ public class Mainframe extends JFrame {
 	}
 
 	public static void updateNode() {
-		rootNode = new DefaultMutableTreeNode("Autoren (" + BookListModel.autoren.size() + ")");
+		rootNode = new DefaultMutableTreeNode("Autoren (" + BookListModel.authors.size() + ")");
 		treeModel = new DefaultTreeModel(rootNode);
-		for (int i = 0; i < BookListModel.autoren.size(); i++) {
-			String autor = BookListModel.autoren.get(i);
+		for (int i = 0; i < BookListModel.authors.size(); i++) {
+			String autor = BookListModel.authors.get(i);
 			autorNode = new DefaultMutableTreeNode(autor);
 			treeModel.insertNodeInto(autorNode, rootNode, i);
-			if (BookListModel.hatAutorSerie(autor)) {
+			if (BookListModel.authorHasSeries(autor)) {
 				try {
-					String[] serien = BookListModel.getSerienVonAutor(autor);
+					String[] serien = BookListModel.getSeriesFromAuthor(autor);
 					for (int j = 0; j < serien.length; j++) {
 						serieNode = new DefaultMutableTreeNode(serien[j]);
 						treeModel.insertNodeInto(serieNode, autorNode, j);
@@ -592,16 +592,16 @@ public class Mainframe extends JFrame {
 	}
 
 	public static void updateModel() {
-		anzeige = new SimpleTableModel(einträge);
-		table.setModel(anzeige);
+		tableDisplay = new SimpleTableModel(entries);
+		table.setModel(tableDisplay);
 		treeSelection = "";
 	}
 
 	public static int anz_bücherAutor(String text) {
 		int anz = 0;
-		for (int i = 0; i < einträge.getSize(); i++) {
-			Book_Booklist eintrag = einträge.getElementAt(i);
-			String autor = eintrag.getAutor();
+		for (int i = 0; i < entries.getSize(); i++) {
+			Book_Booklist eintrag = entries.getElementAt(i);
+			String autor = eintrag.getAuthor();
 			if (autor.equals(text))
 				anz += 1;
 		}
@@ -610,9 +610,9 @@ public class Mainframe extends JFrame {
 
 	public static int anz_bücherSerie(String text) {
 		int anz = 0;
-		for (int i = 0; i < einträge.getSize(); i++) {
-			Book_Booklist eintrag = einträge.getElementAt(i);
-			String serie = eintrag.getSerie();
+		for (int i = 0; i < entries.getSize(); i++) {
+			Book_Booklist eintrag = entries.getElementAt(i);
+			String serie = eintrag.getSeries();
 			if (serie.equals(text))
 				anz += 1;
 		}
@@ -622,47 +622,47 @@ public class Mainframe extends JFrame {
 	public static void search(String text) {
 		filter.clear();
 		text = text.toUpperCase();
-		for (int i = 0; i < einträge.getSize(); i++) {
-			Book_Booklist eintrag = einträge.getElementAt(i);
-			String autor = eintrag.getAutor().toUpperCase();
-			String titel = eintrag.getTitel().toUpperCase();
-			String bemerkung = eintrag.getBemerkung().toUpperCase();
-			String leihVon = eintrag.getAusgeliehen_von().toUpperCase();
-			String leihAn = eintrag.getAusgeliehen_an().toUpperCase();
-			String serie = eintrag.getSerie().toUpperCase();
+		for (int i = 0; i < entries.getSize(); i++) {
+			Book_Booklist eintrag = entries.getElementAt(i);
+			String autor = eintrag.getAuthor().toUpperCase();
+			String titel = eintrag.getTitle().toUpperCase();
+			String bemerkung = eintrag.getNote().toUpperCase();
+			String leihVon = eintrag.getBorrowedFrom().toUpperCase();
+			String leihAn = eintrag.getBorrowedTo().toUpperCase();
+			String serie = eintrag.getSeries().toUpperCase();
 			if (tree.getSelectionCount() == 0) {
 				if (autor.contains(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (titel.contains(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (bemerkung.contains(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (leihVon.contains(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (leihAn.contains(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (serie.contains(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				}
 			} else {
 				if (autor.equals(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (titel.equals(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (bemerkung.equals(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (leihVon.equals(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (leihAn.equals(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				} else if (serie.equals(text)) {
-					filter.addElement(einträge.getElementAt(i));
+					filter.addElement(entries.getElementAt(i));
 				}
 			}
 		}
 		if (filter.getSize() > 0) {
-			anzeige = new SimpleTableModel(filter);
-			table.setModel(anzeige);
+			tableDisplay = new SimpleTableModel(filter);
+			table.setModel(tableDisplay);
 		} else {
 			JOptionPane.showMessageDialog(null, "Es gab leider keine Treffer!");
 		}

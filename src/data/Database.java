@@ -1,6 +1,5 @@
 package data;
 
-import java.awt.Image;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,21 +151,21 @@ public class Database {
 			// Spaltenüberschriften hinzufügen
 			String[] header = { "Autor", "Titel", "ausgeliehen an" , "ausgeliehen von" , "Bemerkung","Serie", "Serienteil","E-Book" , "ISBN", "Datum" };
 			writer.writeNext(header);
-			ArrayList<Book_Booklist> list = BookListModel.getBücher();
+			ArrayList<Book_Booklist> list = BookListModel.getBooks();
 			int größe = list.size();
 			// Bücher in die Tabelle einfügen
 			for (int i = 0; i < größe; i++) {
-				if(list.get(i).getDatum() == null) {
+				if(list.get(i).getDate() == null) {
 					BookListModel.loadOnDemand(list.get(i));
 				}
-				String autor = list.get(i).getAutor();
-				String titel = list.get(i).getTitel();
-				String ausgeliehen_an = list.get(i).getAusgeliehen_an();
-				String ausgeliehen_von = list.get(i).getAusgeliehen_an();
-				String bemerkung = list.get(i).getBemerkung();
-				String datum = list.get(i).getDatum().toString();
-				String serie = list.get(i).getSerie();
-				String seriePart = list.get(i).getSeriePart();
+				String autor = list.get(i).getAuthor();
+				String titel = list.get(i).getTitle();
+				String ausgeliehen_an = list.get(i).getBorrowedTo();
+				String ausgeliehen_von = list.get(i).getBorrowedTo();
+				String bemerkung = list.get(i).getNote();
+				String datum = list.get(i).getDate().toString();
+				String serie = list.get(i).getSeries();
+				String seriePart = list.get(i).getSeriesVol();
 				String ebook = Boolean.toString(list.get(i).isEbook());
 				String isbn = list.get(i).getIsbn();
 				String[] data = { autor, titel, ausgeliehen_an, ausgeliehen_von, bemerkung, serie, seriePart, ebook, isbn, datum };

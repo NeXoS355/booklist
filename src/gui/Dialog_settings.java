@@ -39,39 +39,39 @@ public class Dialog_settings extends JDialog {
 		c.anchor = GridBagConstraints.CENTER;
 		c.ipady = 5;
 		c.insets = new Insets(10, 10, 0, 10);
-		JLabel lbl_fontSize = new JLabel("Schriftgrößen");
-		lbl_fontSize.setFont(Mainframe.schrift);
-		this.add(lbl_fontSize, c);
+		JLabel lblFontSize = new JLabel("Schriftgrößen");
+		lblFontSize.setFont(Mainframe.defaultFont);
+		this.add(lblFontSize, c);
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
 		c.gridy = 1;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_fontAllgemein = new JLabel("Allgemein");
-		this.add(lbl_fontAllgemein, c);
+		JLabel lblFontGeneral = new JLabel("Allgemein");
+		this.add(lblFontGeneral, c);
 		c.gridx = 1;
 		c.gridy = 1;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		Integer[] font = { 12, 14, 16, 18, 20 };
-		JComboBox<Integer> cmb_font = new JComboBox<Integer>(font);
-		cmb_font.setSelectedItem(Mainframe.schrift.getSize());
-		this.add(cmb_font, c);
+		JComboBox<Integer> cmbFont = new JComboBox<Integer>(font);
+		cmbFont.setSelectedItem(Mainframe.defaultFont.getSize());
+		this.add(cmbFont, c);
 		c.gridx = 0;
 		c.gridy = 2;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
-		JLabel lbl_fontDesc = new JLabel("Beschreibung");
-		this.add(lbl_fontDesc, c);
+		JLabel lblFontDesc = new JLabel("Beschreibung");
+		this.add(lblFontDesc, c);
 		c.gridx = 1;
 		c.gridy = 2;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		Integer[] fontDesc = { 12, 14, 16, 18, 20 };
-		JComboBox<Integer> cmb_fontDesc = new JComboBox<Integer>(fontDesc);
-		cmb_fontDesc.setSelectedItem(Mainframe.descSchrift.getSize());
-		this.add(cmb_fontDesc, c);
+		JComboBox<Integer> cmbFontDesc = new JComboBox<Integer>(fontDesc);
+		cmbFontDesc.setSelectedItem(Mainframe.descFont.getSize());
+		this.add(cmbFontDesc, c);
 
 		c.gridx = 0;
 		c.gridy = 3;
@@ -79,9 +79,9 @@ public class Dialog_settings extends JDialog {
 		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.CENTER;
 		c.fill = GridBagConstraints.NONE;
-		JLabel lbl_features = new JLabel("optionale Features");
-		lbl_features.setFont(Mainframe.schrift);
-		this.add(lbl_features, c);
+		JLabel lblFeatures = new JLabel("optionale Features");
+		lblFeatures.setFont(Mainframe.defaultFont);
+		this.add(lblFeatures, c);
 
 		c.gridx = 0;
 		c.gridy = 4;
@@ -89,85 +89,85 @@ public class Dialog_settings extends JDialog {
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		JLabel lbl_autoDownload = new JLabel("AutoDownload");
-		lbl_autoDownload.setToolTipText("Bei Anlage eines neune Buches werden direkt Infos aus den APIs abgerufen");
-		this.add(lbl_autoDownload, c);
+		JLabel lblAutoDownload = new JLabel("AutoDownload");
+		lblAutoDownload.setToolTipText("Bei Anlage eines neune Buches werden direkt Infos aus den APIs abgerufen");
+		this.add(lblAutoDownload, c);
 		c.gridx = 1;
 		c.gridy = 4;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		Integer[] array_autoDownload = { 0, 1 };
-		JComboBox<Integer> cmb_autoDownload = new JComboBox<Integer>(array_autoDownload);
-		cmb_autoDownload.setSelectedItem(HandleConfig.autoDownload);
-		this.add(cmb_autoDownload, c);
+		Integer[] arrayAutoDownload = { 0, 1 };
+		JComboBox<Integer> cmbAutoDownload = new JComboBox<Integer>(arrayAutoDownload);
+		cmbAutoDownload.setSelectedItem(HandleConfig.autoDownload);
+		this.add(cmbAutoDownload, c);
 
 		c.gridx = 0;
 		c.gridy = 5;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
-		JLabel lbl_onDemand = new JLabel("Load on Demand");
-		lbl_onDemand.setToolTipText("Cover & Beschreibungen werden erst beim öffnen des Bearbeiten Dialogs geladen.");
-		this.add(lbl_onDemand, c);
+		JLabel lblOnDemand = new JLabel("Load on Demand");
+		lblOnDemand.setToolTipText("Cover & Beschreibungen werden erst beim öffnen des Bearbeiten Dialogs geladen.");
+		this.add(lblOnDemand, c);
 		c.gridx = 1;
 		c.gridy = 5;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		Integer[] array_onDemand = { 0, 1 };
-		JComboBox<Integer> cmb_onDemand = new JComboBox<Integer>(array_onDemand);
-		cmb_onDemand.setSelectedItem(HandleConfig.loadOnDemand);
-		this.add(cmb_onDemand, c);
+		Integer[] arrayOnDemand = { 0, 1 };
+		JComboBox<Integer> cmbOnDemand = new JComboBox<Integer>(arrayOnDemand);
+		cmbOnDemand.setSelectedItem(HandleConfig.loadOnDemand);
+		this.add(cmbOnDemand, c);
 		
 		c.gridx = 0;
 		c.gridy = 6;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
-		JLabel lbl_searchParam = new JLabel("Search Parameter");
-		lbl_searchParam.setToolTipText("Google API Suchparameter. t=Titel, at=Autor+Titel");
-		this.add(lbl_searchParam, c);
+		JLabel lblSearchParam = new JLabel("Search Parameter");
+		lblSearchParam.setToolTipText("Google API Suchparameter. t=Titel, at=Autor+Titel");
+		this.add(lblSearchParam, c);
 		c.gridx = 1;
 		c.gridy = 6;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		String[] array_searchParam = { "t", "at" };
-		JComboBox<String> cmb_searchParam = new JComboBox<String>(array_searchParam);
-		cmb_searchParam.setSelectedItem(HandleConfig.searchParam);
-		this.add(cmb_searchParam, c);
+		String[] arraySearchParam = { "t", "at" };
+		JComboBox<String> cmbSearchParam = new JComboBox<String>(arraySearchParam);
+		cmbSearchParam.setSelectedItem(HandleConfig.searchParam);
+		this.add(cmbSearchParam, c);
 		c.gridx = 0;
 		c.gridy = 7;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
-		JLabel lbl_debugTimings = new JLabel("Debug");
-		lbl_debugTimings.setToolTipText("Ausführlichkeit der Logging Aktivität 0=WARN,1=INFO,2=TRACE");
-		this.add(lbl_debugTimings, c);
+		JLabel lblDebug = new JLabel("Debug");
+		lblDebug.setToolTipText("Ausführlichkeit der Logging Aktivität 0=WARN,1=INFO,2=TRACE");
+		this.add(lblDebug, c);
 		c.gridx = 1;
 		c.gridy = 7;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		Integer[] array_debug = { 0, 1, 2};
-		JComboBox<Integer> cmb_debug = new JComboBox<Integer>(array_debug);
-		cmb_debug.setSelectedItem(HandleConfig.debug);
-		this.add(cmb_debug, c);
+		Integer[] arrayDebug = { 0, 1, 2};
+		JComboBox<Integer> cmbDebug = new JComboBox<Integer>(arrayDebug);
+		cmbDebug.setSelectedItem(HandleConfig.debug);
+		this.add(cmbDebug, c);
 
-		JButton btn_save = new JButton("Speichern");
-		btn_save.setFont(Mainframe.schrift);
-		btn_save.addActionListener(new ActionListener() {
+		JButton btnSave = new JButton("Speichern");
+		btnSave.setFont(Mainframe.defaultFont);
+		btnSave.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try (PrintWriter out = new PrintWriter("config.conf")) {
 					Mainframe.logger.info("Save Settings");
 					//set Parameters which can be changed on the fly
-					HandleConfig.loadOnDemand = (int) cmb_onDemand.getSelectedItem();
-					HandleConfig.autoDownload = (int) cmb_autoDownload.getSelectedItem();
-					HandleConfig.searchParam = (String) cmb_searchParam.getSelectedItem();
+					HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
+					HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
+					HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
 
 					//write new config file
-					out.println("fontSize=" + cmb_font.getSelectedItem());
-					out.println("descFontSize=" + cmb_fontDesc.getSelectedItem());
-					out.println("autoDownload=" + cmb_autoDownload.getSelectedItem());
-					out.println("loadOnDemand=" + cmb_onDemand.getSelectedItem());
-					out.println("searchParam=" + cmb_searchParam.getSelectedItem());
-					out.println("debug=" + cmb_debug.getSelectedItem());
+					out.println("fontSize=" + cmbFont.getSelectedItem());
+					out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
+					out.println("autoDownload=" + cmbAutoDownload.getSelectedItem());
+					out.println("loadOnDemand=" + cmbOnDemand.getSelectedItem());
+					out.println("searchParam=" + cmbSearchParam.getSelectedItem());
+					out.println("debug=" + cmbDebug.getSelectedItem());
 				} catch (FileNotFoundException ex) {
 					ex.printStackTrace();
 					Mainframe.logger.error("Fehler beim speichern der Einstellungen");
@@ -179,11 +179,11 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 99;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		this.add(btn_save, c);
+		this.add(btnSave, c);
 
-		JButton btn_abort = new JButton("Abbrechen");
-		btn_abort.setFont(Mainframe.schrift);
-		btn_abort.addActionListener(new ActionListener() {
+		JButton btnAbort = new JButton("Abbrechen");
+		btnAbort.setFont(Mainframe.defaultFont);
+		btnAbort.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -194,7 +194,7 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 99;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		this.add(btn_abort, c);
+		this.add(btnAbort, c);
 
 		this.setVisible(true);
 	}

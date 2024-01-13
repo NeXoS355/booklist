@@ -15,24 +15,24 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static ArrayList<Book_Wishlist> bücher = new ArrayList<Book_Wishlist>();
-	public static ArrayList<String> autoren = new ArrayList<String>();
+	private static ArrayList<Book_Wishlist> books = new ArrayList<Book_Wishlist>();
+	public static ArrayList<String> authors = new ArrayList<String>();
 
 	public WishlistListModel() {
-		bücher.clear();
+		books.clear();
 		Database.createConnection();
 		ResultSet rs = Database.readDbWishlist();
 		try {
 			while (rs.next()) {
 				try {
-					String autor = rs.getString("autor").trim();
-					String titel = rs.getString("titel").trim();
-					String bemerkung = rs.getString("bemerkung").trim();
-					String serie = rs.getString("serie").trim();
-					String seriePart = rs.getString("seriePart");
-					Timestamp datum = rs.getTimestamp("date");
-					bücher.add(new Book_Wishlist(autor, titel, bemerkung, serie,
-							seriePart, datum, false));
+					String author = rs.getString("autor").trim();
+					String title = rs.getString("titel").trim();
+					String note = rs.getString("bemerkung").trim();
+					String series = rs.getString("serie").trim();
+					String seriesVol = rs.getString("seriePart");
+					Timestamp date = rs.getTimestamp("date");
+					books.add(new Book_Wishlist(author, title, note, series,
+							seriesVol, date, false));
 
 				} catch (DateTimeParseException ex1) {
 					System.err.println("Datum falsch während DB auslesen");
@@ -44,41 +44,41 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 		}
 	}
 
-	public void add(Book_Wishlist buch) {
-		bücher.add(buch);
-		fireIntervalAdded(this, 0, bücher.size());
-		System.out.println("Wishlist Buch hinzugefügt: " + buch.getAutor() + "," + buch.getTitel());
+	public void add(Book_Wishlist book) {
+		books.add(book);
+		fireIntervalAdded(this, 0, books.size());
+		System.out.println("Wishlist Buch hinzugefügt: " + book.getAuthor() + "," + book.getTitle());
 	}
 	
 	public static void clear() {
-		for (int i = 0;i < bücher.size();i++) {
-			bücher.remove(i);
+		for (int i = 0;i < books.size();i++) {
+			books.remove(i);
 		}
 	}
 
-	public void delete(Book_Wishlist buch) {
-		bücher.remove(buch);
-		fireIntervalRemoved(this, 0, bücher.size());
-		System.out.println("Wischlist Buch gelöscht: " + buch.getAutor() + "," + buch.getTitel());
+	public void delete(Book_Wishlist book) {
+		books.remove(book);
+		fireIntervalRemoved(this, 0, books.size());
+		System.out.println("Wischlist Buch gelöscht: " + book.getAuthor() + "," + book.getTitle());
 	}
 
 	public void delete(int index) {
-		Database.deleteFromWishlist(bücher.get(index).getAutor(), bücher.get(index).getTitel());
-		bücher.remove(index);
+		Database.deleteFromWishlist(books.get(index).getAuthor(), books.get(index).getTitle());
+		books.remove(index);
 		fireIntervalRemoved(this, index, index);
 	}
 
 	@Override
 	public Book_Wishlist getElementAt(int arg0) {
-		return bücher.get(arg0);
+		return books.get(arg0);
 	}
 
-	public int getIndexOf(String searchAutor, String searchTitel) {
-		for (int i = 0; i < bücher.size(); i++) {
-			Book_Wishlist eintrag = bücher.get(i);
-			String autor = eintrag.getAutor().toUpperCase();
-			String titel = eintrag.getTitel().toUpperCase();
-			if (autor.equals(searchAutor.toUpperCase()) && titel.equals(searchTitel.toUpperCase())) {
+	public int getIndexOf(String searchAuthor, String searchTitle) {
+		for (int i = 0; i < books.size(); i++) {
+			Book_Wishlist entry = books.get(i);
+			String author = entry.getAuthor().toUpperCase();
+			String title = entry.getTitle().toUpperCase();
+			if (author.equals(searchAuthor.toUpperCase()) && title.equals(searchTitle.toUpperCase())) {
 				return i;
 			}
 		}
@@ -88,11 +88,11 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 
 	@Override
 	public int getSize() {
-		return bücher.size();
+		return books.size();
 	}
 
 	public int indexOf(Book_Wishlist buch) {
-		return bücher.indexOf(buch);
+		return books.indexOf(buch);
 	}
 
 }

@@ -52,46 +52,46 @@ import data.Database;
 public class Dialog_edit_Booklist extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private RoundJTextField txt_author;
-	private RoundJTextField txt_title;
-	private JCheckBox check_von;
-	private RoundJTextField txt_leihVon;
-	private JCheckBox check_an;
-	private RoundJTextField txt_leihAn;
-	private RoundJTextField txt_merk;
-	private RoundJTextField txt_serie;
-	private RoundJTextField txt_seriePart;
-	private JCheckBox check_ebook;
-	private JLabel lbl_pic;
-	private JLabel lbl_firstStar;
-	private JLabel lbl_secondStar;
-	private JLabel lbl_thirdStar;
-	private JLabel lbl_fourthStar;
-	private JLabel lbl_fifthStar;
-	private JLabel lbl_ackRating;
+	private RoundJTextField txtAuthor;
+	private RoundJTextField txtTitle;
+	private JCheckBox checkFrom;
+	private RoundJTextField txtBorrowedFrom;
+	private JCheckBox checkTo;
+	private RoundJTextField txtBorrowedTo;
+	private RoundJTextField txtNote;
+	private RoundJTextField txtSeries;
+	private RoundJTextField txtSeriesVol;
+	private JCheckBox checkEbook;
+	private JLabel lblPic;
+	private JLabel lblFirstStar;
+	private JLabel lblSecondStar;
+	private JLabel lblThirdStar;
+	private JLabel lblFourthStar;
+	private JLabel lblFifthStar;
+	private JLabel lblAckRating;
 	private ImageIcon fullStar;
 	private ImageIcon halfStar;
 	private ImageIcon noStar;
 	private ImageIcon ackRating;
 	private boolean ack = false;
-	private JPanel panel_east_rating = new JPanel(new GridLayout(1, 6, -5, -5));
+	private JPanel panelEastRating = new JPanel(new GridLayout(1, 6, -5, -5));
 	private int currentShownRating = 0;
-	private Book_Booklist eintrag;
+	private Book_Booklist entry;
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_edit_Booklist(BookListModel einträge, int index, DefaultTreeModel treeModel,
+	public Dialog_edit_Booklist(BookListModel entries, int index, DefaultTreeModel treeModel,
 			DefaultMutableTreeNode rootNode) {
 
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(600, 645));
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 100);
-		this.setAlwaysOnTop(false);
+		this.setAlwaysOnTop(true);
 
-		eintrag = einträge.getElementAt(index);
+		entry = entries.getElementAt(index);
 
 		if (HandleConfig.loadOnDemand == 1) {
-			BookListModel.loadOnDemand(eintrag);
+			BookListModel.loadOnDemand(entry);
 		}
 
 		URL fullStarIconURL = getClass().getResource("/resources/fullStar.png");
@@ -110,35 +110,35 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		this.setLayout(new BorderLayout(10, 10));
 
-		JPanel panel_north = new JPanel();
-		panel_north.setLayout(new GridLayout(1, 2));
+		JPanel panelNorth = new JPanel();
+		panelNorth.setLayout(new GridLayout(1, 2));
 
-		JPanel panel_west = new JPanel();
-		panel_west.setLayout(new GridLayout(4, 1, 10, 20));
+		JPanel panelWest = new JPanel();
+		panelWest.setLayout(new GridLayout(4, 1, 10, 20));
 
-		JPanel panel_center = new JPanel();
-		panel_center.setLayout(new GridBagLayout());
+		JPanel panelCenter = new JPanel();
+		panelCenter.setLayout(new GridBagLayout());
 
-		JPanel panel_east_border = new JPanel();
-		panel_east_border.setLayout(new BorderLayout(10, 10));
+		JPanel panelEastBorder = new JPanel();
+		panelEastBorder.setLayout(new BorderLayout(10, 10));
 
-		JPanel panel_south_border = new JPanel();
-		panel_south_border.setLayout(new BorderLayout(10, 10));
+		JPanel panelSouthBorder = new JPanel();
+		panelSouthBorder.setLayout(new BorderLayout(10, 10));
 
-		JPanel panel_south = new JPanel();
-		panel_south.setLayout(new GridLayout(3, 2, 10, 10));
+		JPanel panelSouth = new JPanel();
+		panelSouth.setLayout(new GridLayout(3, 2, 10, 10));
 
-		int höhe = 60;
-		int breite = 100;
+		int heigth = 60;
+		int width = 100;
 
 		/*
 		 * create and add components to Panel North
 		 */
-		JLabel lbl_datum = new JLabel(
-				"hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDatum()));
+		JLabel lblDate = new JLabel(
+				"hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
 
-		JLabel lbl_isbn = new JLabel("ISBN: " + eintrag.getIsbn(), SwingConstants.RIGHT);
-		lbl_isbn.addMouseListener(new MouseAdapter() {
+		JLabel lblIsbn = new JLabel("ISBN: " + entry.getIsbn(), SwingConstants.RIGHT);
+		lblIsbn.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -154,13 +154,13 @@ public class Dialog_edit_Booklist extends JDialog {
 				JMenuItem itemDel = new JMenuItem("löschen");
 				menu.add(itemCopy);
 				menu.add(itemDel);
-				menu.show(lbl_isbn, e.getX(), e.getY());
+				menu.show(lblIsbn, e.getX(), e.getY());
 				itemCopy.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-						StringSelection selection = new StringSelection(eintrag.getIsbn());
+						StringSelection selection = new StringSelection(entry.getIsbn());
 						cb.setContents(selection, null);
 					}
 				});
@@ -168,30 +168,30 @@ public class Dialog_edit_Booklist extends JDialog {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						eintrag.setIsbn(null);
-						Database.delIsbn(eintrag.getBid());
+						entry.setIsbn(null);
+						Database.delIsbn(entry.getBid());
 						dispose();
-						new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+						new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 					}
 				});
 			}
 		});
 
-		panel_north.add(lbl_datum);
-		panel_north.add(lbl_isbn);
-		panel_north.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+		panelNorth.add(lblDate);
+		panelNorth.add(lblIsbn);
+		panelNorth.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
 		/*
 		 * create and add components to Panel East
 		 */
-		ImageIcon imgIcn = showImg(eintrag);
+		ImageIcon imgIcn = showImg(entry);
 		if (imgIcn != null) {
 			Image img = imgIcn.getImage();
 			Image newimg = img.getScaledInstance(128, 192, java.awt.Image.SCALE_SMOOTH);
 			imgIcn = new ImageIcon(newimg);
-			lbl_pic = new JLabel(imgIcn);
-			lbl_pic.setPreferredSize(new Dimension(160, 280));
-			lbl_pic.addMouseListener(new MouseAdapter() {
+			lblPic = new JLabel(imgIcn);
+			lblPic.setPreferredSize(new Dimension(160, 280));
+			lblPic.addMouseListener(new MouseAdapter() {
 
 				@Override
 				public void mouseClicked(MouseEvent e) {
@@ -207,15 +207,15 @@ public class Dialog_edit_Booklist extends JDialog {
 					JMenuItem itemChanPic = new JMenuItem("Bild bearbeiten");
 					menu.add(itemChanPic);
 					menu.add(itemDelPic);
-					menu.show(lbl_pic, e.getX(), e.getY());
+					menu.show(lblPic, e.getX(), e.getY());
 					itemChanPic.addActionListener(new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
 							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
 							if (webpage != null && webpage != "") {
-								HandleWebInfo.DownloadWebPage(eintrag, 2, false);
-								lbl_pic = new JLabel(showImg(eintrag));
+								HandleWebInfo.DownloadWebPage(entry, 2, false);
+								lblPic = new JLabel(showImg(entry));
 							}
 						}
 					});
@@ -223,12 +223,12 @@ public class Dialog_edit_Booklist extends JDialog {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							boolean state = HandleWebInfo.deletePic(eintrag.getBid());
+							boolean state = HandleWebInfo.deletePic(entry.getBid());
 							if (state == true) {
 								// JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
-								eintrag.setPic(null);
+								entry.setPic(null);
 								dispose();
-								new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+								new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 							} else {
 								JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten");
 							}
@@ -238,68 +238,68 @@ public class Dialog_edit_Booklist extends JDialog {
 
 				}
 			});
-			panel_east_border.add(lbl_pic, BorderLayout.CENTER);
+			panelEastBorder.add(lblPic, BorderLayout.CENTER);
 
 		} else {
-			JButton btn_downloadInfo = new JButton("Download Info");
-			btn_downloadInfo.addActionListener(new ActionListener() {
+			JButton btnDownloadInfo = new JButton("Download Info");
+			btnDownloadInfo.addActionListener(new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					int compResult1 = 0;
 					int compResult2 = 0;
 
-					compResult1 = HandleWebInfo.DownloadWebPage(eintrag, 2, false);
+					compResult1 = HandleWebInfo.DownloadWebPage(entry, 2, false);
 					if (compResult1 < 75) {
-						compResult2 = HandleWebInfo.DownloadWebPage(eintrag, 2, true);
+						compResult2 = HandleWebInfo.DownloadWebPage(entry, 2, true);
 						if (compResult1 > compResult2) {
-							HandleWebInfo.DownloadWebPage(eintrag, 2, false);
+							HandleWebInfo.DownloadWebPage(entry, 2, false);
 						}
 					}
 
 					dispose();
-					new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+					new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 				}
 			});
-			panel_east_border.add(btn_downloadInfo, BorderLayout.CENTER);
+			panelEastBorder.add(btnDownloadInfo, BorderLayout.CENTER);
 		}
 
-		lbl_firstStar = new JLabel(noStar);
-		lbl_secondStar = new JLabel(noStar);
-		lbl_thirdStar = new JLabel(noStar);
-		lbl_fourthStar = new JLabel(noStar);
-		lbl_fifthStar = new JLabel(noStar);
-		lbl_ackRating = new JLabel(ackRating);
-		lbl_ackRating.setVisible(false);
+		lblFirstStar = new JLabel(noStar);
+		lblSecondStar = new JLabel(noStar);
+		lblThirdStar = new JLabel(noStar);
+		lblFourthStar = new JLabel(noStar);
+		lblFifthStar = new JLabel(noStar);
+		lblAckRating = new JLabel(ackRating);
+		lblAckRating.setVisible(false);
 
 		setRatingGUI();
 
-		lbl_firstStar.addMouseMotionListener(new MouseMotionAdapter() {
+		lblFirstStar.addMouseMotionListener(new MouseMotionAdapter() {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				if (!ack) {
-					int half = lbl_firstStar.getWidth() / 2;
+					int half = lblFirstStar.getWidth() / 2;
 					int mouse = e.getX();
 					if (mouse > half && currentShownRating != 2) {
-						lbl_secondStar.setIcon(noStar);
-						lbl_thirdStar.setIcon(noStar);
-						lbl_fourthStar.setIcon(noStar);
-						lbl_fifthStar.setIcon(noStar);
-						lbl_firstStar.setIcon(fullStar);
+						lblSecondStar.setIcon(noStar);
+						lblThirdStar.setIcon(noStar);
+						lblFourthStar.setIcon(noStar);
+						lblFifthStar.setIcon(noStar);
+						lblFirstStar.setIcon(fullStar);
 						currentShownRating = 2;
 					} else if (mouse < half && currentShownRating != 1) {
-						lbl_secondStar.setIcon(noStar);
-						lbl_thirdStar.setIcon(noStar);
-						lbl_fourthStar.setIcon(noStar);
-						lbl_fifthStar.setIcon(noStar);
-						lbl_firstStar.setIcon(halfStar);
+						lblSecondStar.setIcon(noStar);
+						lblThirdStar.setIcon(noStar);
+						lblFourthStar.setIcon(noStar);
+						lblFifthStar.setIcon(noStar);
+						lblFirstStar.setIcon(halfStar);
 						currentShownRating = 1;
 					}
 				}
 			}
 		});
-		lbl_firstStar.addMouseListener(new MouseAdapter() {
+		lblFirstStar.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
@@ -313,32 +313,32 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-		lbl_secondStar.addMouseMotionListener(new MouseMotionAdapter() {
+		lblSecondStar.addMouseMotionListener(new MouseMotionAdapter() {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				if (!ack) {
-					int half = lbl_firstStar.getWidth() / 2;
+					int half = lblFirstStar.getWidth() / 2;
 					int mouse = e.getX();
 					if (mouse > half && currentShownRating != 4) {
-						lbl_firstStar.setIcon(fullStar);
-						lbl_thirdStar.setIcon(noStar);
-						lbl_fourthStar.setIcon(noStar);
-						lbl_fifthStar.setIcon(noStar);
-						lbl_secondStar.setIcon(fullStar);
+						lblFirstStar.setIcon(fullStar);
+						lblThirdStar.setIcon(noStar);
+						lblFourthStar.setIcon(noStar);
+						lblFifthStar.setIcon(noStar);
+						lblSecondStar.setIcon(fullStar);
 						currentShownRating = 4;
 					} else if (mouse < half && currentShownRating != 3) {
-						lbl_firstStar.setIcon(fullStar);
-						lbl_thirdStar.setIcon(noStar);
-						lbl_fourthStar.setIcon(noStar);
-						lbl_fifthStar.setIcon(noStar);
-						lbl_secondStar.setIcon(halfStar);
+						lblFirstStar.setIcon(fullStar);
+						lblThirdStar.setIcon(noStar);
+						lblFourthStar.setIcon(noStar);
+						lblFifthStar.setIcon(noStar);
+						lblSecondStar.setIcon(halfStar);
 						currentShownRating = 3;
 					}
 				}
 			}
 		});
-		lbl_secondStar.addMouseListener(new MouseAdapter() {
+		lblSecondStar.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
@@ -352,32 +352,32 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-		lbl_thirdStar.addMouseMotionListener(new MouseMotionAdapter() {
+		lblThirdStar.addMouseMotionListener(new MouseMotionAdapter() {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				if (!ack) {
-					int half = lbl_firstStar.getWidth() / 2;
+					int half = lblFirstStar.getWidth() / 2;
 					int mouse = e.getX();
 					if (mouse > half && currentShownRating != 6) {
-						lbl_firstStar.setIcon(fullStar);
-						lbl_secondStar.setIcon(fullStar);
-						lbl_fourthStar.setIcon(noStar);
-						lbl_fifthStar.setIcon(noStar);
-						lbl_thirdStar.setIcon(fullStar);
+						lblFirstStar.setIcon(fullStar);
+						lblSecondStar.setIcon(fullStar);
+						lblFourthStar.setIcon(noStar);
+						lblFifthStar.setIcon(noStar);
+						lblThirdStar.setIcon(fullStar);
 						currentShownRating = 6;
 					} else if (mouse < half && currentShownRating != 5) {
-						lbl_firstStar.setIcon(fullStar);
-						lbl_secondStar.setIcon(fullStar);
-						lbl_fourthStar.setIcon(noStar);
-						lbl_fifthStar.setIcon(noStar);
-						lbl_thirdStar.setIcon(halfStar);
+						lblFirstStar.setIcon(fullStar);
+						lblSecondStar.setIcon(fullStar);
+						lblFourthStar.setIcon(noStar);
+						lblFifthStar.setIcon(noStar);
+						lblThirdStar.setIcon(halfStar);
 						currentShownRating = 5;
 					}
 				}
 			}
 		});
-		lbl_thirdStar.addMouseListener(new MouseAdapter() {
+		lblThirdStar.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
@@ -391,32 +391,32 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-		lbl_fourthStar.addMouseMotionListener(new MouseMotionAdapter() {
+		lblFourthStar.addMouseMotionListener(new MouseMotionAdapter() {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				if (!ack) {
-					int half = lbl_firstStar.getWidth() / 2;
+					int half = lblFirstStar.getWidth() / 2;
 					int mouse = e.getX();
 					if (mouse > half && currentShownRating != 8) {
-						lbl_firstStar.setIcon(fullStar);
-						lbl_secondStar.setIcon(fullStar);
-						lbl_thirdStar.setIcon(fullStar);
-						lbl_fifthStar.setIcon(noStar);
-						lbl_fourthStar.setIcon(fullStar);
+						lblFirstStar.setIcon(fullStar);
+						lblSecondStar.setIcon(fullStar);
+						lblThirdStar.setIcon(fullStar);
+						lblFifthStar.setIcon(noStar);
+						lblFourthStar.setIcon(fullStar);
 						currentShownRating = 8;
 					} else if (mouse < half && currentShownRating != 7) {
-						lbl_firstStar.setIcon(fullStar);
-						lbl_secondStar.setIcon(fullStar);
-						lbl_thirdStar.setIcon(fullStar);
-						lbl_fifthStar.setIcon(noStar);
-						lbl_fourthStar.setIcon(halfStar);
+						lblFirstStar.setIcon(fullStar);
+						lblSecondStar.setIcon(fullStar);
+						lblThirdStar.setIcon(fullStar);
+						lblFifthStar.setIcon(noStar);
+						lblFourthStar.setIcon(halfStar);
 						currentShownRating = 7;
 					}
 				}
 			}
 		});
-		lbl_fourthStar.addMouseListener(new MouseAdapter() {
+		lblFourthStar.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
@@ -429,47 +429,45 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		lbl_fifthStar.addMouseMotionListener(new MouseMotionAdapter() {
+		lblFifthStar.addMouseMotionListener(new MouseMotionAdapter() {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				if (!ack) {
-					int half = lbl_firstStar.getWidth() / 2;
+					int half = lblFirstStar.getWidth() / 2;
 					int mouse = e.getX();
 					int delay = 25;
 					if (mouse > half && currentShownRating != 10) {
 						Mainframe.executor.submit(() -> {
 							try {
-								lbl_firstStar.setIcon(fullStar);
+								lblFirstStar.setIcon(fullStar);
 								Thread.sleep(delay);
-								lbl_secondStar.setIcon(fullStar);
+								lblSecondStar.setIcon(fullStar);
 								Thread.sleep(delay);
-								lbl_thirdStar.setIcon(fullStar);
+								lblThirdStar.setIcon(fullStar);
 								Thread.sleep(delay);
-								lbl_fourthStar.setIcon(fullStar);
+								lblFourthStar.setIcon(fullStar);
 								Thread.sleep(delay);
-								lbl_fifthStar.setIcon(fullStar);
+								lblFifthStar.setIcon(fullStar);
 							} catch (InterruptedException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
+								Mainframe.logger.error(e1.getMessage());
 							}
 						});
 						currentShownRating = 10;
 					} else if (mouse < half && currentShownRating != 9) {
 						Mainframe.executor.submit(() -> {
 							try {
-								lbl_firstStar.setIcon(fullStar);
+								lblFirstStar.setIcon(fullStar);
 								Thread.sleep(delay);
-								lbl_secondStar.setIcon(fullStar);
+								lblSecondStar.setIcon(fullStar);
 								Thread.sleep(delay);
-								lbl_thirdStar.setIcon(fullStar);
+								lblThirdStar.setIcon(fullStar);
 								Thread.sleep(delay);
-								lbl_fourthStar.setIcon(fullStar);
+								lblFourthStar.setIcon(fullStar);
 								Thread.sleep(delay);
-								lbl_fifthStar.setIcon(halfStar);
+								lblFifthStar.setIcon(halfStar);
 							} catch (InterruptedException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
+								Mainframe.logger.error(e1.getMessage());
 							}
 						});
 						currentShownRating = 9;
@@ -477,7 +475,7 @@ public class Dialog_edit_Booklist extends JDialog {
 				}
 			}
 		});
-		lbl_fifthStar.addMouseListener(new MouseAdapter() {
+		lblFifthStar.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
@@ -491,61 +489,61 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-		panel_east_rating.add(lbl_firstStar);
-		panel_east_rating.add(lbl_secondStar);
-		panel_east_rating.add(lbl_thirdStar);
-		panel_east_rating.add(lbl_fourthStar);
-		panel_east_rating.add(lbl_fifthStar);
-		panel_east_rating.add(lbl_ackRating);
+		panelEastRating.add(lblFirstStar);
+		panelEastRating.add(lblSecondStar);
+		panelEastRating.add(lblThirdStar);
+		panelEastRating.add(lblFourthStar);
+		panelEastRating.add(lblFifthStar);
+		panelEastRating.add(lblAckRating);
 
-		panel_east_rating.setAlignmentX(0);
+		panelEastRating.setAlignmentX(0);
 
-		panel_east_border.add(panel_east_rating, BorderLayout.SOUTH);
+		panelEastBorder.add(panelEastRating, BorderLayout.SOUTH);
 
 		/*
 		 * create and add components to Panel Center
 		 */
-		JLabel lbl_author = new JLabel("Autor:");
-		lbl_author.setFont(Mainframe.schrift);
-		lbl_author.setPreferredSize(new Dimension(breite, höhe));
+		JLabel lblAuthor = new JLabel("Autor:");
+		lblAuthor.setFont(Mainframe.defaultFont);
+		lblAuthor.setPreferredSize(new Dimension(width, heigth));
 
-		txt_author = new RoundJTextField(eintrag.getAutor());
-		txt_author.setFont(Mainframe.schrift);
-		txt_author.setPreferredSize(new Dimension(50, höhe));
-		txt_author.setBorder(standardBorder);
+		txtAuthor = new RoundJTextField(entry.getAuthor());
+		txtAuthor.setFont(Mainframe.defaultFont);
+		txtAuthor.setPreferredSize(new Dimension(50, heigth));
+		txtAuthor.setBorder(standardBorder);
 
-		txt_author.addKeyListener(new KeyAdapter() {
+		txtAuthor.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				int typed = txt_author.getCaretPosition();
+				int typed = txtAuthor.getCaretPosition();
 
 				if (e.getKeyCode() >= 65 && e.getKeyCode() <= 105) {
 
-					String typedString = txt_author.getText().substring(0, typed);
+					String typedString = txtAuthor.getText().substring(0, typed);
 
-					if (!txt_author.getText().equals("")) {
-						String[] autoren = autoCompletion(typedString, "autor");
-						for (int i = 0; i < autoren.length && autoren[i] != null; i++) {
-							int autorenLength = autoren[i].length();
-							String setText = autoren[i].substring(typed, autorenLength);
-							txt_author.setText(typedString + setText);
-							txt_author.setCaretPosition(typed);
-							txt_author.setSelectionStart(typed);
-							txt_author.setSelectionEnd(autoren[i].length());
+					if (!txtAuthor.getText().equals("")) {
+						String[] authors = autoCompletion(typedString, "autor");
+						for (int i = 0; i < authors.length && authors[i] != null; i++) {
+							int authorsLength = authors[i].length();
+							String setText = authors[i].substring(typed, authorsLength);
+							txtAuthor.setText(typedString + setText);
+							txtAuthor.setCaretPosition(typed);
+							txtAuthor.setSelectionStart(typed);
+							txtAuthor.setSelectionEnd(authors[i].length());
 
 						}
 					}
 				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-					typed = txt_author.getCaretPosition();
-					txt_author.setText(txt_author.getText().substring(0, typed));
+					typed = txtAuthor.getCaretPosition();
+					txtAuthor.setText(txtAuthor.getText().substring(0, typed));
 				} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-					typed = txt_author.getCaretPosition();
-					txt_author.setText(txt_author.getText().substring(0, typed));
+					typed = txtAuthor.getCaretPosition();
+					txtAuthor.setText(txtAuthor.getText().substring(0, typed));
 				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					speichern(eintrag);
+					save(entry);
 				} else if (!e.isActionKey()) {
-					txt_author.setBackground(Color.white);
+					txtAuthor.setBackground(Color.white);
 				} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 
@@ -556,214 +554,214 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		txt_author.addMouseListener(new MouseAdapter() {
+		txtAuthor.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_author.setBorder(standardBorder);
+				txtAuthor.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_author.setBorder(activeBorder);
+				txtAuthor.setBorder(activeBorder);
 
 			}
 		});
 
-		JLabel lbl_title = new JLabel("Titel:");
-		lbl_title.setFont(Mainframe.schrift);
-		lbl_title.setPreferredSize(new Dimension(breite, höhe));
-		txt_title = new RoundJTextField(eintrag.getTitel());
-		txt_title.setFont(Mainframe.schrift);
-		txt_title.setPreferredSize(new Dimension(50, höhe));
-		txt_title.setBorder(standardBorder);
-		txt_title.addKeyListener(new KeyAdapter() {
+		JLabel lblTitle = new JLabel("Titel:");
+		lblTitle.setFont(Mainframe.defaultFont);
+		lblTitle.setPreferredSize(new Dimension(width, heigth));
+		txtTitle = new RoundJTextField(entry.getTitle());
+		txtTitle.setFont(Mainframe.defaultFont);
+		txtTitle.setPreferredSize(new Dimension(50, heigth));
+		txtTitle.setBorder(standardBorder);
+		txtTitle.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					speichern(eintrag);
+					save(entry);
 				} else if (!e.isActionKey()) {
-					if (txt_title.getText().equals("Buch bereits vorhanden!")) {
-						txt_title.setText("");
+					if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
+						txtTitle.setText("");
 					}
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
-				if (txt_title.getText().length() > 50) {
-					txt_title.setEditable(false);
-					txt_title.setText("Nicht mehr als 50 Zeichen!");
-					txt_title.setBackground(new Color(255, 105, 105));
+				if (txtTitle.getText().length() > 50) {
+					txtTitle.setEditable(false);
+					txtTitle.setText("Nicht mehr als 50 Zeichen!");
+					txtTitle.setBackground(new Color(255, 105, 105));
 				}
 
 			}
 
 		});
-		txt_title.addMouseListener(new MouseAdapter() {
+		txtTitle.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_title.setBorder(standardBorder);
+				txtTitle.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_title.setBorder(activeBorder);
+				txtTitle.setBorder(activeBorder);
 
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (txt_title.getText().equals("Nicht mehr als 50 Zeichen!")) {
-					txt_title.setEditable(true);
-					txt_title.setForeground(Color.black);
-					txt_title.setBackground(Color.white);
-					txt_title.setText("");
+				if (txtTitle.getText().equals("Nicht mehr als 50 Zeichen!")) {
+					txtTitle.setEditable(true);
+					txtTitle.setForeground(Color.black);
+					txtTitle.setBackground(Color.white);
+					txtTitle.setText("");
 				}
 			}
 
 		});
 
-		JLabel lbl_merk = new JLabel("Bemerkung:");
-		lbl_merk.setFont(Mainframe.schrift);
-		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
+		JLabel lblNote = new JLabel("Bemerkung:");
+		lblNote.setFont(Mainframe.defaultFont);
+		lblNote.setPreferredSize(new Dimension(width, heigth));
 
-		txt_merk = new RoundJTextField(eintrag.getBemerkung());
-		txt_merk.setFont(Mainframe.schrift);
-		txt_merk.setPreferredSize(new Dimension(50, höhe));
-		txt_merk.setBorder(standardBorder);
-		txt_merk.addKeyListener(new KeyAdapter() {
+		txtNote = new RoundJTextField(entry.getNote());
+		txtNote.setFont(Mainframe.defaultFont);
+		txtNote.setPreferredSize(new Dimension(50, heigth));
+		txtNote.setBorder(standardBorder);
+		txtNote.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
-					speichern(eintrag);
+					save(entry);
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 			}
 
 		});
-		txt_merk.addMouseListener(new MouseAdapter() {
+		txtNote.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_merk.setBorder(standardBorder);
+				txtNote.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_merk.setBorder(activeBorder);
+				txtNote.setBorder(activeBorder);
 
 			}
 
 		});
 
-		JLabel lbl_serie = new JLabel("Serie | Band:");
-		lbl_serie.setFont(Mainframe.schrift);
-		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
+		JLabel lblSeries = new JLabel("Serie | Band:");
+		lblSeries.setFont(Mainframe.defaultFont);
+		lblSeries.setPreferredSize(new Dimension(width, heigth));
 
-		txt_serie = new RoundJTextField(eintrag.getSerie());
-		txt_serie.setFont(Mainframe.schrift);
-		txt_serie.setPreferredSize(new Dimension(50, höhe));
-		txt_serie.setBorder(standardBorder);
-		txt_serie.addKeyListener(new KeyAdapter() {
+		txtSeries = new RoundJTextField(entry.getSeries());
+		txtSeries.setFont(Mainframe.defaultFont);
+		txtSeries.setPreferredSize(new Dimension(50, heigth));
+		txtSeries.setBorder(standardBorder);
+		txtSeries.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				int typed = txt_serie.getCaretPosition();
+				int typed = txtSeries.getCaretPosition();
 
 				if (e.getKeyCode() >= 65 && e.getKeyCode() <= 105) {
 
-					String typedString = txt_serie.getText().substring(0, typed);
+					String typedString = txtSeries.getText().substring(0, typed);
 
-					if (!txt_serie.getText().equals("")) {
-						String[] serien = autoCompletion(typedString, "serie");
-						for (int i = 0; i < serien.length && serien[i] != null; i++) {
-							int autorenLength = serien[i].length();
-							String setText = serien[i].substring(typed, autorenLength);
-							txt_serie.setText(typedString + setText);
-							txt_serie.setCaretPosition(typed);
-							txt_serie.setSelectionStart(typed);
-							txt_serie.setSelectionEnd(serien[i].length());
+					if (!txtSeries.getText().equals("")) {
+						String[] series = autoCompletion(typedString, "serie");
+						for (int i = 0; i < series.length && series[i] != null; i++) {
+							int authorsLength = series[i].length();
+							String setText = series[i].substring(typed, authorsLength);
+							txtSeries.setText(typedString + setText);
+							txtSeries.setCaretPosition(typed);
+							txtSeries.setSelectionStart(typed);
+							txtSeries.setSelectionEnd(series[i].length());
 
 						}
 					}
 				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-					typed = txt_serie.getCaretPosition();
-					txt_serie.setText(txt_serie.getText().substring(0, typed));
+					typed = txtSeries.getCaretPosition();
+					txtSeries.setText(txtSeries.getText().substring(0, typed));
 				} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-					typed = txt_serie.getCaretPosition();
-					txt_serie.setText(txt_serie.getText().substring(0, typed));
+					typed = txtSeries.getCaretPosition();
+					txtSeries.setText(txtSeries.getText().substring(0, typed));
 				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					speichern(eintrag);
+					save(entry);
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 			}
 
 		});
-		txt_serie.addMouseListener(new MouseAdapter() {
+		txtSeries.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_serie.setBorder(standardBorder);
+				txtSeries.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_serie.setBorder(activeBorder);
+				txtSeries.setBorder(activeBorder);
 
 			}
 
 		});
 
-		txt_seriePart = new RoundJTextField(eintrag.getSeriePart());
-		txt_seriePart.setFont(Mainframe.schrift);
-		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
-		txt_seriePart.setBorder(standardBorder);
-		txt_seriePart.addKeyListener(new KeyAdapter() {
+		txtSeriesVol = new RoundJTextField(entry.getSeriesVol());
+		txtSeriesVol.setFont(Mainframe.defaultFont);
+		txtSeriesVol.setPreferredSize(new Dimension(50, heigth));
+		txtSeriesVol.setBorder(standardBorder);
+		txtSeriesVol.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
-					speichern(eintrag);
+					save(entry);
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
-				if (txt_seriePart.getText().length() > 2) {
-					txt_seriePart.setText("");
-					txt_seriePart.setBackground(new Color(255, 105, 105));
+				if (txtSeriesVol.getText().length() > 2) {
+					txtSeriesVol.setText("");
+					txtSeriesVol.setBackground(new Color(255, 105, 105));
 				} else
-					txt_seriePart.setBackground(Color.white);
+					txtSeriesVol.setBackground(Color.white);
 			}
 
 		});
-		txt_seriePart.addMouseListener(new MouseAdapter() {
+		txtSeriesVol.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_seriePart.setBorder(standardBorder);
+				txtSeriesVol.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_seriePart.setBorder(activeBorder);
+				txtSeriesVol.setBorder(activeBorder);
 
 			}
 
 		});
 
-		JLabel lbl_ebook = new JLabel("E-Book:");
-		lbl_ebook.setFont(Mainframe.schrift);
-		lbl_ebook.setPreferredSize(new Dimension(breite, höhe));
+		JLabel lblEbook = new JLabel("E-Book:");
+		lblEbook.setFont(Mainframe.defaultFont);
+		lblEbook.setPreferredSize(new Dimension(width, heigth));
 
-		check_ebook = new JCheckBox();
-		check_ebook.setFont(Mainframe.schrift);
-		check_ebook.setSelected(eintrag.isEbook());
+		checkEbook = new JCheckBox();
+		checkEbook.setFont(Mainframe.defaultFont);
+		checkEbook.setSelected(entry.isEbook());
 
 		/*
 		 * Set Center Layout
@@ -777,187 +775,187 @@ public class Dialog_edit_Booklist extends JDialog {
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.ipady = 15;
-		panel_center.add(lbl_author, c);
+		panelCenter.add(lblAuthor, c);
 		c.gridx = 1;
 		c.gridy = 0;
 		c.weightx = 0.5;
 		c.gridwidth = 9;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_author, c);
+		panelCenter.add(txtAuthor, c);
 		c.gridx = 0;
 		c.gridy = 1;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
 		c.insets = new Insets(10, 0, 0, 0);
-		panel_center.add(lbl_title, c);
+		panelCenter.add(lblTitle, c);
 		c.gridx = 1;
 		c.gridy = 1;
 		c.weightx = 0.5;
 		c.gridwidth = 9;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_title, c);
+		panelCenter.add(txtTitle, c);
 		c.gridx = 0;
 		c.gridy = 2;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		panel_center.add(lbl_merk, c);
+		panelCenter.add(lblNote, c);
 		c.gridx = 1;
 		c.gridy = 2;
 		c.weightx = 0.5;
 		c.gridwidth = 9;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_merk, c);
+		panelCenter.add(txtNote, c);
 		c.gridx = 0;
 		c.gridy = 3;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		panel_center.add(lbl_serie, c);
+		panelCenter.add(lblSeries, c);
 		c.gridx = 1;
 		c.gridy = 3;
 		c.weightx = 0.5;
 		c.gridwidth = 8;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_serie, c);
+		panelCenter.add(txtSeries, c);
 		c.gridx = 9;
 		c.gridy = 3;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(10, 10, 0, 0);
-		panel_center.add(txt_seriePart, c);
+		panelCenter.add(txtSeriesVol, c);
 		c.gridx = 0;
 		c.gridy = 4;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
 		c.insets = new Insets(10, 0, 0, 0);
-		panel_center.add(lbl_ebook, c);
+		panelCenter.add(lblEbook, c);
 		c.gridx = 1;
 		c.gridy = 4;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(check_ebook, c);
-		panel_center.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+		panelCenter.add(checkEbook, c);
+		panelCenter.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
 		/*
 		 * create components for Panel South
 		 */
-		check_von = new JCheckBox("ausgeliehen von");
-		check_von.setFont(Mainframe.schrift);
-		if (!eintrag.getAusgeliehen_von().isEmpty())
-			check_von.setSelected(true);
-		check_von.addActionListener(new ActionListener() {
+		checkFrom = new JCheckBox("ausgeliehen von");
+		checkFrom.setFont(Mainframe.defaultFont);
+		if (!entry.getBorrowedFrom().isEmpty())
+			checkFrom.setSelected(true);
+		checkFrom.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (check_von.isSelected()) {
-					check_an.setSelected(false);
-					txt_leihAn.setVisible(false);
-					txt_leihVon.setText("");
-					txt_leihVon.setVisible(true);
+				if (checkFrom.isSelected()) {
+					checkTo.setSelected(false);
+					txtBorrowedTo.setVisible(false);
+					txtBorrowedFrom.setText("");
+					txtBorrowedFrom.setVisible(true);
 				} else {
-					txt_leihVon.setVisible(false);
+					txtBorrowedFrom.setVisible(false);
 				}
 
 			}
 		});
 
-		check_an = new JCheckBox("ausgeliehen an");
-		check_an.setFont(Mainframe.schrift);
-		if (!eintrag.getAusgeliehen_an().isEmpty())
-			check_an.setSelected(true);
-		check_an.addActionListener(new ActionListener() {
+		checkTo = new JCheckBox("ausgeliehen an");
+		checkTo.setFont(Mainframe.defaultFont);
+		if (!entry.getBorrowedTo().isEmpty())
+			checkTo.setSelected(true);
+		checkTo.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (check_an.isSelected()) {
-					check_von.setSelected(false);
-					txt_leihVon.setVisible(false);
-					txt_leihAn.setText("");
-					txt_leihAn.setVisible(true);
+				if (checkTo.isSelected()) {
+					checkFrom.setSelected(false);
+					txtBorrowedFrom.setVisible(false);
+					txtBorrowedTo.setText("");
+					txtBorrowedTo.setVisible(true);
 				} else {
-					txt_leihAn.setVisible(false);
+					txtBorrowedTo.setVisible(false);
 				}
 			}
 		});
 
-		txt_leihVon = new RoundJTextField(eintrag.getAusgeliehen_von());
-		txt_leihVon.setFont(Mainframe.schrift);
-		txt_leihVon.setBorder(standardBorder);
-		if (eintrag.getAusgeliehen_von().isEmpty())
-			txt_leihVon.setVisible(false);
-		txt_leihVon.addKeyListener(new KeyAdapter() {
+		txtBorrowedFrom = new RoundJTextField(entry.getBorrowedFrom());
+		txtBorrowedFrom.setFont(Mainframe.defaultFont);
+		txtBorrowedFrom.setBorder(standardBorder);
+		if (entry.getBorrowedFrom().isEmpty())
+			txtBorrowedFrom.setVisible(false);
+		txtBorrowedFrom.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
-					speichern(eintrag);
+					save(entry);
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 			}
 
 		});
-		txt_leihVon.addMouseListener(new MouseAdapter() {
+		txtBorrowedFrom.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_leihVon.setBorder(standardBorder);
+				txtBorrowedFrom.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_leihVon.setBorder(activeBorder);
+				txtBorrowedFrom.setBorder(activeBorder);
 
 			}
 
 		});
 
-		txt_leihAn = new RoundJTextField(eintrag.getAusgeliehen_an());
-		txt_leihAn.setFont(Mainframe.schrift);
-		txt_leihAn.setBorder(standardBorder);
-		if (eintrag.getAusgeliehen_an().isEmpty())
-			txt_leihAn.setVisible(false);
-		txt_leihAn.addKeyListener(new KeyAdapter() {
+		txtBorrowedTo = new RoundJTextField(entry.getBorrowedTo());
+		txtBorrowedTo.setFont(Mainframe.defaultFont);
+		txtBorrowedTo.setBorder(standardBorder);
+		if (entry.getBorrowedTo().isEmpty())
+			txtBorrowedTo.setVisible(false);
+		txtBorrowedTo.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
-					speichern(eintrag);
+					save(entry);
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 			}
 
 		});
-		txt_leihAn.addMouseListener(new MouseAdapter() {
+		txtBorrowedTo.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_leihAn.setBorder(standardBorder);
+				txtBorrowedTo.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_leihAn.setBorder(activeBorder);
+				txtBorrowedTo.setBorder(activeBorder);
 
 			}
 
 		});
 
-		JButton btn_add = new JButton("Speichern");
-		btn_add.setFont(Mainframe.schrift);
-		btn_add.addActionListener(new ActionListener() {
+		JButton btnAdd = new JButton("Speichern");
+		btnAdd.setFont(Mainframe.defaultFont);
+		btnAdd.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				speichern(eintrag);
+				save(entry);
 			}
 		});
 
-		JButton btn_abort = new JButton("Abbrechen");
-		btn_abort.setFont(Mainframe.schrift);
-		btn_abort.addActionListener(new ActionListener() {
+		JButton btnAbort = new JButton("Abbrechen");
+		btnAbort.setFont(Mainframe.defaultFont);
+		btnAbort.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -968,29 +966,29 @@ public class Dialog_edit_Booklist extends JDialog {
 		/*
 		 * add components into Panel South
 		 */
-		panel_south.add(check_von);
-		panel_south.add(check_an);
-		panel_south.add(txt_leihVon);
-		panel_south.add(txt_leihAn);
-		panel_south.add(btn_add);
-		panel_south.add(btn_abort);
-		panel_south.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+		panelSouth.add(checkFrom);
+		panelSouth.add(checkTo);
+		panelSouth.add(txtBorrowedFrom);
+		panelSouth.add(txtBorrowedTo);
+		panelSouth.add(btnAdd);
+		panelSouth.add(btnAbort);
+		panelSouth.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
 		/*
 		 * create TextArea for Description
 		 */
-		JTextArea txt_desc = new JTextArea(10, 30);
-		txt_desc.setText(eintrag.getDesc());
-		txt_desc.setEnabled(false);
-		txt_desc.setLineWrap(true);
-		txt_desc.setWrapStyleWord(true);
-		txt_desc.setFont(Mainframe.descSchrift);
-		txt_desc.setDisabledTextColor(Color.BLACK);
-		this.setSize(this.getWidth(), this.getHeight() + (Mainframe.descSchrift.getSize() - 16) * 14);
-		JScrollPane scroll_desc = new JScrollPane(txt_desc, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+		JTextArea txtDesc = new JTextArea(10, 30);
+		txtDesc.setText(entry.getDesc());
+		txtDesc.setEnabled(false);
+		txtDesc.setLineWrap(true);
+		txtDesc.setWrapStyleWord(true);
+		txtDesc.setFont(Mainframe.descFont);
+		txtDesc.setDisabledTextColor(Color.BLACK);
+		this.setSize(this.getWidth(), this.getHeight() + (Mainframe.descFont.getSize() - 16) * 14);
+		JScrollPane scrollDesc = new JScrollPane(txtDesc, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		txt_desc.addMouseListener(new MouseAdapter() {
+		txtDesc.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -1004,17 +1002,17 @@ public class Dialog_edit_Booklist extends JDialog {
 				JPopupMenu menu = new JPopupMenu();
 				JMenuItem itemDelDesc = new JMenuItem("Beschreibung löschen");
 				menu.add(itemDelDesc);
-				menu.show(txt_desc, e.getX(), e.getY());
+				menu.show(txtDesc, e.getX(), e.getY());
 				itemDelDesc.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						boolean state = Database.delDesc(eintrag.getBid());
+						boolean state = Database.delDesc(entry.getBid());
 						if (state == true) {
 							// JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich gelöscht");
-							eintrag.setDesc(null);
+							entry.setDesc(null);
 							dispose();
-							new Dialog_edit_Booklist(einträge, index, treeModel, rootNode);
+							new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 						} else {
 							JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten");
 						}
@@ -1025,16 +1023,16 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		});
 
-		panel_south_border.add(scroll_desc, BorderLayout.SOUTH);
-		panel_south_border.add(panel_south, BorderLayout.CENTER);
+		panelSouthBorder.add(scrollDesc, BorderLayout.SOUTH);
+		panelSouthBorder.add(panelSouth, BorderLayout.CENTER);
 
-		this.add(panel_north, BorderLayout.NORTH);
-		this.add(panel_center, BorderLayout.CENTER);
-		this.add(panel_east_border, BorderLayout.EAST);
-		this.add(panel_south_border, BorderLayout.SOUTH);
+		this.add(panelNorth, BorderLayout.NORTH);
+		this.add(panelCenter, BorderLayout.CENTER);
+		this.add(panelEastBorder, BorderLayout.EAST);
+		this.add(panelSouthBorder, BorderLayout.SOUTH);
 
 		if (Mainframe.getTreeSelection() == "") {
-			Mainframe.search(txt_author.getText());
+			Mainframe.search(txtAuthor.getText());
 		} else {
 			Mainframe.search(Mainframe.getTreeSelection());
 		}
@@ -1048,11 +1046,11 @@ public class Dialog_edit_Booklist extends JDialog {
 		String[] returnArray = null;
 		if (field.equals("autor")) {
 			int j = 0;
-			int anz_autoren = BookListModel.autoren.size();
-			String[] result = new String[anz_autoren];
-			for (int i = 0; i < anz_autoren; i++) {
-				if (BookListModel.autoren.get(i).startsWith(search)) {
-					result[j] = BookListModel.autoren.get(i);
+			int authorCount = BookListModel.authors.size();
+			String[] result = new String[authorCount];
+			for (int i = 0; i < authorCount; i++) {
+				if (BookListModel.authors.get(i).startsWith(search)) {
+					result[j] = BookListModel.authors.get(i);
 					j++;
 				}
 			}
@@ -1065,11 +1063,11 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		} else if (field.equals("serie")) {
 			int j = 0;
-			String[] serien = BookListModel.getSerienVonAutor(txt_author.getText());
-			String[] result = new String[serien.length];
-			for (int i = 0; i < serien.length; i++) {
-				if (serien[i].startsWith(search)) {
-					result[j] = serien[i];
+			String[] series = BookListModel.getSeriesFromAuthor(txtAuthor.getText());
+			String[] result = new String[series.length];
+			for (int i = 0; i < series.length; i++) {
+				if (series[i].startsWith(search)) {
+					result[j] = series[i];
 					j++;
 				}
 			}
@@ -1084,115 +1082,115 @@ public class Dialog_edit_Booklist extends JDialog {
 		return returnArray;
 	}
 
-	public void speichern(Book_Booklist eintrag) {
-		int bid = eintrag.getBid();
-		String oldAutor = eintrag.getAutor();
-		String oldTitel = eintrag.getTitel();
-		String oldMerk = eintrag.getBemerkung();
-		String oldSerie = eintrag.getSerie();
-		String oldSeriePart = eintrag.getSeriePart();
-		boolean oldEbook = eintrag.isEbook();
-		boolean oldAusgeliehen = eintrag.isAusgeliehen();
+	public void save(Book_Booklist entry) {
+		int bid = entry.getBid();
+		String oldAutor = entry.getAuthor();
+		String oldTitel = entry.getTitle();
+		String oldNote = entry.getNote();
+		String oldSeries = entry.getSeries();
+		String oldSeriesVol = entry.getSeriesVol();
+		boolean oldEbook = entry.isEbook();
+		boolean oldBorrowed = entry.isBorrowed();
 
-		String oldNameAusgVon = eintrag.getAusgeliehen_von();
-		String oldNameAusgAn = eintrag.getAusgeliehen_an();
+		String oldNameBorrowedFrom = entry.getBorrowedFrom();
+		String oldNameBorrowedTo = entry.getBorrowedTo();
 
-		String newAutor = txt_author.getText().trim();
-		String newTitel = txt_title.getText().trim();
-		String newBemerkung = txt_merk.getText().trim();
-		String newSerie = txt_serie.getText().trim();
-		String newSeriePart = txt_seriePart.getText();
-		boolean newEbook = check_ebook.isSelected();
-		boolean newAusgAn = check_an.isSelected();
-		boolean newAusgVon = check_von.isSelected();
+		String newAuthor = txtAuthor.getText().trim();
+		String newTitle = txtTitle.getText().trim();
+		String newNote = txtNote.getText().trim();
+		String newSeries = txtSeries.getText().trim();
+		String newSeriesVol = txtSeriesVol.getText();
+		boolean newEbook = checkEbook.isSelected();
+		boolean newBorrwoedTo = checkTo.isSelected();
+		boolean newBorrwoedFrom = checkFrom.isSelected();
 
-		if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
-			if (checkInput(newAutor, newTitel, Mainframe.einträge.getIndexOf(oldAutor, oldTitel))) {
-				if (!oldAutor.equals(newAutor)) {
-					eintrag.setAutor(newAutor);
-					Database.updateBooklistEntry(bid, "autor", newAutor);
+		if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
+			if (checkInput(newAuthor, newTitle, Mainframe.entries.getIndexOf(oldAutor, oldTitel))) {
+				if (!oldAutor.equals(newAuthor)) {
+					entry.setAuthor(newAuthor);
+					Database.updateBooklistEntry(bid, "autor", newAuthor);
 				}
-				if (!oldTitel.equals(newTitel)) {
-					eintrag.setTitel(newTitel);
-					Database.updateBooklistEntry(bid, "titel", newTitel);
+				if (!oldTitel.equals(newTitle)) {
+					entry.setTitle(newTitle);
+					Database.updateBooklistEntry(bid, "titel", newTitle);
 				}
-				if (!oldMerk.equals(newBemerkung)) {
-					eintrag.setBemerkung(newBemerkung);
-					Database.updateBooklistEntry(bid, "bemerkung", newBemerkung);
+				if (!oldNote.equals(newNote)) {
+					entry.setNote(newNote);
+					Database.updateBooklistEntry(bid, "bemerkung", newNote);
 				}
-				if (!oldSerie.equals(newSerie)) {
-					eintrag.setSerie(newSerie);
-					Database.updateBooklistEntry(bid, "serie", newSerie);
+				if (!oldSeries.equals(newSeries)) {
+					entry.setSeries(newSeries);
+					Database.updateBooklistEntry(bid, "serie", newSeries);
 				}
-				if (!oldSeriePart.equals(newSeriePart)) {
-					eintrag.setSeriePart(newSeriePart);
-					Database.updateBooklistEntry(bid, "seriePart", newSeriePart);
+				if (!oldSeriesVol.equals(newSeriesVol)) {
+					entry.setSeriesVol(newSeriesVol);
+					Database.updateBooklistEntry(bid, "seriePart", newSeriesVol);
 				}
 				if (oldEbook != newEbook) {
-					eintrag.setEbook(newEbook);
+					entry.setEbook(newEbook);
 					String ebook_str = "0";
 					if (newEbook)
 						ebook_str = "1";
 					Database.updateBooklistEntry(bid, "ebook", ebook_str);
 				}
-				if (oldAusgeliehen == true) {
-					if (newAusgAn && oldNameAusgAn.length() == 0) {
-						eintrag.setAusgeliehen_an(txt_leihAn.getText());
+				if (oldBorrowed == true) {
+					if (newBorrwoedTo && oldNameBorrowedTo.length() == 0) {
+						entry.setBorrowedTo(txtBorrowedTo.getText());
 						Database.updateBooklistEntry(bid, "ausgeliehen", "an");
-						Database.updateBooklistEntry(bid, "name", txt_leihAn.getText());
+						Database.updateBooklistEntry(bid, "name", txtBorrowedTo.getText());
 					}
-					if (newAusgVon && oldNameAusgVon.length() == 0) {
-						eintrag.setAusgeliehen_von(txt_leihVon.getText());
+					if (newBorrwoedFrom && oldNameBorrowedFrom.length() == 0) {
+						entry.setBorrowedFrom(txtBorrowedFrom.getText());
 						Database.updateBooklistEntry(bid, "ausgeliehen", "von");
-						Database.updateBooklistEntry(bid, "name", txt_leihVon.getText());
+						Database.updateBooklistEntry(bid, "name", txtBorrowedFrom.getText());
 					}
-					if (!newAusgAn && !newAusgVon) {
-						eintrag.setAusgeliehen(false);
-						eintrag.setAusgeliehen_von("");
-						eintrag.setAusgeliehen_an("");
+					if (!newBorrwoedTo && !newBorrwoedFrom) {
+						entry.setBorrowed(false);
+						entry.setBorrowedFrom("");
+						entry.setBorrowedTo("");
 						Database.updateBooklistEntry(bid, "ausgeliehen", "nein");
 						Database.updateBooklistEntry(bid, "name", "");
 					}
 				}
-				if (oldAusgeliehen == false) {
-					if (newAusgAn) {
-						eintrag.setAusgeliehen(true);
-						eintrag.setAusgeliehen_an(txt_leihAn.getText());
+				if (oldBorrowed == false) {
+					if (newBorrwoedTo) {
+						entry.setBorrowed(true);
+						entry.setBorrowedTo(txtBorrowedTo.getText());
 						Database.updateBooklistEntry(bid, "ausgeliehen", "an");
-						Database.updateBooklistEntry(bid, "name", txt_leihAn.getText());
-					} else if (newAusgVon) {
-						eintrag.setAusgeliehen(true);
-						eintrag.setAusgeliehen_von(txt_leihVon.getText());
+						Database.updateBooklistEntry(bid, "name", txtBorrowedTo.getText());
+					} else if (newBorrwoedFrom) {
+						entry.setBorrowed(true);
+						entry.setBorrowedFrom(txtBorrowedFrom.getText());
 						Database.updateBooklistEntry(bid, "ausgeliehen", "von");
-						Database.updateBooklistEntry(bid, "name", txt_leihVon.getText());
+						Database.updateBooklistEntry(bid, "name", txtBorrowedFrom.getText());
 					}
 				}
-				Mainframe.logger.info("Buch geändert: " + eintrag.getAutor() + "-" + eintrag.getTitel());
+				Mainframe.logger.info("Buch geändert: " + entry.getAuthor() + "-" + entry.getTitle());
 				dispose();
 			} else {
 				Mainframe.logger.info("Buch ändern: Bereits vorhanden!");
-				txt_title.setText("Buch bereits vorhanden!");
-				txt_title.setBackground(new Color(255, 105, 105));
+				txtTitle.setText("Buch bereits vorhanden!");
+				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 		} else {
-			if (txt_author.getText().isEmpty()) {
+			if (txtAuthor.getText().isEmpty()) {
 				Mainframe.logger.info("Buch ändern: Autor nicht gesetzt!");
-				txt_author.setBackground(new Color(255, 105, 105));
+				txtAuthor.setBackground(new Color(255, 105, 105));
 			}
-			if (txt_title.getText().isEmpty()) {
+			if (txtTitle.getText().isEmpty()) {
 				Mainframe.logger.info("Buch ändern: Titel nicht gesetzt!");
-				txt_title.setBackground(new Color(255, 105, 105));
+				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 		}
-		BookListModel.autorenPrüfen();
+		BookListModel.checkAuthors();
 		Mainframe.updateModel();
 	}
 
 	// Check New Autor & Titel if there already exists the same
-	public boolean checkInput(String newAutor, String newTitel, int index) {
-		for (int i = 0; i < Mainframe.einträge.getSize(); i++) {
-			Book_Booklist eintrag = Mainframe.einträge.getElementAt(i);
-			if (eintrag.getAutor().equals(newAutor) && eintrag.getTitel().equals(newTitel)) {
+	public boolean checkInput(String newAuthor, String newTitle, int index) {
+		for (int i = 0; i < Mainframe.entries.getSize(); i++) {
+			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
+			if (eintrag.getAuthor().equals(newAuthor) && eintrag.getTitle().equals(newTitle)) {
 				if (i != index) {
 					Mainframe.logger.info("Buch ändern: Autor & Titel bereits vorhanden");
 					return false;
@@ -1224,10 +1222,10 @@ public class Dialog_edit_Booklist extends JDialog {
 		return false;
 	}
 
-	public ImageIcon showImg(Book_Booklist eintrag) {
+	public ImageIcon showImg(Book_Booklist entry) {
 		Image img = null;
 		try {
-			img = eintrag.getPic();
+			img = entry.getPic();
 		} catch (Exception e) {
 			Mainframe.logger.error(e.getMessage());
 		}
@@ -1240,100 +1238,100 @@ public class Dialog_edit_Booklist extends JDialog {
 	}
 
 	private void setRatingGUI() {
-		if (eintrag.getRating() == 1) {
-			lbl_firstStar.setIcon(halfStar);
-			lbl_secondStar.setIcon(noStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 2) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(noStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 3) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(halfStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 4) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 5) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(halfStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 6) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 7) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(halfStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 8) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(fullStar);
-			lbl_fifthStar.setIcon(noStar);
-		} else if (eintrag.getRating() == 9) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(fullStar);
-			lbl_fifthStar.setIcon(halfStar);
-		} else if (eintrag.getRating() == 10) {
-			lbl_firstStar.setIcon(fullStar);
-			lbl_secondStar.setIcon(fullStar);
-			lbl_thirdStar.setIcon(fullStar);
-			lbl_fourthStar.setIcon(fullStar);
-			lbl_fifthStar.setIcon(fullStar);
+		if (entry.getRating() == 1) {
+			lblFirstStar.setIcon(halfStar);
+			lblSecondStar.setIcon(noStar);
+			lblThirdStar.setIcon(noStar);
+			lblFourthStar.setIcon(noStar);
+			lblFifthStar.setIcon(noStar);
+		} else if (entry.getRating() == 2) {
+			lblFirstStar.setIcon(fullStar);
+			lblSecondStar.setIcon(noStar);
+			lblThirdStar.setIcon(noStar);
+			lblFourthStar.setIcon(noStar);
+			lblFifthStar.setIcon(noStar);
+		} else if (entry.getRating() == 3) {
+			lblFirstStar.setIcon(fullStar);
+			lblSecondStar.setIcon(halfStar);
+			lblThirdStar.setIcon(noStar);
+			lblFourthStar.setIcon(noStar);
+			lblFifthStar.setIcon(noStar);
+		} else if (entry.getRating() == 4) {
+			lblFirstStar.setIcon(fullStar);
+			lblSecondStar.setIcon(fullStar);
+			lblThirdStar.setIcon(noStar);
+			lblFourthStar.setIcon(noStar);
+			lblFifthStar.setIcon(noStar);
+		} else if (entry.getRating() == 5) {
+			lblFirstStar.setIcon(fullStar);
+			lblSecondStar.setIcon(fullStar);
+			lblThirdStar.setIcon(halfStar);
+			lblFourthStar.setIcon(noStar);
+			lblFifthStar.setIcon(noStar);
+		} else if (entry.getRating() == 6) {
+			lblFirstStar.setIcon(fullStar);
+			lblSecondStar.setIcon(fullStar);
+			lblThirdStar.setIcon(fullStar);
+			lblFourthStar.setIcon(noStar);
+			lblFifthStar.setIcon(noStar);
+		} else if (entry.getRating() == 7) {
+			lblFirstStar.setIcon(fullStar);
+			lblSecondStar.setIcon(fullStar);
+			lblThirdStar.setIcon(fullStar);
+			lblFourthStar.setIcon(halfStar);
+			lblFifthStar.setIcon(noStar);
+		} else if (entry.getRating() == 8) {
+			lblFirstStar.setIcon(fullStar);
+			lblSecondStar.setIcon(fullStar);
+			lblThirdStar.setIcon(fullStar);
+			lblFourthStar.setIcon(fullStar);
+			lblFifthStar.setIcon(noStar);
+		} else if (entry.getRating() == 9) {
+			lblFirstStar.setIcon(fullStar);
+			lblSecondStar.setIcon(fullStar);
+			lblThirdStar.setIcon(fullStar);
+			lblFourthStar.setIcon(fullStar);
+			lblFifthStar.setIcon(halfStar);
+		} else if (entry.getRating() == 10) {
+			lblFirstStar.setIcon(fullStar);
+			lblSecondStar.setIcon(fullStar);
+			lblThirdStar.setIcon(fullStar);
+			lblFourthStar.setIcon(fullStar);
+			lblFifthStar.setIcon(fullStar);
 		} else {
-			lbl_firstStar.setIcon(noStar);
-			lbl_secondStar.setIcon(noStar);
-			lbl_thirdStar.setIcon(noStar);
-			lbl_fourthStar.setIcon(noStar);
-			lbl_fifthStar.setIcon(noStar);
+			lblFirstStar.setIcon(noStar);
+			lblSecondStar.setIcon(noStar);
+			lblThirdStar.setIcon(noStar);
+			lblFourthStar.setIcon(noStar);
+			lblFifthStar.setIcon(noStar);
 		}
 		currentShownRating = 0;
 
 	}
 
 	private void setRating(MouseEvent e, int i) {
-		int half = lbl_firstStar.getWidth() / 2;
+		int half = lblFirstStar.getWidth() / 2;
 		int mouse = e.getX();
 
 		if (mouse > half) {
 			int rate = i * 2;
 			Mainframe.logger.trace("Rating set: " + rate);
-			eintrag.setRating(rate);
+			entry.setRating(rate);
 		} else {
 			int rate = i * 2 - 1;
 			Mainframe.logger.trace("Rating set: " + rate);
-			eintrag.setRating(rate);
+			entry.setRating(rate);
 		}
 
 		Mainframe.executor.submit(() -> {
 			try {
 				ack = true;
-				panel_east_rating.add(lbl_ackRating);
-				lbl_ackRating.setVisible(true);
+				panelEastRating.add(lblAckRating);
+				lblAckRating.setVisible(true);
 				Thread.sleep(2000);
-				panel_east_rating.remove(lbl_ackRating);
-				lbl_ackRating.setVisible(false);
-				panel_east_rating.repaint();
+				panelEastRating.remove(lblAckRating);
+				lblAckRating.setVisible(false);
+				panelEastRating.repaint();
 				ack = false;
 			} catch (InterruptedException e1) {
 				Mainframe.logger.error(e1.getMessage());

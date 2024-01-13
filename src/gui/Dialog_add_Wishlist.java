@@ -348,7 +348,7 @@ public class Dialog_add_Wishlist extends JDialog {
 				String seriePart = txt_seriePart.getText();
 				Timestamp datum = new Timestamp(System.currentTimeMillis());
 				if (!Duplicant(autor, titel)) {
-					wishlist.Wishlisteinträge.add(new Book_Wishlist(autor, titel, bemerkung, serie, seriePart, datum, true));
+					wishlist.wishlistEntries.add(new Book_Wishlist(autor, titel, bemerkung, serie, seriePart, datum, true));
 					dispose();
 				} else {
 					txt_title.setText("Buch bereits vorhanden!");
@@ -374,9 +374,9 @@ public class Dialog_add_Wishlist extends JDialog {
 	}
 
 	public boolean Duplicant(String autor, String titel) {
-		for (int i = 0; i < wishlist.Wishlisteinträge.getSize(); i++) {
-			Book_Wishlist eintrag = wishlist.Wishlisteinträge.getElementAt(i);
-			if (eintrag.getAutor().equals(autor) && eintrag.getTitel().equals(titel)) {
+		for (int i = 0; i < wishlist.wishlistEntries.getSize(); i++) {
+			Book_Wishlist eintrag = wishlist.wishlistEntries.getElementAt(i);
+			if (eintrag.getAuthor().equals(autor) && eintrag.getTitle().equals(titel)) {
 				return true;
 			}
 		}

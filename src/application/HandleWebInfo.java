@@ -27,7 +27,7 @@ import com.google.gson.JsonParser;
 
 public class HandleWebInfo {
 
-	public static int DownloadWebPage(Book_Booklist eintrag, int maxResults, boolean retry) {
+	public static int DownloadWebPage(Book_Booklist entry, int maxResults, boolean retry) {
 		int compareReturn = 0;
 		try {
 
@@ -43,15 +43,15 @@ public class HandleWebInfo {
 
 			StringBuilder str = new StringBuilder();
 			if (HandleConfig.searchParam.equals("at")) {
-				str.append(sanitizeString(eintrag.getAutor()) + "+");
+				str.append(sanitizeString(entry.getAuthor()) + "+");
 			}
-			str.append(sanitizeString(eintrag.getTitel()));
+			str.append(sanitizeString(entry.getTitle()));
 
 			// Die URL der REST-API
 			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str.toString() + "&maxResults="
 					+ maxResults + "&printType=books";
 
-			Mainframe.logger.info("Search API: " + eintrag.toString().toString());
+			Mainframe.logger.info("Search API: " + entry.toString().toString());
 			Mainframe.logger.info("Search API URL: " + apiUrl);
 
 			// HttpURLConnection erstellen
@@ -75,7 +75,7 @@ public class HandleWebInfo {
 
 				// JSON-Antwort in ein JsonObject umwandeln
 				JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
-				compareReturn = analyseApiRequst(jsonObject, eintrag);
+				compareReturn = analyseApiRequst(jsonObject, entry);
 			}
 			// Verbindung schließen
 			connection.disconnect();
@@ -84,13 +84,13 @@ public class HandleWebInfo {
 			Mainframe.logger.error(e.getMessage());
 		}
 		Mainframe.logger.info("checkWebInfo " + "Retry: " + retry);
-		Mainframe.logger.info("checkWebInfo " + "Overall Score: " + eintrag.getAutor() + "-" + eintrag.getTitel() + ":"
+		Mainframe.logger.info("checkWebInfo " + "Overall Score: " + entry.getAuthor() + "-" + entry.getTitle() + ":"
 				+ compareReturn);
 		return compareReturn;
 
 	}
 
-	private static int analyseApiRequst(JsonObject jsonObject, Book_Booklist eintrag) {
+	private static int analyseApiRequst(JsonObject jsonObject, Book_Booklist entry) {
 		// Auf den Titel zugreifen
 		int i = 0;
 		int cCover = 0;
@@ -110,7 +110,7 @@ public class HandleWebInfo {
 							if (imageLinks.has("smallThumbnail")) {
 								String link = imageLinks.get("smallThumbnail").getAsString();
 								// Downloading Image
-								savePic(link, eintrag);
+								savePic(link, entry);
 								cCover = 1;
 							} else {
 								Mainframe.logger.trace("WebInfo Download: 'smallThumbnail' not found!");
@@ -128,7 +128,7 @@ public class HandleWebInfo {
 										String isbn = isbnidentifiers13.get("identifier").getAsString();
 										cIsbn = 1;
 										Mainframe.executor.submit(() -> {
-											eintrag.setIsbn(isbn);
+											entry.setIsbn(isbn);
 										});
 									}
 								}
@@ -139,19 +139,19 @@ public class HandleWebInfo {
 						}
 						if (volumeInfo.has("title")) {
 							String title = volumeInfo.get("title").getAsString();
-							cCompTitle = compareString(title, eintrag.getTitel());
+							cCompTitle = compareString(title, entry.getTitle());
 						}
 						if (volumeInfo.has("authors")) {
 							var authors = volumeInfo.getAsJsonArray("authors");
 							String author = authors.get(0).getAsString();
-							cCompAuthor = compareString(author, eintrag.getAutor());
+							cCompAuthor = compareString(author, entry.getAuthor());
 						}
 
 						if (volumeInfo.has("description") && cDesc == 0) {
 							String description = volumeInfo.get("description").getAsString();
 							cDesc = 1;
 							Mainframe.executor.submit(() -> {
-								eintrag.setDesc(description);
+								entry.setDesc(description);
 							});
 						} else {
 							Mainframe.logger.trace("WebInfo Download: 'description' not found!");
@@ -225,7 +225,7 @@ public class HandleWebInfo {
 		return Database.delPic(bid);
 	}
 
-	public static boolean savePic(String weblink, Book_Booklist eintrag) {
+	public static boolean savePic(String weblink, Book_Booklist entry) {
 		BufferedInputStream in;
 		try {
 			URL url = new URL(weblink);
@@ -242,7 +242,7 @@ public class HandleWebInfo {
 			ByteArrayInputStream inStreambj = new ByteArrayInputStream(response);
 			BufferedImage newImage = ImageIO.read(inStreambj);
 			Image img = newImage;
-			eintrag.setPic(img);
+			entry.setPic(img);
 
 			BufferedInputStream photoStream = new BufferedInputStream(inStreambj);
 			photoStream.close();
@@ -257,7 +257,7 @@ public class HandleWebInfo {
 
 			Mainframe.executor.submit(() -> {
 				try {
-					Database.updatePic(eintrag.getBid(), stream);
+					Database.updatePic(entry.getBid(), stream);
 					stream.close();
 					Path file = Paths.get(path);
 					Files.delete(file);

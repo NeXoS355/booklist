@@ -27,13 +27,13 @@ public class SimpleTableModel extends DefaultTableModel {
 		for (int i = 0; i < bücher.getSize(); i++) {
 			for (int j = 0; j < cols; j++) {
 				if (j == 0) {
-					rowData[j] = bücher.getElementAt(i).getAutor();
+					rowData[j] = bücher.getElementAt(i).getAuthor();
 				} else if (j == 1) {
-					rowData[j] = bücher.getElementAt(i).getTitel();
+					rowData[j] = bücher.getElementAt(i).getTitle();
 				} else if (j == 2) {
-					rowData[j] = bücher.getElementAt(i).getSerie() + " - " + bücher.getElementAt(i).getSeriePart();
+					rowData[j] = bücher.getElementAt(i).getSeries() + " - " + bücher.getElementAt(i).getSeriesVol();
 				} else if (j == 3) {
-					rowData[j] = bücher.getElementAt(i).getBemerkung();
+					rowData[j] = bücher.getElementAt(i).getNote();
 				}
 			}
 			this.addRow(rowData);
@@ -53,13 +53,13 @@ public class SimpleTableModel extends DefaultTableModel {
 		for (int i = 0; i < bücher.getSize(); i++) {
 			for (int j = 0; j < cols; j++) {
 				if (j == 0) {
-					rowData[j] = bücher.getElementAt(i).getAutor();
+					rowData[j] = bücher.getElementAt(i).getAuthor();
 				} else if (j == 1) {
-					rowData[j] = bücher.getElementAt(i).getTitel();
+					rowData[j] = bücher.getElementAt(i).getTitle();
 				} else if (j == 2) {
-					rowData[j] = bücher.getElementAt(i).getSerie() + " - " + bücher.getElementAt(i).getSeriePart();
+					rowData[j] = bücher.getElementAt(i).getSeries() + " - " + bücher.getElementAt(i).getSeriesVol();
 				} else if (j == 3) {
-					rowData[j] = bücher.getElementAt(i).getBemerkung();
+					rowData[j] = bücher.getElementAt(i).getNote();
 				}
 			}
 			this.addRow(rowData);

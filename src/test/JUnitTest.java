@@ -14,58 +14,58 @@ import application.WishlistListModel;
 
 class JUnitTest {
 
-	public static BookListModel BookEinträge;
-	public static WishlistListModel WishlistEinträge;
+	public static BookListModel BookEntries;
+	public static WishlistListModel wishlistEntries;
 
 	@Test
 	public void testBookList() {
-		BookEinträge = new BookListModel();
+		BookEntries = new BookListModel();
 		Book_Booklist book = null;
 		book = new Book_Booklist("Testautor", "Testtitel", true, "", "", "", "", "", false, null, null, null,
 				new Timestamp(System.currentTimeMillis()), false);
-		BookEinträge.add(book);
+		BookEntries.add(book);
 		// Is Book added?
-		int anzahl = BookEinträge.getSize();
+		int anzahl = BookEntries.getSize();
 		assertTrue(anzahl > 0);
 
 		// Is Book deleted?
-		BookEinträge.delete(book);
-		assertTrue(BookEinträge.getSize() == anzahl - 1);
+		BookEntries.delete(book);
+		assertTrue(BookEntries.getSize() == anzahl - 1);
 
 		// Is Book correctly saved?
-		assertEquals("Testautor", book.getAutor());
-		assertEquals("Testtitel", book.getTitel());
+		assertEquals("Testautor", book.getAuthor());
+		assertEquals("Testtitel", book.getTitle());
 
 		// Is Book editable?
-		book.setAutor("EditTest");
-		book.setAusgeliehen(true);
-		book.setAusgeliehen_an("TestAusleihe");
-		assertEquals("EditTest", book.getAutor());
-		assertEquals("TestAusleihe", book.getAusgeliehen_an());
+		book.setAuthor("EditTest");
+		book.setBorrowed(true);
+		book.setBorrowedTo("TestAusleihe");
+		assertEquals("EditTest", book.getAuthor());
+		assertEquals("TestAusleihe", book.getBorrowedTo());
 
 	}
 
 	@Test
 	public void testWishlist() {
-		WishlistEinträge = new WishlistListModel();
+		wishlistEntries = new WishlistListModel();
 		Book_Wishlist book = null;
 		try {
 			book = new Book_Wishlist("Testautor", "Testtitel", "", "", "", new Timestamp(System.currentTimeMillis()),
 					false);
-			WishlistEinträge.add(book);
+			wishlistEntries.add(book);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		assertEquals("Testautor", book.getAutor());
-		assertEquals("Testtitel", book.getTitel());
+		assertEquals("Testautor", book.getAuthor());
+		assertEquals("Testtitel", book.getTitle());
 
-		book.setAutor("EditTest");
-		assertEquals("EditTest", book.getAutor());
+		book.setAuthor("EditTest");
+		assertEquals("EditTest", book.getAuthor());
 
-		assertEquals(1, WishlistEinträge.getSize());
-		WishlistEinträge.delete(book);
-		assertEquals(0, WishlistEinträge.getSize());
+		assertEquals(1, wishlistEntries.getSize());
+		wishlistEntries.delete(book);
+		assertEquals(0, wishlistEntries.getSize());
 	}
 
 }

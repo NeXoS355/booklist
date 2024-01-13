@@ -33,8 +33,8 @@ public class wishlist extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static WishlistTableModel anzeige;
-	public static WishlistListModel Wishlisteinträge;
+	private static WishlistTableModel display;
+	public static WishlistListModel wishlistEntries;
 	private static JTable table = new JTable();
 	Font schrift = new Font("Roboto", Font.BOLD, 16);
 
@@ -44,35 +44,35 @@ public class wishlist extends JFrame {
 		this.setSize(700, 700);
 		this.setLocation(150, 150);
 
-		Wishlisteinträge = new WishlistListModel();
-		anzeige = new WishlistTableModel(Wishlisteinträge);
+		wishlistEntries = new WishlistListModel();
+		display = new WishlistTableModel(wishlistEntries);
 
 		JPanel north_panel = new JPanel();
 		north_panel.setLayout(new BorderLayout(5, 5));
 
 		north_panel.add(new JPanel(), BorderLayout.CENTER);
 
-		JButton btn_add = new JButton();
-		btn_add.setText("+");
-		btn_add.setFont(btn_add.getFont().deriveFont(Font.BOLD, 20));
-		btn_add.addActionListener(new ActionListener() {
+		JButton btnAdd = new JButton();
+		btnAdd.setText("+");
+		btnAdd.setFont(btnAdd.getFont().deriveFont(Font.BOLD, 20));
+		btnAdd.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Dialog_add_Wishlist(Wishlisteinträge);
+				new Dialog_add_Wishlist(wishlistEntries);
 			}
 		});
-		north_panel.add(btn_add, BorderLayout.WEST);
+		north_panel.add(btnAdd, BorderLayout.WEST);
 
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() >= 2 && SwingUtilities.isLeftMouseButton(e)) {
-					String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
-					String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
-					int index = Wishlisteinträge.getIndexOf(searchAutor, searchTitel);
-					new Dialog_edit_Wishlist(Wishlisteinträge, index);
+					String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
+					String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
+					int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
+					new Dialog_edit_Wishlist(wishlistEntries, index);
 				}
 				if (SwingUtilities.isRightMouseButton(e)) {
 					JTable table2 = (JTable) e.getSource();
@@ -106,7 +106,7 @@ public class wishlist extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch hinzufügen") {
-							new Dialog_add_Wishlist(Wishlisteinträge);
+							new Dialog_add_Wishlist(wishlistEntries);
 						}
 						updateModel();
 					}
@@ -116,7 +116,7 @@ public class wishlist extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch löschen") {
-							deleteBuch();
+							deleteBook();
 							updateModel();
 						}
 					}
@@ -126,10 +126,10 @@ public class wishlist extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch bearbeiten") {
-							String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
-							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
-							int index = Wishlisteinträge.getIndexOf(searchAutor, searchTitel);
-							new Dialog_edit_Wishlist(Wishlisteinträge, index);
+							String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
+							String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
+							int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
+							new Dialog_edit_Wishlist(wishlistEntries, index);
 							updateModel();
 						}
 					}
@@ -139,29 +139,29 @@ public class wishlist extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch konvertieren") {
-							String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
-							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
-							int index = Wishlisteinträge.getIndexOf(searchAutor, searchTitel);
-							Book_Wishlist wishBook = Wishlisteinträge.getElementAt(index);
+							String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
+							String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
+							int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
+							Book_Wishlist wishBook = wishlistEntries.getElementAt(index);
 
-							String autor = wishBook.getAutor();
-							String titel = wishBook.getTitel();
-							String serie = wishBook.getSerie();
-							String vol = wishBook.getSeriePart();
-							String merk = wishBook.getBemerkung();
+							String author = wishBook.getAuthor();
+							String title = wishBook.getTitle();
+							String series = wishBook.getSeries();
+							String vol = wishBook.getSeriesVol();
+							String note = wishBook.getNote();
 
 							Image pic = null;
 							String desc = "";
 							String isbn = "";
-							Timestamp datum = new Timestamp(System.currentTimeMillis());;
+							Timestamp date = new Timestamp(System.currentTimeMillis());;
 							boolean ebook = false;
-							String ausgeliehen_an = "";
-							String ausgeliehen_von = "";
-							boolean boolAusgeliehen = false;
+							String borrowedTo = "";
+							String borrowedFrom = "";
+							boolean boolBorrowed = false;
 
-							Mainframe.einträge.add(new Book_Booklist(autor, titel, boolAusgeliehen, ausgeliehen_an,
-									ausgeliehen_von, merk, serie, vol, ebook, pic, desc, isbn, datum, true));
-							Wishlisteinträge.delete(index);
+							Mainframe.entries.add(new Book_Booklist(author, title, boolBorrowed, borrowedTo,
+									borrowedFrom, note, series, vol, ebook, pic, desc, isbn, date, true));
+							wishlistEntries.delete(index);
 							updateModel();
 							Mainframe.updateModel();
 						}
@@ -175,14 +175,14 @@ public class wishlist extends JFrame {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-					deleteBuch();
+					deleteBook();
 					updateModel();
 				}
 
 			}
 		});
 
-		table.setModel(anzeige);
+		table.setModel(display);
 		table.setFont(schrift);
 		table.setRowHeight(22);
 
@@ -198,22 +198,22 @@ public class wishlist extends JFrame {
 	}
 
 	public static void updateModel() {
-		anzeige = new WishlistTableModel(Wishlisteinträge);
-		table.setModel(anzeige);
+		display = new WishlistTableModel(wishlistEntries);
+		table.setModel(display);
 		System.out.println("Wishlist Model updated");
 	}
 
-	public void deleteBuch() {
+	public void deleteBook() {
 		int[] selected = table.getSelectedRows();
 		for (int i = 0; i < selected.length; i++) {
-			String searchAutor = (String) table.getValueAt(selected[i], 0);
-			String searchTitel = (String) table.getValueAt(selected[i], 1);
-			int index = Wishlisteinträge.getIndexOf(searchAutor, searchTitel);
+			String searchAuthor = (String) table.getValueAt(selected[i], 0);
+			String searchTitle = (String) table.getValueAt(selected[i], 1);
+			int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
 			if (selected.length != 0) {
-				int antwort = JOptionPane.showConfirmDialog(null, "Wirklich '" + searchTitel + "' löschen?", "Löschen",
+				int response = JOptionPane.showConfirmDialog(null, "Wirklich '" + searchTitle + "' löschen?", "Löschen",
 						JOptionPane.YES_NO_OPTION);
-				if (antwort == JOptionPane.YES_OPTION) {
-					Wishlisteinträge.delete(index);
+				if (response == JOptionPane.YES_OPTION) {
+					wishlistEntries.delete(index);
 				}
 			} else {
 				JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");

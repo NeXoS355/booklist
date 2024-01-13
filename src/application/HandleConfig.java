@@ -43,7 +43,7 @@ public class HandleConfig {
 					if (setting.equals("fontSize")) {
 						try {
 							size = Integer.parseInt(value.trim());
-							Mainframe.schrift = new Font("Roboto", Font.PLAIN, size);
+							Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, size);
 							Mainframe.logger.info("fontSize: " + size);
 						} catch (NumberFormatException e) {
 							JOptionPane.showMessageDialog(null,
@@ -52,7 +52,7 @@ public class HandleConfig {
 					} else if (setting.equals("descFontSize")) {
 						try {
 							size = Integer.parseInt(value.trim());
-							Mainframe.descSchrift = new Font("Roboto", Font.PLAIN, size);
+							Mainframe.descFont = new Font("Roboto", Font.PLAIN, size);
 							Mainframe.logger.info("descFontSize: " + size);
 						} catch (NumberFormatException e) {
 							JOptionPane.showMessageDialog(null,
@@ -122,8 +122,8 @@ public class HandleConfig {
 			}
 		} else {
 			try (PrintWriter out = new PrintWriter("config.conf")) {
-				out.println("fontSize=" + Mainframe.schrift.getSize());
-				out.println("descFontSize=" + Mainframe.descSchrift.getSize());
+				out.println("fontSize=" + Mainframe.defaultFont.getSize());
+				out.println("descFontSize=" + Mainframe.descFont.getSize());
 				out.println("autoDownload=" + autoDownload);
 				out.println("loadOnDemand=" + loadOnDemand);
 				out.println("searchParam=" + searchParam);
