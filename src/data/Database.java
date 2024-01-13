@@ -1,5 +1,6 @@
 package data;
 
+import java.awt.Image;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -149,19 +150,26 @@ public class Database {
 		String fileName = "books.csv";
 		try (CSVWriter writer = new CSVWriter(new FileWriter(fileName))) {
 			// Spaltenüberschriften hinzufügen
-			String[] header = { "Autor", "Titel", "Datum", "Serie", "Serienteil", "Bemerkung" };
+			String[] header = { "Autor", "Titel", "ausgeliehen an" , "ausgeliehen von" , "Bemerkung","Serie", "Serienteil","E-Book" , "ISBN", "Datum" };
 			writer.writeNext(header);
 			ArrayList<Book_Booklist> list = BookListModel.getBücher();
 			int größe = list.size();
 			// Bücher in die Tabelle einfügen
 			for (int i = 0; i < größe; i++) {
+				if(list.get(i).getDatum() == null) {
+					BookListModel.loadOnDemand(list.get(i));
+				}
 				String autor = list.get(i).getAutor();
 				String titel = list.get(i).getTitel();
-				Timestamp datum = list.get(i).getDatum();
+				String ausgeliehen_an = list.get(i).getAusgeliehen_an();
+				String ausgeliehen_von = list.get(i).getAusgeliehen_an();
+				String bemerkung = list.get(i).getBemerkung();
+				String datum = list.get(i).getDatum().toString();
 				String serie = list.get(i).getSerie();
 				String seriePart = list.get(i).getSeriePart();
-				String bemerkung = list.get(i).getBemerkung();
-				String[] data = { autor, titel, datum.toString(), serie, seriePart, bemerkung };
+				String ebook = Boolean.toString(list.get(i).isEbook());
+				String isbn = list.get(i).getIsbn();
+				String[] data = { autor, titel, ausgeliehen_an, ausgeliehen_von, bemerkung, serie, seriePart, ebook, isbn, datum };
 				writer.writeNext(data);
 			}
 			;
