@@ -25,23 +25,26 @@ public class Book_Booklist {
 	private int bid;
 	private int rating;
 
-	/** Booklist Entry Constructor
-	  * 
-	  * @param author - Full author Name
-	  * @param title - Book title
-	  * @param borrowed - boolean variable to declare Books as borrowed From or To
-	  * @param borrowedTo - Name of the Person the Book is borrowed to
-	  * @param borrowedFrom - Name of the Person the Book has been borrowed from 
-	  * @param note - free String variable as note
-	  * @param series - series name of the Book
-	  * @param serieVol - volume number of the Book in the series
-	  * @param ebook - sets the book as ebook
-	  * @param pic - Book Cover
-	  * @param desc - Book Description mostly a short summary
-	  * @param isbn - International Standard Book Number (ISBN13)
-	  * @param date - date at which the book has been added to the Database
-	  * @param db - true if book should be added to db or just temporary to the list
-	*/
+	/**
+	 * Booklist Entry Constructor
+	 * 
+	 * @param author       - Full author Name
+	 * @param title        - Book title
+	 * @param borrowed     - boolean variable to declare Books as borrowed From or
+	 *                     To
+	 * @param borrowedTo   - Name of the Person the Book is borrowed to
+	 * @param borrowedFrom - Name of the Person the Book has been borrowed from
+	 * @param note         - free String variable as note
+	 * @param series       - series name of the Book
+	 * @param serieVol     - volume number of the Book in the series
+	 * @param ebook        - sets the book as ebook
+	 * @param pic          - Book Cover
+	 * @param desc         - Book Description mostly a short summary
+	 * @param isbn         - International Standard Book Number (ISBN13)
+	 * @param date         - date at which the book has been added to the Database
+	 * @param db           - true if book should be added to db or just temporary to
+	 *                     the list
+	 */
 	public Book_Booklist(String author, String title, boolean borrowed, String borrowedTo, String borrowedFrom,
 			String note, String series, String seriesVol, boolean ebook, Image pic, String desc, String isbn,
 			Timestamp date, boolean db) {
@@ -52,7 +55,7 @@ public class Book_Booklist {
 		this.note = note;
 		this.series = series;
 		this.seriesVol = seriesVol;
-		this.setEbook(ebook);
+		this.ebook = ebook;
 		this.pic = pic;
 		this.desc = desc;
 		this.isbn = isbn;
@@ -72,8 +75,8 @@ public class Book_Booklist {
 							date.toString());
 
 				else if (!borrowedFrom.isEmpty())
-					bid = Database.addToBooklist(author, title, "von", borrowedFrom, note, series, seriesVol,
-							ebook, date.toString());
+					bid = Database.addToBooklist(author, title, "von", borrowedFrom, note, series, seriesVol, ebook,
+							date.toString());
 				else
 					bid = Database.addToBooklist(author, title, "nein", "", note, series, seriesVol, ebook,
 							date.toString());
@@ -83,38 +86,42 @@ public class Book_Booklist {
 		}
 	}
 
-	/** shorter Booklist Entry Constructor
-	  * 
-	  * @param author - Full author Name
-	  * @param title - Book title
-	  * @param note - free String variable as note
-	  * @param series - series name of the Book
-	  * @param serieVol - volume number of the Book in the series
-	  * @param ebook - sets the book as ebook
-	  * @param pic - Book Cover
-	  * @param desc - Book Description mostly a short summary
-	  * @param isbn - International Standard Book Number (ISBN13)
-	  * @param date - date at which the book has been added to the Database
-	  * @param db - true if book should be added to db or just temporary to the list
-	*/
+	/**
+	 * shorter Booklist Entry Constructor
+	 * 
+	 * @param author   - Full author Name
+	 * @param title    - Book title
+	 * @param note     - free String variable as note
+	 * @param series   - series name of the Book
+	 * @param serieVol - volume number of the Book in the series
+	 * @param ebook    - sets the book as ebook
+	 * @param pic      - Book Cover
+	 * @param desc     - Book Description mostly a short summary
+	 * @param isbn     - International Standard Book Number (ISBN13)
+	 * @param date     - date at which the book has been added to the Database
+	 * @param db       - true if book should be added to db or just temporary to the
+	 *                 list
+	 */
 	public Book_Booklist(String author, String title, String note, String series, String seriesVol, boolean ebook,
 			Image pic, String desc, String isbn, Timestamp date, boolean db) throws SQLException {
 		this(author, title, false, "", "", note, series, seriesVol, ebook, pic, desc, isbn, date, db);
 	}
 
-	/** toString Method author + title
-	  *
-	  * @return author + title in String format
-	*/
+	/**
+	 * toString Method author + title
+	 *
+	 * @return author + title in String format
+	 */
 	@Override
 	public String toString() {
 		return author + "    |    " + title;
 	}
 
-	/** hashCode with autor + title
-	  *
-	  * @return hashCode with author + title
-	*/
+	/**
+	 * hashCode with autor + title
+	 *
+	 * @return hashCode with author + title
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -124,12 +131,13 @@ public class Book_Booklist {
 		return result;
 	}
 
-	/** equals check with author and title
-	  *
-	  * @param obj - object to compare
-	  *
-	  * @return "true" if equal else "false"
-	*/
+	/**
+	 * equals check with author and title
+	 *
+	 * @param obj - object to compare
+	 *
+	 * @return "true" if equal else "false"
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -236,31 +244,34 @@ public class Book_Booklist {
 		return desc;
 	}
 
-	
-	/** setter for desc
-	  *
-	  * @param desc - description to set
-	  * @param db - boolean value if value should be written to db
-	  *
-	*/
+	/**
+	 * setter for desc
+	 *
+	 * @param desc - description to set
+	 * @param db   - boolean value if value should be written to db
+	 *
+	 */
 	public void setDesc(String desc, boolean db) {
 		this.desc = desc;
-		Database.updateDesc(this.getBid(), desc);
+		if (db)
+			Database.updateDesc(this.getBid(), desc);
 	}
 
 	public String getIsbn() {
 		return isbn;
 	}
 
-	/** setter for isbn
-	  *
-	  * @param isbn - isbn to set
-	  * @param db - boolean value if value should be written to db
-	  *
-	*/
+	/**
+	 * setter for isbn
+	 *
+	 * @param isbn - isbn to set
+	 * @param db   - boolean value if value should be written to db
+	 *
+	 */
 	public void setIsbn(String isbn, boolean db) {
 		this.isbn = isbn;
-		Database.updateIsbn(this.getBid(), isbn);
+		if (db)
+			Database.updateIsbn(this.getBid(), isbn);
 	}
 
 	public int getBid() {
@@ -283,15 +294,17 @@ public class Book_Booklist {
 		return rating;
 	}
 
-	/** setter for rating
-	  *
-	  * @param rating - rating to set
-	  * @param db - boolean value if value should be written to db
-	  *
-	*/
+	/**
+	 * setter for rating
+	 *
+	 * @param rating - rating to set
+	 * @param db     - boolean value if value should be written to db
+	 *
+	 */
 	public void setRating(int rating, boolean db) {
 		this.rating = rating;
-		Database.updateRating(this.getBid(), rating);
+		if (db)
+			Database.updateRating(this.getBid(), rating);
 	}
 
 }

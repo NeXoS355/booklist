@@ -321,6 +321,7 @@ public class Mainframe extends JFrame {
 //				return comp;
 //			}
 //		};
+		
 		table.setModel(tableDisplay);
 		table.setFont(defaultFont);
 		table.setShowVerticalLines(false);
