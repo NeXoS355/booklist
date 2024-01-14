@@ -128,7 +128,7 @@ public class HandleWebInfo {
 										String isbn = isbnidentifiers13.get("identifier").getAsString();
 										cIsbn = 1;
 										Mainframe.executor.submit(() -> {
-											entry.setIsbn(isbn);
+											entry.setIsbn(isbn, true);
 										});
 									}
 								}
@@ -151,7 +151,7 @@ public class HandleWebInfo {
 							String description = volumeInfo.get("description").getAsString();
 							cDesc = 1;
 							Mainframe.executor.submit(() -> {
-								entry.setDesc(description);
+								entry.setDesc(description, true);
 							});
 						} else {
 							Mainframe.logger.trace("WebInfo Download: 'description' not found!");

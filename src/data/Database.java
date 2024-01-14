@@ -330,7 +330,7 @@ public class Database {
 	*/
 	public static ResultSet getSeriesInfo(String author) {
 		ResultSet rs = null;
-		String sql = "SELECT serie, seriePart FROM bücher WHERE autor=? ORDER BY serie";
+		String sql = "SELECT serie, seriePart FROM bücher WHERE autor=? and serie!= '' ORDER BY serie";
 		try {
 			PreparedStatement pst = con.prepareStatement(sql);
 			pst.setString(1, author);

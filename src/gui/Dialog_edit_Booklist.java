@@ -167,7 +167,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						entry.setIsbn(null);
+						entry.setIsbn(null, true);
 						dispose();
 						new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 					}
@@ -1008,7 +1008,7 @@ public class Dialog_edit_Booklist extends JDialog {
 						boolean state = Database.delDesc(entry.getBid());
 						if (state == true) {
 							// JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich gelöscht");
-							entry.setDesc(null);
+							entry.setDesc(null, true);
 							dispose();
 							new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 						} else {
@@ -1326,32 +1326,35 @@ public class Dialog_edit_Booklist extends JDialog {
 	 * 
 	 */
 	private void setRating(MouseEvent e, int i) {
-		int half = lblFirstStar.getWidth() / 2;
-		int mouse = e.getX();
+		if (SwingUtilities.isLeftMouseButton(e)) {
+			int half = lblFirstStar.getWidth() / 2;
+			int mouse = e.getX();
 
-		if (mouse > half) {
-			int rate = i * 2;
-			Mainframe.logger.trace("Rating set: " + rate);
-			entry.setRating(rate);
-		} else {
-			int rate = i * 2 - 1;
-			Mainframe.logger.trace("Rating set: " + rate);
-			entry.setRating(rate);
+			if (mouse > half) {
+				int rate = i * 2;
+				Mainframe.logger.trace("Rating set: " + rate);
+				entry.setRating(rate, true);
+			} else {
+				int rate = i * 2 - 1;
+				Mainframe.logger.trace("Rating set: " + rate);
+				entry.setRating(rate, true);
+			}
+
+			Mainframe.executor.submit(() -> {
+				try {
+					ack = true;
+					panelEastRating.add(lblAckRating);
+					lblAckRating.setVisible(true);
+					Thread.sleep(2000);
+					panelEastRating.remove(lblAckRating);
+					lblAckRating.setVisible(false);
+					panelEastRating.repaint();
+					ack = false;
+				} catch (InterruptedException e1) {
+					Mainframe.logger.error(e1.getMessage());
+				}
+			});
 		}
 
-		Mainframe.executor.submit(() -> {
-			try {
-				ack = true;
-				panelEastRating.add(lblAckRating);
-				lblAckRating.setVisible(true);
-				Thread.sleep(2000);
-				panelEastRating.remove(lblAckRating);
-				lblAckRating.setVisible(false);
-				panelEastRating.repaint();
-				ack = false;
-			} catch (InterruptedException e1) {
-				Mainframe.logger.error(e1.getMessage());
-			}
-		});
 	}
 }

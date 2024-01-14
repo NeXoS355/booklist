@@ -236,7 +236,14 @@ public class Book_Booklist {
 		return desc;
 	}
 
-	public void setDesc(String desc) {
+	
+	/** setter for desc
+	  *
+	  * @param desc - description to set
+	  * @param db - boolean value if value should be written to db
+	  *
+	*/
+	public void setDesc(String desc, boolean db) {
 		this.desc = desc;
 		Database.updateDesc(this.getBid(), desc);
 	}
@@ -245,7 +252,13 @@ public class Book_Booklist {
 		return isbn;
 	}
 
-	public void setIsbn(String isbn) {
+	/** setter for isbn
+	  *
+	  * @param isbn - isbn to set
+	  * @param db - boolean value if value should be written to db
+	  *
+	*/
+	public void setIsbn(String isbn, boolean db) {
 		this.isbn = isbn;
 		Database.updateIsbn(this.getBid(), isbn);
 	}
@@ -270,7 +283,13 @@ public class Book_Booklist {
 		return rating;
 	}
 
-	public void setRating(int rating) {
+	/** setter for rating
+	  *
+	  * @param rating - rating to set
+	  * @param db - boolean value if value should be written to db
+	  *
+	*/
+	public void setRating(int rating, boolean db) {
 		this.rating = rating;
 		Database.updateRating(this.getBid(), rating);
 	}

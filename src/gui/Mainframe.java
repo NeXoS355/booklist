@@ -90,7 +90,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.6.2  (01.2024)  ";
+	private String version = "Ver. 2.6.3  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");

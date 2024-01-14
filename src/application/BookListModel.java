@@ -127,11 +127,11 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					}
 
 					book.setPic(buf_pic);
-					book.setDesc(desc);
+					book.setDesc(desc, false);
 					book.setEbook(ebook);
 					book.setDate(datum);
-					book.setIsbn(isbn);
-					book.setRating(rating);
+					book.setIsbn(isbn, false);
+					book.setRating(rating, false);
 
 					String borrowed = rs.getString("ausgeliehen");
 					boolean boolBorrowed = false;
@@ -330,7 +330,6 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	public static void analyzeAuthor(String author) {
 		ResultSet rs = Database.getSeriesInfo(author);
 		String[] series = new String[10];
-		int[] minPart = new int[30];
 		int[] maxPart = new int[30];
 		String oldSeries = "";
 		int newSeries = 1;
@@ -352,9 +351,6 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					maxPart[i] = seriesVolume;
 
 				}
-				if (seriesVolume < minPart[i] || newSeries == 1) {
-					minPart[i] = seriesVolume;
-				}
 
 				newSeries = 0;
 				oldSeries = realSeries;
@@ -367,7 +363,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		boolean found = false;
 		for (i = 0; i < series.length; i++) {
 			if (series[i] != null) {
-				for (int j = minPart[i] + 1; j < maxPart[i]; j++) {
+				for (int j = 1; j < maxPart[i]; j++) {
 					for (int k = 0; k < books.size(); k++) {
 						Book_Booklist book = books.get(k);
 						if (book.getSeries().equals(series[i]) && Integer.parseInt(book.getSeriesVol()) == j) {
