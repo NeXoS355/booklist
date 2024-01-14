@@ -10,6 +10,7 @@ Features:
     filter your list via author, series or search with fulltext
     export your list to an csv file
     add Books to your Wishlist
+    rate the Book you just read with 1-5 Stars
 
 Compiled with jdk17 and the following dependencies
 
