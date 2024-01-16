@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.table.TableColumnModel;
 
 import application.HandleConfig;
 
@@ -21,13 +22,19 @@ public class Dialog_settings extends JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static JComboBox<Integer> cmbFont;
+	private static JComboBox<Integer> cmbFontDesc;
+	private static JComboBox<Integer> cmbAutoDownload;
+	private static JComboBox<Integer> cmbOnDemand;
+	private static JComboBox<String> cmbSearchParam;
+	private static JComboBox<Integer> cmbDebug;
 
 	public Dialog_settings() {
 
 		this.setTitle("Einstellungen");
 		this.setModal(true);
 		this.setLayout(new GridBagLayout());
-		this.setSize(300, 360);
+		this.setSize(300, 400);
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -55,7 +62,7 @@ public class Dialog_settings extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		Integer[] font = { 12, 14, 16, 18, 20 };
-		JComboBox<Integer> cmbFont = new JComboBox<Integer>(font);
+		cmbFont = new JComboBox<Integer>(font);
 		cmbFont.setSelectedItem(Mainframe.defaultFont.getSize());
 		this.add(cmbFont, c);
 		c.gridx = 0;
@@ -69,7 +76,7 @@ public class Dialog_settings extends JDialog {
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		Integer[] fontDesc = { 12, 14, 16, 18, 20 };
-		JComboBox<Integer> cmbFontDesc = new JComboBox<Integer>(fontDesc);
+		cmbFontDesc = new JComboBox<Integer>(fontDesc);
 		cmbFontDesc.setSelectedItem(Mainframe.descFont.getSize());
 		this.add(cmbFontDesc, c);
 
@@ -97,7 +104,7 @@ public class Dialog_settings extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		Integer[] arrayAutoDownload = { 0, 1 };
-		JComboBox<Integer> cmbAutoDownload = new JComboBox<Integer>(arrayAutoDownload);
+		cmbAutoDownload = new JComboBox<Integer>(arrayAutoDownload);
 		cmbAutoDownload.setSelectedItem(HandleConfig.autoDownload);
 		this.add(cmbAutoDownload, c);
 
@@ -113,10 +120,10 @@ public class Dialog_settings extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		Integer[] arrayOnDemand = { 0, 1 };
-		JComboBox<Integer> cmbOnDemand = new JComboBox<Integer>(arrayOnDemand);
+		cmbOnDemand = new JComboBox<Integer>(arrayOnDemand);
 		cmbOnDemand.setSelectedItem(HandleConfig.loadOnDemand);
 		this.add(cmbOnDemand, c);
-		
+
 		c.gridx = 0;
 		c.gridy = 6;
 		c.weightx = 0.1;
@@ -129,7 +136,7 @@ public class Dialog_settings extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		String[] arraySearchParam = { "t", "at" };
-		JComboBox<String> cmbSearchParam = new JComboBox<String>(arraySearchParam);
+		cmbSearchParam = new JComboBox<String>(arraySearchParam);
 		cmbSearchParam.setSelectedItem(HandleConfig.searchParam);
 		this.add(cmbSearchParam, c);
 		c.gridx = 0;
@@ -143,8 +150,8 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 7;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		Integer[] arrayDebug = { 0, 1, 2};
-		JComboBox<Integer> cmbDebug = new JComboBox<Integer>(arrayDebug);
+		Integer[] arrayDebug = { 0, 1, 2 };
+		cmbDebug = new JComboBox<Integer>(arrayDebug);
 		cmbDebug.setSelectedItem(HandleConfig.debug);
 		this.add(cmbDebug, c);
 
@@ -154,24 +161,7 @@ public class Dialog_settings extends JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try (PrintWriter out = new PrintWriter("config.conf")) {
-					Mainframe.logger.info("Save Settings");
-					//set Parameters which can be changed on the fly
-					HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
-					HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
-					HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
-
-					//write new config file
-					out.println("fontSize=" + cmbFont.getSelectedItem());
-					out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
-					out.println("autoDownload=" + cmbAutoDownload.getSelectedItem());
-					out.println("loadOnDemand=" + cmbOnDemand.getSelectedItem());
-					out.println("searchParam=" + cmbSearchParam.getSelectedItem());
-					out.println("debug=" + cmbDebug.getSelectedItem());
-				} catch (FileNotFoundException ex) {
-					ex.printStackTrace();
-					Mainframe.logger.error("Fehler beim speichern der Einstellungen");
-				}
+				saveSettings();
 				dispose();
 			}
 		});
@@ -197,6 +187,44 @@ public class Dialog_settings extends JDialog {
 		this.add(btnAbort, c);
 
 		this.setVisible(true);
+	}
+
+	public static void saveSettings() {
+		try (PrintWriter out = new PrintWriter("config.conf")) {
+			Mainframe.logger.info("Save Settings");
+			// set Parameters which can be changed on the fly
+			HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
+			HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
+			HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
+
+			out.println("fontSize=" + cmbFont.getSelectedItem());
+			out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
+			out.println("autoDownload=" + cmbAutoDownload.getSelectedItem());
+			out.println("loadOnDemand=" + cmbOnDemand.getSelectedItem());
+			out.println("searchParam=" + cmbSearchParam.getSelectedItem());
+			out.println("debug=" + cmbDebug.getSelectedItem());
+			
+			TableColumnModel columnModel = Mainframe.table.getColumnModel();
+			
+			StringBuilder strWidth = new StringBuilder();
+			strWidth.append("layout=");
+			strWidth.append(columnModel.getColumn(0).getWidth());
+			strWidth.append(",");
+			strWidth.append(columnModel.getColumn(1).getWidth());
+			strWidth.append(",");
+			strWidth.append(columnModel.getColumn(2).getWidth());
+			strWidth.append(",");
+			strWidth.append(columnModel.getColumn(3).getWidth());
+			strWidth.append(",");
+			strWidth.append(columnModel.getColumn(4).getWidth());
+			
+			out.print(strWidth);
+			
+
+		} catch (FileNotFoundException ex) {
+			ex.printStackTrace();
+			Mainframe.logger.error("Fehler beim speichern der Einstellungen");
+		}
 	}
 
 }

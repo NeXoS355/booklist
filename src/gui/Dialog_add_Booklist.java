@@ -353,6 +353,7 @@ public class Dialog_add_Booklist extends JDialog {
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.ipady = 15;
+		c.insets = new Insets(10, 0, 0, 0);
 		panel_center.add(lbl_author, c);
 		c.gridx = 1;
 		c.gridy = 0;
@@ -364,7 +365,6 @@ public class Dialog_add_Booklist extends JDialog {
 		c.gridy = 1;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		c.insets = new Insets(10, 0, 0, 0);
 		panel_center.add(lbl_title, c);
 		c.gridx = 1;
 		c.gridy = 1;
@@ -578,14 +578,14 @@ public class Dialog_add_Booklist extends JDialog {
 				if (checkInput(autor, titel)) {
 					if (checkTo.isSelected()) {
 						book = new Book_Booklist(autor, titel, true, txtBorrowedTo.getText(), "", bemerkung, serie,
-								seriePart, ebook, null, null, null, datum, true);
+								seriePart, ebook,0, null, null, null, datum, true);
 						Mainframe.entries.add(book);
 					} else if (checkFrom.isSelected()) {
 						book = new Book_Booklist(autor, titel, true, "", txtBorrowedFrom.getText(), bemerkung, serie,
-								seriePart, ebook, null, null, null, datum, true);
+								seriePart, ebook,0, null, null, null, datum, true);
 						Mainframe.entries.add(book);
 					} else {
-						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, ebook, null, null, null,
+						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, ebook,0, null, null, null,
 								datum, true);
 						Mainframe.entries.add(book);
 					}

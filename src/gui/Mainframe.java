@@ -50,6 +50,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -77,7 +78,7 @@ public class Mainframe extends JFrame {
 
 	public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
 	public static Font descFont = new Font("Roboto", Font.PLAIN, 16);
-	private static JTable table = new JTable();
+	static JTable table = new JTable();
 	public static BookListModel entries;
 	private static DefaultListModel<Book_Booklist> filter;
 	private static SimpleTableModel tableDisplay;
@@ -90,7 +91,14 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	private String version = "Ver. 2.6.3  (01.2024)  ";
+	
+	public static int prozEbook = 0;
+	public static int prozAuthor = 0;
+	public static int prozTitle = 0;
+	public static int prozSeries = 0;
+	public static int prozRating = 0;
+	
+	private String version = "Ver. 2.6.4  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -303,38 +311,21 @@ public class Mainframe extends JFrame {
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
 
 		logger.trace("Finished creating GUI Components. Start creating Table Contents");
-
-//		table = new JTable() {
-//			/**
-//			 * 
-//			 */
-//			private static final long serialVersionUID = 1L;
-//
-//			@Override
-//			public Component prepareRenderer(TableCellRenderer renderer, int row, int col) {
-//				Component comp = super.prepareRenderer(renderer, row, col);
-//				String cellValue = (String) getModel().getValueAt(row, col); // get the value from the cell
-//				if (cellValue.equals("Frank Schätzing"))
-//					comp.setBackground(Color.red);
-//				else
-//					comp.setBackground(Color.green);
-//				return comp;
-//			}
-//		};
 		
 		table.setModel(tableDisplay);
+		table.setAutoResizeMode( JTable.AUTO_RESIZE_NEXT_COLUMN);
 		table.setFont(defaultFont);
 		table.setShowVerticalLines(false);
 		table.setSelectionBackground(Color.DARK_GRAY);
 		table.setSelectionForeground(Color.WHITE);
-		table.setRowHeight(table.getRowHeight() + 6);
+		table.setRowHeight(table.getRowHeight() + 6);		
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() >= 2 && SwingUtilities.isLeftMouseButton(e)) {
-					String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
-					String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
+					String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
+					String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
 					int index = entries.getIndexOf(searchAutor, searchTitel);
 					new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 				}
@@ -383,8 +374,8 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch bearbeiten") {
-							String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 0);
-							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 1);
+							String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
+							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
 							int index = entries.getIndexOf(searchAutor, searchTitel);
 							new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
 						}
@@ -396,7 +387,7 @@ public class Mainframe extends JFrame {
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Autor analysieren (Beta)") {
 							new wishlist();
-							BookListModel.analyzeAuthor((String) table.getValueAt(table.getSelectedRow(), 0));
+							BookListModel.analyzeAuthor((String) table.getValueAt(table.getSelectedRow(), 1));
 							gui.wishlist.updateModel();
 						}
 					}
@@ -499,7 +490,9 @@ public class Mainframe extends JFrame {
 		logger.trace("Finished creating Tree Contents + ScrollPane. Start Update Model & show GUI");
 
 		updateModel();
+
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+			
 		this.setVisible(true);
 		addWindowListener(new WindowAdapter() {
 
@@ -519,8 +512,8 @@ public class Mainframe extends JFrame {
 	public static void deleteBook() {
 		int[] selected = table.getSelectedRows();
 		for (int i = 0; i < selected.length; i++) {
-			String searchAutor = (String) table.getValueAt(selected[i], 0);
-			String searchTitel = (String) table.getValueAt(selected[i], 1);
+			String searchAutor = (String) table.getValueAt(selected[i], 1);
+			String searchTitel = (String) table.getValueAt(selected[i], 2);
 			int index = entries.getIndexOf(searchAutor, searchTitel);
 			if (selected.length != 0) {
 				int antwort = JOptionPane.showConfirmDialog(null,
@@ -615,6 +608,38 @@ public class Mainframe extends JFrame {
 		tableDisplay = new SimpleTableModel(entries);
 		table.setModel(tableDisplay);
 		treeSelection = "";
+		setTableLayout();
+	}
+	
+	public static void setTableLayout() {
+		TableColumnModel columnModel = table.getColumnModel();
+		
+		int total = columnModel.getTotalColumnWidth();
+		int minProzEbook = total * 5 / 100;
+		int minProzAuthor = total *10 / 100;
+		int minProzTitle = total * 10 / 100;
+		int minProzSeries = total * 10 / 100;
+		int minProzRating = total * 5 / 100;
+		
+		columnModel.getColumn(0).setMinWidth(minProzEbook);
+		columnModel.getColumn(0).setMaxWidth(50);
+		columnModel.getColumn(0).setPreferredWidth(prozEbook);
+		
+		columnModel.getColumn(1).setMinWidth(minProzAuthor);
+		columnModel.getColumn(1).setMaxWidth(Integer.MAX_VALUE);
+		columnModel.getColumn(1).setPreferredWidth(prozAuthor);
+		
+		columnModel.getColumn(2).setMinWidth(minProzTitle);
+		columnModel.getColumn(2).setMaxWidth(Integer.MAX_VALUE);
+		columnModel.getColumn(2).setPreferredWidth(prozTitle);
+		
+		columnModel.getColumn(3).setMinWidth(minProzSeries);
+		columnModel.getColumn(3).setMaxWidth(Integer.MAX_VALUE);
+		columnModel.getColumn(3).setPreferredWidth(prozSeries);
+		
+		columnModel.getColumn(4).setMinWidth(minProzRating);
+		columnModel.getColumn(4).setMaxWidth(50);
+		columnModel.getColumn(4).setPreferredWidth(prozRating);
 	}
 
 	/** search table entries with specified String
@@ -665,6 +690,7 @@ public class Mainframe extends JFrame {
 		if (filter.getSize() > 0) {
 			tableDisplay = new SimpleTableModel(filter);
 			table.setModel(tableDisplay);
+			setTableLayout();
 		} else {
 			JOptionPane.showMessageDialog(null, "Es gab leider keine Treffer!");
 		}

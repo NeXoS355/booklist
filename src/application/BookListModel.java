@@ -43,29 +43,30 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					Book_Booklist book = null;
 					String author = rs.getString("autor").trim();
 					String title = rs.getString("titel").trim();
-					String note = rs.getString("bemerkung");
 					String series = rs.getString("serie").trim();
 					String seriesVolume = rs.getString("seriePart");
+					int int_ebook = rs.getInt("ebook");
+					boolean ebook = false;
+					if (int_ebook == 1)
+						ebook = true;
+					int rating = rs.getInt("rating");
 					int bid = Integer.parseInt(rs.getString("bid"));
 
 					// Variables for LoadOnDemand
+					String note = "";
 					Blob picture = null;
 					String desc = "";
 					String isbn = "";
 					Timestamp date = null;
-					boolean ebook = false;
 					String borrowed = "";
 					String borrowedTo = "";
 					String borrowedFrom = "";
 					boolean boolBorrowed = false;
 
 					if (HandleConfig.loadOnDemand == 0) {
+						note = rs.getString("bemerkung");
 						picture = rs.getBlob("pic");
 						desc = rs.getString("description");
-						int int_ebook = rs.getInt("ebook");
-						ebook = false;
-						if (int_ebook == 1)
-							ebook = true;
 						date = rs.getTimestamp("date");
 						isbn = rs.getString("isbn");
 						borrowed = rs.getString("ausgeliehen");
@@ -84,7 +85,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
 					book = new Book_Booklist(author, title, boolBorrowed, borrowedTo, borrowedFrom, note,
-							series, seriesVolume, ebook, buf_pic, desc, isbn, date, false);
+							series, seriesVolume, ebook,rating, buf_pic, desc, isbn, date, false);
 					book.setBid(bid);
 					getBooks().add(book);
 					Mainframe.logger.trace("Buch ausgelesen: " + book.getAuthor() + "-" + book.getTitle());
@@ -110,12 +111,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			try {
 				ResultSet rs = Database.selectFromBooklist(book.getBid());
 				while (rs.next()) {
+					String note = rs.getString("bemerkung");
 					Blob picture = rs.getBlob("pic");
 					String desc = rs.getString("description");
-					int int_ebook = rs.getInt("ebook");
-					boolean ebook = false;
-					if (int_ebook == 1)
-						ebook = true;
 					Timestamp datum = rs.getTimestamp("date");
 					String isbn = rs.getString("isbn");
 					int rating = rs.getInt("rating");
@@ -128,7 +126,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 					book.setPic(buf_pic);
 					book.setDesc(desc, false);
-					book.setEbook(ebook);
+					book.setNote(note);
 					book.setDate(datum);
 					book.setIsbn(isbn, false);
 					book.setRating(rating, false);

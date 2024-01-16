@@ -110,7 +110,16 @@ public class HandleConfig {
 						} catch (NumberFormatException e) {
 							JOptionPane.showMessageDialog(null,
 									"Fehler in der config (debug): Falsches Format - erwartet integer");
-							
+
+						}
+					} else if (setting.contains("layout")) {
+						String[] values = value.trim().split(",");
+						for (int j = 0; j < values.length; j++) {
+							Mainframe.prozEbook = Integer.parseInt(values[0]);
+							Mainframe.prozAuthor = Integer.parseInt(values[1]);
+							Mainframe.prozTitle = Integer.parseInt(values[2]);
+							Mainframe.prozSeries = Integer.parseInt(values[3]);
+							Mainframe.prozRating = Integer.parseInt(values[4]);
 						}
 					}
 

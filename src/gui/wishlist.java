@@ -160,7 +160,7 @@ public class wishlist extends JFrame {
 							boolean boolBorrowed = false;
 
 							Mainframe.entries.add(new Book_Booklist(author, title, boolBorrowed, borrowedTo,
-									borrowedFrom, note, series, vol, ebook, pic, desc, isbn, date, true));
+									borrowedFrom, note, series, vol, ebook, 0, pic, desc, isbn, date, true));
 							wishlistEntries.delete(index);
 							updateModel();
 							Mainframe.updateModel();

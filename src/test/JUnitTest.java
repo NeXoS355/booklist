@@ -21,7 +21,7 @@ class JUnitTest {
 	public void testBookList() {
 		BookEntries = new BookListModel();
 		Book_Booklist book = null;
-		book = new Book_Booklist("Testautor", "Testtitel", true, "", "", "", "", "", false, null, null, null,
+		book = new Book_Booklist("Testautor", "Testtitel", true, "", "", "", "", "", false,0, null, null, null,
 				new Timestamp(System.currentTimeMillis()), false);
 		BookEntries.add(book);
 		// Is Book added?

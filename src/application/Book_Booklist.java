@@ -38,6 +38,7 @@ public class Book_Booklist {
 	 * @param series       - series name of the Book
 	 * @param serieVol     - volume number of the Book in the series
 	 * @param ebook        - sets the book as ebook
+	 * @param rating       - Book User Rating
 	 * @param pic          - Book Cover
 	 * @param desc         - Book Description mostly a short summary
 	 * @param isbn         - International Standard Book Number (ISBN13)
@@ -46,7 +47,7 @@ public class Book_Booklist {
 	 *                     the list
 	 */
 	public Book_Booklist(String author, String title, boolean borrowed, String borrowedTo, String borrowedFrom,
-			String note, String series, String seriesVol, boolean ebook, Image pic, String desc, String isbn,
+			String note, String series, String seriesVol, boolean ebook, int rating,Image pic, String desc, String isbn,
 			Timestamp date, boolean db) {
 		super();
 		this.author = author;
@@ -60,6 +61,7 @@ public class Book_Booklist {
 		this.desc = desc;
 		this.isbn = isbn;
 		this.date = date;
+		this.rating = rating;
 		if (borrowed) {
 			this.borrowedTo = borrowedTo;
 			this.borrowedFrom = borrowedFrom;
@@ -95,6 +97,7 @@ public class Book_Booklist {
 	 * @param series   - series name of the Book
 	 * @param serieVol - volume number of the Book in the series
 	 * @param ebook    - sets the book as ebook
+	 * @param rating   - Book User Rating
 	 * @param pic      - Book Cover
 	 * @param desc     - Book Description mostly a short summary
 	 * @param isbn     - International Standard Book Number (ISBN13)
@@ -102,9 +105,9 @@ public class Book_Booklist {
 	 * @param db       - true if book should be added to db or just temporary to the
 	 *                 list
 	 */
-	public Book_Booklist(String author, String title, String note, String series, String seriesVol, boolean ebook,
+	public Book_Booklist(String author, String title, String note, String series, String seriesVol, boolean ebook, int rating,
 			Image pic, String desc, String isbn, Timestamp date, boolean db) throws SQLException {
-		this(author, title, false, "", "", note, series, seriesVol, ebook, pic, desc, isbn, date, db);
+		this(author, title, false, "", "", note, series, seriesVol, ebook, rating, pic, desc, isbn, date, db);
 	}
 
 	/**
