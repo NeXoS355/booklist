@@ -63,19 +63,22 @@ public class Dialog_edit_Booklist extends JDialog {
 	private RoundJTextField txtSeriesVol;
 	private JCheckBox checkEbook;
 	private JLabel lblPic;
-	private JLabel lblFirstStar;
-	private JLabel lblSecondStar;
-	private JLabel lblThirdStar;
-	private JLabel lblFourthStar;
-	private JLabel lblFifthStar;
+	private JLabel lblStars;
+	private ImageIcon zeroStar;
+	private ImageIcon zeroHalfStar;
+	private ImageIcon oneStar;
+	private ImageIcon oneHalfStar;
+	private ImageIcon twoStar;
+	private ImageIcon twoHalfStar;
+	private ImageIcon threeStar;
+	private ImageIcon threeHalfStar;
+	private ImageIcon fourStar;
+	private ImageIcon fourHalfStar;
+	private ImageIcon fifeStar;
 	private JLabel lblAckRating;
-	private ImageIcon fullStar;
-	private ImageIcon halfStar;
-	private ImageIcon noStar;
 	private ImageIcon ackRating;
 	private boolean ack = false;
-	private JPanel panelEastRating = new JPanel(new GridLayout(1, 6, -5, -5));
-	private int currentShownRating = 0;
+	private JPanel panelEastRating = new JPanel(new GridBagLayout());
 	private Book_Booklist entry;
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
@@ -94,12 +97,6 @@ public class Dialog_edit_Booklist extends JDialog {
 			BookListModel.loadOnDemand(entry);
 		}
 
-		URL fullStarIconURL = getClass().getResource("/resources/fullStar.png");
-		fullStar = new ImageIcon(fullStarIconURL);
-		URL halfStarIconURL = getClass().getResource("/resources/halfStar.png");
-		halfStar = new ImageIcon(halfStarIconURL);
-		URL noStarIconURL = getClass().getResource("/resources/noStar.png");
-		noStar = new ImageIcon(noStarIconURL);
 		URL ackRatingIconURL = getClass().getResource("/resources/ackRating.png");
 		ackRating = new ImageIcon(ackRatingIconURL);
 
@@ -262,236 +259,104 @@ public class Dialog_edit_Booklist extends JDialog {
 			panelEastBorder.add(btnDownloadInfo, BorderLayout.CENTER);
 		}
 
-		lblFirstStar = new JLabel(noStar);
-		lblSecondStar = new JLabel(noStar);
-		lblThirdStar = new JLabel(noStar);
-		lblFourthStar = new JLabel(noStar);
-		lblFifthStar = new JLabel(noStar);
+		
+		/*
+		 * create and add components to Rating Panel
+		 */
+		lblStars = new JLabel();
+		URL zeroStarUrl = getClass().getResource("/resources/0Star.png");
+		zeroStar = new ImageIcon(zeroStarUrl);
+		URL zeroHalfStarUrl = getClass().getResource("/resources/0_5Star.png");
+		zeroHalfStar = new ImageIcon(zeroHalfStarUrl);
+		URL oneStarUrl = getClass().getResource("/resources/1Star.png");
+		oneStar = new ImageIcon(oneStarUrl);
+		URL oneHalfStarUrl = getClass().getResource("/resources/1_5Star.png");
+		oneHalfStar = new ImageIcon(oneHalfStarUrl);
+		URL twoStarUrl = getClass().getResource("/resources/2Star.png");
+		twoStar = new ImageIcon(twoStarUrl);
+		URL twoHalfStarUrl = getClass().getResource("/resources/2_5Star.png");
+		twoHalfStar = new ImageIcon(twoHalfStarUrl);
+		URL threeStarUrl = getClass().getResource("/resources/3Star.png");
+		threeStar = new ImageIcon(threeStarUrl);
+		URL threeHalfStarUrl = getClass().getResource("/resources/3_5Star.png");
+		threeHalfStar = new ImageIcon(threeHalfStarUrl);
+		URL fourStarUrl = getClass().getResource("/resources/4Star.png");
+		fourStar = new ImageIcon(fourStarUrl);
+		URL fourHalfStarUrl = getClass().getResource("/resources/4_5Star.png");
+		fourHalfStar = new ImageIcon(fourHalfStarUrl);
+		URL fifeStarUrl = getClass().getResource("/resources/5Star.png");
+		fifeStar = new ImageIcon(fifeStarUrl);
+
 		lblAckRating = new JLabel(ackRating);
 		lblAckRating.setVisible(false);
 
-		setRatingGUI();
+		setRatingIcon();
 
-		lblFirstStar.addMouseMotionListener(new MouseMotionAdapter() {
-
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				if (!ack) {
-					int half = lblFirstStar.getWidth() / 2;
-					int mouse = e.getX();
-					if (mouse > half && currentShownRating != 2) {
-						lblSecondStar.setIcon(noStar);
-						lblThirdStar.setIcon(noStar);
-						lblFourthStar.setIcon(noStar);
-						lblFifthStar.setIcon(noStar);
-						lblFirstStar.setIcon(fullStar);
-						currentShownRating = 2;
-					} else if (mouse < half && currentShownRating != 1) {
-						lblSecondStar.setIcon(noStar);
-						lblThirdStar.setIcon(noStar);
-						lblFourthStar.setIcon(noStar);
-						lblFifthStar.setIcon(noStar);
-						lblFirstStar.setIcon(halfStar);
-						currentShownRating = 1;
-					}
-				}
-			}
-		});
-		lblFirstStar.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				setRatingGUI();
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				setRating(e, 1);
-			}
-
-		});
-
-		lblSecondStar.addMouseMotionListener(new MouseMotionAdapter() {
+		lblStars.addMouseMotionListener(new MouseMotionAdapter() {
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				if (!ack) {
-					int half = lblFirstStar.getWidth() / 2;
+					int segmentWidth = lblStars.getWidth() / 10;
 					int mouse = e.getX();
-					if (mouse > half && currentShownRating != 4) {
-						lblFirstStar.setIcon(fullStar);
-						lblThirdStar.setIcon(noStar);
-						lblFourthStar.setIcon(noStar);
-						lblFifthStar.setIcon(noStar);
-						lblSecondStar.setIcon(fullStar);
-						currentShownRating = 4;
-					} else if (mouse < half && currentShownRating != 3) {
-						lblFirstStar.setIcon(fullStar);
-						lblThirdStar.setIcon(noStar);
-						lblFourthStar.setIcon(noStar);
-						lblFifthStar.setIcon(noStar);
-						lblSecondStar.setIcon(halfStar);
-						currentShownRating = 3;
+					int segment = mouse / segmentWidth + 1;
+
+					switch (segment) {
+					case 1:
+						lblStars.setIcon(zeroHalfStar);
+						break;
+					case 2:
+						lblStars.setIcon(oneStar);
+						break;
+					case 3:
+						lblStars.setIcon(oneHalfStar);
+						break;
+					case 4:
+						lblStars.setIcon(twoStar);
+						break;
+					case 5:
+						lblStars.setIcon(twoHalfStar);
+						break;
+					case 6:
+						lblStars.setIcon(threeStar);
+						break;
+					case 7:
+						lblStars.setIcon(threeHalfStar);
+						break;
+					case 8:
+						lblStars.setIcon(fourStar);
+						break;
+					case 9:
+						lblStars.setIcon(fourHalfStar);
+						break;
+					case 10:
+						lblStars.setIcon(fifeStar);
+						break;
 					}
 				}
 			}
 		});
-		lblSecondStar.addMouseListener(new MouseAdapter() {
+
+		lblStars.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				setRatingGUI();
+				setRatingIcon();
 			}
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				setRating(e, 2);
-			}
-
-		});
-
-		lblThirdStar.addMouseMotionListener(new MouseMotionAdapter() {
-
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				if (!ack) {
-					int half = lblFirstStar.getWidth() / 2;
-					int mouse = e.getX();
-					if (mouse > half && currentShownRating != 6) {
-						lblFirstStar.setIcon(fullStar);
-						lblSecondStar.setIcon(fullStar);
-						lblFourthStar.setIcon(noStar);
-						lblFifthStar.setIcon(noStar);
-						lblThirdStar.setIcon(fullStar);
-						currentShownRating = 6;
-					} else if (mouse < half && currentShownRating != 5) {
-						lblFirstStar.setIcon(fullStar);
-						lblSecondStar.setIcon(fullStar);
-						lblFourthStar.setIcon(noStar);
-						lblFifthStar.setIcon(noStar);
-						lblThirdStar.setIcon(halfStar);
-						currentShownRating = 5;
-					}
+				int segmentWidth = lblStars.getWidth() / 10;
+				int mouse = e.getX();
+				int segment = mouse / segmentWidth + 1;
+				
+				if (SwingUtilities.isLeftMouseButton(e)) {
+					setRating(segment);
 				}
 			}
 		});
-		lblThirdStar.addMouseListener(new MouseAdapter() {
 
-			@Override
-			public void mouseExited(MouseEvent e) {
-				setRatingGUI();
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				setRating(e, 3);
-			}
-
-		});
-
-		lblFourthStar.addMouseMotionListener(new MouseMotionAdapter() {
-
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				if (!ack) {
-					int half = lblFirstStar.getWidth() / 2;
-					int mouse = e.getX();
-					if (mouse > half && currentShownRating != 8) {
-						lblFirstStar.setIcon(fullStar);
-						lblSecondStar.setIcon(fullStar);
-						lblThirdStar.setIcon(fullStar);
-						lblFifthStar.setIcon(noStar);
-						lblFourthStar.setIcon(fullStar);
-						currentShownRating = 8;
-					} else if (mouse < half && currentShownRating != 7) {
-						lblFirstStar.setIcon(fullStar);
-						lblSecondStar.setIcon(fullStar);
-						lblThirdStar.setIcon(fullStar);
-						lblFifthStar.setIcon(noStar);
-						lblFourthStar.setIcon(halfStar);
-						currentShownRating = 7;
-					}
-				}
-			}
-		});
-		lblFourthStar.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				setRatingGUI();
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				setRating(e, 4);
-			}
-
-		});
-		lblFifthStar.addMouseMotionListener(new MouseMotionAdapter() {
-
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				if (!ack) {
-					int half = lblFirstStar.getWidth() / 2;
-					int mouse = e.getX();
-					int delay = 25;
-					if (mouse > half && currentShownRating != 10) {
-						Mainframe.executor.submit(() -> {
-							try {
-								lblFirstStar.setIcon(fullStar);
-								Thread.sleep(delay);
-								lblSecondStar.setIcon(fullStar);
-								Thread.sleep(delay);
-								lblThirdStar.setIcon(fullStar);
-								Thread.sleep(delay);
-								lblFourthStar.setIcon(fullStar);
-								Thread.sleep(delay);
-								lblFifthStar.setIcon(fullStar);
-							} catch (InterruptedException e1) {
-								Mainframe.logger.error(e1.getMessage());
-							}
-						});
-						currentShownRating = 10;
-					} else if (mouse < half && currentShownRating != 9) {
-						Mainframe.executor.submit(() -> {
-							try {
-								lblFirstStar.setIcon(fullStar);
-								Thread.sleep(delay);
-								lblSecondStar.setIcon(fullStar);
-								Thread.sleep(delay);
-								lblThirdStar.setIcon(fullStar);
-								Thread.sleep(delay);
-								lblFourthStar.setIcon(fullStar);
-								Thread.sleep(delay);
-								lblFifthStar.setIcon(halfStar);
-							} catch (InterruptedException e1) {
-								Mainframe.logger.error(e1.getMessage());
-							}
-						});
-						currentShownRating = 9;
-					}
-				}
-			}
-		});
-		lblFifthStar.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				setRatingGUI();
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				setRating(e, 5);
-			}
-
-		});
-
-		panelEastRating.add(lblFirstStar);
-		panelEastRating.add(lblSecondStar);
-		panelEastRating.add(lblThirdStar);
-		panelEastRating.add(lblFourthStar);
-		panelEastRating.add(lblFifthStar);
+		panelEastRating.add(lblStars);
 		panelEastRating.add(lblAckRating);
 
 		panelEastRating.setAlignmentX(0);
@@ -1243,118 +1108,60 @@ public class Dialog_edit_Booklist extends JDialog {
 	}
 
 	/**
-	 * sets the correct Star Icons according to current Rating
+	 * sets the correct Rating Icon according to current Rating
 	 * 
 	 */
-	private void setRatingGUI() {
+	private void setRatingIcon() {
 		if (entry.getRating() == 1) {
-			lblFirstStar.setIcon(halfStar);
-			lblSecondStar.setIcon(noStar);
-			lblThirdStar.setIcon(noStar);
-			lblFourthStar.setIcon(noStar);
-			lblFifthStar.setIcon(noStar);
+			lblStars.setIcon(zeroHalfStar);
 		} else if (entry.getRating() == 2) {
-			lblFirstStar.setIcon(fullStar);
-			lblSecondStar.setIcon(noStar);
-			lblThirdStar.setIcon(noStar);
-			lblFourthStar.setIcon(noStar);
-			lblFifthStar.setIcon(noStar);
+			lblStars.setIcon(oneStar);
 		} else if (entry.getRating() == 3) {
-			lblFirstStar.setIcon(fullStar);
-			lblSecondStar.setIcon(halfStar);
-			lblThirdStar.setIcon(noStar);
-			lblFourthStar.setIcon(noStar);
-			lblFifthStar.setIcon(noStar);
+			lblStars.setIcon(oneHalfStar);
 		} else if (entry.getRating() == 4) {
-			lblFirstStar.setIcon(fullStar);
-			lblSecondStar.setIcon(fullStar);
-			lblThirdStar.setIcon(noStar);
-			lblFourthStar.setIcon(noStar);
-			lblFifthStar.setIcon(noStar);
+			lblStars.setIcon(twoStar);
 		} else if (entry.getRating() == 5) {
-			lblFirstStar.setIcon(fullStar);
-			lblSecondStar.setIcon(fullStar);
-			lblThirdStar.setIcon(halfStar);
-			lblFourthStar.setIcon(noStar);
-			lblFifthStar.setIcon(noStar);
+			lblStars.setIcon(twoHalfStar);
 		} else if (entry.getRating() == 6) {
-			lblFirstStar.setIcon(fullStar);
-			lblSecondStar.setIcon(fullStar);
-			lblThirdStar.setIcon(fullStar);
-			lblFourthStar.setIcon(noStar);
-			lblFifthStar.setIcon(noStar);
+			lblStars.setIcon(threeStar);
 		} else if (entry.getRating() == 7) {
-			lblFirstStar.setIcon(fullStar);
-			lblSecondStar.setIcon(fullStar);
-			lblThirdStar.setIcon(fullStar);
-			lblFourthStar.setIcon(halfStar);
-			lblFifthStar.setIcon(noStar);
+			lblStars.setIcon(threeHalfStar);
 		} else if (entry.getRating() == 8) {
-			lblFirstStar.setIcon(fullStar);
-			lblSecondStar.setIcon(fullStar);
-			lblThirdStar.setIcon(fullStar);
-			lblFourthStar.setIcon(fullStar);
-			lblFifthStar.setIcon(noStar);
+			lblStars.setIcon(fourStar);
 		} else if (entry.getRating() == 9) {
-			lblFirstStar.setIcon(fullStar);
-			lblSecondStar.setIcon(fullStar);
-			lblThirdStar.setIcon(fullStar);
-			lblFourthStar.setIcon(fullStar);
-			lblFifthStar.setIcon(halfStar);
+			lblStars.setIcon(fourHalfStar);
 		} else if (entry.getRating() == 10) {
-			lblFirstStar.setIcon(fullStar);
-			lblSecondStar.setIcon(fullStar);
-			lblThirdStar.setIcon(fullStar);
-			lblFourthStar.setIcon(fullStar);
-			lblFifthStar.setIcon(fullStar);
+			lblStars.setIcon(fifeStar);
 		} else {
-			lblFirstStar.setIcon(noStar);
-			lblSecondStar.setIcon(noStar);
-			lblThirdStar.setIcon(noStar);
-			lblFourthStar.setIcon(noStar);
-			lblFifthStar.setIcon(noStar);
+			lblStars.setIcon(zeroStar);
 		}
-		currentShownRating = 0;
-
 	}
 
 	/**
 	 * sets the definied Rating of Booklist entry and shows Acknowldge Icon
 	 * 
-	 * @param e - MouseEvent to get Mouse Position
-	 * @param i - value of pressed Star 1-5
+	 * @param segment - rating to set according to mouse position
 	 * 
 	 */
-	private void setRating(MouseEvent e, int i) {
-		if (SwingUtilities.isLeftMouseButton(e)) {
-			int half = lblFirstStar.getWidth() / 2;
-			int mouse = e.getX();
+	private void setRating(int segment) {
 
-			if (mouse > half) {
-				int rate = i * 2;
-				Mainframe.logger.trace("Rating set: " + rate);
-				entry.setRating(rate, true);
-			} else {
-				int rate = i * 2 - 1;
-				Mainframe.logger.trace("Rating set: " + rate);
-				entry.setRating(rate, true);
+		Mainframe.logger.trace("Rating set: " + segment);
+		entry.setRating(segment, true);
+
+		Mainframe.executor.submit(() -> {
+			try {
+				ack = true;
+//				panelEastRating.add(lblAckRating);
+				lblAckRating.setVisible(true);
+				Thread.sleep(2000);
+//				panelEastRating.remove(lblAckRating);
+				lblAckRating.setVisible(false);
+				panelEastRating.repaint();
+				ack = false;
+			} catch (InterruptedException e1) {
+				Mainframe.logger.error(e1.getMessage());
 			}
-
-			Mainframe.executor.submit(() -> {
-				try {
-					ack = true;
-					panelEastRating.add(lblAckRating);
-					lblAckRating.setVisible(true);
-					Thread.sleep(2000);
-					panelEastRating.remove(lblAckRating);
-					lblAckRating.setVisible(false);
-					panelEastRating.repaint();
-					ack = false;
-				} catch (InterruptedException e1) {
-					Mainframe.logger.error(e1.getMessage());
-				}
-			});
-		}
-
+		});
 	}
+
 }
