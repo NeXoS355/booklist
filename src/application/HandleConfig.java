@@ -112,7 +112,7 @@ public class HandleConfig {
 									"Fehler in der config (debug): Falsches Format - erwartet integer");
 
 						}
-					} else if (setting.contains("layout")) {
+					} else if (setting.contains("layoutWidth")) {
 						String[] values = value.trim().split(",");
 						for (int j = 0; j < values.length; j++) {
 							Mainframe.prozEbook = Integer.parseInt(values[0]);
@@ -120,6 +120,15 @@ public class HandleConfig {
 							Mainframe.prozTitle = Integer.parseInt(values[2]);
 							Mainframe.prozSeries = Integer.parseInt(values[3]);
 							Mainframe.prozRating = Integer.parseInt(values[4]);
+						}
+					} else if (setting.contains("layoutSort")) {
+						String[] values = value.trim().split(",");
+						for (int j = 0; j < values.length; j++) {
+							SimpleTableModel.columnNames[0] = (values[0]);
+							SimpleTableModel.columnNames[1] = (values[1]);
+							SimpleTableModel.columnNames[2] = (values[2]);
+							SimpleTableModel.columnNames[3] = (values[3]);
+							SimpleTableModel.columnNames[4] = (values[4]);
 						}
 					}
 

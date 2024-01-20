@@ -10,7 +10,7 @@ public class SimpleTableModel extends DefaultTableModel {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private String[] columnNames = { "E-Book", "Autor", "Titel", "Serie", "Rating" };
+	public static String[] columnNames = { "E-Book", "Autor", "Titel", "Serie", "Rating" };
 	private int cols = columnNames.length;
 	private String[] rowData = new String[cols];
 
@@ -23,22 +23,41 @@ public class SimpleTableModel extends DefaultTableModel {
 			this.removeRow(i);
 		}
 
+		int columnEbook = 0;
+		int columnAuthor = 0;
+		int columnTitle = 0;
+		int columnSeries = 0;
+		int columnRating = 0;
+
+		for (int i = 0; i < columnNames.length; i++) {
+			if (columnNames[i].equals("E-Book"))
+				columnEbook = i;
+			else if (columnNames[i].equals("Autor"))
+				columnAuthor = i;
+			else if (columnNames[i].equals("Titel"))
+				columnTitle = i;
+			else if (columnNames[i].equals("Serie"))
+				columnSeries = i;
+			else if (columnNames[i].equals("Rating"))
+				columnRating = i;
+		}
+
 		for (int i = 0; i < bücher.getSize(); i++) {
 			for (int j = 0; j < cols; j++) {
-				if (j == 0) {
+				if (j == columnEbook) {
 					boolean isEbook = bücher.getElementAt(i).isEbook();
 					if (isEbook) {
 						rowData[j] = "X";
 					} else {
 						rowData[j] = "";
 					}
-				} else if (j == 1) {
+				} else if (j == columnAuthor) {
 					rowData[j] = bücher.getElementAt(i).getAuthor();
-				} else if (j == 2) {
+				} else if (j == columnTitle) {
 					rowData[j] = bücher.getElementAt(i).getTitle();
-				} else if (j == 3) {
+				} else if (j == columnSeries) {
 					rowData[j] = bücher.getElementAt(i).getSeries() + " - " + bücher.getElementAt(i).getSeriesVol();
-				} else if (j == 4) {
+				} else if (j == columnRating) {
 					if (bücher.getElementAt(i).getRating() > 0) {
 						rowData[j] = Integer.toString(bücher.getElementAt(i).getRating());
 					} else {

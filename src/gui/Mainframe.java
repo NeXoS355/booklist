@@ -91,14 +91,14 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	
+
 	public static int prozEbook = 0;
 	public static int prozAuthor = 0;
 	public static int prozTitle = 0;
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
-	
-	private String version = "Ver. 2.6.4  (01.2024)  ";
+
+	private String version = "Ver. 2.6.5  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -125,7 +125,8 @@ public class Mainframe extends JFrame {
 		this.setIconImage(icon.getImage());
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
+				| IllegalAccessException e) {
 			logger.error(e.getMessage());
 		}
 
@@ -311,14 +312,14 @@ public class Mainframe extends JFrame {
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
 
 		logger.trace("Finished creating GUI Components. Start creating Table Contents");
-		
+
 		table.setModel(tableDisplay);
-		table.setAutoResizeMode( JTable.AUTO_RESIZE_NEXT_COLUMN);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
 		table.setFont(defaultFont);
 		table.setShowVerticalLines(false);
 		table.setSelectionBackground(Color.DARK_GRAY);
 		table.setSelectionForeground(Color.WHITE);
-		table.setRowHeight(table.getRowHeight() + 6);		
+		table.setRowHeight(table.getRowHeight() + 6);
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -492,7 +493,7 @@ public class Mainframe extends JFrame {
 		updateModel();
 
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-			
+
 		this.setVisible(true);
 		addWindowListener(new WindowAdapter() {
 
@@ -506,9 +507,10 @@ public class Mainframe extends JFrame {
 		logger.trace("Init completed");
 	}
 
-	/** deletes the currently selected entry from Booklist
-	  * 
-	*/
+	/**
+	 * deletes the currently selected entry from Booklist
+	 * 
+	 */
 	public static void deleteBook() {
 		int[] selected = table.getSelectedRows();
 		for (int i = 0; i < selected.length; i++) {
@@ -534,9 +536,10 @@ public class Mainframe extends JFrame {
 		updateModel();
 	}
 
-	/** updates the JTree
-	  * 
-	*/
+	/**
+	 * updates the JTree
+	 * 
+	 */
 	public static void updateNode() {
 		rootNode = new DefaultMutableTreeNode("Autoren (" + BookListModel.authors.size() + ")");
 		treeModel = new DefaultTreeModel(rootNode);
@@ -565,11 +568,12 @@ public class Mainframe extends JFrame {
 		tree.repaint();
 	}
 
-	/** copy multiple files to specified directory
-	  * 
-	  * @param from - Source file or Directory
-	  * @param to - Destination Directory
-	*/
+	/**
+	 * copy multiple files to specified directory
+	 * 
+	 * @param from - Source file or Directory
+	 * @param to   - Destination Directory
+	 */
 	public static void copyFilesInDirectory(File from, File to) {
 		if (!to.exists()) {
 			to.mkdirs();
@@ -588,11 +592,12 @@ public class Mainframe extends JFrame {
 		}
 	}
 
-	/** copy single specified file to specified directory
-	  * 
-	  * @param file - file to copy
-	  * @param to - path where to save the file
-	*/
+	/**
+	 * copy single specified file to specified directory
+	 * 
+	 * @param file - file to copy
+	 * @param to   - path where to save the file
+	 */
 	private static void copyFileToDirectory(File file, File to) throws IOException {
 		if (!to.exists()) {
 			to.mkdirs();
@@ -601,51 +606,63 @@ public class Mainframe extends JFrame {
 		Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
 	}
 
-	/** updates the table with current model
-	  * 
-	*/
+	/**
+	 * updates the table with current model
+	 * 
+	 */
 	public static void updateModel() {
 		tableDisplay = new SimpleTableModel(entries);
 		table.setModel(tableDisplay);
 		treeSelection = "";
 		setTableLayout();
 	}
-	
+
+	/**
+	 * sets the JTable Column Layout
+	 * 
+	 */
 	public static void setTableLayout() {
 		TableColumnModel columnModel = table.getColumnModel();
-		
+
 		int total = columnModel.getTotalColumnWidth();
 		int minProzEbook = total * 5 / 100;
-		int minProzAuthor = total *10 / 100;
+		int minProzAuthor = total * 10 / 100;
 		int minProzTitle = total * 10 / 100;
 		int minProzSeries = total * 10 / 100;
 		int minProzRating = total * 5 / 100;
-		
-		columnModel.getColumn(0).setMinWidth(minProzEbook);
-		columnModel.getColumn(0).setMaxWidth(50);
-		columnModel.getColumn(0).setPreferredWidth(prozEbook);
-		
-		columnModel.getColumn(1).setMinWidth(minProzAuthor);
-		columnModel.getColumn(1).setMaxWidth(Integer.MAX_VALUE);
-		columnModel.getColumn(1).setPreferredWidth(prozAuthor);
-		
-		columnModel.getColumn(2).setMinWidth(minProzTitle);
-		columnModel.getColumn(2).setMaxWidth(Integer.MAX_VALUE);
-		columnModel.getColumn(2).setPreferredWidth(prozTitle);
-		
-		columnModel.getColumn(3).setMinWidth(minProzSeries);
-		columnModel.getColumn(3).setMaxWidth(Integer.MAX_VALUE);
-		columnModel.getColumn(3).setPreferredWidth(prozSeries);
-		
-		columnModel.getColumn(4).setMinWidth(minProzRating);
-		columnModel.getColumn(4).setMaxWidth(50);
-		columnModel.getColumn(4).setPreferredWidth(prozRating);
+
+		for (int i = 0; i < SimpleTableModel.columnNames.length; i++) {
+			if (SimpleTableModel.columnNames[i].equals("E-Book")) {
+				columnModel.getColumn(i).setMinWidth(minProzEbook);
+				columnModel.getColumn(i).setMaxWidth(50);
+				columnModel.getColumn(i).setPreferredWidth(prozEbook);
+			} else if (SimpleTableModel.columnNames[i].equals("Autor")) {
+				columnModel.getColumn(i).setMinWidth(minProzAuthor);
+				columnModel.getColumn(i).setMaxWidth(Integer.MAX_VALUE);
+				columnModel.getColumn(i).setPreferredWidth(prozAuthor);
+			} else if (SimpleTableModel.columnNames[i].equals("Titel")) {
+				columnModel.getColumn(i).setMinWidth(minProzTitle);
+				columnModel.getColumn(i).setMaxWidth(Integer.MAX_VALUE);
+				columnModel.getColumn(i).setPreferredWidth(prozTitle);
+			} else if (SimpleTableModel.columnNames[i].equals("Serie")) {
+				columnModel.getColumn(i).setMinWidth(minProzSeries);
+				columnModel.getColumn(i).setMaxWidth(Integer.MAX_VALUE);
+				columnModel.getColumn(i).setPreferredWidth(prozSeries);
+			} else if (SimpleTableModel.columnNames[i].equals("Rating")) {
+				columnModel.getColumn(i).setMinWidth(minProzRating);
+				columnModel.getColumn(i).setMaxWidth(50);
+				columnModel.getColumn(i).setPreferredWidth(prozRating);
+			}
+
+		}
+
 	}
 
-	/** search table entries with specified String
-	  * 
-	  * @param text - search String
-	*/
+	/**
+	 * search table entries with specified String
+	 * 
+	 * @param text - search String
+	 */
 	public static void search(String text) {
 		filter.clear();
 		text = text.toUpperCase();
@@ -696,43 +713,48 @@ public class Mainframe extends JFrame {
 		}
 	}
 
-	/** get current Tree Selection for other Classes
-	  * 
-	  * @return current Tree Selection
-	*/
+	/**
+	 * get current Tree Selection for other Classes
+	 * 
+	 * @return current Tree Selection
+	 */
 	public static String getTreeSelection() {
 		System.out.println(treeSelection);
 		return treeSelection;
 	}
 
-	/** get last searched text for other classes
-	  * 
-	  * @return last searched text
-	*/
+	/**
+	 * get last searched text for other classes
+	 * 
+	 * @return last searched text
+	 */
 	public static String getLastSearch() {
 		return lastSearch;
 	}
 
-	/** sets global Variable to the last searched String
-	  * 
-	  * @param lastSearch - String of last searched text
-	*/
+	/**
+	 * sets global Variable to the last searched String
+	 * 
+	 * @param lastSearch - String of last searched text
+	 */
 	public static void setLastSearch(String lastSearch) {
 		Mainframe.lastSearch = lastSearch;
 	}
-	
-	/** start Instance of Mainframe
-	  * 
-	  * @param args - 
-	*/
+
+	/**
+	 * start Instance of Mainframe
+	 * 
+	 * @param args -
+	 */
 	public static void main(String[] args) {
 		getInstance();
 	}
-	
-	/** startr Mainframe for instance
-	  * 
-	  * @return Mainframe Object
-	*/
+
+	/**
+	 * startr Mainframe for instance
+	 * 
+	 * @return Mainframe Object
+	 */
 	public static Mainframe getInstance() {
 		if (instance == null) {
 			instance = new Mainframe();

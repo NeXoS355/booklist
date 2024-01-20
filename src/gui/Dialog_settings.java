@@ -207,7 +207,7 @@ public class Dialog_settings extends JDialog {
 			TableColumnModel columnModel = Mainframe.table.getColumnModel();
 			
 			StringBuilder strWidth = new StringBuilder();
-			strWidth.append("layout=");
+			strWidth.append("layoutWidth=");
 			strWidth.append(columnModel.getColumn(0).getWidth());
 			strWidth.append(",");
 			strWidth.append(columnModel.getColumn(1).getWidth());
@@ -218,7 +218,21 @@ public class Dialog_settings extends JDialog {
 			strWidth.append(",");
 			strWidth.append(columnModel.getColumn(4).getWidth());
 			
-			out.print(strWidth);
+			out.println(strWidth);
+			
+			StringBuilder strColumnTitle = new StringBuilder();
+			strColumnTitle.append("layoutSort=");
+			strColumnTitle.append(columnModel.getColumn(0).getHeaderValue());
+			strColumnTitle.append(",");
+			strColumnTitle.append(columnModel.getColumn(1).getHeaderValue());
+			strColumnTitle.append(",");
+			strColumnTitle.append(columnModel.getColumn(2).getHeaderValue());
+			strColumnTitle.append(",");
+			strColumnTitle.append(columnModel.getColumn(3).getHeaderValue());
+			strColumnTitle.append(",");
+			strColumnTitle.append(columnModel.getColumn(4).getHeaderValue());
+			
+			out.println(strColumnTitle);
 			
 
 		} catch (FileNotFoundException ex) {
