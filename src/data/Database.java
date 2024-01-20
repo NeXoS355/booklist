@@ -27,10 +27,11 @@ public class Database {
 	private static Connection con = null;
 	public static int highestBid = 100000;
 
-	/** Create Connection to Derby Database
-	  * 
-	  *@return - Connection object to derby Database
-	*/
+	/**
+	 * Create Connection to Derby Database
+	 * 
+	 * @return - Connection object to derby Database
+	 */
 	public static Connection createConnection() {
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 		try {
@@ -51,9 +52,10 @@ public class Database {
 
 	}
 
-	/** Close Connection to Derby Database
-	  * 
-	*/
+	/**
+	 * Close Connection to Derby Database
+	 * 
+	 */
 	public static void closeConnection() {
 		try {
 			DriverManager.getConnection("jdbc:derby:;shutdown=true");
@@ -69,10 +71,11 @@ public class Database {
 
 	}
 
-	/** checks Derby DB Tables and creates them if needed
-	  * 
-	  * @param con - Connection Object from "createConnection" Function
-	*/
+	/**
+	 * checks Derby DB Tables and creates them if needed
+	 * 
+	 * @param con - Connection Object from "createConnection" Function
+	 */
 	public static void createTable(Connection con) {
 		Statement createBooklist = null;
 		Statement createWishlist = null;
@@ -113,10 +116,11 @@ public class Database {
 		}
 	}
 
-	/** prints SQL Exception to console and logger
-	  * 
-	  * @param e - Exception handler
-	*/
+	/**
+	 * prints SQL Exception to console and logger
+	 * 
+	 * @param e - Exception handler
+	 */
 	private static void printSQLException(SQLException e) {
 		System.err.println("\n----- SQLException -----");
 		System.err.println("  SQL State:  " + e.getSQLState());
@@ -126,10 +130,11 @@ public class Database {
 		Mainframe.logger.error(e.getMessage());
 	}
 
-	/** reads whole table "bücher" from Database
-	  * 
-	  * @return - ResultSet with all entries from Table "bücher"
-	*/
+	/**
+	 * reads whole table "bücher" from Database
+	 * 
+	 * @return - ResultSet with all entries from Table "bücher"
+	 */
 	public static ResultSet readDbBooklist() {
 		ResultSet rs = null;
 		try {
@@ -141,10 +146,11 @@ public class Database {
 		return rs;
 	}
 
-	/** reads only mandatory columns of table "bücher"
-	  * 
-	  * @return - ResultSet with only mandatory columns from Table "bücher"
-	*/
+	/**
+	 * reads only mandatory columns of table "bücher"
+	 * 
+	 * @return - ResultSet with only mandatory columns from Table "bücher"
+	 */
 	public static ResultSet readDbBooklistLite() {
 		ResultSet rs = null;
 		try {
@@ -156,34 +162,81 @@ public class Database {
 		}
 		return rs;
 	}
-	
-	/** reads single DISTINCT column from table "bücher" to get e.g. different authors or series info
-	  * 
-	  * @param columnName - name of the column to retrieve 
-	  * 
-	  * @return - ResultSet with only mandatory columns from Table "bücher"
-	*/
-	public static ResultSet getColumnFromBooklist(String columnName) {
+
+	/**
+	 * reads single DISTINCT column from table "bücher" to get e.g. different
+	 * authors or series info
+	 * 
+	 * @param columnName - name of the column to retrieve
+	 * 
+	 * @return - ResultSet with only mandatory columns from Table "bücher"
+	 */
+	public static ResultSet getColumnsFromBooklist(String[] columnName) {
 		ResultSet rs = null;
+		StringBuilder str = new StringBuilder();
+
+		str.append("SELECT DISTINCT ");
+		for (int i = 0; i < columnName.length; i++) {
+			str.append(columnName[i]);
+			if (i != columnName.length-1)
+				str.append(",");
+		}
+		str.append(" FROM bücher");
+
 		try {
 			Statement st = con.createStatement();
-			rs = st.executeQuery(
-					"SELECT DISTINCT " + columnName + " FROM bücher");
+			rs = st.executeQuery(str.toString());
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
 		return rs;
 	}
 	
-	/** reads single DISTINCT column from table "bücher" to get e.g. different authors or series info
-	  * 
-	  * @param columnName - name of the column to retrieve 
-	  * @param whereColumn - name of column to filter
-	  * @param whereValue - value to search in column "whereColumn"
-	  * 
-	  * @return - ResultSet with only mandatory columns from Table "bücher"
-	*/
-	public static ResultSet getColumnFromBooklist(String columnName, String whereColumn, String whereValue) {
+	/**
+	 * calculates the Median Rating  with specific group by Clause
+	 * 
+	 * @param columnName - name of the column to retrieve
+	 * 
+	 * @return - ResultSet with Average Rating over specific Group
+	 */
+	public static ResultSet getAvgRating(String[] columnName) {
+		ResultSet rs = null;
+		StringBuilder str = new StringBuilder();
+
+		str.append("SELECT AVG(rating),");
+		for (int i = 0; i < columnName.length; i++) {
+			str.append(columnName[i]);
+			if (i != columnName.length - 1)
+				str.append(",");
+		}
+		str.append(" FROM bücher WHERE rating <> 0 GROUP BY ");
+		for (int i = 0; i < columnName.length; i++) {
+			str.append(columnName[i]);
+			if (i != columnName.length - 1)
+				str.append(",");
+		}
+
+
+		try {
+			Statement st = con.createStatement();
+			rs = st.executeQuery(str.toString());
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+		return rs;
+	}
+
+	/**
+	 * reads single DISTINCT column from table "bücher" to get e.g. different
+	 * authors or series info
+	 * 
+	 * @param columnName  - name of the column to retrieve
+	 * @param whereColumn - name of column to filter
+	 * @param whereValue  - value to search in column "whereColumn"
+	 * 
+	 * @return - ResultSet with only mandatory columns from Table "bücher"
+	 */
+	public static ResultSet getColumnWithWhere(String columnName, String whereColumn, String whereValue) {
 		ResultSet rs = null;
 		try {
 			Statement st = con.createStatement();
@@ -195,13 +248,31 @@ public class Database {
 		return rs;
 	}
 
+	/**
+	 * counts columns with GROUP BY Clause
+	 * 
+	 * @param groupByColumn - name of column to group
+	 * 
+	 * @return - Returns ResultSet of Query with GrouBy Clause. [1] Count, [2] groupByColumn
+	 */
+	public static ResultSet getColumnCountsWithGroup(String groupByColumn) {
+		ResultSet rs = null;
+		try {
+			Statement st = con.createStatement();
+			rs = st.executeQuery("SELECT COUNT(*)," + groupByColumn + " FROM bücher GROUP BY " + groupByColumn);
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+		return rs;
+	}
 
-	/** reads one specific book from table "bücher"
-	  * 
-	  * @param bid - Book ID of needed entry
-	  * 
-	  * @return - ResultSet with one entry from Table "bücher"
-	*/
+	/**
+	 * reads one specific book from table "bücher"
+	 * 
+	 * @param bid - Book ID of needed entry
+	 * 
+	 * @return - ResultSet with one entry from Table "bücher"
+	 */
 	public static ResultSet selectFromBooklist(int bid) {
 		String sql = "SELECT * FROM bücher WHERE bid=" + bid;
 		ResultSet rs = null;
@@ -214,23 +285,26 @@ public class Database {
 		return rs;
 	}
 
-	/** exports all entries from booklist to .csv file (books.csv) in the same Directory
-	  * 
-	  * @return - success value
-	*/
+	/**
+	 * exports all entries from booklist to .csv file (books.csv) in the same
+	 * Directory
+	 * 
+	 * @return - success value
+	 */
 	public static boolean CSVExport() {
 		boolean success = false;
 		System.out.println("CSV Export");
 		String fileName = "books.csv";
 		try (CSVWriter writer = new CSVWriter(new FileWriter(fileName))) {
 			// Spaltenüberschriften hinzufügen
-			String[] header = { "Autor", "Titel", "ausgeliehen an" , "ausgeliehen von" , "Bemerkung","Serie", "Serienteil","E-Book" , "ISBN", "Datum" };
+			String[] header = { "Autor", "Titel", "ausgeliehen an", "ausgeliehen von", "Bemerkung", "Serie",
+					"Serienteil", "E-Book", "ISBN", "Datum" };
 			writer.writeNext(header);
 			ArrayList<Book_Booklist> list = BookListModel.getBooks();
 			int größe = list.size();
 			// Bücher in die Tabelle einfügen
 			for (int i = 0; i < größe; i++) {
-				if(list.get(i).getDate() == null) {
+				if (list.get(i).getDate() == null) {
 					BookListModel.loadOnDemand(list.get(i));
 				}
 				String autor = list.get(i).getAuthor();
@@ -243,7 +317,8 @@ public class Database {
 				String seriePart = list.get(i).getSeriesVol();
 				String ebook = Boolean.toString(list.get(i).isEbook());
 				String isbn = list.get(i).getIsbn();
-				String[] data = { autor, titel, ausgeliehen_an, ausgeliehen_von, bemerkung, serie, seriePart, ebook, isbn, datum };
+				String[] data = { autor, titel, ausgeliehen_an, ausgeliehen_von, bemerkung, serie, seriePart, ebook,
+						isbn, datum };
 				writer.writeNext(data);
 			}
 			;
@@ -254,11 +329,12 @@ public class Database {
 		}
 		return success;
 	}
-	
-	/** read the current DB Versions from table "versions"
-	  * 
-	  * @return - DB version String with last modified date
-	*/
+
+	/**
+	 * read the current DB Versions from table "versions"
+	 * 
+	 * @return - DB version String with last modified date
+	 */
 	public static String readCurrentLayoutVersion() {
 		ResultSet rs = null;
 		String version = "";
@@ -278,10 +354,11 @@ public class Database {
 		return "DB Layout Version:" + version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);
 	}
 
-	/** deletes one specific book from table "bücher"
-	  * 
-	  * @param bid - Book ID of entry
-	*/
+	/**
+	 * deletes one specific book from table "bücher"
+	 * 
+	 * @param bid - Book ID of entry
+	 */
 	public static void deleteFromBooklist(int bid) {
 		try {
 			String sql = "DELETE FROM bücher WHERE bid = ?";
@@ -296,20 +373,21 @@ public class Database {
 		}
 	}
 
-	/** saves a new entry to booklist
-	  * 
-	  * @param author - full name of the Author
-	  * @param title - title of the Book
-	  * @param borrowed - set if borrowed From or To
-	  * @param name - set to name of which one borrowed a book from or to
-	  * @param note - free String input about Book or Author
-	  * @param series - series of book
-	  * @param seriesVol - set which volume is the book in the specified series
-	  * @param ebook - boolean variable if Book is an ebook
-	  * @param date - date when the entry was added
-	  * 
-	  * @return assigned bid of the newly added book
-	*/
+	/**
+	 * saves a new entry to booklist
+	 * 
+	 * @param author    - full name of the Author
+	 * @param title     - title of the Book
+	 * @param borrowed  - set if borrowed From or To
+	 * @param name      - set to name of which one borrowed a book from or to
+	 * @param note      - free String input about Book or Author
+	 * @param series    - series of book
+	 * @param seriesVol - set which volume is the book in the specified series
+	 * @param ebook     - boolean variable if Book is an ebook
+	 * @param date      - date when the entry was added
+	 * 
+	 * @return assigned bid of the newly added book
+	 */
 	public static int addToBooklist(String author, String title, String borrowed, String name, String note,
 			String series, String seriesVol, boolean ebook, String date) throws SQLException {
 		String sql = "INSERT INTO bücher(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,ebook,date,bid) VALUES(?,?,?,?,?,?,?,?,?,?)";
@@ -332,19 +410,20 @@ public class Database {
 		st.executeUpdate();
 		st.close();
 
-		Mainframe.logger.info("Booklist Datenbank Eintrag erstellt: " + author + "," + title + "," + borrowed + ","
-				+ name + "," + note + "," + series + "," + seriesVol + "," + date + "," + int_ebook + ","
-				+ (highestBid));
+		Mainframe.logger
+				.info("Booklist Datenbank Eintrag erstellt: " + author + "," + title + "," + borrowed + "," + name + ","
+						+ note + "," + series + "," + seriesVol + "," + date + "," + int_ebook + "," + (highestBid));
 		return highestBid;
 	}
 
-	/** updates a specified column with provided value and bid
-	  * 
-	  * @param bid - book id
-	  * @param colName - set value of this column
-	  * @param value - set column to this value
-	  * 
-	*/
+	/**
+	 * updates a specified column with provided value and bid
+	 * 
+	 * @param bid     - book id
+	 * @param colName - set value of this column
+	 * @param value   - set column to this value
+	 * 
+	 */
 	public static void updateBooklistEntry(int bid, String colName, String value) {
 		String sql = "update bücher set " + colName + "=? where bid=?";
 		PreparedStatement st;
@@ -359,14 +438,15 @@ public class Database {
 			Mainframe.logger.error("Fehler beim aktualisieren des Buchs: " + bid + " - " + colName + "=" + value);
 		}
 	}
-	
-	/** gets Information about all series of one specific author
-	  * 
-	  * @param author - name of author 
-	  * 
-	  * @return ResultSet with series and volume info from one specific author
-	  * 
-	*/
+
+	/**
+	 * gets Information about all series of one specific author
+	 * 
+	 * @param author - name of author
+	 * 
+	 * @return ResultSet with series and volume info from one specific author
+	 * 
+	 */
 	public static ResultSet getSeriesInfo(String author) {
 		ResultSet rs = null;
 		String sql = "SELECT serie, seriePart FROM bücher WHERE autor=? and serie!= '' ORDER BY serie";
@@ -381,12 +461,13 @@ public class Database {
 		return rs;
 	}
 
-	/** updates the "pic" column of specific Book entry
-	  * 
-	  * @param bid - book id
-	  * @param photo - photo data
-	  * 
-	*/
+	/**
+	 * updates the "pic" column of specific Book entry
+	 * 
+	 * @param bid   - book id
+	 * @param photo - photo data
+	 * 
+	 */
 	public static void updatePic(int bid, InputStream photo) {
 		String sql = "update bücher set pic=? where bid=?";
 		PreparedStatement st;
@@ -403,12 +484,13 @@ public class Database {
 
 	}
 
-	/** empties the "pic" column of specific Book
-	  * 
-	  * @param bid - book id
-	  * 
-	  * @return success value
-	*/
+	/**
+	 * empties the "pic" column of specific Book
+	 * 
+	 * @param bid - book id
+	 * 
+	 * @return success value
+	 */
 	public static boolean delPic(int bid) {
 		String sql = "update bücher set pic=null where bid=?";
 		PreparedStatement st;
@@ -426,12 +508,13 @@ public class Database {
 
 	}
 
-	/** gets the "pic" column of specific Book entry
-	  * 
-	  * @param bid - book id
-	  * 
-	  * @return ResultSet with pic value
-	*/
+	/**
+	 * gets the "pic" column of specific Book entry
+	 * 
+	 * @param bid - book id
+	 * 
+	 * @return ResultSet with pic value
+	 */
 	public static ResultSet getPic(int bid) {
 		ResultSet rs = null;
 		String sql = "SELECT pic FROM bücher WHERE bid=?";
@@ -446,12 +529,13 @@ public class Database {
 		return rs;
 	}
 
-	/** updates the "description" column of specific Book entry
-	  * 
-	  * @param bid - book id
-	  * @param desc - description String
-	  * 
-	*/
+	/**
+	 * updates the "description" column of specific Book entry
+	 * 
+	 * @param bid  - book id
+	 * @param desc - description String
+	 * 
+	 */
 	public static void updateDesc(int bid, String desc) {
 		String sql = "update bücher set description=? where bid=?";
 		PreparedStatement st;
@@ -468,12 +552,13 @@ public class Database {
 
 	}
 
-	/** empties the "description" column of specific Book
-	  * 
-	  * @param bid - book id
-	  * 
-	  * @return success value
-	*/
+	/**
+	 * empties the "description" column of specific Book
+	 * 
+	 * @param bid - book id
+	 * 
+	 * @return success value
+	 */
 	public static boolean delDesc(int bid) {
 		String sql = "update bücher set description=null where bid=?";
 		PreparedStatement st;
@@ -491,12 +576,13 @@ public class Database {
 
 	}
 
-	/** updates the "isbn" column of specific Book entry
-	  * 
-	  * @param bid - book id
-	  * @param isbn - isbn Number as String
-	  * 
-	*/
+	/**
+	 * updates the "isbn" column of specific Book entry
+	 * 
+	 * @param bid  - book id
+	 * @param isbn - isbn Number as String
+	 * 
+	 */
 	public static void updateIsbn(int bid, String isbn) {
 		String sql = "update bücher set isbn=? where bid=?";
 		PreparedStatement st;
@@ -513,12 +599,13 @@ public class Database {
 
 	}
 
-	/** empties the "isbn" column of specific Book
-	  * 
-	  * @param bid - book id
-	  * 
-	  * @return success value
-	*/
+	/**
+	 * empties the "isbn" column of specific Book
+	 * 
+	 * @param bid - book id
+	 * 
+	 * @return success value
+	 */
 	public static boolean delIsbn(int bid) {
 		String sql = "update bücher set isbn='' where bid=?";
 		PreparedStatement st;
@@ -535,13 +622,14 @@ public class Database {
 		}
 
 	}
-	
-	/** updates the "rating" column of specific Book entry
-	  * 
-	  * @param bid - book id
-	  * @param rating - rating Number
-	  * 
-	*/
+
+	/**
+	 * updates the "rating" column of specific Book entry
+	 * 
+	 * @param bid    - book id
+	 * @param rating - rating Number
+	 * 
+	 */
 	public static void updateRating(int bid, int rating) {
 		String sql = "update bücher set rating=? where bid=?";
 		PreparedStatement st;
@@ -558,10 +646,11 @@ public class Database {
 
 	}
 
-	/** reads all columns of table "wishlist" from Database
-	  * 
-	  * @return - ResultSet with all columns from Table "wishlist"
-	*/
+	/**
+	 * reads all columns of table "wishlist" from Database
+	 * 
+	 * @return - ResultSet with all columns from Table "wishlist"
+	 */
 	public static ResultSet readDbWishlist() {
 		ResultSet rs = null;
 		try {
@@ -573,16 +662,17 @@ public class Database {
 		return rs;
 	}
 
-	/** saves a new entry to wishlist
-	  * 
-	  * @param author - full name of the Author
-	  * @param title - title of the Book
-	  * @param note - free String input about Book or Author
-	  * @param series - series of book
-	  * @param seriesVol - set which volume is the book in the specified series
-	  * @param date - date when the entry was added
-	  * 
-	*/
+	/**
+	 * saves a new entry to wishlist
+	 * 
+	 * @param author    - full name of the Author
+	 * @param title     - title of the Book
+	 * @param note      - free String input about Book or Author
+	 * @param series    - series of book
+	 * @param seriesVol - set which volume is the book in the specified series
+	 * @param date      - date when the entry was added
+	 * 
+	 */
 	public static void addToWishlist(String author, String title, String note, String series, String seriesVol,
 			String date) {
 		try {
@@ -605,11 +695,12 @@ public class Database {
 		}
 	}
 
-	/** deletes one specific book from table "wishlist"
-	  * 
-	  * @param author - name of author
-	  * @param title - title of the book
-	*/
+	/**
+	 * deletes one specific book from table "wishlist"
+	 * 
+	 * @param author - name of author
+	 * @param title  - title of the book
+	 */
 	public static void deleteFromWishlist(String author, String title) {
 		try {
 			String sql = "DELETE FROM wishlist WHERE autor = ? AND titel = ?";

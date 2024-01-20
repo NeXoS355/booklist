@@ -292,6 +292,14 @@ public class Mainframe extends JFrame {
 				new Dialog_settings();
 			}
 		});
+		JMenuItem info = new JMenuItem("Info");
+		info.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new Dialog_info();
+			}
+		});
 
 		menue.add(datei);
 		menue.add(extras);
@@ -302,6 +310,7 @@ public class Mainframe extends JFrame {
 		extras.add(ExcelExport);
 		extras.add(backup);
 		extras.add(wishlist);
+		extras.add(info);
 		hilfe.add(dbVersion);
 		pnlMenü.add(menue, BorderLayout.WEST);
 

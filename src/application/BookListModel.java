@@ -162,8 +162,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 */
 	public static void checkAuthors() {
 		authors.clear();
+		String[] columnName = { "autor" };
 		try {
-			ResultSet rs = Database.getColumnFromBooklist("autor");
+			ResultSet rs = Database.getColumnsFromBooklist(columnName);
 			while (rs.next()) {
 				String author = rs.getString(1);
 				authors.add(author);
@@ -222,7 +223,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 		ArrayList<String> seriesList = new ArrayList<String>();
 		try {
-			ResultSet rs = Database.getColumnFromBooklist("serie", "autor", author);
+			ResultSet rs = Database.getColumnWithWhere("serie", "autor", author);
 			while (rs.next()) {
 				String series = rs.getString(1);
 				if (!series.isEmpty())
@@ -249,7 +250,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 */
 	public static boolean authorHasSeries(String author) {
 		try {
-			ResultSet rs = Database.getColumnFromBooklist("serie", "autor", author);
+			ResultSet rs = Database.getColumnWithWhere("serie", "autor", author);
 			while (rs.next()) {
 				String series = rs.getString(1);
 				if (!series.isEmpty()) {
@@ -261,6 +262,128 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			Mainframe.logger.error(e.getMessage());
 		}
 		return false;
+	}
+
+	/**
+	 * queries the Database for a specific column and gets the most Occurences
+	 * 
+	 * @return return a List with the value(s) with the most Occurences in the
+	 *         specified column
+	 */
+	public static ArrayList<String> getMostOf(String getValue) {
+		ArrayList<String> value = new ArrayList<String>();
+		ArrayList<Integer> valueCount = new ArrayList<Integer>();
+		ArrayList<String> mostOfValue = new ArrayList<String>();
+		int mostCount = 0;
+		ResultSet rs = Database.getColumnCountsWithGroup(getValue);
+
+		try {
+			while (rs.next()) {
+				int count = rs.getInt(1);
+				String valueString = rs.getString(2);
+
+				if (!valueString.equals("")) {
+					valueCount.add(count);
+					value.add(valueString);
+
+					if (count > mostCount)
+						mostCount = count;
+				}
+			}
+			for (int i = 0; i < value.size(); i++) {
+				if (valueCount.get(i) == mostCount)
+					mostOfValue.add(value.get(i));
+			}
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+		return mostOfValue;
+	}
+
+	/**
+	 * gets Author or Series with best overall Rating
+	 * 
+	 * @return return a List with Authors or Series with the best overall Rating
+	 */
+	public static ArrayList<String> getBestRatingOf(String getValue) {
+		ArrayList<String> value = new ArrayList<String>();
+		ArrayList<Double> valueRating = new ArrayList<Double>();
+		ArrayList<String> BestOfRating = new ArrayList<String>();
+		double maxRating = 0;
+		String[] columnNames = { getValue };
+		ResultSet rs = Database.getAvgRating(columnNames);
+
+		try {
+			while (rs.next()) {
+				double rating = rs.getDouble(1);
+				String valueString = rs.getString(2);
+
+				if (!valueString.equals("")) {
+					valueRating.add(rating);
+					value.add(valueString);
+
+					if (rating > maxRating)
+						maxRating = rating;
+				}
+			}
+			for (int i = 0; i < value.size(); i++) {
+				if (valueRating.get(i) == maxRating)
+					BestOfRating.add(value.get(i));
+			}
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+		return BestOfRating;
+	}
+
+	/**
+	 * gets
+	 * 
+	 * @return return a List with Authors or Series with the best overall Rating
+	 */
+	public static int getEbookCount(int ebook) {
+		int count = 0;
+		ResultSet rs = Database.getColumnCountsWithGroup("ebook");
+
+		try {
+			while (rs.next()) {
+				count = rs.getInt(1);
+				int isEbook = rs.getInt(2);
+
+				if (ebook == 1 && isEbook == 1) {
+					return count;
+				} else if (ebook == 0 && isEbook == 0)
+					return count;
+
+			}
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+		return count;
+	}
+
+	/**
+	 * gets Author or Series with best overall Rating
+	 * 
+	 * @return return a List with Authors or Series with the best overall Rating
+	 */
+	public static ArrayList<String> getBooksPerYear() {
+		ArrayList<String> year = new ArrayList<String>();
+		ResultSet rs = Database.getColumnCountsWithGroup("YEAR(date), MONTH(date)");
+
+		try {
+			while (rs.next()) {
+				int yearCount = rs.getInt(1);
+				String yearValue = rs.getString(2);
+				String monthValue = rs.getString(3);
+
+				year.add(yearValue + "/" + monthValue + " - " + yearCount);
+			}
+
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+		return year;
 	}
 
 	/**
