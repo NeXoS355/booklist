@@ -18,7 +18,7 @@ import gui.Mainframe;
 import gui.wishlist;
 
 /**
- *  Manages the Booklist and Authorlist
+ * Manages the Booklist and Authorlist
  */
 public class BookListModel extends AbstractListModel<Book_Booklist> {
 
@@ -39,7 +39,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		try {
 			while (rs.next()) {
 				try {
-					// necessary Variables cannot be loaded onDemand
+					// necessary Variables which cannot be loaded onDemand
 					Book_Booklist book = null;
 					String author = rs.getString("autor").trim();
 					String title = rs.getString("titel").trim();
@@ -52,7 +52,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					int rating = rs.getInt("rating");
 					int bid = Integer.parseInt(rs.getString("bid"));
 
-					// Variables for LoadOnDemand
+					// Empty Variables for LoadOnDemand
 					String note = "";
 					Blob picture = null;
 					String desc = "";
@@ -84,8 +84,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
-					book = new Book_Booklist(author, title, boolBorrowed, borrowedTo, borrowedFrom, note,
-							series, seriesVolume, ebook,rating, buf_pic, desc, isbn, date, false);
+					book = new Book_Booklist(author, title, boolBorrowed, borrowedTo, borrowedFrom, note, series,
+							seriesVolume, ebook, rating, buf_pic, desc, isbn, date, false);
 					book.setBid(bid);
 					getBooks().add(book);
 					Mainframe.logger.trace("Buch ausgelesen: " + book.getAuthor() + "-" + book.getTitle());
@@ -101,11 +101,13 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		}
 	}
 
-	/** This method loads the extended informations which are not loaded on Startup if "loadOnDemand = 1".
+	/**
+	 * This method loads the extended informations which are not loaded on Startup
+	 * if "loadOnDemand = 1".
 	 * 
 	 * @param book - load values of this Book Entry
-	 *  
-	*/
+	 * 
+	 */
 	public static void loadOnDemand(Book_Booklist book) {
 		if (book.getDesc() == "" && book.getPic() == null) {
 			try {
@@ -154,130 +156,120 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		}
 	}
 
-	/** updates the author list and updates the displayed Tree
+	/**
+	 * updates the author list and updates the displayed Tree
 	 * 
-	*/
+	 */
 	public static void checkAuthors() {
 		authors.clear();
-		for (int i = 0; i < getBooks().size(); i++) {
-			if (!authors.contains(getBooks().get(i).getAuthor()))
-				authors.add(getBooks().get(i).getAuthor());
+		try {
+			ResultSet rs = Database.getColumnFromBooklist("autor");
+			while (rs.next()) {
+				String author = rs.getString(1);
+				authors.add(author);
+			}
+			Mainframe.logger.trace("Updated Author List");
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
 		}
 		Mainframe.updateNode();
 	}
 
-	/** Adds book to Booklist
+	/**
+	 * Adds book to Booklist
 	 * 
 	 * @param book - Book Object
-	 *  
-	*/
+	 * 
+	 */
 	public void add(Book_Booklist book) {
 		books.add(book);
 		fireIntervalAdded(this, 0, books.size());
-		System.out.println("Booklist Buch hinzugefügt: " + book.getAuthor() + "," + book.getTitle());
+		Mainframe.logger.info("Booklist Buch hinzugefügt: " + book.getAuthor() + "," + book.getTitle());
 	}
 
-	/** Deletes book from Booklist
+	/**
+	 * Deletes book from Booklist
 	 * 
 	 * @param book - Book Object
-	 *  
-	*/
+	 * 
+	 */
 	public void delete(Book_Booklist book) {
 		getBooks().remove(book);
 		fireIntervalRemoved(this, 0, getBooks().size());
-		System.out.println("Booklist Buch gelöscht: " + book.getAuthor() + "," + book.getTitle());
+		Mainframe.logger.info("Booklist Buch gelöscht: " + book.getAuthor() + "," + book.getTitle());
 	}
 
-	/** Deletes book from Booklist
+	/**
+	 * Deletes book from Booklist
 	 * 
 	 * @param index - index of Book in List
-	 *  
-	*/
+	 * 
+	 */
 	public void delete(int index) {
 		Database.deleteFromBooklist(getBooks().get(index).getBid());
 		getBooks().remove(index);
 		fireIntervalRemoved(this, index, index);
 	}
 
-	/** Gets all distinct series from a specific author
+	/**
+	 * Gets all distinct series from a specific author
 	 * 
 	 * @param author - Full name of Author
-	 *  
-	 *  @return String Array with all distinct series of the specified author
-	*/
+	 * 
+	 * @return String Array with all distinct series of the specified author
+	 */
 	public static String[] getSeriesFromAuthor(String author) {
-		ArrayList<String> series = new ArrayList<String>();
 
-		for (int i = 0; i < getBooks().size(); i++) {
-			Book_Booklist book = getBooks().get(i);
-			if (book.getAuthor().contains(author)) {
-				if (!book.getSeries().trim().equals("")) {
-					boolean newSeries = true;
-					for (int j = 0; j < series.size(); j++) {
-						if (series.get(j).equals(book.getSeries()))
-							newSeries = false;
-					}
-					if (newSeries)
-						series.add(book.getSeries());
-
-				}
+		ArrayList<String> seriesList = new ArrayList<String>();
+		try {
+			ResultSet rs = Database.getColumnFromBooklist("serie", "autor", author);
+			while (rs.next()) {
+				String series = rs.getString(1);
+				if (!series.isEmpty())
+					seriesList.add(series);
 			}
-
+			Mainframe.logger.trace("Got Series from Author: " + author);
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
 		}
-		String[] returnArr = new String[series.size()];
-		for (int i = 0; i < series.size(); i++) {
-			returnArr[i] = series.get(i);
+
+		String[] returnArr = new String[seriesList.size()];
+		for (int i = 0; i < seriesList.size(); i++) {
+			returnArr[i] = seriesList.get(i);
 		}
 		return returnArr;
 	}
 
-	/** Gets all Books from a specific author
+	/**
+	 * checks if an author has a series
 	 * 
 	 * @param author - Full name of Author
-	 *  
-	 *  @return Int Array with all Books of the specified author
-	*/
-	public static int[] getBooksFromAuthor(String author) {
-		ArrayList<Integer> books = new ArrayList<Integer>();
-
-		for (int i = 0; i < getBooks().size(); i++) {
-			Book_Booklist book = getBooks().get(i);
-			if (book.getAuthor().contains(author)) {
-				books.add(book.getBid());
-			}
-		}
-		int[] returnArr = new int[books.size()];
-		for (int i = 0; i < books.size(); i++) {
-			returnArr[i] = books.get(i);
-		}
-		return returnArr;
-
-	}
-
-	/** checks if an author has a series
 	 * 
-	 * @param author - Full name of Author
-	 *  
-	 *  @return "true" of has series else "false"
-	*/
+	 * @return "true" of has series else "false"
+	 */
 	public static boolean authorHasSeries(String author) {
-		for (int i = 0; i < getBooks().size(); i++) {
-			Book_Booklist book = getBooks().get(i);
-			if (book.getAuthor().contains(author)) {
-				if (!book.getSeries().trim().equals("")) {
+		try {
+			ResultSet rs = Database.getColumnFromBooklist("serie", "autor", author);
+			while (rs.next()) {
+				String series = rs.getString(1);
+				if (!series.isEmpty()) {
+					Mainframe.logger.trace("Author '" + author + "' has minimum 1 Series");
 					return true;
 				}
 			}
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
 		}
 		return false;
 	}
 
-	/** get Element at specific index
+	/**
+	 * get Element at specific index
 	 * 
 	 * @param arg0 - index which to get
-	 *  
-	 *  @return Book Object at specified index
-	*/
+	 * 
+	 * @return Book Object at specified index
+	 */
 	@Override
 	public Book_Booklist getElementAt(int arg0) {
 		return getBooks().get(arg0);
@@ -296,35 +288,39 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	}
 
-	/** get size of Booklist
-	 *  
-	 *  @return size of Booklist
-	*/
+	/**
+	 * get size of Booklist
+	 * 
+	 * @return size of Booklist
+	 */
 	@Override
 	public int getSize() {
 		return getBooks().size();
 	}
 
-	/** get index of specific Book
-	 *  
-	 *  @return index of Book in list
-	*/
+	/**
+	 * get index of specific Book
+	 * 
+	 * @return index of Book in list
+	 */
 	public int indexOf(Book_Booklist book) {
 		return getBooks().indexOf(book);
 	}
 
-	/** get whole Booklist
-	 *  
-	 *  @return ArrayList with all Books
-	*/
+	/**
+	 * get whole Booklist
+	 * 
+	 * @return ArrayList with all Books
+	 */
 	public static ArrayList<Book_Booklist> getBooks() {
 		return books;
 	}
 
-	/** check all series from author and add missing entries to wishlist
-	 *  
-	 *  @param author - Full name of author
-	*/
+	/**
+	 * check all series from author and add missing entries to wishlist
+	 * 
+	 * @param author - Full name of author
+	 */
 	public static void analyzeAuthor(String author) {
 		ResultSet rs = Database.getSeriesInfo(author);
 		String[] series = new String[10];

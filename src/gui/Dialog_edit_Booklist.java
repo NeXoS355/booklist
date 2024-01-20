@@ -352,7 +352,26 @@ public class Dialog_edit_Booklist extends JDialog {
 				
 				if (SwingUtilities.isLeftMouseButton(e)) {
 					setRating(segment);
+				} else if (SwingUtilities.isRightMouseButton(e)) {
+					showMenu(e);
 				}
+			}
+			
+			private void showMenu(MouseEvent e) {
+				JPopupMenu menu = new JPopupMenu();
+				JMenuItem itemDeleteRating = new JMenuItem("Rating löschen");
+				menu.add(itemDeleteRating);
+				menu.show(lblStars, e.getX(), e.getY());
+				itemDeleteRating.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						if (e.getActionCommand() == "Rating löschen") {
+							setRating(0);
+							setRatingIcon();
+						}
+					}
+				});
 			}
 		});
 
@@ -1151,10 +1170,8 @@ public class Dialog_edit_Booklist extends JDialog {
 		Mainframe.executor.submit(() -> {
 			try {
 				ack = true;
-//				panelEastRating.add(lblAckRating);
 				lblAckRating.setVisible(true);
 				Thread.sleep(2000);
-//				panelEastRating.remove(lblAckRating);
 				lblAckRating.setVisible(false);
 				panelEastRating.repaint();
 				ack = false;

@@ -555,7 +555,7 @@ public class Mainframe extends JFrame {
 						treeModel.insertNodeInto(serieNode, autorNode, j);
 					}
 				} catch (NullPointerException e) {
-					System.out.println("Mainframe Keine Serie gefunden zu " + autor);
+					Mainframe.logger.info("Mainframe Keine Serie gefunden zu " + autor);
 				}
 
 			}

@@ -141,7 +141,7 @@ public class Database {
 		return rs;
 	}
 
-	/** reads only mandatory columns of table "bücher" from Database
+	/** reads only mandatory columns of table "bücher"
 	  * 
 	  * @return - ResultSet with only mandatory columns from Table "bücher"
 	*/
@@ -156,6 +156,45 @@ public class Database {
 		}
 		return rs;
 	}
+	
+	/** reads single DISTINCT column from table "bücher" to get e.g. different authors or series info
+	  * 
+	  * @param columnName - name of the column to retrieve 
+	  * 
+	  * @return - ResultSet with only mandatory columns from Table "bücher"
+	*/
+	public static ResultSet getColumnFromBooklist(String columnName) {
+		ResultSet rs = null;
+		try {
+			Statement st = con.createStatement();
+			rs = st.executeQuery(
+					"SELECT DISTINCT " + columnName + " FROM bücher");
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+		return rs;
+	}
+	
+	/** reads single DISTINCT column from table "bücher" to get e.g. different authors or series info
+	  * 
+	  * @param columnName - name of the column to retrieve 
+	  * @param whereColumn - name of column to filter
+	  * @param whereValue - value to search in column "whereColumn"
+	  * 
+	  * @return - ResultSet with only mandatory columns from Table "bücher"
+	*/
+	public static ResultSet getColumnFromBooklist(String columnName, String whereColumn, String whereValue) {
+		ResultSet rs = null;
+		try {
+			Statement st = con.createStatement();
+			rs = st.executeQuery(
+					"SELECT DISTINCT " + columnName + " FROM bücher WHERE " + whereColumn + "='" + whereValue + "'");
+		} catch (SQLException e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+		return rs;
+	}
+
 
 	/** reads one specific book from table "bücher"
 	  * 
