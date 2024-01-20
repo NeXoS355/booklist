@@ -11,6 +11,7 @@ Features:
     export your list to an csv file
     add Books to your Wishlist
     rate the Book you just read with 1-5 Stars
+    display interesting informations about your Database e.g. most popular series or author
 
 Compiled with jdk17 and the following dependencies
 
