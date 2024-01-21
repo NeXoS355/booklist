@@ -10,15 +10,17 @@ import javax.swing.JOptionPane;
 
 import gui.Mainframe;
 
-/** checks the connected Database version and updates if necessary
-*
-*/
+/**
+ * checks the connected Database version and updates if necessary
+ *
+ */
 public class Updater {
 
-	/** checks current Version of Booklist Table and runs the update if necessary
-	*
-	* @param con - Connection to Database
-	*/
+	/**
+	 * checks current Version of Booklist Table and runs the update if necessary
+	 *
+	 * @param con - Connection to Database
+	 */
 	public static void checkUpdate(Connection con) {
 
 		String sql = "";
@@ -222,15 +224,16 @@ public class Updater {
 				System.exit(1);
 			}
 		case "2.6.0":
-			//all good
+			// all good
 		}
 
 	}
 
-	/** reads version in Table "versions"
-	*
-	* @param con - Connection to Database
-	*/
+	/**
+	 * reads version in Table "versions"
+	 *
+	 * @param con - Connection to Database
+	 */
 	public static String checkVersion(Connection con) {
 		Statement st = null;
 		ResultSet rs = null;

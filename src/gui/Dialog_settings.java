@@ -14,6 +14,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.table.TableColumnModel;
 
+import application.BookListModel;
 import application.HandleConfig;
 
 public class Dialog_settings extends JDialog {
@@ -27,14 +28,15 @@ public class Dialog_settings extends JDialog {
 	private static JComboBox<Integer> cmbAutoDownload;
 	private static JComboBox<Integer> cmbOnDemand;
 	private static JComboBox<String> cmbSearchParam;
-	private static JComboBox<Integer> cmbDebug;
+	private static JComboBox<String> cmbDebug;
+	private static JComboBox<Boolean> cmbUseDB;
 
 	public Dialog_settings() {
 
 		this.setTitle("Einstellungen");
 		this.setModal(true);
 		this.setLayout(new GridBagLayout());
-		this.setSize(300, 400);
+		this.setSize(300, 420);
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -79,7 +81,6 @@ public class Dialog_settings extends JDialog {
 		cmbFontDesc = new JComboBox<Integer>(fontDesc);
 		cmbFontDesc.setSelectedItem(Mainframe.descFont.getSize());
 		this.add(cmbFontDesc, c);
-
 		c.gridx = 0;
 		c.gridy = 3;
 		c.weightx = 0.5;
@@ -89,7 +90,6 @@ public class Dialog_settings extends JDialog {
 		JLabel lblFeatures = new JLabel("optionale Features");
 		lblFeatures.setFont(Mainframe.defaultFont);
 		this.add(lblFeatures, c);
-
 		c.gridx = 0;
 		c.gridy = 4;
 		c.weightx = 0.1;
@@ -97,7 +97,7 @@ public class Dialog_settings extends JDialog {
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		JLabel lblAutoDownload = new JLabel("AutoDownload");
-		lblAutoDownload.setToolTipText("Bei Anlage eines neune Buches werden direkt Infos aus den APIs abgerufen");
+		lblAutoDownload.setToolTipText("Bei Anlage eines neuen Buches werden direkt Infos aus den APIs abgerufen");
 		this.add(lblAutoDownload, c);
 		c.gridx = 1;
 		c.gridy = 4;
@@ -107,7 +107,6 @@ public class Dialog_settings extends JDialog {
 		cmbAutoDownload = new JComboBox<Integer>(arrayAutoDownload);
 		cmbAutoDownload.setSelectedItem(HandleConfig.autoDownload);
 		this.add(cmbAutoDownload, c);
-
 		c.gridx = 0;
 		c.gridy = 5;
 		c.weightx = 0.1;
@@ -123,16 +122,30 @@ public class Dialog_settings extends JDialog {
 		cmbOnDemand = new JComboBox<Integer>(arrayOnDemand);
 		cmbOnDemand.setSelectedItem(HandleConfig.loadOnDemand);
 		this.add(cmbOnDemand, c);
-
 		c.gridx = 0;
 		c.gridy = 6;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		JLabel lblUseDB = new JLabel("Nutze Datenbank");
+		lblUseDB.setToolTipText("Benutzt die Datenbank für die meisten Abfragen");
+		this.add(lblUseDB, c);
+		c.gridx = 1;
+		c.gridy = 6;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		Boolean[] arrayUseDB = { false, true };
+		cmbUseDB = new JComboBox<Boolean>(arrayUseDB);
+		cmbUseDB.setSelectedItem(BookListModel.useDB);
+		this.add(cmbUseDB, c);
+		c.gridx = 0;
+		c.gridy = 7;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		JLabel lblSearchParam = new JLabel("Search Parameter");
 		lblSearchParam.setToolTipText("Google API Suchparameter. t=Titel, at=Autor+Titel");
 		this.add(lblSearchParam, c);
 		c.gridx = 1;
-		c.gridy = 6;
+		c.gridy = 7;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		String[] arraySearchParam = { "t", "at" };
@@ -140,18 +153,18 @@ public class Dialog_settings extends JDialog {
 		cmbSearchParam.setSelectedItem(HandleConfig.searchParam);
 		this.add(cmbSearchParam, c);
 		c.gridx = 0;
-		c.gridy = 7;
+		c.gridy = 8;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		JLabel lblDebug = new JLabel("Debug");
-		lblDebug.setToolTipText("Ausführlichkeit der Logging Aktivität 0=WARN,1=INFO,2=TRACE");
+		lblDebug.setToolTipText("Ausführlichkeit der Logging Aktivität");
 		this.add(lblDebug, c);
 		c.gridx = 1;
-		c.gridy = 7;
+		c.gridy = 8;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
-		Integer[] arrayDebug = { 0, 1, 2 };
-		cmbDebug = new JComboBox<Integer>(arrayDebug);
+		String[] arrayDebug = { "WARN", "INFO",  "TRACE"};
+		cmbDebug = new JComboBox<String>(arrayDebug);
 		cmbDebug.setSelectedItem(HandleConfig.debug);
 		this.add(cmbDebug, c);
 
@@ -201,6 +214,7 @@ public class Dialog_settings extends JDialog {
 			out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
 			out.println("autoDownload=" + cmbAutoDownload.getSelectedItem());
 			out.println("loadOnDemand=" + cmbOnDemand.getSelectedItem());
+			out.println("useDB=" + cmbUseDB.getSelectedItem());
 			out.println("searchParam=" + cmbSearchParam.getSelectedItem());
 			out.println("debug=" + cmbDebug.getSelectedItem());
 			

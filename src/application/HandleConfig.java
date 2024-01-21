@@ -15,7 +15,7 @@ public class HandleConfig {
 
 	public static int autoDownload = 0;
 	public static int loadOnDemand = 1;
-	public static int debug = 0;
+	public static String debug = "";
 	public static String searchParam = "at";
 
 	public static void readConfig() {
@@ -87,6 +87,19 @@ public class HandleConfig {
 							JOptionPane.showMessageDialog(null,
 									"Fehler in der config (loadOnDemand): Falsches Format - erwartet integer");
 						}
+					} else if (setting.equals("useDB")) {
+						boolean tmp = true;
+						if (value.trim().toLowerCase().equals("true") ) 
+							tmp = true;
+						else if (value.trim().toLowerCase().equals("false")) 
+							tmp = false;
+						else 
+							JOptionPane.showMessageDialog(null,
+							"Fehler in der config (useDB): Falscher Wert - erwartet true oder false");
+						BookListModel.useDB = tmp;
+						Mainframe.logger.info("useDB: " + BookListModel.useDB);
+
+
 					} else if (setting.equals("searchParam")) {
 						String tmp = value.trim();
 						if (tmp.equals("a") || tmp.equals("at")) {
@@ -97,21 +110,13 @@ public class HandleConfig {
 									"Fehler in der config (searchParam): Falscher Wert - erwartet 't' oder 'at'");
 
 					} else if (setting.equals("debug")) {
-
-						try {
-							int tmp = Integer.parseInt(value.trim());
-							if (tmp >= 0 && tmp < 3) {
-								debug = tmp;
-								Mainframe.logger.info("debug: " + debug);
-							} else
-								JOptionPane.showMessageDialog(null,
-										"Fehler in der config (debug): Falscher Wert - erwartet 0-2");
-
-						} catch (NumberFormatException e) {
+						String tmp = value.trim();
+						if (tmp.equals("WARN") || tmp.equals("INFO") || tmp.equals("TRACE")) {
+							debug = tmp;
+							Mainframe.logger.info("debug: " + debug);
+						} else
 							JOptionPane.showMessageDialog(null,
-									"Fehler in der config (debug): Falsches Format - erwartet integer");
-
-						}
+									"Fehler in der config (debug): Falscher Wert - erwartet WARN, INFO oder TRACE");
 					} else if (setting.contains("layoutWidth")) {
 						String[] values = value.trim().split(",");
 						for (int j = 0; j < values.length; j++) {
@@ -138,7 +143,9 @@ public class HandleConfig {
 			} catch (IOException e) {
 				Mainframe.logger.error(e.getMessage());
 			}
-		} else {
+		} else
+
+		{
 			try (PrintWriter out = new PrintWriter("config.conf")) {
 				out.println("fontSize=" + Mainframe.defaultFont.getSize());
 				out.println("descFontSize=" + Mainframe.descFont.getSize());

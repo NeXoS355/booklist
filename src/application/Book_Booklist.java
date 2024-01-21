@@ -106,7 +106,7 @@ public class Book_Booklist {
 	 *                 list
 	 */
 	public Book_Booklist(String author, String title, String note, String series, String seriesVol, boolean ebook, int rating,
-			Image pic, String desc, String isbn, Timestamp date, boolean db) throws SQLException {
+			Image pic, String desc, String isbn, Timestamp date, boolean db) {
 		this(author, title, false, "", "", note, series, seriesVol, ebook, rating, pic, desc, isbn, date, db);
 	}
 

@@ -167,7 +167,7 @@ public class Database {
 	 * reads single DISTINCT column from table "bücher" to get e.g. different
 	 * authors or series info
 	 * 
-	 * @param columnName - name of the column to retrieve
+	 * @param columnName - Array of column names to retrieve
 	 * 
 	 * @return - ResultSet with only mandatory columns from Table "bücher"
 	 */
@@ -181,7 +181,12 @@ public class Database {
 			if (i != columnName.length-1)
 				str.append(",");
 		}
-		str.append(" FROM bücher");
+		str.append(" FROM bücher ORDER BY ");
+		for (int i = 0; i < columnName.length; i++) {
+			str.append(columnName[i]);
+			if (i != columnName.length-1)
+				str.append(",");
+		}
 
 		try {
 			Statement st = con.createStatement();
@@ -686,8 +691,6 @@ public class Database {
 			st.setString(6, date);
 			st.executeUpdate();
 			st.close();
-			System.out.println("Wishlist Datenbank Eintrag erstellt: " + author + "," + title + "," + note + ","
-					+ series + "," + seriesVol + "," + date);
 			Mainframe.logger.info("Wishlist Datenbank Eintrag erstellt: " + author + "," + title + "," + note + ","
 					+ series + "," + seriesVol + "," + date);
 		} catch (SQLException e) {
@@ -709,7 +712,7 @@ public class Database {
 			st.setString(2, title);
 			st.executeUpdate();
 			st.close();
-			System.out.println("Wishlist Datenbank Eintrag gelöscht: " + author + "," + title);
+			Mainframe.logger.info("Wishlist Datenbank Eintrag gelöscht: " + author + "," + title);
 		} catch (
 
 		SQLException e) {

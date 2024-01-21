@@ -25,6 +25,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	private static final long serialVersionUID = 1L;
 	private static ArrayList<Book_Booklist> books = new ArrayList<Book_Booklist>();
 	public static ArrayList<String> authors = new ArrayList<String>();
+	public static boolean useDB = false;
 
 	public BookListModel() {
 		Database.createConnection();
@@ -162,16 +163,24 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 */
 	public static void checkAuthors() {
 		authors.clear();
-		String[] columnName = { "autor" };
-		try {
-			ResultSet rs = Database.getColumnsFromBooklist(columnName);
-			while (rs.next()) {
-				String author = rs.getString(1);
-				authors.add(author);
+
+		if (useDB) {
+			try {
+				String[] columnName = { "autor" };
+				ResultSet rs = Database.getColumnsFromBooklist(columnName);
+				while (rs.next()) {
+					authors.add(rs.getString(1));
+				}
+				Mainframe.logger.trace("Updated Author List through DB");
+			} catch (SQLException e) {
+				Mainframe.logger.error(e.getMessage());
 			}
-			Mainframe.logger.trace("Updated Author List");
-		} catch (SQLException e) {
-			Mainframe.logger.error(e.getMessage());
+		} else {
+			for (int i = 0; i < getBooks().size(); i++) {
+				if (!authors.contains(getBooks().get(i).getAuthor()))
+					authors.add(getBooks().get(i).getAuthor());
+			}
+			Mainframe.logger.trace("Updated Author List through Java Lists");
 		}
 		Mainframe.updateNode();
 	}
@@ -220,18 +229,38 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 * @return String Array with all distinct series of the specified author
 	 */
 	public static String[] getSeriesFromAuthor(String author) {
-
 		ArrayList<String> seriesList = new ArrayList<String>();
-		try {
-			ResultSet rs = Database.getColumnWithWhere("serie", "autor", author);
-			while (rs.next()) {
-				String series = rs.getString(1);
-				if (!series.isEmpty())
-					seriesList.add(series);
+
+		if (useDB) {
+			try {
+				ResultSet rs = Database.getColumnWithWhere("serie", "autor", author);
+				while (rs.next()) {
+					String series = rs.getString(1);
+					if (!series.isEmpty())
+						seriesList.add(series);
+				}
+				Mainframe.logger.trace("Got Series from Author through DB: " + author);
+			} catch (SQLException e) {
+				Mainframe.logger.error(e.getMessage());
 			}
-			Mainframe.logger.trace("Got Series from Author: " + author);
-		} catch (SQLException e) {
-			Mainframe.logger.error(e.getMessage());
+		} else {
+			for (int i = 0; i < getBooks().size(); i++) {
+				Book_Booklist book = getBooks().get(i);
+				if (book.getAuthor().contains(author)) {
+					if (!book.getSeries().trim().equals("")) {
+						boolean newSeries = true;
+						for (int j = 0; j < seriesList.size(); j++) {
+							if (seriesList.get(j).equals(book.getSeries()))
+								newSeries = false;
+						}
+						if (newSeries) {
+							seriesList.add(book.getSeries());
+							Mainframe.logger.trace("Got Series from Author through Lists: " + author);
+						}
+					}
+				}
+
+			}
 		}
 
 		String[] returnArr = new String[seriesList.size()];
@@ -249,17 +278,27 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 * @return "true" of has series else "false"
 	 */
 	public static boolean authorHasSeries(String author) {
-		try {
-			ResultSet rs = Database.getColumnWithWhere("serie", "autor", author);
-			while (rs.next()) {
-				String series = rs.getString(1);
-				if (!series.isEmpty()) {
-					Mainframe.logger.trace("Author '" + author + "' has minimum 1 Series");
-					return true;
+		if (useDB) {
+			try {
+				ResultSet rs = Database.getColumnWithWhere("serie", "autor", author);
+				while (rs.next()) {
+					String series = rs.getString(1);
+					if (!series.isEmpty()) {
+						return true;
+					}
+				}
+			} catch (SQLException e) {
+				Mainframe.logger.error(e.getMessage());
+			}
+		} else {
+			for (int i = 0; i < getBooks().size(); i++) {
+				Book_Booklist book = getBooks().get(i);
+				if (book.getAuthor().contains(author)) {
+					if (!book.getSeries().trim().equals("")) {
+						return true;
+					}
 				}
 			}
-		} catch (SQLException e) {
-			Mainframe.logger.error(e.getMessage());
 		}
 		return false;
 	}
@@ -342,18 +381,34 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 * @return return a List with Authors or Series with the best overall Rating
 	 */
 	public static int getEbookCount(int ebook) {
+		int noEbook = 0;
 		int count = 0;
+
 		ResultSet rs = Database.getColumnCountsWithGroup("ebook");
 
 		try {
 			while (rs.next()) {
 				count = rs.getInt(1);
-				int isEbook = rs.getInt(2);
+				String isEbook = rs.getString(2);
 
-				if (ebook == 1 && isEbook == 1) {
+				if (ebook == 1 && isEbook.equals("1")) {
 					return count;
-				} else if (ebook == 0 && isEbook == 0)
-					return count;
+				} else if (ebook == 0 && isEbook == null) {
+					if (noEbook == 0) {
+						noEbook += count;
+					} else {
+						noEbook += count;
+						return noEbook;
+					}
+				} else if (ebook == 0 && isEbook.equals("0")) {
+					if (noEbook == 0) {
+						noEbook += count;
+					} else {
+						noEbook += count;
+						return noEbook;
+					}
+
+				}
 
 			}
 		} catch (SQLException e) {
@@ -369,15 +424,14 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 */
 	public static ArrayList<String> getBooksPerYear() {
 		ArrayList<String> year = new ArrayList<String>();
-		ResultSet rs = Database.getColumnCountsWithGroup("YEAR(date), MONTH(date)");
+		ResultSet rs = Database.getColumnCountsWithGroup("YEAR(date)");
 
 		try {
 			while (rs.next()) {
 				int yearCount = rs.getInt(1);
 				String yearValue = rs.getString(2);
-				String monthValue = rs.getString(3);
 
-				year.add(yearValue + "/" + monthValue + " - " + yearCount);
+				year.add(yearValue + " - " + yearCount + "\n");
 			}
 
 		} catch (SQLException e) {
@@ -490,7 +544,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					}
 					if (!found) {
 						try {
-							System.out.println("Serie: " + series[i] + " fehlender Part: " + j);
+							Mainframe.logger.info("Analyze Author: Serie: " + series[i] + " fehlender Part: " + j);
 							wishlist.wishlistEntries.add(new Book_Wishlist(author, Integer.toString(j), "", series[i],
 									String.valueOf(j), new Timestamp(System.currentTimeMillis()), true));
 						} catch (SQLException e) {

@@ -14,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import javax.swing.BorderFactory;
@@ -34,7 +33,7 @@ import application.HandleWebInfo;
 import application.BookListModel;
 
 /**
- *  Dialog to add new Book to Booklist Table and DB
+ * Dialog to add new Book to Booklist Table and DB
  */
 public class Dialog_add_Booklist extends JDialog {
 
@@ -561,76 +560,72 @@ public class Dialog_add_Booklist extends JDialog {
 
 	}
 
-	/** adds the Book to Booklist
-	  * 
-	*/
+	/**
+	 * adds the Book to Booklist
+	 * 
+	 */
 	public void addBook() {
-		try {
-			if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
-				Book_Booklist book = null;
-				String autor = txtAuthor.getText();
-				String titel = txtTitle.getText();
-				String bemerkung = txtNote.getText();
-				String serie = txtSerie.getText();
-				String seriePart = txtSeriesVol.getText();
-				boolean ebook = checkEbook.isSelected();
-				Timestamp datum = new Timestamp(System.currentTimeMillis());
-				if (checkInput(autor, titel)) {
-					if (checkTo.isSelected()) {
-						book = new Book_Booklist(autor, titel, true, txtBorrowedTo.getText(), "", bemerkung, serie,
-								seriePart, ebook,0, null, null, null, datum, true);
-						Mainframe.entries.add(book);
-					} else if (checkFrom.isSelected()) {
-						book = new Book_Booklist(autor, titel, true, "", txtBorrowedFrom.getText(), bemerkung, serie,
-								seriePart, ebook,0, null, null, null, datum, true);
-						Mainframe.entries.add(book);
-					} else {
-						book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, ebook,0, null, null, null,
-								datum, true);
-						Mainframe.entries.add(book);
-					}
-					if (HandleConfig.autoDownload == 1)
-						HandleWebInfo.DownloadWebPage(book, 2, false);
 
-					dispose();
+		if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
+			String autor = txtAuthor.getText();
+			String titel = txtTitle.getText();
+			String bemerkung = txtNote.getText();
+			String serie = txtSerie.getText();
+			String seriePart = txtSeriesVol.getText();
+			boolean ebook = checkEbook.isSelected();
+			Timestamp datum = new Timestamp(System.currentTimeMillis());
+			if (checkInput(autor, titel)) {
+				Book_Booklist book = null;
+				if (checkTo.isSelected()) {
+					book = new Book_Booklist(autor, titel, true, txtBorrowedTo.getText(), "", bemerkung, serie,
+							seriePart, ebook, 0, null, null, null, datum, true);
+					Mainframe.entries.add(book);
+				} else if (checkFrom.isSelected()) {
+					book = new Book_Booklist(autor, titel, true, "", txtBorrowedFrom.getText(), bemerkung, serie,
+							seriePart, ebook, 0, null, null, null, datum, true);
+					Mainframe.entries.add(book);
 				} else {
-					txtTitle.setText("Buch bereits vorhanden!");
-					txtTitle.setBackground(new Color(255, 105, 105));
+					book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, ebook, 0, null, null, null,
+							datum, true);
+					Mainframe.entries.add(book);
 				}
+				if (HandleConfig.autoDownload == 1) {
+					HandleWebInfo.DownloadWebPage(book, 2, false);
+				}
+
 			} else {
-				if (txtAuthor.getText().isEmpty()) {
-					txtAuthor.setBackground(new Color(255, 105, 105));
-				}
-				if (txtTitle.getText().isEmpty()) {
-					txtTitle.setBackground(new Color(255, 105, 105));
-				}
-			}
-			Mainframe.setLastSearch(txtAuthor.getText());
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-			txtTitle.setForeground(Color.white);
-			txtTitle.setBackground(new Color(255, 105, 105));
-			if (ex.getSQLState() == "23505") {
 				txtTitle.setText("Buch bereits vorhanden!");
+				txtTitle.setBackground(new Color(255, 105, 105));
+			}
+
+		} else {
+			if (txtAuthor.getText().isEmpty()) {
+				txtAuthor.setBackground(new Color(255, 105, 105));
+			}
+			if (txtTitle.getText().isEmpty()) {
+				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 		}
-		Mainframe.updateModel();
-		if (Mainframe.getTreeSelection() == "") {
+		BookListModel.checkAuthors();
+		Mainframe.setLastSearch(txtAuthor.getText());
+		if (Mainframe.getTreeSelection().equals("")) {
 			Mainframe.search(txtAuthor.getText());
 		} else {
 			Mainframe.search(Mainframe.getTreeSelection());
 		}
-		BookListModel.checkAuthors();
+		dispose();
+
 	}
 
-	/** add the autoComplete feature to "autor" and "serie"
+	/**
+	 * add the autoComplete feature to "autor" and "serie"
 	 * 
 	 * @param search - currently typed String
-	 * @param field - sets variable based on which field is active
+	 * @param field  - sets variable based on which field is active
 	 * 
 	 * @return String array with matching authors or series
-	 *  
-	*/
+	 * 
+	 */
 	public String[] autoCompletion(String search, String field) {
 		String[] returnArray = null;
 		if (field.equals("autor")) {
@@ -671,14 +666,15 @@ public class Dialog_add_Booklist extends JDialog {
 		return returnArray;
 	}
 
-	/** checks if author with the same title already exists
+	/**
+	 * checks if author with the same title already exists
 	 * 
 	 * @param author - name of Author
-	 * @param title - Book title
+	 * @param title  - Book title
 	 * 
 	 * @return "false" if already exists else "true"
-	 *  
-	*/
+	 * 
+	 */
 	public boolean checkInput(String author, String title) {
 		for (int i = 0; i < Mainframe.entries.getSize(); i++) {
 			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);

@@ -9,8 +9,6 @@ import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -73,7 +71,13 @@ import data.Database;
 public class Mainframe extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+	// log4j to log in file called app.log
 	public static Logger logger = null;
+	/*
+	 * executor for Multithreading Mainframe.executor.submit(() -> {
+	 * 
+	 * });
+	 */
 	public static ExecutorService executor = Executors.newFixedThreadPool(10);
 
 	public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
@@ -98,7 +102,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "Ver. 2.6.5  (01.2024)  ";
+	private String version = "Ver. 2.6.6  (01.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -106,11 +110,11 @@ public class Mainframe extends JFrame {
 		logger = LogManager.getLogger(getClass());
 		logger.trace("start creating Frame & readConfig");
 		HandleConfig.readConfig();
-		if (HandleConfig.debug == 0) {
+		if (HandleConfig.debug.equals("WARN")) {
 			Configurator.setLevel(logger, Level.WARN);
-		} else if (HandleConfig.debug == 1) {
+		} else if (HandleConfig.debug.equals("INFO")) {
 			Configurator.setLevel(logger, Level.INFO);
-		} else if (HandleConfig.debug == 2) {
+		} else if (HandleConfig.debug.equals("TRACE")) {
 			Configurator.setLevel(logger, Level.TRACE);
 		}
 
@@ -411,7 +415,6 @@ public class Mainframe extends JFrame {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
 					deleteBook();
-					updateModel();
 				}
 				BookListModel.checkAuthors();
 				txt_search.setText("Suche ... (" + entries.getSize() + ")");
@@ -482,14 +485,14 @@ public class Mainframe extends JFrame {
 			}
 
 		});
-		tree.addFocusListener(new FocusAdapter() {
-
-			@Override
-			public void focusLost(FocusEvent e) {
-				tree.setSelectionPath(null);
-			}
-
-		});
+//		tree.addFocusListener(new FocusAdapter() {
+//
+//			@Override
+//			public void focusLost(FocusEvent e) {
+//				tree.setSelectionPath(null);
+//			}
+//
+//		});
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
@@ -521,28 +524,27 @@ public class Mainframe extends JFrame {
 	 * 
 	 */
 	public static void deleteBook() {
-		int[] selected = table.getSelectedRows();
-		for (int i = 0; i < selected.length; i++) {
-			String searchAutor = (String) table.getValueAt(selected[i], 1);
-			String searchTitel = (String) table.getValueAt(selected[i], 2);
-			int index = entries.getIndexOf(searchAutor, searchTitel);
-			if (selected.length != 0) {
-				int antwort = JOptionPane.showConfirmDialog(null,
-						"Wirklich '" + searchAutor + " - " + searchTitel + "' löschen?", "Löschen",
-						JOptionPane.YES_NO_OPTION);
-				if (antwort == JOptionPane.YES_OPTION) {
-					entries.delete(index);
+			int[] selected = table.getSelectedRows();
+			for (int i = 0; i < selected.length; i++) {
+				String searchAutor = (String) table.getValueAt(selected[i], 1);
+				String searchTitel = (String) table.getValueAt(selected[i], 2);
+				int index = entries.getIndexOf(searchAutor, searchTitel);
+				if (selected.length != 0) {
+					int antwort = JOptionPane.showConfirmDialog(null,
+							"Wirklich '" + searchAutor + " - " + searchTitel + "' löschen?", "Löschen",
+							JOptionPane.YES_NO_OPTION);
+					if (antwort == JOptionPane.YES_OPTION) {
+						entries.delete(index);
+					}
+					BookListModel.checkAuthors();
+				} else {
+					JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
 				}
-				BookListModel.checkAuthors();
-			} else {
-				JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
 			}
-		}
-		if (treeSelection != "")
-			search(treeSelection);
-		else
-			search(getLastSearch());
-		updateModel();
+			if (!treeSelection.equals(""))
+				search(treeSelection);
+			else
+				search(getLastSearch());
 	}
 
 	/**
@@ -575,6 +577,19 @@ public class Mainframe extends JFrame {
 		tree.setModel(treeModel);
 		tree.revalidate();
 		tree.repaint();
+		Mainframe.logger.trace("Mainframe Node updated");
+	}
+
+	/**
+	 * updates the table with current model
+	 * 
+	 */
+	public static void updateModel() {
+		tableDisplay = new SimpleTableModel(entries);
+		table.setModel(tableDisplay);
+		treeSelection = "";
+		setTableLayout();
+		Mainframe.logger.trace("Mainframe Model updated");
 	}
 
 	/**
@@ -613,17 +628,6 @@ public class Mainframe extends JFrame {
 		}
 		File n = new File(to.getAbsolutePath() + "/" + file.getName());
 		Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
-	}
-
-	/**
-	 * updates the table with current model
-	 * 
-	 */
-	public static void updateModel() {
-		tableDisplay = new SimpleTableModel(entries);
-		table.setModel(tableDisplay);
-		treeSelection = "";
-		setTableLayout();
 	}
 
 	/**
@@ -728,7 +732,6 @@ public class Mainframe extends JFrame {
 	 * @return current Tree Selection
 	 */
 	public static String getTreeSelection() {
-		System.out.println(treeSelection);
 		return treeSelection;
 	}
 
