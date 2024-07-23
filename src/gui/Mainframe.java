@@ -102,7 +102,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "Ver. 2.6.6  (01.2024)  ";
+	private String version = "Ver. 2.6.7  (07.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");

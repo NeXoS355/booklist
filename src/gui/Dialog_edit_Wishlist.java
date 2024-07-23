@@ -26,6 +26,8 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
+
+import application.Book_Booklist;
 import application.Book_Wishlist;
 import application.WishlistListModel;
 import data.Database;
@@ -429,6 +431,12 @@ public class Dialog_edit_Wishlist extends JDialog {
 	public boolean Duplicant(String autor, String titel, int index) {
 		for (int i = 0; i < wishlist.wishlistEntries.getSize(); i++) {
 			Book_Wishlist eintrag = wishlist.wishlistEntries.getElementAt(i);
+			if (eintrag.getAuthor().equals(autor) && eintrag.getTitle().equals(titel)) {
+				return true;
+			}
+		}
+		for (int i = 0; i < Mainframe.entries.getSize(); i++) {
+			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
 			if (eintrag.getAuthor().equals(autor) && eintrag.getTitle().equals(titel)) {
 				return true;
 			}

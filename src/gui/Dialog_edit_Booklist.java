@@ -62,6 +62,7 @@ public class Dialog_edit_Booklist extends JDialog {
 	private RoundJTextField txtSeries;
 	private RoundJTextField txtSeriesVol;
 	private JCheckBox checkEbook;
+	private JButton btnAdd;
 	private JLabel lblPic;
 	private JLabel lblStars;
 	private ImageIcon zeroStar;
@@ -467,6 +468,7 @@ public class Dialog_edit_Booklist extends JDialog {
 				} else if (!e.isActionKey()) {
 					if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
 						txtTitle.setText("");
+						btnAdd.setEnabled(true);
 					}
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
@@ -825,7 +827,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-		JButton btnAdd = new JButton("Speichern");
+		btnAdd = new JButton("Speichern");
 		btnAdd.setFont(Mainframe.defaultFont);
 		btnAdd.addActionListener(new ActionListener() {
 
@@ -1067,6 +1069,7 @@ public class Dialog_edit_Booklist extends JDialog {
 				Mainframe.logger.info("Buch ändern: Bereits vorhanden!");
 				txtTitle.setText("Buch bereits vorhanden!");
 				txtTitle.setBackground(new Color(255, 105, 105));
+				btnAdd.setEnabled(false);
 			}
 		} else {
 			if (txtAuthor.getText().isEmpty()) {

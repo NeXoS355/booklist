@@ -48,6 +48,7 @@ public class Dialog_add_Booklist extends JDialog {
 	private RoundJTextField txtSerie;
 	private RoundJTextField txtSeriesVol;
 	private JCheckBox checkEbook;
+	private JButton btn_add;
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
@@ -162,6 +163,7 @@ public class Dialog_add_Booklist extends JDialog {
 				} else if (!e.isActionKey()) {
 					if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
 						txtTitle.setText("");
+						btn_add.setEnabled(true);
 					}
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
@@ -196,6 +198,7 @@ public class Dialog_add_Booklist extends JDialog {
 					txtTitle.setForeground(Color.black);
 					txtTitle.setBackground(Color.white);
 					txtTitle.setText("");
+					btn_add.setEnabled(true);
 				}
 			}
 
@@ -513,7 +516,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 		});
 
-		JButton btn_add = new JButton("hinzufügen");
+		btn_add = new JButton("hinzufügen");
 		btn_add.setFont(Mainframe.defaultFont);
 		btn_add.addActionListener(new ActionListener() {
 
@@ -592,9 +595,18 @@ public class Dialog_add_Booklist extends JDialog {
 				if (HandleConfig.autoDownload == 1) {
 					HandleWebInfo.DownloadWebPage(book, 2, false);
 				}
+				BookListModel.checkAuthors();
+				Mainframe.setLastSearch(txtAuthor.getText());
+				if (Mainframe.getTreeSelection().equals("")) {
+					Mainframe.search(txtAuthor.getText());
+				} else {
+					Mainframe.search(Mainframe.getTreeSelection());
+				}
+				dispose();
 
 			} else {
 				txtTitle.setText("Buch bereits vorhanden!");
+				btn_add.setEnabled(false);
 				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 
@@ -606,14 +618,6 @@ public class Dialog_add_Booklist extends JDialog {
 				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 		}
-		BookListModel.checkAuthors();
-		Mainframe.setLastSearch(txtAuthor.getText());
-		if (Mainframe.getTreeSelection().equals("")) {
-			Mainframe.search(txtAuthor.getText());
-		} else {
-			Mainframe.search(Mainframe.getTreeSelection());
-		}
-		dispose();
 
 	}
 
