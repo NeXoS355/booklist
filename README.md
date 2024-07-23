@@ -13,7 +13,7 @@ Features:
     rate the Book you just read with 1-5 Stars
     display interesting informations about your Database e.g. most popular series or author
 
-Compiled with jdk17 and the following dependencies
+Tested with jdk21 and the following dependencies
 
     derby 10.16.1.1
     derbyshared 10.16.1.1
