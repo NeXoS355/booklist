@@ -172,8 +172,8 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 9;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
-		JLabel lblBackup = new JLabel("Backup ohne Rückfrage");
-		lblBackup.setToolTipText("Kann die Abfrage beim schließen des Programms nach einem Backup unterdrücken");
+		JLabel lblBackup = new JLabel("Backupverhalten");
+		lblBackup.setToolTipText("0= Kein Backup beim schließen; 1=Abfrage beim schließen; 2=automatisches Backup beim schließen");
 		this.add(lblBackup, c);
 		c.gridx = 1;
 		c.gridy = 9;

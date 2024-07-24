@@ -505,15 +505,22 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void windowClosing(WindowEvent et) {
-				logger.info("Close Database");
+				logger.trace("Close Database");
 				Database.closeConnection();
-				logger.info("Window closing");
+				if (HandleConfig.backup == 2) {
+					createBackup();
+				} else if (HandleConfig.backup == 1) {
+					if (JOptionPane.showConfirmDialog(null, "Backup erstellen?", "Backup?",
+							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+						boolean ret = createBackup();
+						if (ret)
+							JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
+						else
+							JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen oder nicht vollständig.");
+					}
+				}
+				logger.trace("Window closing");
 			}
-		});
-		logger.trace("Init completed");
-
-		this.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
 			public void windowClosed(java.awt.event.WindowEvent windowEvent) {
 				if (HandleConfig.backup == 2) {
 					createBackup();
@@ -527,9 +534,10 @@ public class Mainframe extends JFrame {
 							JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen oder nicht vollständig.");
 					}
 				}
+				logger.trace("Window closed");
 			}
 		});
-
+		logger.trace("Init completed");
 	}
 
 	/**
