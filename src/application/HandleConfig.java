@@ -15,7 +15,7 @@ public class HandleConfig {
 
 	public static int autoDownload = 0;
 	public static int loadOnDemand = 1;
-	public static String debug = "";
+	public static String debug = "TRACE";
 	public static String searchParam = "at";
 
 	public static void readConfig() {

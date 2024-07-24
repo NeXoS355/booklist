@@ -271,7 +271,7 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String text = Database.readCurrentLayoutVersion() + "\nApache Derby 10.16.1.1 (May 19, 2022)";
+				String text = "DB Layout Version: " + Database.readCurrentLayoutVersion() +  "\nApache Derby: " + Database.readCurrentDBVersion();
 				JOptionPane.showMessageDialog(null, text);
 			}
 		});

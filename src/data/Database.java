@@ -13,6 +13,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import org.apache.derby.tools.sysinfo;
+
 import com.opencsv.CSVWriter;
 
 import application.BookListModel;
@@ -336,7 +338,7 @@ public class Database {
 	}
 
 	/**
-	 * read the current DB Versions from table "versions"
+	 * read the current DB Layout from table "versions"
 	 * 
 	 * @return - DB version String with last modified date
 	 */
@@ -356,7 +358,17 @@ public class Database {
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim auslesen der DB Version");
 		}
-		return "DB Layout Version:" + version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);
+		return version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);
+	}
+	
+	/**
+	 * read the current version of apache derby
+	 * 
+	 * @return - apache derby version String
+	 */
+	public static String readCurrentDBVersion() {
+		String version = sysinfo.getVersionString();
+		return version;
 	}
 
 	/**

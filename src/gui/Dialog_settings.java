@@ -127,7 +127,7 @@ public class Dialog_settings extends JDialog {
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		JLabel lblUseDB = new JLabel("Nutze Datenbank");
-		lblUseDB.setToolTipText("Benutzt die Datenbank für die meisten Abfragen");
+		lblUseDB.setToolTipText("Benutzt die Datenbank für Suchanfragen, Vergleiche und andere Abfragen");
 		this.add(lblUseDB, c);
 		c.gridx = 1;
 		c.gridy = 6;
@@ -209,6 +209,7 @@ public class Dialog_settings extends JDialog {
 			HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
 			HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
 			HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
+			HandleConfig.debug = (String) cmbDebug.getSelectedItem();
 
 			out.println("fontSize=" + cmbFont.getSelectedItem());
 			out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
