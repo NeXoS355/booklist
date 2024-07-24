@@ -15,12 +15,12 @@ Features:
 
 Tested with jdk21 and the following dependencies
 
-    derby 10.16.1.1
-    derbyshared 10.16.1.1
-    derbytools 10.16.1.1
-    gson 2.10.1
-    log4j-core 2.22.1
-    log4j-api 2.22.1
-    opencsv 5.7.1
+    derby 10.17.1.0
+    derbyshared 10.17.1.0
+    derbytools 10.17.1.0
+    gson 2.11.0
+    log4j-core 2.23.1
+    log4j-api 2.23.1
+    opencsv 5.9
 
     
