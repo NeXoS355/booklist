@@ -30,13 +30,14 @@ public class Dialog_settings extends JDialog {
 	private static JComboBox<String> cmbSearchParam;
 	private static JComboBox<String> cmbDebug;
 	private static JComboBox<Boolean> cmbUseDB;
+	private static JComboBox<Integer> cmbBackup;
 
 	public Dialog_settings() {
 
 		this.setTitle("Einstellungen");
 		this.setModal(true);
 		this.setLayout(new GridBagLayout());
-		this.setSize(300, 420);
+		this.setSize(300, 450);
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -141,7 +142,7 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 7;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
-		JLabel lblSearchParam = new JLabel("Search Parameter");
+		JLabel lblSearchParam = new JLabel("Suchparameter");
 		lblSearchParam.setToolTipText("Google API Suchparameter. t=Titel, at=Autor+Titel");
 		this.add(lblSearchParam, c);
 		c.gridx = 1;
@@ -167,6 +168,22 @@ public class Dialog_settings extends JDialog {
 		cmbDebug = new JComboBox<String>(arrayDebug);
 		cmbDebug.setSelectedItem(HandleConfig.debug);
 		this.add(cmbDebug, c);
+		c.gridx = 0;
+		c.gridy = 9;
+		c.weightx = 0.1;
+		c.gridwidth = 1;
+		JLabel lblBackup = new JLabel("Backup ohne Rückfrage");
+		lblBackup.setToolTipText("Kann die Abfrage beim schließen des Programms nach einem Backup unterdrücken");
+		this.add(lblBackup, c);
+		c.gridx = 1;
+		c.gridy = 9;
+		c.weightx = 0.5;
+		c.gridwidth = 1;
+		Integer[] arrayBackup = { 0, 1, 2 };
+		cmbBackup = new JComboBox<Integer>(arrayBackup);
+		cmbBackup.setSelectedItem(HandleConfig.backup);
+		this.add(cmbBackup, c);
+		
 
 		JButton btnSave = new JButton("Speichern");
 		btnSave.setFont(Mainframe.defaultFont);
@@ -210,6 +227,7 @@ public class Dialog_settings extends JDialog {
 			HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
 			HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
 			HandleConfig.debug = (String) cmbDebug.getSelectedItem();
+			HandleConfig.backup = (int) cmbBackup.getSelectedItem();
 
 			out.println("fontSize=" + cmbFont.getSelectedItem());
 			out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
@@ -218,6 +236,7 @@ public class Dialog_settings extends JDialog {
 			out.println("useDB=" + cmbUseDB.getSelectedItem());
 			out.println("searchParam=" + cmbSearchParam.getSelectedItem());
 			out.println("debug=" + cmbDebug.getSelectedItem());
+			out.println("backup=" + cmbBackup.getSelectedItem());
 			
 			TableColumnModel columnModel = Mainframe.table.getColumnModel();
 			

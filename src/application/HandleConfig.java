@@ -17,6 +17,7 @@ public class HandleConfig {
 	public static int loadOnDemand = 1;
 	public static String debug = "TRACE";
 	public static String searchParam = "at";
+	public static int backup = 2;
 
 	public static void readConfig() {
 		File f = new File("config.conf");
@@ -89,16 +90,15 @@ public class HandleConfig {
 						}
 					} else if (setting.equals("useDB")) {
 						boolean tmp = true;
-						if (value.trim().toLowerCase().equals("true") ) 
+						if (value.trim().toLowerCase().equals("true"))
 							tmp = true;
-						else if (value.trim().toLowerCase().equals("false")) 
+						else if (value.trim().toLowerCase().equals("false"))
 							tmp = false;
-						else 
+						else
 							JOptionPane.showMessageDialog(null,
-							"Fehler in der config (useDB): Falscher Wert - erwartet true oder false");
+									"Fehler in der config (useDB): Falscher Wert - erwartet true oder false");
 						BookListModel.useDB = tmp;
 						Mainframe.logger.info("useDB: " + BookListModel.useDB);
-
 
 					} else if (setting.equals("searchParam")) {
 						String tmp = value.trim();
@@ -117,6 +117,21 @@ public class HandleConfig {
 						} else
 							JOptionPane.showMessageDialog(null,
 									"Fehler in der config (debug): Falscher Wert - erwartet WARN, INFO oder TRACE");
+					} else if (setting.equals("backup")) {
+						try {
+							int tmp = Integer.parseInt(value.trim());
+							if (tmp >= 0 && tmp <= 2)
+								backup = tmp;
+							else
+								JOptionPane.showMessageDialog(null,
+										"Fehler in der config (backup): Falscher Wert - erwartet 0,1 oder 2");
+							Mainframe.logger.info("backup: " + backup);
+						} catch (NumberFormatException e) {
+							JOptionPane.showMessageDialog(null,
+									"Fehler in der config (backup): Falscher Wert - Integer erwartet");
+						Mainframe.logger.info("ERROR backup NumberFormatException");
+						}
+
 					} else if (setting.contains("layoutWidth")) {
 						String[] values = value.trim().split(",");
 						for (int j = 0; j < values.length; j++) {

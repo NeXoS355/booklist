@@ -18,6 +18,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -102,7 +103,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "Ver. 2.6.7  (07.2024)  ";
+	private String version = "Ver. 2.6.8  (07.2024)  ";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -234,20 +235,11 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
-					Date dt = new Date();
-					Long LongTime = dt.getTime();
-					String StrTime = Long.toString(LongTime).substring(0, LongTime.toString().length() - 3);
-					copyFilesInDirectory(new File("BooklistDB"), new File("Sicherung/" + StrTime + "/BooklistDB"));
-					copyFileToDirectory(new File("derby.log"), new File("Sicherung/" + StrTime));
-					copyFileToDirectory(new File("config.conf"), new File("Sicherung/" + StrTime));
-					copyFileToDirectory(new File("Bücherliste.jar"), new File("Sicherung/" + StrTime));
+				boolean ret = createBackup();
+				if (ret)
 					JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
-
-				} catch (IOException e1) {
-					e1.printStackTrace();
+				else
 					JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen oder nicht vollständig.");
-				}
 			}
 		});
 		JMenuItem close = new JMenuItem("Schließen");
@@ -255,7 +247,8 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.exit(1);
+				//System.exit(1);
+				dispose();
 			}
 		});
 		JMenuItem wishlist = new JMenuItem("Wunschliste");
@@ -271,7 +264,8 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String text = "DB Layout Version: " + Database.readCurrentLayoutVersion() +  "\nApache Derby: " + Database.readCurrentDBVersion();
+				String text = "DB Layout Version: " + Database.readCurrentLayoutVersion() + "\nApache Derby: "
+						+ Database.readCurrentDBVersion();
 				JOptionPane.showMessageDialog(null, text);
 			}
 		});
@@ -517,6 +511,25 @@ public class Mainframe extends JFrame {
 			}
 		});
 		logger.trace("Init completed");
+
+		this.addWindowListener(new java.awt.event.WindowAdapter() {
+			@Override
+			public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+				if (HandleConfig.backup == 2) {
+					createBackup();
+				} else if (HandleConfig.backup == 1) {
+					if (JOptionPane.showConfirmDialog(null, "Backup erstellen?", "Backup?",
+							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+						boolean ret = createBackup();
+						if (ret)
+							JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
+						else
+							JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen oder nicht vollständig.");
+					}
+				}
+			}
+		});
+
 	}
 
 	/**
@@ -524,27 +537,27 @@ public class Mainframe extends JFrame {
 	 * 
 	 */
 	public static void deleteBook() {
-			int[] selected = table.getSelectedRows();
-			for (int i = 0; i < selected.length; i++) {
-				String searchAutor = (String) table.getValueAt(selected[i], 1);
-				String searchTitel = (String) table.getValueAt(selected[i], 2);
-				int index = entries.getIndexOf(searchAutor, searchTitel);
-				if (selected.length != 0) {
-					int antwort = JOptionPane.showConfirmDialog(null,
-							"Wirklich '" + searchAutor + " - " + searchTitel + "' löschen?", "Löschen",
-							JOptionPane.YES_NO_OPTION);
-					if (antwort == JOptionPane.YES_OPTION) {
-						entries.delete(index);
-					}
-					BookListModel.checkAuthors();
-				} else {
-					JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
+		int[] selected = table.getSelectedRows();
+		for (int i = 0; i < selected.length; i++) {
+			String searchAutor = (String) table.getValueAt(selected[i], 1);
+			String searchTitel = (String) table.getValueAt(selected[i], 2);
+			int index = entries.getIndexOf(searchAutor, searchTitel);
+			if (selected.length != 0) {
+				int antwort = JOptionPane.showConfirmDialog(null,
+						"Wirklich '" + searchAutor + " - " + searchTitel + "' löschen?", "Löschen",
+						JOptionPane.YES_NO_OPTION);
+				if (antwort == JOptionPane.YES_OPTION) {
+					entries.delete(index);
 				}
+				BookListModel.checkAuthors();
+			} else {
+				JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
 			}
-			if (!treeSelection.equals(""))
-				search(treeSelection);
-			else
-				search(getLastSearch());
+		}
+		if (!treeSelection.equals(""))
+			search(treeSelection);
+		else
+			search(getLastSearch());
 	}
 
 	/**
@@ -578,6 +591,7 @@ public class Mainframe extends JFrame {
 		tree.revalidate();
 		tree.repaint();
 		Mainframe.logger.trace("Mainframe Node updated");
+
 	}
 
 	/**
@@ -723,6 +737,43 @@ public class Mainframe extends JFrame {
 			setTableLayout();
 		} else {
 			JOptionPane.showMessageDialog(null, "Es gab leider keine Treffer!");
+		}
+	}
+
+	/**
+	 * creates a full file based copy of all important files
+	 * 
+	 * @return return success state True=success False=failure
+	 */
+	public static boolean createBackup() {
+		try {
+			String filepath = Mainframe.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+			String[] fileArray = filepath.split("/");
+			String filename = fileArray[fileArray.length - 1];
+			if (filename.contains(".jar")) {
+				Date dt = new Date();
+				Long LongTime = dt.getTime();
+				String StrTime = Long.toString(LongTime).substring(0, LongTime.toString().length() - 3);
+				copyFilesInDirectory(new File("BooklistDB"), new File("Sicherung/" + StrTime + "/BooklistDB"));
+				copyFileToDirectory(new File("derby.log"), new File("Sicherung/" + StrTime));
+				copyFileToDirectory(new File("config.conf"), new File("Sicherung/" + StrTime));
+				copyFileToDirectory(new File(filename), new File("Sicherung/" + StrTime));
+				Mainframe.logger.info("Backup created");
+				return true;
+			} else {
+				Mainframe.logger.error("Error while creating Backup. Could not extract filename.");
+				return false;
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			Mainframe.logger.error("Error while creating Backup. IOException");
+			Mainframe.logger.error(e1.toString());
+			return false;
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+			Mainframe.logger.error("Error while creating Backup. URISyntaxException");
+			Mainframe.logger.error(e1.toString());
+			return false;
 		}
 	}
 
