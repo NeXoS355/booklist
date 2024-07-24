@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,7 +57,7 @@ public class HandleWebInfo {
 			Mainframe.logger.info("Search API URL: " + apiUrl);
 
 			// HttpURLConnection erstellen
-			URL url = new URL(apiUrl);
+			URL url = new URI(apiUrl).toURL();
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 			// GET-Methode festlegen
@@ -228,7 +230,7 @@ public class HandleWebInfo {
 	public static boolean savePic(String weblink, Book_Booklist entry) {
 		BufferedInputStream in;
 		try {
-			URL url = new URL(weblink);
+			URL url = new URI(weblink).toURL();
 			in = new BufferedInputStream(url.openStream());
 
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -273,6 +275,9 @@ public class HandleWebInfo {
 			// TODO Auto-generated catch block
 			Mainframe.logger.error(e.getMessage());
 
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			Mainframe.logger.error(e.getMessage());
 		}
 		return true;
 	}
