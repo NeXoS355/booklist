@@ -46,6 +46,7 @@ public class Dialog_add_Wishlist extends JDialog {
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	public Dialog_add_Wishlist(WishlistListModel einträge) {
+		Mainframe.logger.trace("Wishlist Book add: start creating Frame");
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 365));
 		this.setLocation(200, 200);
@@ -334,6 +335,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		this.add(panel_south, BorderLayout.SOUTH);
 		this.add(new JLabel(""), BorderLayout.NORTH); // oberer Abstand vom JFrame
 
+		Mainframe.logger.trace("Wishlist Book add: Frame successfully created");
 		this.setVisible(true);
 		this.setModal(true);
 		this.setResizable(false);
@@ -342,6 +344,7 @@ public class Dialog_add_Wishlist extends JDialog {
 
 	public void addBuch() {
 		try {
+			Mainframe.logger.trace("Book add: start saving");
 			if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
 				String autor = txt_author.getText();
 				String titel = txt_title.getText();
@@ -356,6 +359,7 @@ public class Dialog_add_Wishlist extends JDialog {
 					txt_title.setText("Buch bereits vorhanden!");
 					txt_title.setBackground(new Color(255, 105, 105));
 				}
+				Mainframe.logger.trace("Book add: saved successfully");
 			} else {
 				if (txt_author.getText().isEmpty()) {
 					txt_author.setBackground(new Color(255, 105, 105));

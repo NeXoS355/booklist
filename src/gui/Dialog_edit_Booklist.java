@@ -87,6 +87,7 @@ public class Dialog_edit_Booklist extends JDialog {
 	public Dialog_edit_Booklist(BookListModel entries, int index, DefaultTreeModel treeModel,
 			DefaultMutableTreeNode rootNode) {
 
+		Mainframe.logger.trace("Book edit: start creating Frame");
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(600, 645));
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 100);
@@ -920,7 +921,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		} else {
 			Mainframe.search(Mainframe.getTreeSelection());
 		}
-
+		Mainframe.logger.trace("Book edit: Frame successfully created");
 		this.setVisible(true);
 		this.setResizable(false);
 
@@ -1073,16 +1074,17 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		} else {
 			if (txtAuthor.getText().isEmpty()) {
-				Mainframe.logger.info("Buch ändern: Autor nicht gesetzt!");
+				Mainframe.logger.info("Book edit: Autor nicht gesetzt!");
 				txtAuthor.setBackground(new Color(255, 105, 105));
 			}
 			if (txtTitle.getText().isEmpty()) {
-				Mainframe.logger.info("Buch ändern: Titel nicht gesetzt!");
+				Mainframe.logger.info("Book edit: Titel nicht gesetzt!");
 				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 		}
 		BookListModel.checkAuthors();
 		Mainframe.updateModel();
+		Mainframe.logger.trace("Book edit: saved");
 	}
 
 	/**
@@ -1099,7 +1101,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
 			if (eintrag.getAuthor().equals(newAuthor) && eintrag.getTitle().equals(newTitle)) {
 				if (i != index) {
-					Mainframe.logger.info("Buch ändern: Autor & Titel bereits vorhanden");
+					Mainframe.logger.info("Book edit: Autor & Titel bereits vorhanden");
 					return false;
 				}
 			}

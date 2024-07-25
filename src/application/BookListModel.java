@@ -147,7 +147,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						book.setBorrowedFrom(borrowedFrom);
 						book.setBorrowed(boolBorrowed);
 					}
-					Mainframe.logger.info("loading Book info: " + book.getAuthor() + "-" + book.getTitle());
+					Mainframe.logger.trace("loading Book info: " + book.getAuthor() + "-" + book.getTitle());
 				}
 			} catch (SQLException e) {
 				Mainframe.logger.error(e.getMessage());

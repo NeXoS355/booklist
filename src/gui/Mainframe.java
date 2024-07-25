@@ -96,6 +96,8 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
+//	private static Color selectionColor  = new Color(80,80,80);
+//	private static Color ackgroundColor  = new Color(46,46,46);
 
 	public static int prozEbook = 0;
 	public static int prozAuthor = 0;
@@ -103,7 +105,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "Ver. 2.6.8  (07.2024)  ";
+	private String version = "2.6.9";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -145,7 +147,7 @@ public class Mainframe extends JFrame {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(5, 5));
 
-		txt_search = new JTextField();
+		txt_search = new RoundJTextField();
 		txt_search.setToolTipText("Suchtext");
 		txt_search.setText("Suche ... (" + entries.getSize() + ")");
 		txt_search.setForeground(Color.gray);
@@ -181,9 +183,8 @@ public class Mainframe extends JFrame {
 		});
 		panel.add(txt_search, BorderLayout.CENTER);
 
-		JButton btn_add = new JButton();
+		JButton btn_add = new JButton("+");
 		btn_add.setFocusPainted(false);
-		btn_add.setText("+");
 		btn_add.setFont(btn_add.getFont().deriveFont(Font.BOLD, 20));
 		btn_add.addActionListener(new ActionListener() {
 
@@ -312,7 +313,7 @@ public class Mainframe extends JFrame {
 		hilfe.add(dbVersion);
 		pnlMenü.add(menue, BorderLayout.WEST);
 
-		JLabel lblVersion = new JLabel(version);
+		JLabel lblVersion = new JLabel("Version: " + version);
 
 		lblVersion.setFont(new Font(lblVersion.getFont().getName(), Font.BOLD, lblVersion.getFont().getSize()));
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -324,6 +325,7 @@ public class Mainframe extends JFrame {
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
 		table.setFont(defaultFont);
 		table.setShowVerticalLines(false);
+		table.setShowHorizontalLines(false);
 		table.setSelectionBackground(Color.DARK_GRAY);
 		table.setSelectionForeground(Color.WHITE);
 		table.setRowHeight(table.getRowHeight() + 6);
@@ -490,6 +492,7 @@ public class Mainframe extends JFrame {
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
+		treeScrollPane.setForeground(new Color(46,46,46));
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, listScrollPane);
 		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
@@ -535,6 +538,7 @@ public class Mainframe extends JFrame {
 					}
 				}
 				logger.trace("Window closed");
+				System.exit(1);
 			}
 		});
 		logger.trace("Init completed");
@@ -561,6 +565,7 @@ public class Mainframe extends JFrame {
 			} else {
 				JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
 			}
+			logger.trace("Book deleted: " + searchAutor + ";" + searchTitel);
 		}
 		if (!treeSelection.equals(""))
 			search(treeSelection);

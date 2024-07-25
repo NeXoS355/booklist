@@ -43,6 +43,7 @@ public class wishlist extends JFrame {
 		this.setLayout(new BorderLayout(10, 10));
 		this.setSize(700, 700);
 		this.setLocation(150, 150);
+		Mainframe.logger.trace("Wishlist: start creating Frame");
 
 		wishlistEntries = new WishlistListModel();
 		display = new WishlistTableModel(wishlistEntries);
@@ -68,10 +69,11 @@ public class wishlist extends JFrame {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() >= 2 && SwingUtilities.isLeftMouseButton(e)) {
+				if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
 					String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
 					String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
 					int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
+					Mainframe.logger.trace("Clickcount: " + e.getClickCount() + ";Wishlist open Edit Dialog ");
 					new Dialog_edit_Wishlist(wishlistEntries, index);
 				}
 				if (SwingUtilities.isRightMouseButton(e)) {
@@ -107,6 +109,7 @@ public class wishlist extends JFrame {
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch hinzufügen") {
 							new Dialog_add_Wishlist(wishlistEntries);
+							Mainframe.logger.trace("Menu;Wishlist open Add Dialog");
 						}
 						updateModel();
 					}
@@ -129,6 +132,7 @@ public class wishlist extends JFrame {
 							String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
 							String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
 							int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
+							Mainframe.logger.trace("Menu;Wishlist open Edit Dialog");
 							new Dialog_edit_Wishlist(wishlistEntries, index);
 							updateModel();
 						}
@@ -163,6 +167,7 @@ public class wishlist extends JFrame {
 							wishlistEntries.delete(index);
 							updateModel();
 							Mainframe.updateModel();
+							Mainframe.logger.trace("Menu;Wishlist Book converted;" + author + "," + title);
 						}
 					}
 				});
@@ -189,17 +194,19 @@ public class wishlist extends JFrame {
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		mid_panel.add(listScrollPane, BorderLayout.CENTER);
-
+		
+		Mainframe.logger.trace("Wishlist: Frame created successfully");
 		this.add(north_panel, BorderLayout.NORTH);
 		this.add(mid_panel, BorderLayout.CENTER);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.setVisible(true);
+
 	}
 
 	public static void updateModel() {
 		display = new WishlistTableModel(wishlistEntries);
 		table.setModel(display);
-		System.out.println("Wishlist Model updated");
+		Mainframe.logger.trace("Wishlist Model updated");
 	}
 
 	public void deleteBook() {
@@ -217,6 +224,7 @@ public class wishlist extends JFrame {
 			} else {
 				JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
 			}
+			Mainframe.logger.trace("Wishlist Book deleted: " + searchAuthor + ";" + searchTitle);
 		}
 		updateModel();
 	}

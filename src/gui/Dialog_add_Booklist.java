@@ -53,6 +53,7 @@ public class Dialog_add_Booklist extends JDialog {
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	public Dialog_add_Booklist(BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
+		Mainframe.logger.trace("Book add: start creating Frame");
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 400));
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
@@ -557,6 +558,8 @@ public class Dialog_add_Booklist extends JDialog {
 		this.setModal(true);
 		this.setResizable(false);
 
+		Mainframe.logger.trace("Book add: Frame successfully created");
+		
 		if (!(Mainframe.getTreeSelection()).equals("")) {
 			txtTitle.requestFocus();
 		}

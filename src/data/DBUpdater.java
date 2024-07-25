@@ -14,7 +14,7 @@ import gui.Mainframe;
  * checks the connected Database version and updates if necessary
  *
  */
-public class Updater {
+public class DBUpdater {
 
 	/**
 	 * checks current Version of Booklist Table and runs the update if necessary

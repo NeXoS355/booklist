@@ -42,7 +42,7 @@ public class Database {
 				con = DriverManager.getConnection("jdbc:derby:BooklistDB;create=true;upgrade=true");
 				createTable(con);
 			}
-			Updater.checkUpdate(con);
+			DBUpdater.checkUpdate(con);
 		} catch (SQLException e) {
 			System.err.println("Verbindung konnte nicht hergestellt werden");
 			Mainframe.logger.error(e.getMessage());
