@@ -16,12 +16,18 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,6 +65,12 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import application.BookListModel;
 import application.Book_Booklist;
@@ -105,7 +117,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "2.6.9";
+	private String version = "2.7.0";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -248,7 +260,7 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//System.exit(1);
+				// System.exit(1);
 				dispose();
 			}
 		});
@@ -299,6 +311,82 @@ public class Mainframe extends JFrame {
 				new Dialog_info();
 			}
 		});
+		JMenuItem webApp = new JMenuItem("Web API");
+		webApp.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				downloadFromApi();
+			}
+
+			private void downloadFromApi() {
+				try {
+					URL url = new URI(HandleConfig.apiURL+"/api.php?token="+HandleConfig.apiToken).toURL();
+					System.out.println(url);
+					HttpURLConnection con = (HttpURLConnection) url.openConnection();
+					con.setRequestMethod("GET");
+					int responseCode = con.getResponseCode();
+					if (responseCode == HttpURLConnection.HTTP_OK) {
+						 // API-Antwort lesen (Rohdaten)
+		                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		                String inputLine;
+		                StringBuilder response = new StringBuilder();
+
+		                while ((inputLine = in.readLine()) != null) {
+		                    response.append(inputLine);
+		                }
+		                
+		                String jsonResponse = response.toString();
+		                JsonElement jsonElement = JsonParser.parseString(jsonResponse);
+		                if (jsonElement.isJsonArray()) {
+		                    JsonArray jsonArray = jsonElement.getAsJsonArray();
+		                    for (JsonElement element : jsonArray) {
+		                        JsonObject jsonObject = element.getAsJsonObject();
+				                // Felder als String-Variablen speichern
+				                String author = jsonObject.get("author").getAsString();
+				                String title = jsonObject.get("title").getAsString();
+				                String series = jsonObject.has("series") ? jsonObject.get("series").getAsString() : "";
+				                String seriesPart = jsonObject.has("seriesPart") ? jsonObject.get("seriesPart").getAsString() : "";
+				                String note = jsonObject.has("note") ? jsonObject.get("note").getAsString() : "";
+				                String ebook = jsonObject.has("ebook") ? jsonObject.get("ebook").getAsString() : null;
+				                boolean boolEbook = false;
+				                if(ebook.equals("1")) {
+				                	boolEbook = true;
+				                } else {
+				                	boolEbook = false; 
+				                }
+				                System.out.println(response.toString());
+				                // Ausgeben der String-Variablen
+				                System.out.println("Autor: " + author);
+				                System.out.println("Titel: " + title);
+				                System.out.println("Buchreihe: " + series);
+				                System.out.println("Teil der Buchreihe: " + seriesPart);
+				                System.out.println("Bemerkung: " + note);
+				                System.out.println("eBook: " + boolEbook);
+				                
+				                Mainframe.entries.add(new Book_Booklist(author, title, note, series, seriesPart, boolEbook, 0, null, "", "",new Timestamp(System.currentTimeMillis()), true));
+								BookListModel.checkAuthors();
+								Mainframe.setLastSearch(author);
+				                updateModel();
+		                    }
+		                } 
+						in.close();
+						con.disconnect();
+					} else {
+						System.out.println("GET request failed");
+					}
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 
 		menue.add(datei);
 		menue.add(extras);
@@ -309,6 +397,7 @@ public class Mainframe extends JFrame {
 		extras.add(ExcelExport);
 		extras.add(backup);
 		extras.add(wishlist);
+		extras.add(webApp);
 		extras.add(info);
 		hilfe.add(dbVersion);
 		pnlMenü.add(menue, BorderLayout.WEST);
@@ -492,7 +581,7 @@ public class Mainframe extends JFrame {
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
-		treeScrollPane.setForeground(new Color(46,46,46));
+		treeScrollPane.setForeground(new Color(46, 46, 46));
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, listScrollPane);
 		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
@@ -513,8 +602,8 @@ public class Mainframe extends JFrame {
 				if (HandleConfig.backup == 2) {
 					createBackup();
 				} else if (HandleConfig.backup == 1) {
-					if (JOptionPane.showConfirmDialog(null, "Backup erstellen?", "Backup?",
-							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+					if (JOptionPane.showConfirmDialog(null, "Backup erstellen?", "Backup?", JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
 						boolean ret = createBackup();
 						if (ret)
 							JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
@@ -524,12 +613,13 @@ public class Mainframe extends JFrame {
 				}
 				logger.trace("Window closing");
 			}
+
 			public void windowClosed(java.awt.event.WindowEvent windowEvent) {
 				if (HandleConfig.backup == 2) {
 					createBackup();
 				} else if (HandleConfig.backup == 1) {
-					if (JOptionPane.showConfirmDialog(null, "Backup erstellen?", "Backup?",
-							JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+					if (JOptionPane.showConfirmDialog(null, "Backup erstellen?", "Backup?", JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
 						boolean ret = createBackup();
 						if (ret)
 							JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");

@@ -14,5 +14,7 @@
 	<classpathentry kind="lib" path="dependencies/log4j-core-2.23.1.jar"/>
 	<classpathentry kind="lib" path="dependencies/opencsv-5.9.jar"/>
 	<classpathentry kind="lib" path="dependencies/gson-2.11.0.jar"/>
+	<classpathentry kind="lib" path="dependencies/zxing_core-3.5.3.jar"/>
+	<classpathentry kind="lib" path="dependencies/zxing_javase-3.5.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

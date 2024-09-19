@@ -18,6 +18,8 @@ public class HandleConfig {
 	public static String debug = "TRACE";
 	public static String searchParam = "at";
 	public static int backup = 2;
+	public static String apiToken = "";
+	public static String apiURL = "";
 
 	public static void readConfig() {
 		File f = new File("config.conf");
@@ -129,10 +131,14 @@ public class HandleConfig {
 						} catch (NumberFormatException e) {
 							JOptionPane.showMessageDialog(null,
 									"Fehler in der config (backup): Falscher Wert - Integer erwartet");
-						Mainframe.logger.info("ERROR backup NumberFormatException");
+							Mainframe.logger.info("ERROR backup NumberFormatException");
 						}
 
-					} else if (setting.contains("layoutWidth")) {
+					} else if (setting.equals("apiToken")) {
+						apiToken = value.trim();
+					} else if (setting.equals("apiURL")) {
+						apiURL = value.trim();
+					} else if (setting.equals("layoutWidth")) {
 						String[] values = value.trim().split(",");
 						for (int j = 0; j < values.length; j++) {
 							Mainframe.prozEbook = Integer.parseInt(values[0]);
@@ -141,7 +147,7 @@ public class HandleConfig {
 							Mainframe.prozSeries = Integer.parseInt(values[3]);
 							Mainframe.prozRating = Integer.parseInt(values[4]);
 						}
-					} else if (setting.contains("layoutSort")) {
+					} else if (setting.equals("layoutSort")) {
 						String[] values = value.trim().split(",");
 						for (int j = 0; j < values.length; j++) {
 							SimpleTableModel.columnNames[0] = (values[0]);
