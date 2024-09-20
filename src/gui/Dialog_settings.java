@@ -8,8 +8,6 @@ import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.security.SecureRandom;
-import java.util.Base64;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -187,8 +185,8 @@ public class Dialog_settings extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int antwort = JOptionPane.showConfirmDialog(null,
-						"Wirklich neuen Token genrieren?\nDie ausstehenden Bücher mit dem alten Token können dann nicht mehr abgerufen werden.", "generieren",
-						JOptionPane.YES_NO_OPTION);
+						"Wirklich neuen Token genrieren?\nDie ausstehenden Bücher mit dem alten Token können dann nicht mehr abgerufen werden.",
+						"generieren", JOptionPane.YES_NO_OPTION);
 				if (antwort == JOptionPane.YES_OPTION) {
 					String token = generateRandomToken(64);
 					txtApiToken.setText(token);
@@ -199,7 +197,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 0;
 		c.gridy = 98;
 		this.add(btnGenToken, c);
-		
+
 		JButton btnShowQR = new JButton("zeige QR Code");
 		btnShowQR.setFont(Mainframe.defaultFont);
 		btnShowQR.addActionListener(new ActionListener() {
@@ -245,7 +243,7 @@ public class Dialog_settings extends JDialog {
 	}
 
 	public static void saveSettings() {
-		try (PrintWriter out = new PrintWriter("config.conf")) {			
+		try (PrintWriter out = new PrintWriter("config.conf")) {
 			Mainframe.logger.info("Save Settings");
 			// set Parameters which can be changed on the fly
 			HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
@@ -305,10 +303,17 @@ public class Dialog_settings extends JDialog {
 
 	// Method to generate a random token with 64 characters
 	private String generateRandomToken(int length) {
-		SecureRandom random = new SecureRandom();
-		byte[] bytes = new byte[length];
-		random.nextBytes(bytes);
-		return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).substring(0, length);
-	}
 
+		final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		SecureRandom random = new SecureRandom();
+		StringBuilder token = new StringBuilder(length);
+
+		// Generiere das Token aus der Zeichenliste
+		for (int i = 0; i < length; i++) {
+			int index = random.nextInt(CHARACTERS.length());
+			token.append(CHARACTERS.charAt(index));
+		}
+
+		return token.toString();
+	}
 }
