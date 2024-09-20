@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -66,7 +67,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -117,7 +117,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "2.7.0";
+	private String version = "3.0.0";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -287,11 +287,16 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				boolean check = Database.CSVExport();
-				if (check) {
-					JOptionPane.showMessageDialog(null, "Liste erfolgreich exportiert!");
-				} else {
-					JOptionPane.showMessageDialog(null, "Datei konnte nicht geschrieben werden!");
+				int antwort = JOptionPane.showConfirmDialog(null,
+						"Es wird eine csv Datei im Programmpfad abgelegt.\nFortfahren?", "Export",
+						JOptionPane.YES_NO_OPTION);
+				if (antwort == JOptionPane.YES_OPTION) {
+					boolean check = Database.CSVExport();
+					if (check) {
+						JOptionPane.showMessageDialog(null, "Liste erfolgreich exportiert!");
+					} else {
+						JOptionPane.showMessageDialog(null, "Datei konnte nicht geschrieben werden!");
+					}
 				}
 			}
 		});
@@ -311,21 +316,27 @@ public class Mainframe extends JFrame {
 				new Dialog_info();
 			}
 		});
-		JMenuItem webApp = new JMenuItem("Web API");
+		JMenuItem webApp = new JMenuItem("API Abruf");
 		webApp.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				downloadFromApi();
+				if (!HandleConfig.apiToken.equals("") && !HandleConfig.apiURL.equals("")) {
+					downloadFromApi();
+				} else {
+					JOptionPane.showMessageDialog(null, "API Token oder URL nicht gefunden.\nBitte die Einstellungen überprüfen!");
+				}
+
 			}
 
 			private void downloadFromApi() {
 				try {
-					URL url = new URI(HandleConfig.apiURL+"/api.php?token="+HandleConfig.apiToken).toURL();
-					System.out.println(url);
-					HttpURLConnection con = (HttpURLConnection) url.openConnection();
+					URL getUrl = new URI(HandleConfig.apiURL+"/api/get.php?token="+HandleConfig.apiToken).toURL();
+					logger.trace("Web API request: " + getUrl);
+					HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
 					con.setRequestMethod("GET");
 					int responseCode = con.getResponseCode();
+					logger.trace("Web API GET responseCode: " + responseCode);
 					if (responseCode == HttpURLConnection.HTTP_OK) {
 						 // API-Antwort lesen (Rohdaten)
 		                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -337,16 +348,20 @@ public class Mainframe extends JFrame {
 		                }
 		                
 		                String jsonResponse = response.toString();
+		                logger.trace("Web API GET response: " + jsonResponse);
 		                JsonElement jsonElement = JsonParser.parseString(jsonResponse);
+		                int count = 0;
+		                String importedBooks = "";
 		                if (jsonElement.isJsonArray()) {
 		                    JsonArray jsonArray = jsonElement.getAsJsonArray();
 		                    for (JsonElement element : jsonArray) {
+		                    	count += 1;
 		                        JsonObject jsonObject = element.getAsJsonObject();
 				                // Felder als String-Variablen speichern
 				                String author = jsonObject.get("author").getAsString();
 				                String title = jsonObject.get("title").getAsString();
 				                String series = jsonObject.has("series") ? jsonObject.get("series").getAsString() : "";
-				                String seriesPart = jsonObject.has("seriesPart") ? jsonObject.get("seriesPart").getAsString() : "";
+				                String seriesPart = jsonObject.has("series_part") ? jsonObject.get("series_part").getAsString() : "";
 				                String note = jsonObject.has("note") ? jsonObject.get("note").getAsString() : "";
 				                String ebook = jsonObject.has("ebook") ? jsonObject.get("ebook").getAsString() : null;
 				                boolean boolEbook = false;
@@ -355,35 +370,62 @@ public class Mainframe extends JFrame {
 				                } else {
 				                	boolEbook = false; 
 				                }
-				                System.out.println(response.toString());
-				                // Ausgeben der String-Variablen
-				                System.out.println("Autor: " + author);
-				                System.out.println("Titel: " + title);
-				                System.out.println("Buchreihe: " + series);
-				                System.out.println("Teil der Buchreihe: " + seriesPart);
-				                System.out.println("Bemerkung: " + note);
-				                System.out.println("eBook: " + boolEbook);
+				                logger.trace(response.toString());
 				                
-				                Mainframe.entries.add(new Book_Booklist(author, title, note, series, seriesPart, boolEbook, 0, null, "", "",new Timestamp(System.currentTimeMillis()), true));
-								BookListModel.checkAuthors();
-								Mainframe.setLastSearch(author);
-				                updateModel();
+				                Book_Booklist imp = new Book_Booklist(author, title, note, series, seriesPart, boolEbook, 0, null, "", "",new Timestamp(System.currentTimeMillis()), true);
+				                importedBooks = importedBooks + "\n" + author + " - " + title ;
+				                Mainframe.entries.add(imp);
+				                BookListModel.checkAuthors();
 		                    }
 		                } 
 						in.close();
+						if(count >= 1) {
+							if (count == 1) {
+								JOptionPane.showMessageDialog(null, count + " Buch erfolgreich importiert\n" + importedBooks);
+							} else {
+								JOptionPane.showMessageDialog(null, count + " Bücher erfolgreich importiert\n" + importedBooks);
+							}
+							
+					        try {
+					            // URL des Endpunkts
+					            URL deleteUrl = new URI(HandleConfig.apiURL+"/api/delete.php").toURL();
+					            con = (HttpURLConnection) deleteUrl.openConnection();
+					            // POST-Anfrage einstellen
+					            con.setRequestMethod("POST");
+					            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+					            con.setDoOutput(true);
+					            
+					            // Der Token, der gesendet werden soll
+					            String postData = "token=" + HandleConfig.apiToken;
+					            
+					            // Daten in den OutputStream schreiben
+					            try (OutputStream os = con.getOutputStream()) {
+					                byte[] input = postData.getBytes("utf-8");
+					                os.write(input, 0, input.length);
+					            }
+
+					            // Antwortcode überprüfen
+					            responseCode = con.getResponseCode();
+					            logger.trace("Web API POST responseCode: " + responseCode);
+					        } catch (Exception e) {
+					            e.printStackTrace();
+					        }
+						} else {
+							JOptionPane.showMessageDialog(null, "Keine Bücher zum abrufen gefunden.");
+						}
 						con.disconnect();
 					} else {
-						System.out.println("GET request failed");
+						JOptionPane.showMessageDialog(null, "Get request failed.");
 					}
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.trace(e.getMessage());
+					JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.trace(e.getMessage());
+					JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.trace(e.getMessage());
+					JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
 				}
 			}
 		});

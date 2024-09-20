@@ -21,7 +21,7 @@ public class Dialog_info extends JDialog {
 		this.setTitle("Einstellungen");
 		this.setModal(true);
 		this.setLayout(new GridBagLayout());
-		this.setSize(500, 300);
+		this.setSize(400, 400);
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -127,7 +127,7 @@ public class Dialog_info extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		JLabel lbl_Year = new JLabel();
-		lbl_Year.setText((BookListModel.getBooksPerYear()).toString().replace("[", "").replace("]", ""));
+		lbl_Year.setText(BookListModel.getBooksPerYear());
 		this.add(lbl_Year, c);
 		
 

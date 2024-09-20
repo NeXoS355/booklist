@@ -300,7 +300,7 @@ public class Database {
 	 */
 	public static boolean CSVExport() {
 		boolean success = false;
-		System.out.println("CSV Export");
+		Mainframe.logger.trace("CSV Export");
 		String fileName = "books.csv";
 		try (CSVWriter writer = new CSVWriter(new FileWriter(fileName))) {
 			// Spaltenüberschriften hinzufügen

@@ -420,10 +420,11 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	/**
 	 * gets Author or Series with best overall Rating
 	 * 
-	 * @return return a List with Authors or Series with the best overall Rating
+	 * @return return a String with Authors or Series with the best overall Rating
 	 */
-	public static ArrayList<String> getBooksPerYear() {
-		ArrayList<String> year = new ArrayList<String>();
+	public static String getBooksPerYear() {
+		StringBuilder result = new StringBuilder();
+		result.append("<html>");
 		ResultSet rs = Database.getColumnCountsWithGroup("YEAR(date)");
 
 		try {
@@ -431,13 +432,14 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				int yearCount = rs.getInt(1);
 				String yearValue = rs.getString(2);
 
-				year.add(yearValue + " - " + yearCount + "\n");
+				result.append(yearValue + " - " + yearCount + "<br>");
 			}
 
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
-		return year;
+		result.append("</html>");
+		return result.toString();
 	}
 
 	/**

@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.table.TableColumnModel;
 
@@ -185,9 +186,14 @@ public class Dialog_settings extends JDialog {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String token = generateRandomToken(64);
-				txtApiToken.setText(token);
-				HandleConfig.apiToken = token;
+				int antwort = JOptionPane.showConfirmDialog(null,
+						"Wirklich neuen Token genrieren?\nDie ausstehenden Bücher mit dem alten Token können dann nicht mehr abgerufen werden.", "generieren",
+						JOptionPane.YES_NO_OPTION);
+				if (antwort == JOptionPane.YES_OPTION) {
+					String token = generateRandomToken(64);
+					txtApiToken.setText(token);
+					HandleConfig.apiToken = token;
+				}
 			}
 		});
 		c.gridx = 0;
@@ -239,7 +245,7 @@ public class Dialog_settings extends JDialog {
 	}
 
 	public static void saveSettings() {
-		try (PrintWriter out = new PrintWriter("config.conf")) {
+		try (PrintWriter out = new PrintWriter("config.conf")) {			
 			Mainframe.logger.info("Save Settings");
 			// set Parameters which can be changed on the fly
 			HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
