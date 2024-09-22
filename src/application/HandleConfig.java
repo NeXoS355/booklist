@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.SecureRandom;
+
 import javax.swing.JOptionPane;
 
 import gui.Mainframe;
@@ -18,7 +20,7 @@ public class HandleConfig {
 	public static String debug = "TRACE";
 	public static String searchParam = "at";
 	public static int backup = 2;
-	public static String apiToken = "";
+	public static String apiToken = generateRandomToken(64);
 	public static String apiURL = "";
 
 	public static void readConfig() {
@@ -135,9 +137,13 @@ public class HandleConfig {
 						}
 
 					} else if (setting.equals("apiToken")) {
-						apiToken = value.trim();
+						if (value.length() > 60)
+							apiToken = value.trim();
+						else
+							apiToken = generateRandomToken(64);
 					} else if (setting.equals("apiURL")) {
-						apiURL = value.trim();
+						if (value.length() > 60)
+							apiURL = value.trim();
 					} else if (setting.equals("layoutWidth")) {
 						String[] values = value.trim().split(",");
 						for (int j = 0; j < values.length; j++) {
@@ -164,21 +170,42 @@ public class HandleConfig {
 			} catch (IOException e) {
 				Mainframe.logger.error(e.getMessage());
 			}
-		} else
-
-		{
+		} else {
 			try (PrintWriter out = new PrintWriter("config.conf")) {
 				out.println("fontSize=" + Mainframe.defaultFont.getSize());
 				out.println("descFontSize=" + Mainframe.descFont.getSize());
 				out.println("autoDownload=" + autoDownload);
 				out.println("loadOnDemand=" + loadOnDemand);
+				out.println("useDB=" + BookListModel.useDB);
 				out.println("searchParam=" + searchParam);
 				out.println("debug=" + debug);
+				out.println("backup=" + backup);
+				String token = generateRandomToken(64);
+				apiToken = token;
+				out.println("apiToken=" + token);
+				out.println("apiURL=" + apiURL);
+
 			} catch (FileNotFoundException e) {
 				Mainframe.logger.error(e.getMessage());
 			}
 		}
 
+	}
+
+	// Method to generate a random token with 64 characters
+	public static String generateRandomToken(int length) {
+
+		final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		SecureRandom random = new SecureRandom();
+		StringBuilder token = new StringBuilder(length);
+
+		// Generiere das Token aus der Zeichenliste
+		for (int i = 0; i < length; i++) {
+			int index = random.nextInt(CHARACTERS.length());
+			token.append(CHARACTERS.charAt(index));
+		}
+
+		return token.toString();
 	}
 
 }

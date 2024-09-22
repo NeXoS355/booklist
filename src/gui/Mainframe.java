@@ -408,7 +408,7 @@ public class Mainframe extends JFrame {
 					            responseCode = con.getResponseCode();
 					            logger.trace("Web API POST responseCode: " + responseCode);
 					        } catch (Exception e) {
-					            e.printStackTrace();
+					        	logger.error(e.getMessage());
 					        }
 						} else {
 							JOptionPane.showMessageDialog(null, "Keine Bücher zum abrufen gefunden.");
@@ -418,13 +418,13 @@ public class Mainframe extends JFrame {
 						JOptionPane.showMessageDialog(null, "Get request failed.");
 					}
 				} catch (URISyntaxException e) {
-					logger.trace(e.getMessage());
+					logger.error(e.getMessage());
 					JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
 				} catch (MalformedURLException e) {
-					logger.trace(e.getMessage());
+					logger.error(e.getMessage());
 					JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
 				} catch (IOException e) {
-					logger.trace(e.getMessage());
+					logger.error(e.getMessage());
 					JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
 				}
 			}

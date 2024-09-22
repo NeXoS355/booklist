@@ -15,7 +15,6 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -209,7 +208,7 @@ public class Dialog_settings extends JDialog {
 						"Wirklich neuen Token genrieren?\nDie ausstehenden Bücher mit dem alten Token können dann nicht mehr abgerufen werden.",
 						"generieren", JOptionPane.YES_NO_OPTION);
 				if (antwort == JOptionPane.YES_OPTION) {
-					String token = generateRandomToken(64);
+					String token = HandleConfig.generateRandomToken(64);
 					txtApiToken.setText(token);
 					HandleConfig.apiToken = token;
 					generateQRCode(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
@@ -222,15 +221,15 @@ public class Dialog_settings extends JDialog {
 		c.anchor = GridBagConstraints.CENTER;
 		c.fill = GridBagConstraints.NONE;
 		this.add(btnGenToken, c);
-		
-        // QR code label
+
+		// QR code label
 		lblQrCode = new JLabel();
-        generateQRCode(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
-        JPanel qrPanel = new JPanel();
-        qrPanel.add(lblQrCode);
+		generateQRCode(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
+		JPanel qrPanel = new JPanel();
+		qrPanel.add(lblQrCode);
 		c.gridx = 0;
 		c.gridy = 13;
-        this.add(qrPanel, c);
+		this.add(qrPanel, c);
 
 		JButton btnSave = new JButton("Speichern");
 		btnSave.setFont(Mainframe.defaultFont);
@@ -276,15 +275,17 @@ public class Dialog_settings extends JDialog {
 			HandleConfig.backup = (int) cmbBackup.getSelectedItem();
 			HandleConfig.apiToken = txtApiToken.getText();
 			HandleConfig.apiURL = txtApiUrl.getText();
-			if (HandleConfig.apiURL.substring(HandleConfig.apiURL.length()-1).equals("/")) {
-				HandleConfig.apiURL = HandleConfig.apiURL.substring(0,HandleConfig.apiURL.length()-1);
-				System.out.println(HandleConfig.apiURL);
+			if (HandleConfig.apiURL.length() > 0) {
+				if (HandleConfig.apiURL.substring(HandleConfig.apiURL.length() - 1).equals("/")) {
+					HandleConfig.apiURL = HandleConfig.apiURL.substring(0, HandleConfig.apiURL.length() - 1);
+					System.out.println(HandleConfig.apiURL);
+				}
 			}
 			if (HandleConfig.apiURL.length() > 0) {
 				try {
-					Mainframe.logger.trace("Web API request: " + HandleConfig.apiURL+"/api/get.php");
+					Mainframe.logger.trace("Web API request: " + HandleConfig.apiURL + "/api/get.php");
 					URL getUrl;
-					getUrl = new URI(HandleConfig.apiURL+"/api/get.php?token="+HandleConfig.apiToken).toURL();
+					getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
 					HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
 					con.setRequestMethod("GET");
 					int responseCode = con.getResponseCode();
@@ -293,17 +294,17 @@ public class Dialog_settings extends JDialog {
 						JOptionPane.showMessageDialog(null, "Verbindung zur API fehlgeschlagen");
 					}
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Mainframe.logger.error("Fehler prüfen der Verbindung");
+					Mainframe.logger.error(e.getMessage());
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Mainframe.logger.error("Fehler prüfen der Verbindung");
+					Mainframe.logger.error(e.getMessage());
 				} catch (ProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Mainframe.logger.error("Fehler prüfen der Verbindung");
+					Mainframe.logger.error(e.getMessage());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Mainframe.logger.error("Fehler prüfen der Verbindung");
+					Mainframe.logger.error(e.getMessage());
 				}
 
 			}
@@ -355,33 +356,17 @@ public class Dialog_settings extends JDialog {
 		}
 	}
 
-	// Method to generate a random token with 64 characters
-	private String generateRandomToken(int length) {
-
-		final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		SecureRandom random = new SecureRandom();
-		StringBuilder token = new StringBuilder(length);
-
-		// Generiere das Token aus der Zeichenliste
-		for (int i = 0; i < length; i++) {
-			int index = random.nextInt(CHARACTERS.length());
-			token.append(CHARACTERS.charAt(index));
+	// Method to generate and display a QR code
+	private void generateQRCode(String url) {
+		try {
+			QRCodeWriter qrCodeWriter = new QRCodeWriter();
+			Map<EncodeHintType, Object> hints = new HashMap<>();
+			hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+			BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 200, 200, hints);
+			BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+			lblQrCode.setIcon(new ImageIcon(qrImage));
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
-		return token.toString();
 	}
-	
-    // Method to generate and display a QR code
-    private void generateQRCode(String url) {
-        try {
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            Map<EncodeHintType, Object> hints = new HashMap<>();
-            hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-            BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 200, 200, hints);
-            BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
-            lblQrCode.setIcon(new ImageIcon(qrImage));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
