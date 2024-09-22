@@ -23,9 +23,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
@@ -67,6 +69,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -117,7 +120,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "3.0.1";
+	private String version = "3.0.2";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -316,118 +319,33 @@ public class Mainframe extends JFrame {
 				new Dialog_info();
 			}
 		});
-		JMenuItem webApp = new JMenuItem("API Abruf");
-		webApp.addActionListener(new ActionListener() {
+		JMenuItem apiAbruf = new JMenuItem("API Abruf");
+		apiAbruf.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!HandleConfig.apiToken.equals("") && !HandleConfig.apiURL.equals("")) {
 					downloadFromApi();
 				} else {
-					JOptionPane.showMessageDialog(null, "API Token oder URL nicht gefunden.\nBitte die Einstellungen überprüfen!");
-				}
-
-			}
-
-			private void downloadFromApi() {
-				try {
-					logger.trace("Web API request: " + HandleConfig.apiURL+"/api/get.php?token="+HandleConfig.apiToken);
-					URL getUrl = new URI(HandleConfig.apiURL+"/api/get.php?token="+HandleConfig.apiToken).toURL();
-					HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
-					con.setRequestMethod("GET");
-					int responseCode = con.getResponseCode();
-					logger.trace("Web API GET responseCode: " + responseCode);
-					if (responseCode == HttpURLConnection.HTTP_OK) {
-						 // API-Antwort lesen (Rohdaten)
-		                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		                String inputLine;
-		                StringBuilder response = new StringBuilder();
-
-		                while ((inputLine = in.readLine()) != null) {
-		                    response.append(inputLine);
-		                }
-		                
-		                String jsonResponse = response.toString();
-		                logger.trace("Web API GET response: " + jsonResponse);
-		                JsonElement jsonElement = JsonParser.parseString(jsonResponse);
-		                int count = 0;
-		                String importedBooks = "";
-		                if (jsonElement.isJsonArray()) {
-		                    JsonArray jsonArray = jsonElement.getAsJsonArray();
-		                    for (JsonElement element : jsonArray) {
-		                    	count += 1;
-		                        JsonObject jsonObject = element.getAsJsonObject();
-				                // Felder als String-Variablen speichern
-				                String author = jsonObject.get("author").getAsString();
-				                String title = jsonObject.get("title").getAsString();
-				                String series = jsonObject.has("series") ? jsonObject.get("series").getAsString() : "";
-				                String seriesPart = jsonObject.has("series_part") ? jsonObject.get("series_part").getAsString() : "";
-				                String note = jsonObject.has("note") ? jsonObject.get("note").getAsString() : "";
-				                String ebook = jsonObject.has("ebook") ? jsonObject.get("ebook").getAsString() : null;
-				                boolean boolEbook = false;
-				                if(ebook.equals("1")) {
-				                	boolEbook = true;
-				                } else {
-				                	boolEbook = false; 
-				                }
-				                logger.trace(response.toString());
-				                
-				                Book_Booklist imp = new Book_Booklist(author, title, note, series, seriesPart, boolEbook, 0, null, "", "",new Timestamp(System.currentTimeMillis()), true);
-				                importedBooks = importedBooks + "\n" + author + " - " + title ;
-				                Mainframe.entries.add(imp);
-				                BookListModel.checkAuthors();
-		                    }
-		                } 
-						in.close();
-						if(count >= 1) {
-							if (count == 1) {
-								JOptionPane.showMessageDialog(null, count + " Buch erfolgreich importiert\n" + importedBooks);
-							} else {
-								JOptionPane.showMessageDialog(null, count + " Bücher erfolgreich importiert\n" + importedBooks);
-							}
-							
-					        try {
-					            // URL des Endpunkts
-					            URL deleteUrl = new URI(HandleConfig.apiURL+"/api/delete.php").toURL();
-					            con = (HttpURLConnection) deleteUrl.openConnection();
-					            // POST-Anfrage einstellen
-					            con.setRequestMethod("POST");
-					            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-					            con.setDoOutput(true);
-					            
-					            // Der Token, der gesendet werden soll
-					            String postData = "token=" + HandleConfig.apiToken;
-					            
-					            // Daten in den OutputStream schreiben
-					            try (OutputStream os = con.getOutputStream()) {
-					                byte[] input = postData.getBytes("utf-8");
-					                os.write(input, 0, input.length);
-					            }
-
-					            // Antwortcode überprüfen
-					            responseCode = con.getResponseCode();
-					            logger.trace("Web API POST responseCode: " + responseCode);
-					        } catch (Exception e) {
-					        	logger.error(e.getMessage());
-					        }
-						} else {
-							JOptionPane.showMessageDialog(null, "Keine Bücher zum abrufen gefunden.");
-						}
-						con.disconnect();
-					} else {
-						JOptionPane.showMessageDialog(null, "Get request failed.");
-					}
-				} catch (URISyntaxException e) {
-					logger.error(e.getMessage());
-					JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
-				} catch (MalformedURLException e) {
-					logger.error(e.getMessage());
-					JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
-				} catch (IOException e) {
-					logger.error(e.getMessage());
-					JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+					JOptionPane.showMessageDialog(null,
+							"API Token oder URL nicht gefunden.\nBitte die Einstellungen überprüfen!");
 				}
 			}
+		});
+
+		JMenuItem apiUpload = new JMenuItem("API Upload");
+		apiUpload.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!HandleConfig.apiToken.equals("") && !HandleConfig.apiURL.equals("")) {
+					uploadToApi();
+				} else {
+					JOptionPane.showMessageDialog(null,
+							"API Token oder URL nicht gefunden.\nBitte die Einstellungen überprüfen!");
+				}
+			}
+
 		});
 
 		menue.add(datei);
@@ -439,7 +357,8 @@ public class Mainframe extends JFrame {
 		extras.add(ExcelExport);
 		extras.add(backup);
 		extras.add(wishlist);
-		extras.add(webApp);
+		extras.add(apiAbruf);
+		extras.add(apiUpload);
 		extras.add(info);
 		hilfe.add(dbVersion);
 		pnlMenü.add(menue, BorderLayout.WEST);
@@ -921,6 +840,196 @@ public class Mainframe extends JFrame {
 			Mainframe.logger.error(e1.toString());
 			return false;
 		}
+	}
+
+	/**
+	 * download the saved books via API from the webApp
+	 */
+	private void downloadFromApi() {
+		try {
+			logger.trace("Web API request: " + HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken);
+			URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
+			HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
+			con.setRequestMethod("GET");
+			int responseCode = con.getResponseCode();
+			logger.trace("Web API GET responseCode: " + responseCode);
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				// API-Antwort lesen (Rohdaten)
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String inputLine;
+				StringBuilder response = new StringBuilder();
+
+				while ((inputLine = in.readLine()) != null) {
+					response.append(inputLine);
+				}
+
+				String jsonResponse = response.toString();
+				logger.trace("Web API GET response: " + jsonResponse);
+				JsonElement jsonElement = JsonParser.parseString(jsonResponse);
+				int count = 0;
+				String importedBooks = "";
+				if (jsonElement.isJsonArray()) {
+					JsonArray jsonArray = jsonElement.getAsJsonArray();
+					for (JsonElement element : jsonArray) {
+						count += 1;
+						JsonObject jsonObject = element.getAsJsonObject();
+						// Felder als String-Variablen speichern
+						String author = jsonObject.get("author").getAsString();
+						String title = jsonObject.get("title").getAsString();
+						String series = jsonObject.has("series") ? jsonObject.get("series").getAsString() : "";
+						String seriesPart = jsonObject.has("series_part") ? jsonObject.get("series_part").getAsString()
+								: "";
+						String note = jsonObject.has("note") ? jsonObject.get("note").getAsString() : "";
+						String ebook = jsonObject.has("ebook") ? jsonObject.get("ebook").getAsString() : null;
+						boolean boolEbook = false;
+						if (ebook.equals("1")) {
+							boolEbook = true;
+						} else {
+							boolEbook = false;
+						}
+						logger.trace(response.toString());
+
+						Book_Booklist imp = new Book_Booklist(author, title, note, series, seriesPart, boolEbook, 0,
+								null, "", "", new Timestamp(System.currentTimeMillis()), true);
+						importedBooks = importedBooks + "\n" + author + " - " + title;
+						Mainframe.entries.add(imp);
+						BookListModel.checkAuthors();
+					}
+				}
+				in.close();
+				if (count >= 1) {
+					if (count == 1) {
+						JOptionPane.showMessageDialog(null, count + " Buch erfolgreich importiert\n" + importedBooks);
+					} else {
+						JOptionPane.showMessageDialog(null, count + " Bücher erfolgreich importiert\n" + importedBooks);
+					}
+
+					try {
+						// URL des Endpunkts
+						URL deleteUrl = new URI(HandleConfig.apiURL + "/api/delete.php").toURL();
+						con = (HttpURLConnection) deleteUrl.openConnection();
+						// POST-Anfrage einstellen
+						con.setRequestMethod("POST");
+						con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+						con.setDoOutput(true);
+
+						// Der Token, der gesendet werden soll
+						String postData = "token=" + HandleConfig.apiToken;
+
+						// Daten in den OutputStream schreiben
+						try (OutputStream os = con.getOutputStream()) {
+							byte[] input = postData.getBytes("utf-8");
+							os.write(input, 0, input.length);
+						}
+
+						// Antwortcode überprüfen
+						responseCode = con.getResponseCode();
+						logger.trace("Web API DELETE books responseCode: " + responseCode);
+					} catch (Exception e) {
+						logger.error(e.getMessage());
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "Keine Bücher zum abrufen gefunden.");
+				}
+				con.disconnect();
+			} else {
+				JOptionPane.showMessageDialog(null, "Get request failed.");
+			}
+		} catch (URISyntaxException e) {
+			logger.error(e.getMessage());
+			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+		} catch (MalformedURLException e) {
+			logger.error(e.getMessage());
+			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+		}
+	}
+
+	/**
+	 * upload all current Books to the webApp with the corresponding Token
+	 */
+	private void uploadToApi() {
+		try {
+			// URL des Endpunkts
+			URL deleteUrl = new URI(HandleConfig.apiURL + "/api/deleteSynced.php").toURL();
+			HttpURLConnection con = (HttpURLConnection) deleteUrl.openConnection();
+			con = (HttpURLConnection) deleteUrl.openConnection();
+			// POST-Anfrage einstellen
+			con.setRequestMethod("POST");
+			con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			con.setDoOutput(true);
+
+			// Der Token, der gesendet werden soll
+			String postData = "token=" + HandleConfig.apiToken;
+
+			// Daten in den OutputStream schreiben
+			try (OutputStream os = con.getOutputStream()) {
+				byte[] input = postData.getBytes("utf-8");
+				os.write(input, 0, input.length);
+			}
+			int responseCode = con.getResponseCode();
+			logger.trace("Web API DELETE SyncedBooks responseCode: " + responseCode);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}		
+		
+		try {
+			// URL des API-Endpunkts
+			logger.trace("Web API request: " + HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken);
+			URL postUrl;
+			postUrl = new URI(HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken).toURL();
+
+			// Verbindung aufbauen
+			HttpURLConnection con = (HttpURLConnection) postUrl.openConnection();
+			con.setRequestMethod("POST");
+			con.setRequestProperty("Content-Type", "application/json; utf-8");
+			con.setRequestProperty("Accept", "application/json");
+			con.setDoOutput(true);
+
+			// GSON-Instanz erstellen
+			Gson gson = new Gson();
+
+			// Nur die relevanten Felder in ein JSON-Array umwandeln
+			JsonArray jsonArray = new JsonArray();
+			for (Book_Booklist book : BookListModel.getBooks()) {
+				JsonObject jsonBook = new JsonObject();
+				jsonBook.addProperty("bid", book.getBid());
+				jsonBook.addProperty("author", book.getAuthor());
+				jsonBook.addProperty("title", book.getTitle());
+				jsonArray.add(jsonBook);
+			}
+
+			// JSON-Daten senden
+			String jsonInputString = gson.toJson(jsonArray);
+
+			try (OutputStream os = con.getOutputStream()) {
+				byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+				os.write(input, 0, input.length);
+			}
+
+			// Antwort vom Server lesen
+			int responseCode = con.getResponseCode();
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				logger.trace("Bücher erfolgreich hochgeladen!");
+			} else {
+				logger.trace("Fehler beim Hochladen der Bücher: " + responseCode);
+			}
+
+			// Verbindung schließen
+			con.disconnect();
+		} catch (MalformedURLException | URISyntaxException e) {
+			logger.error(e.getMessage());
+			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+		} catch (ProtocolException e) {
+			logger.error(e.getMessage());
+			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+		}
+
 	}
 
 	/**

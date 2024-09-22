@@ -142,7 +142,7 @@ public class HandleConfig {
 						else
 							apiToken = generateRandomToken(64);
 					} else if (setting.equals("apiURL")) {
-						if (value.length() > 60)
+						if (value.length() > 10)
 							apiURL = value.trim();
 					} else if (setting.equals("layoutWidth")) {
 						String[] values = value.trim().split(",");
