@@ -5,16 +5,35 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.table.TableColumnModel;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 
 import application.BookListModel;
 import application.HandleConfig;
@@ -35,13 +54,14 @@ public class Dialog_settings extends JDialog {
 	private static JComboBox<Integer> cmbBackup;
 	private static JTextField txtApiUrl;
 	private static JTextField txtApiToken;
+	private static JLabel lblQrCode;
 
 	public Dialog_settings() {
 
 		this.setTitle("Einstellungen");
 		this.setModal(true);
 		this.setLayout(new GridBagLayout());
-		this.setSize(400, 550);
+		this.setSize(400, 780);
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -176,6 +196,7 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 11;
 		String apiToken = HandleConfig.apiToken;
 		txtApiToken = new JTextField(apiToken);
+		txtApiToken.setEditable(false);
 		this.add(txtApiToken, c);
 
 		JButton btnGenToken = new JButton("generiere");
@@ -191,26 +212,25 @@ public class Dialog_settings extends JDialog {
 					String token = generateRandomToken(64);
 					txtApiToken.setText(token);
 					HandleConfig.apiToken = token;
+					generateQRCode(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
 				}
 			}
 		});
 		c.gridx = 0;
-		c.gridy = 98;
+		c.gridy = 12;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.CENTER;
+		c.fill = GridBagConstraints.NONE;
 		this.add(btnGenToken, c);
-
-		JButton btnShowQR = new JButton("zeige QR Code");
-		btnShowQR.setFont(Mainframe.defaultFont);
-		btnShowQR.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				HandleConfig.apiURL = txtApiUrl.getText();
-				new Dialog_webapi();
-			}
-		});
-		c.gridx = 1;
-		c.gridy = 98;
-		this.add(btnShowQR, c);
+		
+        // QR code label
+		lblQrCode = new JLabel();
+        generateQRCode(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
+        JPanel qrPanel = new JPanel();
+        qrPanel.add(lblQrCode);
+		c.gridx = 0;
+		c.gridy = 13;
+        this.add(qrPanel, c);
 
 		JButton btnSave = new JButton("Speichern");
 		btnSave.setFont(Mainframe.defaultFont);
@@ -224,6 +244,9 @@ public class Dialog_settings extends JDialog {
 		});
 		c.gridx = 0;
 		c.gridy = 99;
+		c.gridwidth = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		this.add(btnSave, c);
 
 		JButton btnAbort = new JButton("Abbrechen");
@@ -253,6 +276,37 @@ public class Dialog_settings extends JDialog {
 			HandleConfig.backup = (int) cmbBackup.getSelectedItem();
 			HandleConfig.apiToken = txtApiToken.getText();
 			HandleConfig.apiURL = txtApiUrl.getText();
+			if (HandleConfig.apiURL.substring(HandleConfig.apiURL.length()-1).equals("/")) {
+				HandleConfig.apiURL = HandleConfig.apiURL.substring(0,HandleConfig.apiURL.length()-1);
+				System.out.println(HandleConfig.apiURL);
+			}
+			if (HandleConfig.apiURL.length() > 0) {
+				try {
+					Mainframe.logger.trace("Web API request: " + HandleConfig.apiURL+"/api/get.php");
+					URL getUrl;
+					getUrl = new URI(HandleConfig.apiURL+"/api/get.php?token="+HandleConfig.apiToken).toURL();
+					HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
+					con.setRequestMethod("GET");
+					int responseCode = con.getResponseCode();
+					Mainframe.logger.trace("Web API GET responseCode: " + responseCode);
+					if (responseCode != HttpURLConnection.HTTP_OK) {
+						JOptionPane.showMessageDialog(null, "Verbindung zur API fehlgeschlagen");
+					}
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ProtocolException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
 
 			out.println("fontSize=" + cmbFont.getSelectedItem());
 			out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
@@ -316,4 +370,18 @@ public class Dialog_settings extends JDialog {
 
 		return token.toString();
 	}
+	
+    // Method to generate and display a QR code
+    private void generateQRCode(String url) {
+        try {
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            Map<EncodeHintType, Object> hints = new HashMap<>();
+            hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+            BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 200, 200, hints);
+            BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+            lblQrCode.setIcon(new ImageIcon(qrImage));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

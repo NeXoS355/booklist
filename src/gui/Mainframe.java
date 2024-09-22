@@ -117,7 +117,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "3.0.0";
+	private String version = "3.0.1";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -331,8 +331,8 @@ public class Mainframe extends JFrame {
 
 			private void downloadFromApi() {
 				try {
+					logger.trace("Web API request: " + HandleConfig.apiURL+"/api/get.php?token="+HandleConfig.apiToken);
 					URL getUrl = new URI(HandleConfig.apiURL+"/api/get.php?token="+HandleConfig.apiToken).toURL();
-					logger.trace("Web API request: " + getUrl);
 					HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
 					con.setRequestMethod("GET");
 					int responseCode = con.getResponseCode();
@@ -882,6 +882,7 @@ public class Mainframe extends JFrame {
 			setTableLayout();
 		} else {
 			JOptionPane.showMessageDialog(null, "Es gab leider keine Treffer!");
+			updateModel();
 		}
 	}
 
