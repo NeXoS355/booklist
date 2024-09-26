@@ -120,7 +120,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "3.0.2";
+	private String version = "3.0.3";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -866,12 +866,13 @@ public class Mainframe extends JFrame {
 				String jsonResponse = response.toString();
 				logger.trace("Web API GET response: " + jsonResponse);
 				JsonElement jsonElement = JsonParser.parseString(jsonResponse);
-				int count = 0;
+				int imported = 0;
+				int rejected = 0;
 				String importedBooks = "";
+				String rejectedBooks = "";
 				if (jsonElement.isJsonArray()) {
 					JsonArray jsonArray = jsonElement.getAsJsonArray();
 					for (JsonElement element : jsonArray) {
-						count += 1;
 						JsonObject jsonObject = element.getAsJsonObject();
 						// Felder als String-Variablen speichern
 						String author = jsonObject.get("author").getAsString();
@@ -887,22 +888,40 @@ public class Mainframe extends JFrame {
 						} else {
 							boolEbook = false;
 						}
-						logger.trace(response.toString());
+						if (seriesPart.equals("0"))
+							seriesPart="";
 
-						Book_Booklist imp = new Book_Booklist(author, title, note, series, seriesPart, boolEbook, 0,
-								null, "", "", new Timestamp(System.currentTimeMillis()), true);
-						importedBooks = importedBooks + "\n" + author + " - " + title;
-						Mainframe.entries.add(imp);
-						BookListModel.checkAuthors();
+						boolean duplicate = false;
+						for (int i = 0; i < entries.getSize(); i++) {
+							if (entries.getElementAt(i).getAuthor().equals(author)
+									&& entries.getElementAt(i).getTitle().equals(title) && !duplicate) {
+								duplicate = true;
+								rejectedBooks = rejectedBooks + "\n" + author + " - " + title;
+								rejected += 1;
+							}
+						}
+						;
+						if (!duplicate) {
+							Book_Booklist imp = new Book_Booklist(author, title, note, series, seriesPart, boolEbook, 0,
+									null, "", "", new Timestamp(System.currentTimeMillis()), true);
+							importedBooks = importedBooks + "\n" + author + " - " + title;
+							imported += 1;
+							Mainframe.entries.add(imp);
+							BookListModel.checkAuthors();
+						}
+
 					}
 				}
 				in.close();
-				if (count >= 1) {
-					if (count == 1) {
-						JOptionPane.showMessageDialog(null, count + " Buch erfolgreich importiert\n" + importedBooks);
-					} else {
-						JOptionPane.showMessageDialog(null, count + " Bücher erfolgreich importiert\n" + importedBooks);
-					}
+				String importString = "";
+				if (rejected > 0)
+					importString = "Anzahl Bücher importiert: " + imported + importedBooks + "\nDupletten erkannt:"
+							+ rejectedBooks;
+				else
+					importString = "Anzahl Bücher importiert: " + imported + "\n" + importedBooks;
+				if (imported >= 1 || rejected > 0) {
+
+					JOptionPane.showMessageDialog(null, importString);
 
 					try {
 						// URL des Endpunkts
@@ -973,8 +992,8 @@ public class Mainframe extends JFrame {
 			logger.trace("Web API DELETE SyncedBooks responseCode: " + responseCode);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
-		}		
-		
+		}
+
 		try {
 			// URL des API-Endpunkts
 			logger.trace("Web API request: " + HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken);
@@ -1013,8 +1032,10 @@ public class Mainframe extends JFrame {
 			int responseCode = con.getResponseCode();
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				logger.trace("Bücher erfolgreich hochgeladen!");
+				JOptionPane.showMessageDialog(null, "Bücher erfolgreich hochgeladen!");
 			} else {
-				logger.trace("Fehler beim Hochladen der Bücher: " + responseCode);
+				logger.error("Fehler beim Hochladen der Bücher: " + responseCode);
+				JOptionPane.showMessageDialog(null, "Fehler beim Hochladen der Bücher: " + responseCode);
 			}
 
 			// Verbindung schließen
