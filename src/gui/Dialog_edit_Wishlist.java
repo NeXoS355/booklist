@@ -62,38 +62,38 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		this.setLayout(new BorderLayout(10, 10));
 
-		JPanel panel_north = new JPanel();
-		panel_north.setLayout(new GridLayout(1, 1));
-		panel_north.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+		JPanel panelNorth = new JPanel();
+		panelNorth.setLayout(new GridLayout(1, 1));
+		panelNorth.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
-		JPanel panel_west = new JPanel();
-		panel_west.setLayout(new GridLayout(4, 1, 10, 20));
+		JPanel panelWest = new JPanel();
+		panelWest.setLayout(new GridLayout(4, 1, 10, 20));
 
-		JPanel panel_center = new JPanel();
-		panel_center.setLayout(new GridBagLayout());
+		JPanel panelCenter = new JPanel();
+		panelCenter.setLayout(new GridBagLayout());
 
-		JPanel panel_east_border = new JPanel();
-		panel_east_border.setLayout(new BorderLayout(10, 10));
+		JPanel panelEastBorder = new JPanel();
+		panelEastBorder.setLayout(new BorderLayout(10, 10));
 
 		JPanel panel_east_grid = new JPanel();
 		panel_east_grid.setLayout(new GridLayout(4, 1, 10, 20));
-		panel_east_border.add(panel_east_grid, BorderLayout.WEST);
+		panelEastBorder.add(panel_east_grid, BorderLayout.WEST);
 
-		JPanel panel_south = new JPanel();
-		panel_south.setLayout(new GridLayout(1, 2, 10, 10));
-		panel_south.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+		JPanel panelSouth = new JPanel();
+		panelSouth.setLayout(new GridLayout(1, 2, 10, 10));
+//		panel_south.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
 		int höhe = 60;
 		int breite = 100;
 
 		JLabel lbl_datum = new JLabel("Datum: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDate()));
-		panel_north.add(lbl_datum);
+		panelNorth.add(lbl_datum);
 
 		// Empty Panel top Gap
 		JLabel lbl_empty1 = new JLabel("");
 		lbl_empty1.setFont(Mainframe.defaultFont);
 		lbl_empty1.setPreferredSize(new Dimension(breite, 10));
-		panel_north.add(lbl_empty1);
+		panelNorth.add(lbl_empty1);
 		// Ende topGap
 
 		/*
@@ -300,93 +300,102 @@ public class Dialog_edit_Wishlist extends JDialog {
 		 * Set Center Layout
 		 */
 		GridBagConstraints c = new GridBagConstraints();
-
 		c.gridx = 0;
 		c.gridy = 0;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.ipady = 15;
-		panel_center.add(lbl_author, c);
+		panelCenter.add(lbl_author, c);
 		c.gridx = 1;
 		c.gridy = 0;
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_author, c);
+		panelCenter.add(txt_author, c);
 		c.gridx = 0;
 		c.gridy = 1;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
 		c.insets = new Insets(10, 0, 0, 0);
-		panel_center.add(lbl_title, c);
+		panelCenter.add(lbl_title, c);
 		c.gridx = 1;
 		c.gridy = 1;
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_title, c);
+		panelCenter.add(txt_title, c);
 		c.gridx = 0;
 		c.gridy = 2;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		panel_center.add(lbl_merk, c);
+		panelCenter.add(lbl_merk, c);
 		c.gridx = 1;
 		c.gridy = 2;
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_merk, c);
+		panelCenter.add(txt_merk, c);
 		c.gridx = 0;
 		c.gridy = 3;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		panel_center.add(lbl_serie, c);
+		panelCenter.add(lbl_serie, c);
 		c.gridx = 1;
 		c.gridy = 3;
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txt_serie, c);
+		panelCenter.add(txt_serie, c);
 		c.gridx = 2;
 		c.gridy = 3;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(10, 10, 0, 0);
-		panel_center.add(txt_seriePart, c);
+		panelCenter.add(txt_seriePart, c);
 		c.gridx = 0;
 		c.gridy = 4;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		c.insets = new Insets(10, 0, 0, 0);
-		panel_center.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+		panelCenter.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
-		JButton btn_add = new JButton("Speichern");
-		btn_add.addActionListener(new ActionListener() {
+		/*
+		 * create components for Panel South
+		 */
+		JButton btnAdd = new JButton("Speichern");
+		btnAdd.setFont(Mainframe.defaultFont);
+		btnAdd.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				speichern(eintrag);
 			}
 		});
-		panel_south.add(btn_add);
 
-		JButton btn_abort = new JButton("Abbrechen");
-		btn_abort.addActionListener(new ActionListener() {
+		JButton btnAbort = new JButton("Abbrechen");
+		btnAbort.setFont(Mainframe.defaultFont);
+		btnAbort.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				dispose();
 			}
 		});
-		panel_south.add(btn_abort);
+		
+		/*
+		 * add components into Panel South
+		 */
+		panelSouth.add(btnAdd);
+		panelSouth.add(btnAbort);
+		panelSouth.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
-		this.add(panel_north, BorderLayout.NORTH);
-		this.add(panel_west, BorderLayout.WEST);
-		this.add(panel_center, BorderLayout.CENTER);
-		this.add(panel_east_border, BorderLayout.EAST);
-		this.add(panel_south, BorderLayout.SOUTH);
+		this.add(panelNorth, BorderLayout.NORTH);
+		this.add(panelWest, BorderLayout.WEST);
+		this.add(panelCenter, BorderLayout.CENTER);
+		this.add(panelEastBorder, BorderLayout.EAST);
+		this.add(panelSouth, BorderLayout.SOUTH);
 
 		Mainframe.logger.trace("Wishlist Book edit: Frame created successfully");
 		this.setVisible(true);

@@ -38,6 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -113,6 +114,7 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
+	static boolean darkmode = true;
 
 	public static int prozEbook = 0;
 	public static int prozAuthor = 0;
@@ -120,7 +122,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "3.0.4";
+	private String version = "3.1.0";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -137,10 +139,11 @@ public class Mainframe extends JFrame {
 		}
 
 		this.setLayout(new BorderLayout(10, 10));
-//		this.setLocation(100, 100);
 		this.setLocationByPlatform(true);
 		this.setSize(1300, 800);
 		this.setResizable(true);
+		
+		
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
@@ -148,11 +151,36 @@ public class Mainframe extends JFrame {
 		this.setIconImage(icon.getImage());
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			JFrame.setDefaultLookAndFeelDecorated(true);
+			if (darkmode) {
+				// Passe Farben für den Dark Mode an
+				UIManager.put("Panel.background", Color.DARK_GRAY);
+				UIManager.put("Label.foreground", Color.WHITE);
+				UIManager.put("CheckBox.background", Color.DARK_GRAY);
+				UIManager.put("CheckBox.foreground", Color.WHITE);
+		        UIManager.put("Menu.background", Color.DARK_GRAY);
+		        UIManager.put("Menu.foreground", Color.WHITE);
+		        UIManager.put("Menu.selectionForeground", Color.WHITE);
+		        UIManager.put("Menu.emptyBorder", true);
+		        UIManager.put("Menu.opaque", true);
+		        UIManager.put("MenuItem.background", Color.DARK_GRAY);
+		        UIManager.put("MenuItem.foreground", Color.WHITE);
+		        UIManager.put("MenuItem.selectionForeground", Color.WHITE);
+		        UIManager.put("MenuItem.opaque", true);
+		        UIManager.put("Table.background", Color.DARK_GRAY);
+		        UIManager.put("Table.foreground", Color.WHITE);
+		        UIManager.put("OptionPane.background", Color.DARK_GRAY);
+		        UIManager.put("OptionPane.messageForeground", Color.WHITE);
+		        tree.setBackground(Color.DARK_GRAY);
+		        table.setBackground(Color.DARK_GRAY);
+		        
+		        this.getContentPane().setBackground(Color.DARK_GRAY);
+			}
 		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
 				| IllegalAccessException e) {
 			logger.error(e.getMessage());
 		}
-
+		
 		logger.trace("Finished create Frame & readConfig. Start creating Lists and readDB");
 		entries = new BookListModel();
 		filter = new DefaultListModel<Book_Booklist>();
@@ -369,6 +397,7 @@ public class Mainframe extends JFrame {
 		lblVersion.setFont(new Font(lblVersion.getFont().getName(), Font.BOLD, lblVersion.getFont().getSize()));
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
 		pnlMenü.add(lblVersion, BorderLayout.EAST);
+		pnlMenü.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 
 		logger.trace("Finished creating GUI Components. Start creating Table Contents");
 
@@ -506,6 +535,8 @@ public class Mainframe extends JFrame {
 		tree.setCellRenderer(renderer);
 		tree.putClientProperty("JTree.lineStyle", "None");
 //		tree.setBackground(new Color(46,46,46));
+
+		
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -557,26 +588,29 @@ public class Mainframe extends JFrame {
 			}
 
 		});
-        // Füge einen MouseMotionListener hinzu, um die Mausposition zu verfolgen
-        tree.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                // Berechne die Zeile, über der die Maus schwebt
-                int row = tree.getRowForLocation(e.getX(), e.getY());
+		// Füge einen MouseMotionListener hinzu, um die Mausposition zu verfolgen
+		tree.addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				// Berechne die Zeile, über der die Maus schwebt
+				int row = tree.getRowForLocation(e.getX(), e.getY());
 
-                // Wenn sich die Zeile geändert hat, aktualisiere den Renderer
-                if (row != renderer.hoveredRow) {
-                    renderer.setHoveredRow(row);
+//				 Wenn sich die Zeile geändert hat, aktualisiere den Renderer
+				if (row != renderer.hoveredRow) {
+					renderer.setHoveredRow(row);
 
-                    // Repaint des Baums, um die Änderungen anzuzeigen
-                    tree.repaint();
-                }
-            }
-        });
+					// Repaint des Baums, um die Änderungen anzuzeigen
+					tree.repaint();
+				}
+			}
+		});
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
-		treeScrollPane.setForeground(new Color(46, 46, 46));
+//		treeScrollPane.setBackground(Color.DARK_GRAY); // Setze den Hintergrund der JScrollPane
+//		treeScrollPane.getViewport().setBackground(Color.DARK_GRAY); // Setze den Hintergrund des Viewports
+        
+//		treeScrollPane.setForeground(new Color(46, 46, 46));
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, listScrollPane);
 		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);

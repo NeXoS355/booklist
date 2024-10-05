@@ -651,9 +651,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		/*
 		 * Set Center Layout
 		 */
-
 		GridBagConstraints c = new GridBagConstraints();
-
 		c.gridx = 0;
 		c.gridy = 0;
 		c.weightx = 0.05;

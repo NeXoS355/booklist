@@ -22,30 +22,60 @@ public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 	}
 
 	public MyTreeCellRenderer() {
-		textNonSelectionColor = Color.BLACK;
-		textSelectionColor = Color.WHITE;
-		backgroundNonSelectionColor = Color.WHITE;
-		backgroundSelectionColor = Color.DARK_GRAY;
-		borderSelectionColor = Color.BLACK;
+		
+//		if(Mainframe.darkmode) {
+//	        setBackgroundNonSelectionColor(Color.DARK_GRAY);
+//	        setBackgroundSelectionColor(Color.GRAY);
+//	        setForeground(Color.WHITE);
+//	        setBackground(Color.DARK_GRAY);
+//	        setTextSelectionColor(Color.WHITE);
+//	        setTextNonSelectionColor(Color.LIGHT_GRAY);
+//		} else {
+//	        setBackgroundNonSelectionColor(Color.WHITE);
+//	        setBackgroundSelectionColor(Color.DARK_GRAY);
+//	        setForeground(Color.BLACK);
+//	        setBackground(Color.WHITE);
+//	        setTextSelectionColor(Color.WHITE);
+//	        setTextNonSelectionColor(Color.BLACK);
+//		}
 
 //        backgroundNonSelectionColor=new Color(46,46,46);
 //        borderSelectionColor=Color.BLACK; 
 
 		setFont(new Font("Roboto", Font.PLAIN, 16));
 	}
+	
+	
 
-	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf,
+	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf,
 			int row, boolean hasFocus) {
 		
-		Component component = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-		// Wenn die Maus über dieser Zeile schwebt, Hintergrundfarbe ändern
-		if (sel) {
-			component.setBackground(getBackgroundSelectionColor());
-		} else if (row == hoveredRow) {
-			component.setBackground(Color.LIGHT_GRAY);
-			
-		} else {
-			component.setBackground(getBackgroundNonSelectionColor());
+		Component component = super.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, hasFocus);
+		
+		if (Mainframe.darkmode) {
+			if (isSelected) {
+				component.setForeground(Color.WHITE);
+				component.setBackground(Color.GRAY);
+			} else if (row == hoveredRow) {
+				component.setForeground(Color.BLACK);
+				component.setBackground(Color.LIGHT_GRAY);
+			} else {
+				component.setForeground(Color.LIGHT_GRAY);
+				component.setBackground(Color.DARK_GRAY);
+			}
+		}
+
+		else {
+			if (isSelected) {
+				component.setForeground(Color.WHITE);
+				component.setBackground(Color.DARK_GRAY);
+			} else if (row == hoveredRow) {
+				component.setForeground(Color.BLACK);
+				component.setBackground(Color.LIGHT_GRAY);
+			} else {
+				component.setForeground(Color.BLACK);
+				component.setBackground(Color.WHITE);
+			}
 		}
 
 		// Da die Hintergrundfarbe nicht automatisch gezeichnet wird, erzwinge das Malen

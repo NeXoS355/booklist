@@ -79,10 +79,6 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_author.setFont(Mainframe.defaultFont);
 		lbl_author.setSize(new Dimension(breite, höhe));
 
-		JPanel panel_west = new JPanel();
-		panel_west.setLayout(new GridLayout(4, 1, 10, 10));
-		panel_west.add(lbl_author);
-
 		/*
 		 * Create Components for Panel Center
 		 */
@@ -149,7 +145,6 @@ public class Dialog_add_Booklist extends JDialog {
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(Mainframe.defaultFont);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_title);
 
 		txtTitle = new RoundJTextField();
 		txtTitle.setFont(Mainframe.defaultFont);
@@ -208,7 +203,6 @@ public class Dialog_add_Booklist extends JDialog {
 		JLabel lbl_merk = new JLabel("Bemerkung:");
 		lbl_merk.setFont(Mainframe.defaultFont);
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_merk);
 
 		txtNote = new RoundJTextField();
 		txtNote.setFont(Mainframe.defaultFont);
@@ -245,7 +239,6 @@ public class Dialog_add_Booklist extends JDialog {
 		JLabel lbl_serie = new JLabel("Serie | Band:");
 		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_serie);
 
 		txtSerie = new RoundJTextField();
 		txtSerie.setFont(Mainframe.defaultFont);
@@ -339,7 +332,6 @@ public class Dialog_add_Booklist extends JDialog {
 		JLabel lbl_ebook = new JLabel("E-Book:");
 		lbl_ebook.setFont(Mainframe.defaultFont);
 		lbl_ebook.setPreferredSize(new Dimension(breite, höhe));
-		panel_west.add(lbl_ebook);
 
 		checkEbook = new JCheckBox();
 		checkEbook.setFont(Mainframe.defaultFont);
@@ -550,7 +542,6 @@ public class Dialog_add_Booklist extends JDialog {
 		panel_south.add(btn_add);
 		panel_south.add(btn_abort);
 
-		this.add(panel_west, BorderLayout.WEST);
 		this.add(panel_center, BorderLayout.CENTER);
 		this.add(panel_south, BorderLayout.SOUTH);
 

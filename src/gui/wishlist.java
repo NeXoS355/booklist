@@ -45,7 +45,7 @@ public class wishlist extends JFrame {
 		super("Wunschliste");
 		this.setLayout(new BorderLayout(10, 10));
 		this.setSize(700, 700);
-		this.setLocation(150, 150);
+		this.setLocationByPlatform(true);
 		Mainframe.logger.trace("Wishlist: start creating Frame");
 
 		wishlistEntries = new WishlistListModel();
