@@ -916,11 +916,6 @@ public class Dialog_edit_Booklist extends JDialog {
 		this.add(panelEastBorder, BorderLayout.EAST);
 		this.add(panelSouthBorder, BorderLayout.SOUTH);
 
-		if (Mainframe.getTreeSelection() == "") {
-			Mainframe.search(txtAuthor.getText());
-		} else {
-			Mainframe.search(Mainframe.getTreeSelection());
-		}
 		Mainframe.logger.trace("Book edit: Frame successfully created");
 		this.setVisible(true);
 		this.setResizable(false);

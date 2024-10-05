@@ -61,7 +61,8 @@ public class Dialog_settings extends JDialog {
 		this.setModal(true);
 		this.setLayout(new GridBagLayout());
 		this.setSize(400, 780);
-		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
+		this.setLocationByPlatform(true);
+//		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
 
 		GridBagConstraints c = new GridBagConstraints();
 

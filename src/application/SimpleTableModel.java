@@ -14,6 +14,7 @@ public class SimpleTableModel extends DefaultTableModel {
 	private int cols = columnNames.length;
 	private String[] rowData = new String[cols];
 
+	
 	public SimpleTableModel(BookListModel bücher) {
 
 		super();
@@ -111,5 +112,6 @@ public class SimpleTableModel extends DefaultTableModel {
 	public boolean isCellEditable(int row, int column) {
 		return false;
 	}
+	
 
 }

@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -9,6 +10,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.sql.Timestamp;
 
 import javax.swing.JButton;
@@ -36,7 +38,8 @@ public class wishlist extends JFrame {
 	private static WishlistTableModel display;
 	public static WishlistListModel wishlistEntries;
 	private static JTable table = new JTable();
-	Font schrift = new Font("Roboto", Font.BOLD, 16);
+	private static int lastHoverRow = -1;
+	public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
 
 	public wishlist() {
 		super("Wunschliste");
@@ -65,6 +68,15 @@ public class wishlist extends JFrame {
 		});
 		north_panel.add(btnAdd, BorderLayout.WEST);
 
+		
+		table.setModel(display);
+		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer();
+		table.setDefaultRenderer(Object.class, tableRenderer);
+		table.setShowVerticalLines(false);
+		table.setShowHorizontalLines(false);
+		table.setIntercellSpacing(new Dimension(0, 0));
+		table.setFont(defaultFont);
+		table.setRowHeight(table.getRowHeight() + 6);
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -90,6 +102,12 @@ public class wishlist extends JFrame {
 						table2.setRowSelectionInterval(row, row);
 					showMenu(e);
 				}
+			}
+			
+			public void mouseExited(MouseEvent e) {
+				tableRenderer.clearHoveredRow();
+				table.repaint();
+				lastHoverRow = -1;
 			}
 
 			private void showMenu(MouseEvent e) {
@@ -174,6 +192,7 @@ public class wishlist extends JFrame {
 			}
 
 		});
+
 		table.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -185,10 +204,22 @@ public class wishlist extends JFrame {
 
 			}
 		});
+		table.addMouseMotionListener(new MouseMotionAdapter() {
 
-		table.setModel(display);
-		table.setFont(schrift);
-		table.setRowHeight(22);
+			@Override
+			public void mouseMoved(MouseEvent e) {
+
+				JTable table2 = (JTable) e.getSource();
+				int row = table2.rowAtPoint(e.getPoint());
+				if (lastHoverRow != row) {
+					tableRenderer.setHoveredRow(row);
+					table.repaint();
+					lastHoverRow = row;
+				}
+			}
+		});
+
+
 
 		JPanel mid_panel = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -216,13 +247,13 @@ public class wishlist extends JFrame {
 			String searchTitle = (String) table.getValueAt(selected[i], 1);
 			int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
 			if (selected.length != 0) {
-				int response = JOptionPane.showConfirmDialog(null, "Wirklich '" + searchTitle + "' löschen?", "Löschen",
+				int response = JOptionPane.showConfirmDialog(this, "Wirklich '" + searchTitle + "' löschen?", "Löschen",
 						JOptionPane.YES_NO_OPTION);
 				if (response == JOptionPane.YES_OPTION) {
 					wishlistEntries.delete(index);
 				}
 			} else {
-				JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
+				JOptionPane.showMessageDialog(this, "Es wurde kein Buch ausgewählt");
 			}
 			Mainframe.logger.trace("Wishlist Book deleted: " + searchAuthor + ";" + searchTitle);
 		}

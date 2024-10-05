@@ -13,6 +13,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -102,6 +103,7 @@ public class Mainframe extends JFrame {
 	public static BookListModel entries;
 	private static DefaultListModel<Book_Booklist> filter;
 	private static SimpleTableModel tableDisplay;
+	private static int lastHoverRow = -1;
 	private static DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("rootNode");
 	private static DefaultMutableTreeNode autorNode = new DefaultMutableTreeNode("AutorNode");
 	private static DefaultMutableTreeNode serieNode = new DefaultMutableTreeNode("SerieNode");
@@ -111,8 +113,6 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-//	private static Color selectionColor  = new Color(80,80,80);
-//	private static Color ackgroundColor  = new Color(46,46,46);
 
 	public static int prozEbook = 0;
 	public static int prozAuthor = 0;
@@ -120,7 +120,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "3.0.3";
+	private String version = "3.0.4";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -137,7 +137,8 @@ public class Mainframe extends JFrame {
 		}
 
 		this.setLayout(new BorderLayout(10, 10));
-		this.setLocation(100, 100);
+//		this.setLocation(100, 100);
+		this.setLocationByPlatform(true);
 		this.setSize(1300, 800);
 		this.setResizable(true);
 
@@ -373,12 +374,28 @@ public class Mainframe extends JFrame {
 
 		table.setModel(tableDisplay);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer();
+		table.setDefaultRenderer(Object.class, tableRenderer);
 		table.setFont(defaultFont);
 		table.setShowVerticalLines(false);
 		table.setShowHorizontalLines(false);
-		table.setSelectionBackground(Color.DARK_GRAY);
-		table.setSelectionForeground(Color.WHITE);
+		table.setIntercellSpacing(new Dimension(0, 0));
 		table.setRowHeight(table.getRowHeight() + 6);
+		table.addMouseMotionListener(new MouseMotionAdapter() {
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+
+				JTable table2 = (JTable) e.getSource();
+				int row = table2.rowAtPoint(e.getPoint());
+				if (lastHoverRow != row) {
+					tableRenderer.setHoveredRow(row);
+					table.repaint();
+					lastHoverRow = row;
+				}
+			}
+
+		});
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -398,6 +415,12 @@ public class Mainframe extends JFrame {
 					}
 					showMenu(e);
 				}
+			}
+
+			public void mouseExited(MouseEvent e) {
+				tableRenderer.clearHoveredRow();
+				table.repaint();
+				lastHoverRow = -1;
 			}
 
 			private void showMenu(MouseEvent e) {
@@ -479,7 +502,10 @@ public class Mainframe extends JFrame {
 		tree.setEditable(false);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		tree.setShowsRootHandles(false);
-		tree.setCellRenderer(new MyTreeCellRenderer());
+		MyTreeCellRenderer renderer = new MyTreeCellRenderer();
+		tree.setCellRenderer(renderer);
+		tree.putClientProperty("JTree.lineStyle", "None");
+//		tree.setBackground(new Color(46,46,46));
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -531,14 +557,22 @@ public class Mainframe extends JFrame {
 			}
 
 		});
-//		tree.addFocusListener(new FocusAdapter() {
-//
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				tree.setSelectionPath(null);
-//			}
-//
-//		});
+        // Füge einen MouseMotionListener hinzu, um die Mausposition zu verfolgen
+        tree.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                // Berechne die Zeile, über der die Maus schwebt
+                int row = tree.getRowForLocation(e.getX(), e.getY());
+
+                // Wenn sich die Zeile geändert hat, aktualisiere den Renderer
+                if (row != renderer.hoveredRow) {
+                    renderer.setHoveredRow(row);
+
+                    // Repaint des Baums, um die Änderungen anzuzeigen
+                    tree.repaint();
+                }
+            }
+        });
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
@@ -889,7 +923,7 @@ public class Mainframe extends JFrame {
 							boolEbook = false;
 						}
 						if (seriesPart.equals("0"))
-							seriesPart="";
+							seriesPart = "";
 
 						boolean duplicate = false;
 						for (int i = 0; i < entries.getSize(); i++) {
@@ -1009,15 +1043,16 @@ public class Mainframe extends JFrame {
 
 			// GSON-Instanz erstellen
 			Gson gson = new Gson();
-
-			// Nur die relevanten Felder in ein JSON-Array umwandeln
 			JsonArray jsonArray = new JsonArray();
+			// Nur die relevanten Felder in ein JSON-Array umwandeln
+
 			for (Book_Booklist book : BookListModel.getBooks()) {
 				JsonObject jsonBook = new JsonObject();
 				jsonBook.addProperty("bid", book.getBid());
 				jsonBook.addProperty("author", book.getAuthor());
 				jsonBook.addProperty("title", book.getTitle());
 				jsonArray.add(jsonBook);
+
 			}
 
 			// JSON-Daten senden
@@ -1032,10 +1067,10 @@ public class Mainframe extends JFrame {
 			int responseCode = con.getResponseCode();
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				logger.trace("Bücher erfolgreich hochgeladen!");
-				JOptionPane.showMessageDialog(null, "Bücher erfolgreich hochgeladen!");
+				JOptionPane.showMessageDialog(this, "Bücher erfolgreich hochgeladen!");
 			} else {
 				logger.error("Fehler beim Hochladen der Bücher: " + responseCode);
-				JOptionPane.showMessageDialog(null, "Fehler beim Hochladen der Bücher: " + responseCode);
+				JOptionPane.showMessageDialog(this, "Fehler beim Hochladen der Bücher: " + responseCode);
 			}
 
 			// Verbindung schließen
