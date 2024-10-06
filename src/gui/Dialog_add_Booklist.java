@@ -23,6 +23,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -38,15 +39,15 @@ import application.BookListModel;
 public class Dialog_add_Booklist extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private RoundJTextField txtAuthor;
-	private RoundJTextField txtTitle;
+	private CustomTextField txtAuthor;
+	private CustomTextField txtTitle;
 	private JCheckBox checkFrom;
-	private RoundJTextField txtBorrowedFrom;
+	private CustomTextField txtBorrowedFrom;
 	private JCheckBox checkTo;
-	private RoundJTextField txtBorrowedTo;
-	private RoundJTextField txtNote;
-	private RoundJTextField txtSerie;
-	private RoundJTextField txtSeriesVol;
+	private CustomTextField txtBorrowedTo;
+	private CustomTextField txtNote;
+	private CustomTextField txtSerie;
+	private CustomTextField txtSeriesVol;
 	private JCheckBox checkEbook;
 	private JButton btn_add;
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
@@ -82,7 +83,7 @@ public class Dialog_add_Booklist extends JDialog {
 		/*
 		 * Create Components for Panel Center
 		 */
-		txtAuthor = new RoundJTextField();
+		txtAuthor = new CustomTextField();
 		txtAuthor.setFont(Mainframe.defaultFont);
 		txtAuthor.setText(Mainframe.getTreeSelection());
 		txtAuthor.setPreferredSize(new Dimension(50, höhe));
@@ -106,7 +107,6 @@ public class Dialog_add_Booklist extends JDialog {
 							txtAuthor.setCaretPosition(typed);
 							txtAuthor.setSelectionStart(typed);
 							txtAuthor.setSelectionEnd(autoren[i].length());
-
 						}
 					}
 				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
@@ -115,14 +115,20 @@ public class Dialog_add_Booklist extends JDialog {
 				} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
 					typed = txtAuthor.getCaretPosition();
 					txtAuthor.setText(txtAuthor.getText().substring(0, typed));
-					System.out.println(txtAuthor.getText().substring(0, typed));
 				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					addBook();
-				} else if (!e.isActionKey()) {
-					txtAuthor.setBackground(Color.white);
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (txtAuthor.getText().length() > 50) {
+					txtAuthor.setEditable(false);
+					txtAuthor.setText("Nicht mehr als 50 Zeichen!");
+					txtAuthor.setBackground(new Color(255, 105, 105));
+				}
 			}
 
 		});
@@ -139,6 +145,16 @@ public class Dialog_add_Booklist extends JDialog {
 				txtAuthor.setBorder(activeBorder);
 
 			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (!txtAuthor.isEditable()) {
+					txtAuthor.setEditable(true);
+					txtAuthor.setForeground(UIManager.getColor("TextField.foreground"));
+					txtAuthor.setBackground(UIManager.getColor("TextField.background"));
+					txtAuthor.setText("");
+				}
+			}
 
 		});
 
@@ -146,7 +162,7 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_title.setFont(Mainframe.defaultFont);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
 
-		txtTitle = new RoundJTextField();
+		txtTitle = new CustomTextField();
 		txtTitle.setFont(Mainframe.defaultFont);
 		txtTitle.setPreferredSize(new Dimension(50, höhe));
 		txtTitle.setBorder(standardBorder);
@@ -185,16 +201,11 @@ public class Dialog_add_Booklist extends JDialog {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (txtTitle.getText().equals("Nicht mehr als 50 Zeichen!")) {
+				if (!txtTitle.isEditable()) {
 					txtTitle.setEditable(true);
-					txtTitle.setForeground(Color.black);
-					txtTitle.setBackground(Color.white);
+					txtTitle.setForeground(UIManager.getColor("TextField.foreground"));
+					txtTitle.setBackground(UIManager.getColor("TextField.background"));
 					txtTitle.setText("");
-				} else if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
-					txtTitle.setForeground(Color.black);
-					txtTitle.setBackground(Color.white);
-					txtTitle.setText("");
-					btn_add.setEnabled(true);
 				}
 			}
 
@@ -204,7 +215,7 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_merk.setFont(Mainframe.defaultFont);
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 
-		txtNote = new RoundJTextField();
+		txtNote = new CustomTextField();
 		txtNote.setFont(Mainframe.defaultFont);
 		txtNote.setPreferredSize(new Dimension(50, höhe));
 		txtNote.setBorder(standardBorder);
@@ -240,7 +251,7 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 
-		txtSerie = new RoundJTextField();
+		txtSerie = new CustomTextField();
 		txtSerie.setFont(Mainframe.defaultFont);
 		txtSerie.setPreferredSize(new Dimension(50, höhe));
 		txtSerie.setBorder(standardBorder);
@@ -295,7 +306,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 		});
 
-		txtSeriesVol = new RoundJTextField();
+		txtSeriesVol = new CustomTextField();
 		txtSeriesVol.setFont(Mainframe.defaultFont);
 		txtSeriesVol.setPreferredSize(new Dimension(50, höhe));
 		txtSeriesVol.setBorder(standardBorder);
@@ -446,7 +457,7 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 		});
 
-		txtBorrowedFrom = new RoundJTextField();
+		txtBorrowedFrom = new CustomTextField();
 		txtBorrowedFrom.setFont(Mainframe.defaultFont);
 		txtBorrowedFrom.setVisible(false);
 		txtBorrowedFrom.setBorder(standardBorder);
@@ -477,7 +488,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 		});
 
-		txtBorrowedTo = new RoundJTextField();
+		txtBorrowedTo = new CustomTextField();
 		txtBorrowedTo.setFont(Mainframe.defaultFont);
 		txtBorrowedTo.setVisible(false);
 		txtBorrowedTo.setBorder(standardBorder);
@@ -509,7 +520,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 		});
 
-		btn_add = new JButton("hinzufügen");
+		btn_add = ButtonsFactory.createButton("hinzufügen");
 		btn_add.setFont(Mainframe.defaultFont);
 		btn_add.addActionListener(new ActionListener() {
 
@@ -519,7 +530,7 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 		});
 
-		JButton btn_abort = new JButton("abbrechen");
+		JButton btn_abort = ButtonsFactory.createButton("abbrechen");
 		btn_abort.setFont(Mainframe.defaultFont);
 		btn_abort.addActionListener(new ActionListener() {
 

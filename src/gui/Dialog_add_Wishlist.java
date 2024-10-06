@@ -35,11 +35,11 @@ public class Dialog_add_Wishlist extends JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private RoundJTextField txtAuthor;
-	private RoundJTextField txtTitle;
-	private RoundJTextField txtNote;
-	private RoundJTextField txtSerie;
-	private RoundJTextField txtSeriesVol;
+	private CustomTextField txtAuthor;
+	private CustomTextField txtTitle;
+	private CustomTextField txtNote;
+	private CustomTextField txtSerie;
+	private CustomTextField txtSeriesVol;
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
@@ -74,7 +74,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		/*
 		 * Create Components for Panel Center
 		 */
-		txtAuthor = new RoundJTextField();
+		txtAuthor = new CustomTextField();
 		txtAuthor.setFont(Mainframe.defaultFont);
 		txtAuthor.setPreferredSize(new Dimension(50, höhe));
 		txtAuthor.setBorder(standardBorder);
@@ -112,7 +112,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		lbl_title.setFont(Mainframe.defaultFont);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
 		
-		txtTitle = new RoundJTextField();
+		txtTitle = new CustomTextField();
 		txtTitle.setFont(Mainframe.defaultFont);
 		txtTitle.setPreferredSize(new Dimension(50, höhe));
 		txtTitle.setBorder(standardBorder);
@@ -169,7 +169,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 		
 
-		txtNote = new RoundJTextField();
+		txtNote = new CustomTextField();
 		txtNote.setFont(Mainframe.defaultFont);
 		txtNote.setPreferredSize(new Dimension(50, höhe));
 		txtNote.setBorder(standardBorder);
@@ -206,7 +206,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 		
 
-		txtSerie = new RoundJTextField();
+		txtSerie = new CustomTextField();
 		txtSerie.setFont(Mainframe.defaultFont);
 		txtSerie.setPreferredSize(new Dimension(50, höhe));
 		txtSerie.setBorder(standardBorder);
@@ -238,7 +238,7 @@ public class Dialog_add_Wishlist extends JDialog {
 
 		});
 		
-		txtSeriesVol = new RoundJTextField();
+		txtSeriesVol = new CustomTextField();
 		txtSeriesVol.setFont(Mainframe.defaultFont);
 		txtSeriesVol.setPreferredSize(new Dimension(50, höhe));
 		txtSeriesVol.setBorder(standardBorder);
@@ -332,7 +332,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		c.insets = new Insets(10, 10, 0, 0);
 		panel_center.add(txtSeriesVol, c);
 
-		JButton btn_add = new JButton("hinzufügen");
+		JButton btn_add = ButtonsFactory.createButton("hinzufügen");
 		btn_add.setFont(Mainframe.defaultFont);
 		btn_add.addActionListener(new ActionListener() {
 
@@ -342,7 +342,7 @@ public class Dialog_add_Wishlist extends JDialog {
 			}
 		});
 
-		JButton btn_abort = new JButton("abbrechen");
+		JButton btn_abort = ButtonsFactory.createButton("abbrechen");
 		btn_abort.setFont(Mainframe.defaultFont);
 		btn_abort.addActionListener(new ActionListener() {
 

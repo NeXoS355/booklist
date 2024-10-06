@@ -199,11 +199,11 @@ public class Dialog_settings extends JDialog {
 		txtApiToken.setEditable(false);
 		this.add(txtApiToken, c);
 
-		JButton btnGenToken = new JButton("generiere");
+		JButton btnGenToken = ButtonsFactory.createButton("generiere");
 		btnGenToken.setFont(Mainframe.defaultFont);
 		btnGenToken.addActionListener(new ActionListener() {
 
-			@Override
+	@Override
 			public void actionPerformed(ActionEvent e) {
 				int antwort = JOptionPane.showConfirmDialog(null,
 						"Wirklich neuen Token genrieren?\nDie ausstehenden Bücher mit dem alten Token können dann nicht mehr abgerufen werden.",
@@ -232,7 +232,7 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 13;
 		this.add(qrPanel, c);
 
-		JButton btnSave = new JButton("Speichern");
+		JButton btnSave = ButtonsFactory.createButton("Speichern");
 		btnSave.setFont(Mainframe.defaultFont);
 		btnSave.addActionListener(new ActionListener() {
 
@@ -249,7 +249,7 @@ public class Dialog_settings extends JDialog {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		this.add(btnSave, c);
 
-		JButton btnAbort = new JButton("Abbrechen");
+		JButton btnAbort = ButtonsFactory.createButton("Abbrechen");
 		btnAbort.setFont(Mainframe.defaultFont);
 		btnAbort.addActionListener(new ActionListener() {
 
@@ -320,6 +320,7 @@ public class Dialog_settings extends JDialog {
 			out.println("backup=" + cmbBackup.getSelectedItem());
 			out.println("apiToken=" + txtApiToken.getText());
 			out.println("apiURL=" + txtApiUrl.getText());
+			out.println("darkmode=0");
 
 			TableColumnModel columnModel = Mainframe.table.getColumnModel();
 

@@ -22,6 +22,7 @@ public class HandleConfig {
 	public static int backup = 2;
 	public static String apiToken = generateRandomToken(64);
 	public static String apiURL = "";
+	public static int darkmode = 0;
 
 	public static void readConfig() {
 		File f = new File("config.conf");
@@ -144,6 +145,20 @@ public class HandleConfig {
 					} else if (setting.equals("apiURL")) {
 						if (value.length() > 10)
 							apiURL = value.trim();
+					} else if (setting.equals("darkmode")) {
+						try {
+							int tmp = Integer.parseInt(value.trim());
+							if (tmp >= 0 && tmp < 2) {
+								darkmode = tmp;
+								Mainframe.logger.info("darkmode: " + darkmode);
+							} else
+								JOptionPane.showMessageDialog(null,
+										"Fehler in der config (darkmode): Falscher Wert - erwartet 1 oder 0");
+
+						} catch (NumberFormatException e) {
+							JOptionPane.showMessageDialog(null,
+									"Fehler in der config (darkmode): Falsches Format - erwartet integer");
+						}
 					} else if (setting.equals("layoutWidth")) {
 						String[] values = value.trim().split(",");
 						for (int j = 0; j < values.length; j++) {

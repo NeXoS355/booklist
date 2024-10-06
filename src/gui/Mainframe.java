@@ -7,8 +7,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -16,7 +19,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +39,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -50,6 +51,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -60,6 +62,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -104,7 +107,8 @@ public class Mainframe extends JFrame {
 	public static BookListModel entries;
 	private static DefaultListModel<Book_Booklist> filter;
 	private static SimpleTableModel tableDisplay;
-	private static int lastHoverRow = -1;
+	private static int lastTableHoverRow = -1;
+	private static TreePath lastPath = null;
 	private static DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("rootNode");
 	private static DefaultMutableTreeNode autorNode = new DefaultMutableTreeNode("AutorNode");
 	private static DefaultMutableTreeNode serieNode = new DefaultMutableTreeNode("SerieNode");
@@ -114,7 +118,6 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
-	static boolean darkmode = true;
 
 	public static int prozEbook = 0;
 	public static int prozAuthor = 0;
@@ -126,6 +129,7 @@ public class Mainframe extends JFrame {
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
+		super.setBackground(Color.BLACK);
 
 		logger = LogManager.getLogger(getClass());
 		logger.trace("start creating Frame & readConfig");
@@ -142,8 +146,6 @@ public class Mainframe extends JFrame {
 		this.setLocationByPlatform(true);
 		this.setSize(1300, 800);
 		this.setResizable(true);
-		
-		
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
@@ -151,30 +153,55 @@ public class Mainframe extends JFrame {
 		this.setIconImage(icon.getImage());
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			JFrame.setDefaultLookAndFeelDecorated(true);
-			if (darkmode) {
+//			JFrame.setDefaultLookAndFeelDecorated(true);
+			if (HandleConfig.darkmode == 1) {
 				// Passe Farben für den Dark Mode an
 				UIManager.put("Panel.background", Color.DARK_GRAY);
+				
 				UIManager.put("Label.foreground", Color.WHITE);
+				
 				UIManager.put("CheckBox.background", Color.DARK_GRAY);
 				UIManager.put("CheckBox.foreground", Color.WHITE);
-		        UIManager.put("Menu.background", Color.DARK_GRAY);
-		        UIManager.put("Menu.foreground", Color.WHITE);
-		        UIManager.put("Menu.selectionForeground", Color.WHITE);
-		        UIManager.put("Menu.emptyBorder", true);
-		        UIManager.put("Menu.opaque", true);
-		        UIManager.put("MenuItem.background", Color.DARK_GRAY);
-		        UIManager.put("MenuItem.foreground", Color.WHITE);
-		        UIManager.put("MenuItem.selectionForeground", Color.WHITE);
-		        UIManager.put("MenuItem.opaque", true);
-		        UIManager.put("Table.background", Color.DARK_GRAY);
-		        UIManager.put("Table.foreground", Color.WHITE);
-		        UIManager.put("OptionPane.background", Color.DARK_GRAY);
-		        UIManager.put("OptionPane.messageForeground", Color.WHITE);
-		        tree.setBackground(Color.DARK_GRAY);
-		        table.setBackground(Color.DARK_GRAY);
-		        
-		        this.getContentPane().setBackground(Color.DARK_GRAY);
+				
+				UIManager.put("ComboBox.background",Color.WHITE);
+				UIManager.put("ComboBox.foreground", Color.BLACK);
+	            
+				UIManager.put("Menu.background", Color.DARK_GRAY);
+				UIManager.put("Menu.foreground", Color.WHITE);
+				UIManager.put("MenuBar.border", 0);
+				UIManager.put("Menu.selectionForeground", Color.WHITE);
+				UIManager.put("Menu.opaque", true);
+				UIManager.put("MenuItem.background", Color.DARK_GRAY);
+				UIManager.put("MenuItem.foreground", Color.WHITE);
+				UIManager.put("MenuItem.selectionForeground", Color.WHITE);
+				UIManager.put("MenuItem.opaque", true);
+				UIManager.put("PopupMenu.border", Color.DARK_GRAY);
+				
+				UIManager.put("Table.background", Color.DARK_GRAY);
+				UIManager.put("Table.foreground", Color.WHITE);
+				
+				UIManager.put("OptionPane.background", Color.DARK_GRAY);
+				UIManager.put("OptionPane.messageForeground", Color.WHITE);
+				
+				UIManager.put("ScrollPane.background", Color.DARK_GRAY);
+				UIManager.put("SplitPane.background", Color.DARK_GRAY);
+				
+				UIManager.put("TextField.background", Color.DARK_GRAY);
+				UIManager.put("TextField.foreground", new Color(220,220,220));
+				UIManager.put("TextField.caretForeground", UIManager.get("TextField.foreground"));
+				
+				UIManager.put("TextArea.background", Color.DARK_GRAY);
+				UIManager.put("TextArea.inactiveForeground", Color.WHITE);	
+
+				tree.setBackground(Color.DARK_GRAY);
+				table.getTableHeader().setOpaque(false);
+				table.setBackground(Color.DARK_GRAY);
+				table.getTableHeader().setBackground(Color.DARK_GRAY);
+				table.getTableHeader().setForeground(Color.WHITE);
+				this.getContentPane().setBackground(Color.DARK_GRAY);
+			
+			} else {
+				UIManager.put("TextArea.inactiveForeground", Color.BLACK);
 			}
 		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
 				| IllegalAccessException e) {
@@ -189,21 +216,18 @@ public class Mainframe extends JFrame {
 		logger.trace("Finished creating List & DB. Start creating GUI Components");
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout(5, 5));
+		panel.setLayout(new BorderLayout(10, 5));
 
-		txt_search = new RoundJTextField();
+		txt_search = new CustomTextField();
 		txt_search.setToolTipText("Suchtext");
 		txt_search.setText("Suche ... (" + entries.getSize() + ")");
-		txt_search.setForeground(Color.gray);
 		txt_search.setFont(defaultFont);
+		setSearchTextInactive();
 		txt_search.setMargin(new Insets(0, 10, 0, 0));
 		txt_search.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				txt_search.setForeground(Color.black);
-				if (txt_search.getText().contains("Suche ..."))
-					txt_search.setText("");
 				table.clearSelection();
 			}
 
@@ -215,9 +239,9 @@ public class Mainframe extends JFrame {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					search(txt_search.getText());
-					txt_search.setForeground(Color.gray);
 					tree.clearSelection();
 					setLastSearch(txt_search.getText());
+					System.out.println(txt_search.getText());
 					if (tableDisplay.getRowCount() == 0) {
 						updateModel();
 						JOptionPane.showMessageDialog(getParent(), "Keine Übereinstimmung gefunden");
@@ -225,10 +249,23 @@ public class Mainframe extends JFrame {
 				}
 			}
 		});
+		txt_search.addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				setSearchTextInactive();
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				if (txt_search.getText().contains("Suche ..."))
+				txt_search.setText("");
+				setSearchTextActive();
+			}
+		});
 		panel.add(txt_search, BorderLayout.CENTER);
 
-		JButton btn_add = new JButton("+");
-		btn_add.setFocusPainted(false);
+		JButton btn_add = ButtonsFactory.createButton("+");
 		btn_add.setFont(btn_add.getFont().deriveFont(Font.BOLD, 20));
 		btn_add.addActionListener(new ActionListener() {
 
@@ -238,24 +275,17 @@ public class Mainframe extends JFrame {
 				txt_search.setText("Suche ... (" + entries.getSize() + ")");
 			}
 		});
+
 		panel.add(btn_add, BorderLayout.WEST);
 
-		JButton btn_search = new JButton("suchen");
-		btn_search.setFocusPainted(false);
+		JButton btn_search = ButtonsFactory.createButton("suchen");
 		btn_search.setFont(btn_search.getFont().deriveFont(Font.BOLD, 13));
-		BufferedImage image = null;
-		try {
-			image = ImageIO.read(getClass().getResource("/resources/lupe.png"));
-			btn_search.setIcon(new ImageIcon(image));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
 		btn_search.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				search(txt_search.getText());
-				txt_search.setForeground(Color.gray);
+				setSearchTextInactive();
 				tree.clearSelection();
 				setLastSearch(txt_search.getText());
 				if (entries.getSize() == 0) {
@@ -264,6 +294,7 @@ public class Mainframe extends JFrame {
 				}
 			}
 		});
+
 		panel.add(btn_search, BorderLayout.EAST);
 
 		JPanel pnlMenü = new JPanel();
@@ -405,6 +436,8 @@ public class Mainframe extends JFrame {
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
 		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer();
 		table.setDefaultRenderer(Object.class, tableRenderer);
+		JTableHeader header = table.getTableHeader();
+		header.setDefaultRenderer(tableRenderer);
 		table.setFont(defaultFont);
 		table.setShowVerticalLines(false);
 		table.setShowHorizontalLines(false);
@@ -417,10 +450,11 @@ public class Mainframe extends JFrame {
 
 				JTable table2 = (JTable) e.getSource();
 				int row = table2.rowAtPoint(e.getPoint());
-				if (lastHoverRow != row) {
+				if (lastTableHoverRow != row) {
 					tableRenderer.setHoveredRow(row);
-					table.repaint();
-					lastHoverRow = row;
+					repaintTableRow(row);
+					repaintTableRow(lastTableHoverRow);
+					lastTableHoverRow = row;
 				}
 			}
 
@@ -448,8 +482,8 @@ public class Mainframe extends JFrame {
 
 			public void mouseExited(MouseEvent e) {
 				tableRenderer.clearHoveredRow();
-				table.repaint();
-				lastHoverRow = -1;
+				repaintTableRow(lastTableHoverRow);
+				lastTableHoverRow = -1;
 			}
 
 			private void showMenu(MouseEvent e) {
@@ -523,7 +557,11 @@ public class Mainframe extends JFrame {
 
 		JPanel pnl_mid = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		listScrollPane.getViewport().setBackground(new Color(75,75,75));
+		JScrollBar tableVerticalScrollBar = listScrollPane.getVerticalScrollBar();
+		tableVerticalScrollBar.setUI(new CustomScrollBar());
+
 		pnl_mid.add(listScrollPane, BorderLayout.CENTER);
 
 		rootNode.removeAllChildren();
@@ -534,9 +572,7 @@ public class Mainframe extends JFrame {
 		MyTreeCellRenderer renderer = new MyTreeCellRenderer();
 		tree.setCellRenderer(renderer);
 		tree.putClientProperty("JTree.lineStyle", "None");
-//		tree.setBackground(new Color(46,46,46));
 
-		
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -571,6 +607,11 @@ public class Mainframe extends JFrame {
 				}
 			}
 
+			public void mouseExited(MouseEvent e) {
+				repaintTreeBound(null);
+				renderer.setHoveredRow(-1);
+			}
+
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
 				JMenuItem itemAddBuch = new JMenuItem("Buch hinzufügen");
@@ -597,20 +638,22 @@ public class Mainframe extends JFrame {
 
 //				 Wenn sich die Zeile geändert hat, aktualisiere den Renderer
 				if (row != renderer.hoveredRow) {
-					renderer.setHoveredRow(row);
+					TreePath currentPath = tree.getPathForLocation(e.getX(), e.getY());
+					if (currentPath != null && !currentPath.equals(lastPath)) {
+						repaintTreeBound(currentPath);
+						renderer.setHoveredRow(row);
+					}
 
-					// Repaint des Baums, um die Änderungen anzuzeigen
-					tree.repaint();
 				}
 			}
 		});
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		treeScrollPane.getViewport().setBackground(new Color(75,75,75));
+		JScrollBar treeVerticalScrollBar = treeScrollPane.getVerticalScrollBar();
+		treeVerticalScrollBar.setUI(new CustomScrollBar());
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
-//		treeScrollPane.setBackground(Color.DARK_GRAY); // Setze den Hintergrund der JScrollPane
-//		treeScrollPane.getViewport().setBackground(Color.DARK_GRAY); // Setze den Hintergrund des Viewports
-        
-//		treeScrollPane.setForeground(new Color(46, 46, 46));
+
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, listScrollPane);
 		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
@@ -833,7 +876,7 @@ public class Mainframe extends JFrame {
 			String leihVon = eintrag.getBorrowedFrom().toUpperCase();
 			String leihAn = eintrag.getBorrowedTo().toUpperCase();
 			String serie = eintrag.getSeries().toUpperCase();
-			if (tree.getSelectionCount() == 0) {
+//			if (tree.getSelectionCount() == 0) {
 				if (autor.contains(text)) {
 					filter.addElement(entries.getElementAt(i));
 				} else if (titel.contains(text)) {
@@ -847,21 +890,21 @@ public class Mainframe extends JFrame {
 				} else if (serie.contains(text)) {
 					filter.addElement(entries.getElementAt(i));
 				}
-			} else {
-				if (autor.equals(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (titel.equals(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (bemerkung.equals(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (leihVon.equals(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (leihAn.equals(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (serie.equals(text)) {
-					filter.addElement(entries.getElementAt(i));
-				}
-			}
+//			} else {
+//				if (autor.contains(text)) {
+//					filter.addElement(entries.getElementAt(i));
+//				} else if (titel.contains(text)) {
+//					filter.addElement(entries.getElementAt(i));
+//				} else if (bemerkung.contains(text)) {
+//					filter.addElement(entries.getElementAt(i));
+//				} else if (leihVon.contains(text)) {
+//					filter.addElement(entries.getElementAt(i));
+//				} else if (leihAn.contains(text)) {
+//					filter.addElement(entries.getElementAt(i));
+//				} else if (serie.contains(text)) {
+//					filter.addElement(entries.getElementAt(i));
+//				}
+//			}
 		}
 		if (filter.getSize() > 0) {
 			tableDisplay = new SimpleTableModel(filter);
@@ -1147,6 +1190,49 @@ public class Mainframe extends JFrame {
 	 */
 	public static void setLastSearch(String lastSearch) {
 		Mainframe.lastSearch = lastSearch;
+	}
+
+	/**
+	 * repaints only one specific Row of the main Table
+	 * 
+	 * @param row - Rownumber to be repainted
+	 */
+	public void repaintTableRow(int row) {
+		for (int i = 0; i < table.getColumnCount(); i++) {
+			table.repaint(table.getCellRect(row, i, true));
+		}
+	}
+
+	public void repaintTreeBound(TreePath path) {
+		// Begrenze das Repaint auf den alten und neuen Pfad
+		if (lastPath != null) {
+			Rectangle lastBounds = tree.getPathBounds(lastPath);
+			if (lastBounds != null) {
+				tree.repaint(lastBounds); // Alte Position neu zeichnen
+			}
+		}
+
+		lastPath = path;
+
+		Rectangle currentBounds = tree.getPathBounds(path);
+		if (currentBounds != null) {
+			tree.repaint(currentBounds); // Neue Position neu zeichnen
+		}
+	}
+
+	public void setSearchTextInactive() {
+		txt_search.setForeground(Color.GRAY);
+
+	}
+
+	public void setSearchTextActive() {
+		if (HandleConfig.darkmode == 1) {
+			txt_search.setForeground(Color.WHITE);
+			txt_search.setCaretColor(Color.WHITE);
+		} else {
+			txt_search.setForeground(Color.BLACK);
+		}
+
 	}
 
 	/**

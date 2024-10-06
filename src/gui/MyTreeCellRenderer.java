@@ -8,6 +8,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
+
+import application.HandleConfig;
 
 public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 
@@ -16,32 +19,19 @@ public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 	 */
 	private static final long serialVersionUID = 1L;
 	int hoveredRow = -1;
+	TreePath hoveredPath = null;
 
 	public void setHoveredRow(int row) {
 		this.hoveredRow = row;
+		
+	}
+	
+	public void setHoveredPath(TreePath path) {
+		this.hoveredPath = path;
 	}
 
+
 	public MyTreeCellRenderer() {
-		
-//		if(Mainframe.darkmode) {
-//	        setBackgroundNonSelectionColor(Color.DARK_GRAY);
-//	        setBackgroundSelectionColor(Color.GRAY);
-//	        setForeground(Color.WHITE);
-//	        setBackground(Color.DARK_GRAY);
-//	        setTextSelectionColor(Color.WHITE);
-//	        setTextNonSelectionColor(Color.LIGHT_GRAY);
-//		} else {
-//	        setBackgroundNonSelectionColor(Color.WHITE);
-//	        setBackgroundSelectionColor(Color.DARK_GRAY);
-//	        setForeground(Color.BLACK);
-//	        setBackground(Color.WHITE);
-//	        setTextSelectionColor(Color.WHITE);
-//	        setTextNonSelectionColor(Color.BLACK);
-//		}
-
-//        backgroundNonSelectionColor=new Color(46,46,46);
-//        borderSelectionColor=Color.BLACK; 
-
 		setFont(new Font("Roboto", Font.PLAIN, 16));
 	}
 	
@@ -52,7 +42,7 @@ public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 		
 		Component component = super.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, hasFocus);
 		
-		if (Mainframe.darkmode) {
+		if (HandleConfig.darkmode == 1) {
 			if (isSelected) {
 				component.setForeground(Color.WHITE);
 				component.setBackground(Color.GRAY);
@@ -60,7 +50,7 @@ public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 				component.setForeground(Color.BLACK);
 				component.setBackground(Color.LIGHT_GRAY);
 			} else {
-				component.setForeground(Color.LIGHT_GRAY);
+				component.setForeground(new Color(220,220,220));
 				component.setBackground(Color.DARK_GRAY);
 			}
 		}

@@ -12,7 +12,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.Document;
 
-public class RoundJTextField extends JTextField {
+public class CustomTextField extends JTextField {
 
 	/**
 	 * 
@@ -27,7 +27,7 @@ public class RoundJTextField extends JTextField {
      * the initial string is <code>null</code>,
      * and the number of columns is set to 0.
      */
-    public RoundJTextField() {
+    public CustomTextField() {
         super();
         setOpaque(false); // As suggested by @AVD in comment.
     }
@@ -39,7 +39,7 @@ public class RoundJTextField extends JTextField {
      *
      * @param text the text to be displayed, or <code>null</code>
      */
-    public RoundJTextField(String text) {
+    public CustomTextField(String text) {
         this(null, text, 0);
         setOpaque(false);
     }
@@ -60,7 +60,7 @@ public class RoundJTextField extends JTextField {
      *   naturally results from the component implementation
      * @exception IllegalArgumentException if <code>columns</code> &lt; 0
      */
-    public RoundJTextField(Document doc, String text, int columns) {
+    public CustomTextField(Document doc, String text, int columns) {
         if (columns < 0) {
             throw new IllegalArgumentException("columns less than zero.");
         }

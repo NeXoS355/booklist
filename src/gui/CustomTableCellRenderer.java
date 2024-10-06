@@ -2,6 +2,9 @@ package gui;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
+
+import application.HandleConfig;
+
 import java.awt.*;
 
 public class CustomTableCellRenderer extends DefaultTableCellRenderer {
@@ -9,14 +12,14 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int hoveredRow = -1;
+	private int hoveredRow = -2;
 
 	public void setHoveredRow(int row) {
 		this.hoveredRow = row;
 	}
 
 	public void clearHoveredRow() {
-		this.hoveredRow = -1;
+		this.hoveredRow = -2;
 	}
 
 	@Override
@@ -26,7 +29,7 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 		setBorder(null);
 
 		// Hintergrundfarbe setzen: Selected, Hover, normal
-		if (Mainframe.darkmode) {
+		if (HandleConfig.darkmode == 1) {
 			if (isSelected) {
 				component.setForeground(Color.WHITE);
 				component.setBackground(Color.GRAY);
@@ -34,12 +37,10 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 				component.setForeground(Color.BLACK);
 				component.setBackground(Color.LIGHT_GRAY);
 			} else {
-				component.setForeground(Color.LIGHT_GRAY);
+				component.setForeground(new Color(220,220,220));
 				component.setBackground(Color.DARK_GRAY);
 			}
-		}
-
-		else {
+		} else {
 			if (isSelected) {
 				component.setForeground(Color.WHITE);
 				component.setBackground(Color.DARK_GRAY);
@@ -50,6 +51,16 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 				component.setForeground(Color.BLACK);
 				component.setBackground(Color.WHITE);
 			}
+		}
+
+		// Table Header Settings
+		if (row == -1) {
+			setFont(new Font("Roboto", Font.BOLD, 16));
+			if (HandleConfig.darkmode == 1)
+				component.setForeground(Color.WHITE);
+			else
+				component.setForeground(Color.BLACK);
+
 		}
 
 		return component;

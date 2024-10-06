@@ -36,6 +36,7 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -52,15 +53,15 @@ import data.Database;
 public class Dialog_edit_Booklist extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private RoundJTextField txtAuthor;
-	private RoundJTextField txtTitle;
+	private CustomTextField txtAuthor;
+	private CustomTextField txtTitle;
 	private JCheckBox checkFrom;
-	private RoundJTextField txtBorrowedFrom;
+	private CustomTextField txtBorrowedFrom;
 	private JCheckBox checkTo;
-	private RoundJTextField txtBorrowedTo;
-	private RoundJTextField txtNote;
-	private RoundJTextField txtSeries;
-	private RoundJTextField txtSeriesVol;
+	private CustomTextField txtBorrowedTo;
+	private CustomTextField txtNote;
+	private CustomTextField txtSeries;
+	private CustomTextField txtSeriesVol;
 	private JCheckBox checkEbook;
 	private JButton btnAdd;
 	private JLabel lblPic;
@@ -92,7 +93,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		this.setSize(new Dimension(600, 645));
 		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 100);
 		this.setAlwaysOnTop(true);
-
+		
 		entry = entries.getElementAt(index);
 
 		if (HandleConfig.loadOnDemand == 1) {
@@ -238,7 +239,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			panelEastBorder.add(lblPic, BorderLayout.CENTER);
 
 		} else {
-			JButton btnDownloadInfo = new JButton("Download Info");
+			JButton btnDownloadInfo = ButtonsFactory.createButton("Download Info");
 			btnDownloadInfo.addActionListener(new ActionListener() {
 
 				@Override
@@ -391,7 +392,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		lblAuthor.setFont(Mainframe.defaultFont);
 		lblAuthor.setPreferredSize(new Dimension(width, heigth));
 
-		txtAuthor = new RoundJTextField(entry.getAuthor());
+		txtAuthor = new CustomTextField(entry.getAuthor());
 		txtAuthor.setFont(Mainframe.defaultFont);
 		txtAuthor.setPreferredSize(new Dimension(50, heigth));
 		txtAuthor.setBorder(standardBorder);
@@ -415,7 +416,6 @@ public class Dialog_edit_Booklist extends JDialog {
 							txtAuthor.setCaretPosition(typed);
 							txtAuthor.setSelectionStart(typed);
 							txtAuthor.setSelectionEnd(authors[i].length());
-
 						}
 					}
 				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
@@ -426,15 +426,18 @@ public class Dialog_edit_Booklist extends JDialog {
 					txtAuthor.setText(txtAuthor.getText().substring(0, typed));
 				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					save(entry);
-				} else if (!e.isActionKey()) {
-					txtAuthor.setBackground(Color.white);
-				} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+				} 
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
-
 			}
 
+			@Override
 			public void keyPressed(KeyEvent e) {
-
+				if (txtAuthor.getText().length() > 50) {
+					txtAuthor.setEditable(false);
+					txtAuthor.setText("Nicht mehr als 50 Zeichen!");
+					txtAuthor.setBackground(new Color(255, 105, 105));
+				}
 			}
 
 		});
@@ -451,12 +454,23 @@ public class Dialog_edit_Booklist extends JDialog {
 				txtAuthor.setBorder(activeBorder);
 
 			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (!txtAuthor.isEditable()) {
+					txtAuthor.setEditable(true);
+					txtAuthor.setForeground(UIManager.getColor("TextField.foreground"));
+					txtAuthor.setBackground(UIManager.getColor("TextField.background"));
+					txtAuthor.setText("");
+				}
+			}
 		});
 
 		JLabel lblTitle = new JLabel("Titel:");
 		lblTitle.setFont(Mainframe.defaultFont);
 		lblTitle.setPreferredSize(new Dimension(width, heigth));
-		txtTitle = new RoundJTextField(entry.getTitle());
+		
+		txtTitle = new CustomTextField(entry.getTitle());
 		txtTitle.setFont(Mainframe.defaultFont);
 		txtTitle.setPreferredSize(new Dimension(50, heigth));
 		txtTitle.setBorder(standardBorder);
@@ -479,9 +493,7 @@ public class Dialog_edit_Booklist extends JDialog {
 					txtTitle.setText("Nicht mehr als 50 Zeichen!");
 					txtTitle.setBackground(new Color(255, 105, 105));
 				}
-
 			}
-
 		});
 		txtTitle.addMouseListener(new MouseAdapter() {
 
@@ -499,10 +511,10 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (txtTitle.getText().equals("Nicht mehr als 50 Zeichen!")) {
+				if (!txtTitle.isEditable()) {
 					txtTitle.setEditable(true);
-					txtTitle.setForeground(Color.black);
-					txtTitle.setBackground(Color.white);
+					txtTitle.setForeground(UIManager.getColor("TextField.foreground"));
+					txtTitle.setBackground(UIManager.getColor("TextField.background"));
 					txtTitle.setText("");
 				}
 			}
@@ -513,7 +525,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		lblNote.setFont(Mainframe.defaultFont);
 		lblNote.setPreferredSize(new Dimension(width, heigth));
 
-		txtNote = new RoundJTextField(entry.getNote());
+		txtNote = new CustomTextField(entry.getNote());
 		txtNote.setFont(Mainframe.defaultFont);
 		txtNote.setPreferredSize(new Dimension(50, heigth));
 		txtNote.setBorder(standardBorder);
@@ -548,7 +560,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		lblSeries.setFont(Mainframe.defaultFont);
 		lblSeries.setPreferredSize(new Dimension(width, heigth));
 
-		txtSeries = new RoundJTextField(entry.getSeries());
+		txtSeries = new CustomTextField(entry.getSeries());
 		txtSeries.setFont(Mainframe.defaultFont);
 		txtSeries.setPreferredSize(new Dimension(50, heigth));
 		txtSeries.setBorder(standardBorder);
@@ -604,7 +616,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-		txtSeriesVol = new RoundJTextField(entry.getSeriesVol());
+		txtSeriesVol = new CustomTextField(entry.getSeriesVol());
 		txtSeriesVol.setFont(Mainframe.defaultFont);
 		txtSeriesVol.setPreferredSize(new Dimension(50, heigth));
 		txtSeriesVol.setBorder(standardBorder);
@@ -762,7 +774,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		});
 
-		txtBorrowedFrom = new RoundJTextField(entry.getBorrowedFrom());
+		txtBorrowedFrom = new CustomTextField(entry.getBorrowedFrom());
 		txtBorrowedFrom.setFont(Mainframe.defaultFont);
 		txtBorrowedFrom.setBorder(standardBorder);
 		if (entry.getBorrowedFrom().isEmpty())
@@ -794,7 +806,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-		txtBorrowedTo = new RoundJTextField(entry.getBorrowedTo());
+		txtBorrowedTo = new CustomTextField(entry.getBorrowedTo());
 		txtBorrowedTo.setFont(Mainframe.defaultFont);
 		txtBorrowedTo.setBorder(standardBorder);
 		if (entry.getBorrowedTo().isEmpty())
@@ -826,7 +838,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		});
 
-		btnAdd = new JButton("Speichern");
+		btnAdd = ButtonsFactory.createButton("Speichern");
 		btnAdd.setFont(Mainframe.defaultFont);
 		btnAdd.addActionListener(new ActionListener() {
 
@@ -836,7 +848,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		});
 
-		JButton btnAbort = new JButton("Abbrechen");
+		JButton btnAbort = ButtonsFactory.createButton("Abbrechen");
 		btnAbort.setFont(Mainframe.defaultFont);
 		btnAbort.addActionListener(new ActionListener() {
 
@@ -866,7 +878,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		txtDesc.setLineWrap(true);
 		txtDesc.setWrapStyleWord(true);
 		txtDesc.setFont(Mainframe.descFont);
-		txtDesc.setDisabledTextColor(Color.BLACK);
+//		txtDesc.setDisabledTextColor(Color.BLACK);
 		this.setSize(this.getWidth(), this.getHeight() + (Mainframe.descFont.getSize() - 16) * 14);
 		JScrollPane scrollDesc = new JScrollPane(txtDesc, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);

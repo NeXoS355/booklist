@@ -38,11 +38,11 @@ public class Dialog_edit_Wishlist extends JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private RoundJTextField txt_author;
-	private RoundJTextField txt_title;
-	private RoundJTextField txt_merk;
-	private RoundJTextField txt_serie;
-	private RoundJTextField txt_seriePart;
+	private CustomTextField txt_author;
+	private CustomTextField txt_title;
+	private CustomTextField txt_merk;
+	private CustomTextField txt_serie;
+	private CustomTextField txt_seriePart;
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
@@ -102,7 +102,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.defaultFont);
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
-		txt_author = new RoundJTextField(eintrag.getAuthor());
+		txt_author = new CustomTextField(eintrag.getAuthor());
 		txt_author.setFont(Mainframe.defaultFont);
 		txt_author.setPreferredSize(new Dimension(50, höhe));
 		txt_author.setBorder(standardBorder);
@@ -137,7 +137,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(Mainframe.defaultFont);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
-		txt_title = new RoundJTextField(eintrag.getTitle());
+		txt_title = new CustomTextField(eintrag.getTitle());
 		txt_title.setFont(Mainframe.defaultFont);
 		txt_title.setPreferredSize(new Dimension(50, höhe));
 		txt_title.setBorder(standardBorder);
@@ -193,7 +193,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		lbl_merk.setFont(Mainframe.defaultFont);
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 
-		txt_merk = new RoundJTextField(eintrag.getNote());
+		txt_merk = new CustomTextField(eintrag.getNote());
 		txt_merk.setFont(Mainframe.defaultFont);
 		txt_merk.setPreferredSize(new Dimension(50, höhe));
 		txt_merk.setBorder(standardBorder);
@@ -228,7 +228,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 
-		txt_serie = new RoundJTextField(eintrag.getSeries());
+		txt_serie = new CustomTextField(eintrag.getSeries());
 		txt_serie.setFont(Mainframe.defaultFont);
 		txt_serie.setPreferredSize(new Dimension(50, höhe));
 		txt_serie.setBorder(standardBorder);
@@ -260,7 +260,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		});
 
-		txt_seriePart = new RoundJTextField(eintrag.getSeriesVol());
+		txt_seriePart = new CustomTextField(eintrag.getSeriesVol());
 		txt_seriePart.setFont(Mainframe.defaultFont);
 		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
 		txt_seriePart.setBorder(standardBorder);
@@ -364,7 +364,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		/*
 		 * create components for Panel South
 		 */
-		JButton btnAdd = new JButton("Speichern");
+		JButton btnAdd = ButtonsFactory.createButton("Speichern");
 		btnAdd.setFont(Mainframe.defaultFont);
 		btnAdd.addActionListener(new ActionListener() {
 
@@ -374,7 +374,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 			}
 		});
 
-		JButton btnAbort = new JButton("Abbrechen");
+		JButton btnAbort = ButtonsFactory.createButton("Abbrechen");
 		btnAbort.setFont(Mainframe.defaultFont);
 		btnAbort.addActionListener(new ActionListener() {
 

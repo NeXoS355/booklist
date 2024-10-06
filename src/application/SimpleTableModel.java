@@ -10,6 +10,7 @@ public class SimpleTableModel extends DefaultTableModel {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	//default column Names, not used if already set in config.conf
 	public static String[] columnNames = { "E-Book", "Autor", "Titel", "Serie", "Rating" };
 	private int cols = columnNames.length;
 	private String[] rowData = new String[cols];
