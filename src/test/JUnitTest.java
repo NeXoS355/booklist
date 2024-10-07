@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
 
 import application.BookListModel;
 import application.Book_Booklist;
 import application.Book_Wishlist;
 import application.WishlistListModel;
+import gui.Mainframe;
 
 class JUnitTest {
 
@@ -19,6 +21,7 @@ class JUnitTest {
 
 	@Test
 	public void testBookList() {
+		Mainframe.logger = LogManager.getLogger(getClass());
 		BookEntries = new BookListModel();
 		Book_Booklist book = null;
 		book = new Book_Booklist("Testautor", "Testtitel", true, "", "", "", "", "", false,0, null, null, null,
@@ -49,6 +52,7 @@ class JUnitTest {
 	public void testWishlist() {
 		wishlistEntries = new WishlistListModel();
 		Book_Wishlist book = null;
+		int original_wishlist_entries = wishlistEntries.getSize();
 		try {
 			book = new Book_Wishlist("Testautor", "Testtitel", "", "", "", new Timestamp(System.currentTimeMillis()),
 					false);
@@ -63,9 +67,9 @@ class JUnitTest {
 		book.setAuthor("EditTest");
 		assertEquals("EditTest", book.getAuthor());
 
-		assertEquals(1, wishlistEntries.getSize());
+		assertEquals(original_wishlist_entries+1, wishlistEntries.getSize());
 		wishlistEntries.delete(book);
-		assertEquals(0, wishlistEntries.getSize());
+		assertEquals(original_wishlist_entries, wishlistEntries.getSize());
 	}
 
 }

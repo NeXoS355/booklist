@@ -19,8 +19,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -125,7 +127,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private String version = "3.1.0";
+	private static String version = "3.1.1";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -153,45 +155,43 @@ public class Mainframe extends JFrame {
 		this.setIconImage(icon.getImage());
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//			JFrame.setDefaultLookAndFeelDecorated(true);
 			if (HandleConfig.darkmode == 1) {
-				// Passe Farben für den Dark Mode an
+				// Change Colors for Darkmode
 				UIManager.put("Panel.background", Color.DARK_GRAY);
-				
+
 				UIManager.put("Label.foreground", Color.WHITE);
-				
+
 				UIManager.put("CheckBox.background", Color.DARK_GRAY);
 				UIManager.put("CheckBox.foreground", Color.WHITE);
-				
-				UIManager.put("ComboBox.background",Color.WHITE);
+
+				UIManager.put("ComboBox.background", Color.WHITE);
 				UIManager.put("ComboBox.foreground", Color.BLACK);
-	            
+
 				UIManager.put("Menu.background", Color.DARK_GRAY);
 				UIManager.put("Menu.foreground", Color.WHITE);
-				UIManager.put("MenuBar.border", 0);
-				UIManager.put("Menu.selectionForeground", Color.WHITE);
 				UIManager.put("Menu.opaque", true);
-				UIManager.put("MenuItem.background", Color.DARK_GRAY);
+				UIManager.put("MenuBar.border", 0);
+				UIManager.put("MenuItem.background", new Color(90, 90, 90));
 				UIManager.put("MenuItem.foreground", Color.WHITE);
-				UIManager.put("MenuItem.selectionForeground", Color.WHITE);
 				UIManager.put("MenuItem.opaque", true);
 				UIManager.put("PopupMenu.border", Color.DARK_GRAY);
-				
+
 				UIManager.put("Table.background", Color.DARK_GRAY);
 				UIManager.put("Table.foreground", Color.WHITE);
-				
+
 				UIManager.put("OptionPane.background", Color.DARK_GRAY);
 				UIManager.put("OptionPane.messageForeground", Color.WHITE);
-				
+
 				UIManager.put("ScrollPane.background", Color.DARK_GRAY);
 				UIManager.put("SplitPane.background", Color.DARK_GRAY);
-				
+
 				UIManager.put("TextField.background", Color.DARK_GRAY);
-				UIManager.put("TextField.foreground", new Color(220,220,220));
+				UIManager.put("TextField.inactiveBackground", Color.GRAY);
+				UIManager.put("TextField.foreground", new Color(220, 220, 220));
 				UIManager.put("TextField.caretForeground", UIManager.get("TextField.foreground"));
-				
+
 				UIManager.put("TextArea.background", Color.DARK_GRAY);
-				UIManager.put("TextArea.inactiveForeground", Color.WHITE);	
+				UIManager.put("TextArea.inactiveForeground", Color.WHITE);
 
 				tree.setBackground(Color.DARK_GRAY);
 				table.getTableHeader().setOpaque(false);
@@ -199,7 +199,7 @@ public class Mainframe extends JFrame {
 				table.getTableHeader().setBackground(Color.DARK_GRAY);
 				table.getTableHeader().setForeground(Color.WHITE);
 				this.getContentPane().setBackground(Color.DARK_GRAY);
-			
+
 			} else {
 				UIManager.put("TextArea.inactiveForeground", Color.BLACK);
 			}
@@ -207,7 +207,7 @@ public class Mainframe extends JFrame {
 				| IllegalAccessException e) {
 			logger.error(e.getMessage());
 		}
-		
+
 		logger.trace("Finished create Frame & readConfig. Start creating Lists and readDB");
 		entries = new BookListModel();
 		filter = new DefaultListModel<Book_Booklist>();
@@ -221,7 +221,6 @@ public class Mainframe extends JFrame {
 		txt_search = new CustomTextField();
 		txt_search.setToolTipText("Suchtext");
 		txt_search.setText("Suche ... (" + entries.getSize() + ")");
-		txt_search.setFont(defaultFont);
 		setSearchTextInactive();
 		txt_search.setMargin(new Insets(0, 10, 0, 0));
 		txt_search.addMouseListener(new MouseAdapter() {
@@ -241,7 +240,6 @@ public class Mainframe extends JFrame {
 					search(txt_search.getText());
 					tree.clearSelection();
 					setLastSearch(txt_search.getText());
-					System.out.println(txt_search.getText());
 					if (tableDisplay.getRowCount() == 0) {
 						updateModel();
 						JOptionPane.showMessageDialog(getParent(), "Keine Übereinstimmung gefunden");
@@ -250,16 +248,16 @@ public class Mainframe extends JFrame {
 			}
 		});
 		txt_search.addFocusListener(new FocusListener() {
-			
+
 			@Override
 			public void focusLost(FocusEvent e) {
 				setSearchTextInactive();
 			}
-			
+
 			@Override
 			public void focusGained(FocusEvent e) {
 				if (txt_search.getText().contains("Suche ..."))
-				txt_search.setText("");
+					txt_search.setText("");
 				setSearchTextActive();
 			}
 		});
@@ -323,7 +321,6 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// System.exit(1);
 				dispose();
 			}
 		});
@@ -335,13 +332,65 @@ public class Mainframe extends JFrame {
 				new wishlist();
 			}
 		});
-		JMenuItem dbVersion = new JMenuItem("DB Version");
-		dbVersion.addActionListener(new ActionListener() {
+		JMenuItem update = new JMenuItem("check update");
+		update.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String text = "DB Layout Version: " + Database.readCurrentLayoutVersion() + "\nApache Derby: "
-						+ Database.readCurrentDBVersion();
+				URL url = null;
+				try {
+					url = new URI("https://github.com/NeXoS355/booklist/releases/latest/download/Bucherliste.jar")
+							.toURL();
+					try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+							FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
+						byte dataBuffer[] = new byte[1024];
+						int bytesRead;
+						while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+							fileOutputStream.write(dataBuffer, 0, bytesRead);
+						}
+						ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
+						logger.info("Command: " + pb.command());
+						Process proc = pb.start();
+				        // Warte darauf, dass der Prozess abgeschlossen wird
+				        int exitCode = proc.waitFor();
+				        System.out.println("Prozess beendet mit Exit-Code: " + exitCode);
+
+				        // InputStream lesen (kontinuierlich statt mit available())
+				        try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+				             BufferedReader errorReader = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
+
+				            // Ausgabe des Prozesses lesen
+				            String line;
+				            while ((line = reader.readLine()) != null) {
+				                System.out.println("OUT: " + line);
+				            }
+
+				            // Fehlerausgabe lesen (falls vorhanden)
+				            while ((line = errorReader.readLine()) != null) {
+				                System.out.println("ERR: " + line);
+				            }
+				        }
+					} catch (IOException e1) {
+						logger.error(e1.getMessage());
+					} catch (InterruptedException e1) {
+						logger.error(e1.getMessage());
+					}
+				} catch (MalformedURLException | URISyntaxException e1) {
+					// TODO Auto-generated catch block
+					logger.error(e1.getMessage());
+				}
+
+			}
+		});
+		JMenuItem about = new JMenuItem("Über");
+		about.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String javaVersion = System.getProperty("java.version");
+				String text = "https://github.com/NeXoS355/booklist" + "\n\nProgram Version: " + version
+						+ "\nDB Layout Version: " + Database.readCurrentLayoutVersion() + "\n\nLocal Java Version: "
+						+ javaVersion + "\nApache Derby Version: " + Database.readCurrentDBVersion();
 				JOptionPane.showMessageDialog(null, text);
 			}
 		});
@@ -420,7 +469,8 @@ public class Mainframe extends JFrame {
 		extras.add(apiAbruf);
 		extras.add(apiUpload);
 		extras.add(info);
-		hilfe.add(dbVersion);
+		hilfe.add(update);
+		hilfe.add(about);
 		pnlMenü.add(menue, BorderLayout.WEST);
 
 		JLabel lblVersion = new JLabel("Version: " + version);
@@ -558,7 +608,8 @@ public class Mainframe extends JFrame {
 		JPanel pnl_mid = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		listScrollPane.getViewport().setBackground(new Color(75,75,75));
+		if (HandleConfig.darkmode == 1)
+			listScrollPane.getViewport().setBackground(new Color(75, 75, 75));
 		JScrollBar tableVerticalScrollBar = listScrollPane.getVerticalScrollBar();
 		tableVerticalScrollBar.setUI(new CustomScrollBar());
 
@@ -569,7 +620,7 @@ public class Mainframe extends JFrame {
 		tree.setEditable(false);
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		tree.setShowsRootHandles(false);
-		MyTreeCellRenderer renderer = new MyTreeCellRenderer();
+		CustomTreeCellRenderer renderer = new CustomTreeCellRenderer();
 		tree.setCellRenderer(renderer);
 		tree.putClientProperty("JTree.lineStyle", "None");
 
@@ -649,7 +700,8 @@ public class Mainframe extends JFrame {
 		});
 		JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		treeScrollPane.getViewport().setBackground(new Color(75,75,75));
+		if (HandleConfig.darkmode == 1)
+			treeScrollPane.getViewport().setBackground(new Color(75, 75, 75));
 		JScrollBar treeVerticalScrollBar = treeScrollPane.getVerticalScrollBar();
 		treeVerticalScrollBar.setUI(new CustomScrollBar());
 		treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
@@ -876,35 +928,19 @@ public class Mainframe extends JFrame {
 			String leihVon = eintrag.getBorrowedFrom().toUpperCase();
 			String leihAn = eintrag.getBorrowedTo().toUpperCase();
 			String serie = eintrag.getSeries().toUpperCase();
-//			if (tree.getSelectionCount() == 0) {
-				if (autor.contains(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (titel.contains(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (bemerkung.contains(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (leihVon.contains(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (leihAn.contains(text)) {
-					filter.addElement(entries.getElementAt(i));
-				} else if (serie.contains(text)) {
-					filter.addElement(entries.getElementAt(i));
-				}
-//			} else {
-//				if (autor.contains(text)) {
-//					filter.addElement(entries.getElementAt(i));
-//				} else if (titel.contains(text)) {
-//					filter.addElement(entries.getElementAt(i));
-//				} else if (bemerkung.contains(text)) {
-//					filter.addElement(entries.getElementAt(i));
-//				} else if (leihVon.contains(text)) {
-//					filter.addElement(entries.getElementAt(i));
-//				} else if (leihAn.contains(text)) {
-//					filter.addElement(entries.getElementAt(i));
-//				} else if (serie.contains(text)) {
-//					filter.addElement(entries.getElementAt(i));
-//				}
-//			}
+			if (autor.contains(text)) {
+				filter.addElement(entries.getElementAt(i));
+			} else if (titel.contains(text)) {
+				filter.addElement(entries.getElementAt(i));
+			} else if (bemerkung.contains(text)) {
+				filter.addElement(entries.getElementAt(i));
+			} else if (leihVon.contains(text)) {
+				filter.addElement(entries.getElementAt(i));
+			} else if (leihAn.contains(text)) {
+				filter.addElement(entries.getElementAt(i));
+			} else if (serie.contains(text)) {
+				filter.addElement(entries.getElementAt(i));
+			}
 		}
 		if (filter.getSize() > 0) {
 			tableDisplay = new SimpleTableModel(filter);
@@ -1220,11 +1256,17 @@ public class Mainframe extends JFrame {
 		}
 	}
 
+	/**
+	 * set Inactive Color of search TextField
+	 */
 	public void setSearchTextInactive() {
 		txt_search.setForeground(Color.GRAY);
 
 	}
 
+	/**
+	 * set Active Color of search TextField
+	 */
 	public void setSearchTextActive() {
 		if (HandleConfig.darkmode == 1) {
 			txt_search.setForeground(Color.WHITE);
@@ -1241,16 +1283,25 @@ public class Mainframe extends JFrame {
 	 * @param args -
 	 */
 	public static void main(String[] args) {
-		getInstance();
+		if (args.length > 0) {
+			for (String s : args) {
+				if (s.equals("version")) {
+					System.out.println(version);
+				}
+			}
+		} else {
+			getInstance();
+		}
 	}
 
 	/**
-	 * startr Mainframe for instance
+	 * start Mainframe for instance
 	 * 
 	 * @return Mainframe Object
 	 */
 	public static Mainframe getInstance() {
 		if (instance == null) {
+			System.out.println("create new Instance");
 			instance = new Mainframe();
 		}
 

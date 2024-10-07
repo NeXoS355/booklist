@@ -1,5 +1,6 @@
 package gui;
 
+
 import java.awt.Graphics;
 import java.awt.Shape;
 import java.awt.geom.RoundRectangle2D;
@@ -29,7 +30,8 @@ public class CustomTextField extends JTextField {
      */
     public CustomTextField() {
         super();
-        setOpaque(false); // As suggested by @AVD in comment.
+        setOpaque(false);
+        setFont(Mainframe.defaultFont);
     }
     
     /**
@@ -37,11 +39,12 @@ public class CustomTextField extends JTextField {
      * specified text. A default model is created and the number of
      * columns is 0.
      *
-     * @param text the text to be displayed, or <code>null</code>
+     * @param text - the text to be displayed, or <code>null</code>
      */
     public CustomTextField(String text) {
         this(null, text, 0);
         setOpaque(false);
+        setFont(Mainframe.defaultFont);
     }
     
     /**
@@ -50,11 +53,11 @@ public class CustomTextField extends JTextField {
      * This is the constructor through which the other constructors feed.
      * If the document is <code>null</code>, a default model is created.
      *
-     * @param doc  the text storage to use; if this is <code>null</code>,
+     * @param doc - the text storage to use; if this is <code>null</code>,
      *          a default will be provided by calling the
      *          <code>createDefaultModel</code> method
-     * @param text  the initial string to display, or <code>null</code>
-     * @param columns  the number of columns to use to calculate
+     * @param text - the initial string to display, or <code>null</code>
+     * @param columns - the number of columns to use to calculate
      *   the preferred width &gt;= 0; if <code>columns</code>
      *   is set to zero, the preferred width will be whatever
      *   naturally results from the component implementation

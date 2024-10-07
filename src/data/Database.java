@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import org.apache.derby.tools.sysinfo;
@@ -345,20 +344,18 @@ public class Database {
 	public static String readCurrentLayoutVersion() {
 		ResultSet rs = null;
 		String version = "";
-		Timestamp date = null;
 		String sql = "SELECT * FROM versions";
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery(sql);
 			while (rs.next()) {
 				version = rs.getString("version").trim();
-				date = rs.getTimestamp("date");
 			}
 			st.close();
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim auslesen der DB Version");
 		}
-		return version + "   -   " + new SimpleDateFormat("dd.MM.yyyy").format(date);
+		return version;
 	}
 	
 	/**

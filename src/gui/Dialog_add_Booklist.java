@@ -30,7 +30,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import application.Book_Booklist;
 import application.HandleConfig;
-import application.HandleWebInfo;
+import application.GetBookCoversFromWeb;
 import application.BookListModel;
 
 /**
@@ -84,7 +84,6 @@ public class Dialog_add_Booklist extends JDialog {
 		 * Create Components for Panel Center
 		 */
 		txtAuthor = new CustomTextField();
-		txtAuthor.setFont(Mainframe.defaultFont);
 		txtAuthor.setText(Mainframe.getTreeSelection());
 		txtAuthor.setPreferredSize(new Dimension(50, höhe));
 		txtAuthor.setBorder(standardBorder);
@@ -163,7 +162,6 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
 
 		txtTitle = new CustomTextField();
-		txtTitle.setFont(Mainframe.defaultFont);
 		txtTitle.setPreferredSize(new Dimension(50, höhe));
 		txtTitle.setBorder(standardBorder);
 		txtTitle.addKeyListener(new KeyAdapter() {
@@ -216,7 +214,6 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 
 		txtNote = new CustomTextField();
-		txtNote.setFont(Mainframe.defaultFont);
 		txtNote.setPreferredSize(new Dimension(50, höhe));
 		txtNote.setBorder(standardBorder);
 		txtNote.addKeyListener(new KeyAdapter() {
@@ -252,7 +249,6 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 
 		txtSerie = new CustomTextField();
-		txtSerie.setFont(Mainframe.defaultFont);
 		txtSerie.setPreferredSize(new Dimension(50, höhe));
 		txtSerie.setBorder(standardBorder);
 		txtSerie.addKeyListener(new KeyAdapter() {
@@ -307,7 +303,6 @@ public class Dialog_add_Booklist extends JDialog {
 		});
 
 		txtSeriesVol = new CustomTextField();
-		txtSeriesVol.setFont(Mainframe.defaultFont);
 		txtSeriesVol.setPreferredSize(new Dimension(50, höhe));
 		txtSeriesVol.setBorder(standardBorder);
 		txtSeriesVol.addKeyListener(new KeyAdapter() {
@@ -323,7 +318,7 @@ public class Dialog_add_Booklist extends JDialog {
 					txtSeriesVol.setBackground(new Color(255, 105, 105));
 					txtSeriesVol.setText("");
 				} else
-					txtSeriesVol.setBackground(Color.white);
+					txtSeriesVol.setBackground(UIManager.getColor("TextField.background"));
 			}
 		});
 		txtSeriesVol.addMouseListener(new MouseAdapter() {
@@ -458,7 +453,6 @@ public class Dialog_add_Booklist extends JDialog {
 		});
 
 		txtBorrowedFrom = new CustomTextField();
-		txtBorrowedFrom.setFont(Mainframe.defaultFont);
 		txtBorrowedFrom.setVisible(false);
 		txtBorrowedFrom.setBorder(standardBorder);
 		txtBorrowedFrom.addKeyListener(new KeyAdapter() {
@@ -489,7 +483,6 @@ public class Dialog_add_Booklist extends JDialog {
 		});
 
 		txtBorrowedTo = new CustomTextField();
-		txtBorrowedTo.setFont(Mainframe.defaultFont);
 		txtBorrowedTo.setVisible(false);
 		txtBorrowedTo.setBorder(standardBorder);
 		txtBorrowedTo.addKeyListener(new KeyAdapter() {
@@ -598,7 +591,7 @@ public class Dialog_add_Booklist extends JDialog {
 					Mainframe.entries.add(book);
 				}
 				if (HandleConfig.autoDownload == 1) {
-					HandleWebInfo.DownloadWebPage(book, 2, false);
+					GetBookCoversFromWeb.DownloadWebPage(book, 2, false);
 				}
 				BookListModel.checkAuthors();
 				Mainframe.setLastSearch(txtAuthor.getText());

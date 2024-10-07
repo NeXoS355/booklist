@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 
 import application.Book_Booklist;
@@ -38,11 +39,11 @@ public class Dialog_edit_Wishlist extends JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private CustomTextField txt_author;
-	private CustomTextField txt_title;
-	private CustomTextField txt_merk;
-	private CustomTextField txt_serie;
-	private CustomTextField txt_seriePart;
+	private CustomTextField txtAuthor;
+	private CustomTextField txtTitle;
+	private CustomTextField txtNote;
+	private CustomTextField txtSeries;
+	private CustomTextField txtSeriesVol;
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
@@ -102,34 +103,33 @@ public class Dialog_edit_Wishlist extends JDialog {
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.defaultFont);
 		lbl_author.setPreferredSize(new Dimension(breite, höhe));
-		txt_author = new CustomTextField(eintrag.getAuthor());
-		txt_author.setFont(Mainframe.defaultFont);
-		txt_author.setPreferredSize(new Dimension(50, höhe));
-		txt_author.setBorder(standardBorder);
-		txt_author.addKeyListener(new KeyAdapter() {
+		txtAuthor = new CustomTextField(eintrag.getAuthor());
+		txtAuthor.setPreferredSize(new Dimension(50, höhe));
+		txtAuthor.setBorder(standardBorder);
+		txtAuthor.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
 					speichern(eintrag);
 				else if (!e.isActionKey()) {
-					txt_author.setBackground(Color.white);
+					txtAuthor.setBackground(UIManager.getColor("TextField.background"));
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 			}
 		});
-		txt_author.addMouseListener(new MouseAdapter() {
+		txtAuthor.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_author.setBorder(standardBorder);
+				txtAuthor.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_author.setBorder(activeBorder);
+				txtAuthor.setBorder(activeBorder);
 
 			}
 
@@ -137,53 +137,52 @@ public class Dialog_edit_Wishlist extends JDialog {
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(Mainframe.defaultFont);
 		lbl_title.setPreferredSize(new Dimension(breite, höhe));
-		txt_title = new CustomTextField(eintrag.getTitle());
-		txt_title.setFont(Mainframe.defaultFont);
-		txt_title.setPreferredSize(new Dimension(50, höhe));
-		txt_title.setBorder(standardBorder);
-		txt_title.addKeyListener(new KeyAdapter() {
+		txtTitle = new CustomTextField(eintrag.getTitle());
+		txtTitle.setPreferredSize(new Dimension(50, höhe));
+		txtTitle.setBorder(standardBorder);
+		txtTitle.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					speichern(eintrag);
 				} else if (!e.isActionKey()) {
-					if (txt_title.getText().equals("Buch bereits vorhanden!")) {
-						txt_title.setText("");
+					if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
+						txtTitle.setText("");
 					}
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
-				if (txt_title.getText().length() > 50) {
-					txt_title.setEditable(false);
-					txt_title.setText("Nicht mehr als 50 Zeichen!");
-					txt_title.setBackground(new Color(255, 105, 105));
+				if (txtTitle.getText().length() > 50) {
+					txtTitle.setEditable(false);
+					txtTitle.setText("Nicht mehr als 50 Zeichen!");
+					txtTitle.setBackground(new Color(255, 105, 105));
 				}
 
 			}
 
 		});
-		txt_title.addMouseListener(new MouseAdapter() {
+		txtTitle.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_title.setBorder(standardBorder);
+				txtTitle.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_title.setBorder(activeBorder);
+				txtTitle.setBorder(activeBorder);
 
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (txt_title.getText().equals("Nicht mehr als 50 Zeichen!")) {
-					txt_title.setEditable(true);
-					txt_title.setForeground(Color.black);
-					txt_title.setBackground(Color.white);
-					txt_title.setText("");
+				if (txtTitle.getText().equals("Nicht mehr als 50 Zeichen!")) {
+					txtTitle.setEditable(true);
+					txtTitle.setForeground(UIManager.getColor("TextField.foreground"));
+					txtTitle.setBackground(UIManager.getColor("TextField.background"));
+					txtTitle.setText("");
 				}
 			}
 
@@ -193,11 +192,10 @@ public class Dialog_edit_Wishlist extends JDialog {
 		lbl_merk.setFont(Mainframe.defaultFont);
 		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
 
-		txt_merk = new CustomTextField(eintrag.getNote());
-		txt_merk.setFont(Mainframe.defaultFont);
-		txt_merk.setPreferredSize(new Dimension(50, höhe));
-		txt_merk.setBorder(standardBorder);
-		txt_merk.addKeyListener(new KeyAdapter() {
+		txtNote = new CustomTextField(eintrag.getNote());
+		txtNote.setPreferredSize(new Dimension(50, höhe));
+		txtNote.setBorder(standardBorder);
+		txtNote.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -208,17 +206,17 @@ public class Dialog_edit_Wishlist extends JDialog {
 			}
 
 		});
-		txt_merk.addMouseListener(new MouseAdapter() {
+		txtNote.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_merk.setBorder(standardBorder);
+				txtNote.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_merk.setBorder(activeBorder);
+				txtNote.setBorder(activeBorder);
 
 			}
 
@@ -228,11 +226,10 @@ public class Dialog_edit_Wishlist extends JDialog {
 		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
 
-		txt_serie = new CustomTextField(eintrag.getSeries());
-		txt_serie.setFont(Mainframe.defaultFont);
-		txt_serie.setPreferredSize(new Dimension(50, höhe));
-		txt_serie.setBorder(standardBorder);
-		txt_serie.addKeyListener(new KeyAdapter() {
+		txtSeries = new CustomTextField(eintrag.getSeries());
+		txtSeries.setPreferredSize(new Dimension(50, höhe));
+		txtSeries.setBorder(standardBorder);
+		txtSeries.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -244,27 +241,26 @@ public class Dialog_edit_Wishlist extends JDialog {
 			}
 
 		});
-		txt_serie.addMouseListener(new MouseAdapter() {
+		txtSeries.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_serie.setBorder(standardBorder);
+				txtSeries.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_serie.setBorder(activeBorder);
+				txtSeries.setBorder(activeBorder);
 
 			}
 
 		});
 
-		txt_seriePart = new CustomTextField(eintrag.getSeriesVol());
-		txt_seriePart.setFont(Mainframe.defaultFont);
-		txt_seriePart.setPreferredSize(new Dimension(50, höhe));
-		txt_seriePart.setBorder(standardBorder);
-		txt_seriePart.addKeyListener(new KeyAdapter() {
+		txtSeriesVol = new CustomTextField(eintrag.getSeriesVol());
+		txtSeriesVol.setPreferredSize(new Dimension(50, höhe));
+		txtSeriesVol.setBorder(standardBorder);
+		txtSeriesVol.addKeyListener(new KeyAdapter() {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -272,25 +268,25 @@ public class Dialog_edit_Wishlist extends JDialog {
 					speichern(eintrag);
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
-				if (txt_seriePart.getText().length() > 2) {
-					txt_seriePart.setText("");
-					txt_seriePart.setBackground(new Color(255, 105, 105));
+				if (txtSeriesVol.getText().length() > 2) {
+					txtSeriesVol.setText("");
+					txtSeriesVol.setBackground(new Color(255, 105, 105));
 				} else
-					txt_seriePart.setBackground(Color.white);
+					txtTitle.setBackground(UIManager.getColor("TextField.background"));
 			}
 
 		});
-		txt_seriePart.addMouseListener(new MouseAdapter() {
+		txtSeriesVol.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				txt_seriePart.setBorder(standardBorder);
+				txtSeriesVol.setBorder(standardBorder);
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				txt_seriePart.setBorder(activeBorder);
+				txtSeriesVol.setBorder(activeBorder);
 
 			}
 
@@ -312,7 +308,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panelCenter.add(txt_author, c);
+		panelCenter.add(txtAuthor, c);
 		c.gridx = 0;
 		c.gridy = 1;
 		c.weightx = 0.05;
@@ -324,7 +320,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panelCenter.add(txt_title, c);
+		panelCenter.add(txtTitle, c);
 		c.gridx = 0;
 		c.gridy = 2;
 		c.weightx = 0.05;
@@ -335,7 +331,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panelCenter.add(txt_merk, c);
+		panelCenter.add(txtNote, c);
 		c.gridx = 0;
 		c.gridy = 3;
 		c.weightx = 0.05;
@@ -346,14 +342,14 @@ public class Dialog_edit_Wishlist extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panelCenter.add(txt_serie, c);
+		panelCenter.add(txtSeries, c);
 		c.gridx = 2;
 		c.gridy = 3;
 		c.weightx = 0.1;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(10, 10, 0, 0);
-		panelCenter.add(txt_seriePart, c);
+		panelCenter.add(txtSeriesVol, c);
 		c.gridx = 0;
 		c.gridy = 4;
 		c.weightx = 0.1;
@@ -404,14 +400,14 @@ public class Dialog_edit_Wishlist extends JDialog {
 	}
 
 	public void speichern(Book_Wishlist eintrag) {
-		if (!txt_author.getText().isEmpty() && !txt_title.getText().isEmpty()) {
+		if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
 			String oldAutor = eintrag.getAuthor();
 			String oldTitel = eintrag.getTitle();
-			String newAutor = txt_author.getText().trim();
-			String newTitel = txt_title.getText().trim();
-			String newBemerkung = txt_merk.getText().trim();
-			String newSerie = txt_serie.getText().trim();
-			String newSeriePart = txt_seriePart.getText();
+			String newAutor = txtAuthor.getText().trim();
+			String newTitel = txtTitle.getText().trim();
+			String newBemerkung = txtNote.getText().trim();
+			String newSerie = txtSeries.getText().trim();
+			String newSeriePart = txtSeriesVol.getText();
 			Timestamp datum = new Timestamp(System.currentTimeMillis());
 			if (!Duplicant(newAutor, newTitel, wishlist.wishlistEntries.getIndexOf(newAutor, newTitel))) {
 				Database.deleteFromWishlist(oldAutor, oldTitel);
@@ -425,15 +421,15 @@ public class Dialog_edit_Wishlist extends JDialog {
 				dispose();
 				Mainframe.logger.trace("Wishlist Book edit: Book saved successfully");
 			} else {
-				txt_title.setText("Buch bereits vorhanden!");
-				txt_title.setBackground(new Color(255, 105, 105));
+				txtTitle.setText("Buch bereits vorhanden!");
+				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 		} else {
-			if (txt_author.getText().isEmpty()) {
-				txt_author.setBackground(new Color(255, 105, 105));
+			if (txtAuthor.getText().isEmpty()) {
+				txtAuthor.setBackground(new Color(255, 105, 105));
 			}
-			if (txt_title.getText().isEmpty()) {
-				txt_title.setBackground(new Color(255, 105, 105));
+			if (txtTitle.getText().isEmpty()) {
+				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 		}
 		wishlist.updateModel();

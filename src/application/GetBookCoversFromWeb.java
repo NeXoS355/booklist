@@ -27,7 +27,7 @@ import gui.Mainframe;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class HandleWebInfo {
+public class GetBookCoversFromWeb {
 
 	public static int DownloadWebPage(Book_Booklist entry, int maxResults, boolean retry) {
 		int compareReturn = 0;
@@ -63,7 +63,7 @@ public class HandleWebInfo {
 			// GET-Methode festlegen
 			connection.setRequestMethod("GET");
 
-			// Verbindung Ã¶ffnen und Response-Code Ã¼berprÃ¼fen
+			// Verbindung öffnen und Response-Code überprüfen
 			int responseCode = connection.getResponseCode();
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				// InputStream lesen und in einen String umwandeln

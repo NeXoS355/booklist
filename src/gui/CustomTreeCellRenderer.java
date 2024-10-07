@@ -12,7 +12,7 @@ import javax.swing.tree.TreePath;
 
 import application.HandleConfig;
 
-public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
+public class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	/**
 	 * 
@@ -31,7 +31,7 @@ public class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 	}
 
 
-	public MyTreeCellRenderer() {
+	public CustomTreeCellRenderer() {
 		setFont(new Font("Roboto", Font.PLAIN, 16));
 	}
 	
