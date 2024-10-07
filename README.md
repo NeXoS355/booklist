@@ -1,4 +1,5 @@
 This is just a small Project which i did for my family. We couldn't get track of all the books we owned so i decided to write this little program.
+I have created a self hosted webApp for adding Books on the go (https://github.com/NeXoS355/booklist_webapp).
 
 Features:
 
@@ -22,5 +23,7 @@ Tested with jdk21 and the following dependencies
     log4j-core 2.23.1
     log4j-api 2.23.1
     opencsv 5.9
+    zxing_core 3.5.3
+    zxing_javase 3.5.3
 
     
