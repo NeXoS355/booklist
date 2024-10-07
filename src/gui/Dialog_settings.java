@@ -4,17 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,23 +56,37 @@ public class Dialog_settings extends JDialog {
 	private static JTextField txtApiToken;
 	private static JLabel lblQrCode;
 
+	private URL connectionUrl;
+	private URL copyUrl;
+
 	public Dialog_settings() {
 
 		this.setTitle("Einstellungen");
 		this.setModal(true);
 		this.setLayout(new BorderLayout());
-		this.setSize(650, 500);
+		this.setSize(670, 475);
 		this.setLocationByPlatform(true);
+
+		if (Mainframe.isApiConnected())
+			connectionUrl = getClass().getResource("/resources/connection_good.png");
+		else
+			connectionUrl = getClass().getResource("/resources/connection_bad.png");
+		ImageIcon conIcon = new ImageIcon(connectionUrl);
+		
+		if (HandleConfig.darkmode==1)
+			copyUrl =  getClass().getResource("/resources/copy_inv.png");
+		else
+			copyUrl =  getClass().getResource("/resources/copy.png");		
+		ImageIcon copyIcon = new ImageIcon(copyUrl);
 
 		JPanel pnlLeft = new JPanel();
 		pnlLeft.setLayout(new GridBagLayout());
-		
+
 		GridBagConstraints c = new GridBagConstraints();
 
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 4;
-		c.weightx = 1.0;
 		c.anchor = GridBagConstraints.CENTER;
 		c.ipady = 5;
 		c.insets = new Insets(10, 10, 0, 10);
@@ -184,8 +197,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 0;
 		c.gridy = 10;
 		JLabel lblDark = new JLabel("Darkmode");
-		lblBackup.setToolTipText(
-				"0= Light Mode; 1=Dark Mode");
+		lblDark.setToolTipText("0= Light Mode; 1=Dark Mode");
 		pnlLeft.add(lblDark, c);
 		c.gridx = 1;
 		c.gridy = 10;
@@ -208,7 +220,7 @@ public class Dialog_settings extends JDialog {
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		pnlLeft.add(btnSave, c);
-		
+
 		JButton btnAbort = ButtonsFactory.createButton("Abbrechen");
 		btnAbort.setFont(Mainframe.defaultFont);
 		btnAbort.addActionListener(new ActionListener() {
@@ -222,16 +234,16 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 99;
 		c.anchor = GridBagConstraints.EAST;
 		pnlLeft.add(btnAbort, c);
-		
+
 		/*
 		 * Define the right Panel for API Settings
 		 */
 		JPanel pnlRight = new JPanel();
 		pnlRight.setLayout(new GridBagLayout());
 		c = new GridBagConstraints();
-		
-		c.ipady = 5;
-		c.insets = new Insets(10, 10, 0, 10);
+
+		c.ipady = 10;
+		c.insets = new Insets(0, 10, 0, 0);
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 1;
@@ -240,12 +252,37 @@ public class Dialog_settings extends JDialog {
 		JLabel lblApiUrl = new JLabel("Web API URL");
 		lblApiUrl.setToolTipText("URL der web API (https://...api.php)");
 		pnlRight.add(lblApiUrl, c);
+		JLabel lblApiUrlCon = new JLabel(conIcon);
+		if (Mainframe.isApiConnected())
+			lblApiUrlCon.setToolTipText("API ist verbunden");
+		else
+			lblApiUrlCon.setToolTipText("API ist nicht verbunden");
+		c.gridx = 4;
+		c.gridy = 0;
+		c.gridwidth = 1;
+		pnlRight.add(lblApiUrlCon, c);
 		c.gridx = 1;
 		c.gridy = 0;
 		c.gridwidth = 3;
 		String apiUrl = HandleConfig.apiURL;
 		txtApiUrl = new JTextField(apiUrl);
 		pnlRight.add(txtApiUrl, c);
+		JButton btnTokenCopy = ButtonsFactory.createButton(copyIcon);
+		btnTokenCopy.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+				StringSelection apiTokenStr = new StringSelection(txtApiToken.getText());
+				clipboard.setContents(apiTokenStr, null);
+			}
+
+		});
+		c.insets = new Insets(5, 10, 0, 0);
+		c.gridx = 4;
+		c.gridy = 1;
+		c.gridwidth = 1;
+		pnlRight.add(btnTokenCopy, c);
 		c.gridx = 0;
 		c.gridy = 1;
 		c.gridwidth = 1;
@@ -277,10 +314,10 @@ public class Dialog_settings extends JDialog {
 				}
 			}
 		});
+		c.insets = new Insets(10, 10, 0, 10);
 		c.gridx = 1;
 		c.gridy = 2;
 		c.gridwidth = 2;
-//		c.anchor = GridBagConstraints.CENTER;
 		pnlRight.add(btnGenToken, c);
 
 		// QR code label
@@ -294,7 +331,7 @@ public class Dialog_settings extends JDialog {
 		c.gridheight = 7;
 		pnlRight.add(qrPanel, c);
 
-		
+
 		this.add(pnlLeft, BorderLayout.WEST);
 		this.add(pnlRight, BorderLayout.CENTER);
 
@@ -302,96 +339,72 @@ public class Dialog_settings extends JDialog {
 	}
 
 	public static void saveSettings() {
-		try (PrintWriter out = new PrintWriter("config.conf")) {
-			Mainframe.logger.info("Save Settings");
-			// set Parameters which can be changed on the fly
-			HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
-			HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
-			HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
-			HandleConfig.debug = (String) cmbDebug.getSelectedItem();
-			HandleConfig.backup = (int) cmbBackup.getSelectedItem();
-			HandleConfig.apiToken = txtApiToken.getText();
-			HandleConfig.apiURL = txtApiUrl.getText();
-			if (HandleConfig.apiURL.length() > 0) {
-				if (HandleConfig.apiURL.substring(HandleConfig.apiURL.length() - 1).equals("/")) {
-					HandleConfig.apiURL = HandleConfig.apiURL.substring(0, HandleConfig.apiURL.length() - 1);
-					System.out.println(HandleConfig.apiURL);
-				}
-			}
-			if (HandleConfig.apiURL.length() > 0) {
-				try {
-					Mainframe.logger.trace("Web API request: " + HandleConfig.apiURL + "/api/get.php");
-					URL getUrl;
-					getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
-					HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
-					con.setRequestMethod("GET");
-					int responseCode = con.getResponseCode();
-					Mainframe.logger.trace("Web API GET responseCode: " + responseCode);
-					if (responseCode != HttpURLConnection.HTTP_OK) {
-						JOptionPane.showMessageDialog(null, "Verbindung zur API fehlgeschlagen");
+		Mainframe.executor.submit(() -> {
+			try (PrintWriter out = new PrintWriter("config.conf")) {
+				Mainframe.logger.info("Save Settings");
+				// set Parameters which can be changed on the fly
+				HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
+				HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
+				HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
+				HandleConfig.debug = (String) cmbDebug.getSelectedItem();
+				HandleConfig.backup = (int) cmbBackup.getSelectedItem();
+				HandleConfig.apiToken = txtApiToken.getText();
+				HandleConfig.apiURL = txtApiUrl.getText();
+				if (HandleConfig.apiURL.length() > 0) {
+					if (HandleConfig.apiURL.substring(HandleConfig.apiURL.length() - 1).equals("/")) {
+						HandleConfig.apiURL = HandleConfig.apiURL.substring(0, HandleConfig.apiURL.length() - 1);
+						System.out.println(HandleConfig.apiURL);
 					}
-				} catch (MalformedURLException e) {
-					Mainframe.logger.error("Fehler prüfen der Verbindung");
-					Mainframe.logger.error(e.getMessage());
-				} catch (URISyntaxException e) {
-					Mainframe.logger.error("Fehler prüfen der Verbindung");
-					Mainframe.logger.error(e.getMessage());
-				} catch (ProtocolException e) {
-					Mainframe.logger.error("Fehler prüfen der Verbindung");
-					Mainframe.logger.error(e.getMessage());
-				} catch (IOException e) {
-					Mainframe.logger.error("Fehler prüfen der Verbindung");
-					Mainframe.logger.error(e.getMessage());
 				}
+				Mainframe.checkApiConnection();
 
+				out.println("fontSize=" + cmbFont.getSelectedItem());
+				out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
+				out.println("autoDownload=" + cmbAutoDownload.getSelectedItem());
+				out.println("loadOnDemand=" + cmbOnDemand.getSelectedItem());
+				out.println("useDB=" + cmbUseDB.getSelectedItem());
+				out.println("searchParam=" + cmbSearchParam.getSelectedItem());
+				out.println("debug=" + cmbDebug.getSelectedItem());
+				out.println("backup=" + cmbBackup.getSelectedItem());
+				out.println("apiToken=" + txtApiToken.getText());
+				out.println("apiURL=" + txtApiUrl.getText());
+				out.println("darkmode=" + cmbDark.getSelectedItem());
+
+				TableColumnModel columnModel = Mainframe.table.getColumnModel();
+
+				StringBuilder strWidth = new StringBuilder();
+				strWidth.append("layoutWidth=");
+				strWidth.append(columnModel.getColumn(0).getWidth());
+				strWidth.append(",");
+				strWidth.append(columnModel.getColumn(1).getWidth());
+				strWidth.append(",");
+				strWidth.append(columnModel.getColumn(2).getWidth());
+				strWidth.append(",");
+				strWidth.append(columnModel.getColumn(3).getWidth());
+				strWidth.append(",");
+				strWidth.append(columnModel.getColumn(4).getWidth());
+
+				out.println(strWidth);
+
+				StringBuilder strColumnTitle = new StringBuilder();
+				strColumnTitle.append("layoutSort=");
+				strColumnTitle.append(columnModel.getColumn(0).getHeaderValue());
+				strColumnTitle.append(",");
+				strColumnTitle.append(columnModel.getColumn(1).getHeaderValue());
+				strColumnTitle.append(",");
+				strColumnTitle.append(columnModel.getColumn(2).getHeaderValue());
+				strColumnTitle.append(",");
+				strColumnTitle.append(columnModel.getColumn(3).getHeaderValue());
+				strColumnTitle.append(",");
+				strColumnTitle.append(columnModel.getColumn(4).getHeaderValue());
+
+				out.println(strColumnTitle);
+
+			} catch (FileNotFoundException ex) {
+				ex.printStackTrace();
+				Mainframe.logger.error("Fehler beim speichern der Einstellungen");
 			}
-
-			out.println("fontSize=" + cmbFont.getSelectedItem());
-			out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
-			out.println("autoDownload=" + cmbAutoDownload.getSelectedItem());
-			out.println("loadOnDemand=" + cmbOnDemand.getSelectedItem());
-			out.println("useDB=" + cmbUseDB.getSelectedItem());
-			out.println("searchParam=" + cmbSearchParam.getSelectedItem());
-			out.println("debug=" + cmbDebug.getSelectedItem());
-			out.println("backup=" + cmbBackup.getSelectedItem());
-			out.println("apiToken=" + txtApiToken.getText());
-			out.println("apiURL=" + txtApiUrl.getText());
-			out.println("darkmode=" + cmbDark.getSelectedItem());
-
-			TableColumnModel columnModel = Mainframe.table.getColumnModel();
-
-			StringBuilder strWidth = new StringBuilder();
-			strWidth.append("layoutWidth=");
-			strWidth.append(columnModel.getColumn(0).getWidth());
-			strWidth.append(",");
-			strWidth.append(columnModel.getColumn(1).getWidth());
-			strWidth.append(",");
-			strWidth.append(columnModel.getColumn(2).getWidth());
-			strWidth.append(",");
-			strWidth.append(columnModel.getColumn(3).getWidth());
-			strWidth.append(",");
-			strWidth.append(columnModel.getColumn(4).getWidth());
-
-			out.println(strWidth);
-
-			StringBuilder strColumnTitle = new StringBuilder();
-			strColumnTitle.append("layoutSort=");
-			strColumnTitle.append(columnModel.getColumn(0).getHeaderValue());
-			strColumnTitle.append(",");
-			strColumnTitle.append(columnModel.getColumn(1).getHeaderValue());
-			strColumnTitle.append(",");
-			strColumnTitle.append(columnModel.getColumn(2).getHeaderValue());
-			strColumnTitle.append(",");
-			strColumnTitle.append(columnModel.getColumn(3).getHeaderValue());
-			strColumnTitle.append(",");
-			strColumnTitle.append(columnModel.getColumn(4).getHeaderValue());
-
-			out.println(strColumnTitle);
-
-		} catch (FileNotFoundException ex) {
-			ex.printStackTrace();
-			Mainframe.logger.error("Fehler beim speichern der Einstellungen");
-		}
+		});
 	}
 
 	// Method to generate and display a QR code

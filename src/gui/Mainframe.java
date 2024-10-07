@@ -3,6 +3,7 @@ package gui;
 import java.awt.BorderLayout;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.HeadlessException;
@@ -22,10 +23,14 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -34,6 +39,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -120,6 +127,11 @@ public class Mainframe extends JFrame {
 	private static Mainframe instance;
 	private static String treeSelection;
 	private static String lastSearch = "";
+	private static boolean apiConnected = false;
+
+	private static JMenuItem openWebApi;
+	private static JMenuItem apiAbruf;
+	private static JMenuItem apiUpload;
 
 	public static int prozEbook = 0;
 	public static int prozAuthor = 0;
@@ -127,7 +139,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private static String version = "3.1.1";
+	private static String version = "3.1.2";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -143,6 +155,24 @@ public class Mainframe extends JFrame {
 		} else if (HandleConfig.debug.equals("TRACE")) {
 			Configurator.setLevel(logger, Level.TRACE);
 		}
+
+		Mainframe.executor.submit(() -> {
+			try {
+				File file = new File("latest.jar");
+				if (file.exists()) {
+					Path path = Paths.get("latest.jar");
+					boolean deleted = Files.deleteIfExists(path);
+					if (deleted)
+						logger.trace("File detected and deleted: " + path);
+					else
+						logger.warn("File detected but could not be deleted: " + path);
+				}
+				checkApiConnection();
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+			}
+
+		});
 
 		this.setLayout(new BorderLayout(10, 10));
 		this.setLocationByPlatform(true);
@@ -242,7 +272,7 @@ public class Mainframe extends JFrame {
 					setLastSearch(txt_search.getText());
 					if (tableDisplay.getRowCount() == 0) {
 						updateModel();
-						JOptionPane.showMessageDialog(getParent(), "Keine Übereinstimmung gefunden");
+						JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Übereinstimmung gefunden");
 					}
 				}
 			}
@@ -288,7 +318,7 @@ public class Mainframe extends JFrame {
 				setLastSearch(txt_search.getText());
 				if (entries.getSize() == 0) {
 					updateModel();
-					JOptionPane.showMessageDialog(getParent(), "Keine Übereinstimmung gefunden");
+					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Übereinstimmung gefunden");
 				}
 			}
 		});
@@ -311,9 +341,9 @@ public class Mainframe extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				boolean ret = createBackup();
 				if (ret)
-					JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
+					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
 				else
-					JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen oder nicht vollständig.");
+					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup fehlgeschlagen oder nicht vollständig.");
 			}
 		});
 		JMenuItem close = new JMenuItem("Schließen");
@@ -332,55 +362,15 @@ public class Mainframe extends JFrame {
 				new wishlist();
 			}
 		});
-		JMenuItem update = new JMenuItem("check update");
+		JMenuItem update = new JMenuItem("auf Aktualisierung prüfen...");
 		update.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				URL url = null;
-				try {
-					url = new URI("https://github.com/NeXoS355/booklist/releases/latest/download/Bucherliste.jar")
-							.toURL();
-					try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-							FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
-						byte dataBuffer[] = new byte[1024];
-						int bytesRead;
-						while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-							fileOutputStream.write(dataBuffer, 0, bytesRead);
-						}
-						ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
-						logger.info("Command: " + pb.command());
-						Process proc = pb.start();
-				        // Warte darauf, dass der Prozess abgeschlossen wird
-				        int exitCode = proc.waitFor();
-				        System.out.println("Prozess beendet mit Exit-Code: " + exitCode);
-
-				        // InputStream lesen (kontinuierlich statt mit available())
-				        try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-				             BufferedReader errorReader = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
-
-				            // Ausgabe des Prozesses lesen
-				            String line;
-				            while ((line = reader.readLine()) != null) {
-				                System.out.println("OUT: " + line);
-				            }
-
-				            // Fehlerausgabe lesen (falls vorhanden)
-				            while ((line = errorReader.readLine()) != null) {
-				                System.out.println("ERR: " + line);
-				            }
-				        }
-					} catch (IOException e1) {
-						logger.error(e1.getMessage());
-					} catch (InterruptedException e1) {
-						logger.error(e1.getMessage());
-					}
-				} catch (MalformedURLException | URISyntaxException e1) {
-					// TODO Auto-generated catch block
-					logger.error(e1.getMessage());
-				}
-
+				logger.info("check for Updates");
+				checkUpdate();
 			}
+
 		});
 		JMenuItem about = new JMenuItem("Über");
 		about.addActionListener(new ActionListener() {
@@ -391,7 +381,7 @@ public class Mainframe extends JFrame {
 				String text = "https://github.com/NeXoS355/booklist" + "\n\nProgram Version: " + version
 						+ "\nDB Layout Version: " + Database.readCurrentLayoutVersion() + "\n\nLocal Java Version: "
 						+ javaVersion + "\nApache Derby Version: " + Database.readCurrentDBVersion();
-				JOptionPane.showMessageDialog(null, text);
+				JOptionPane.showMessageDialog(Mainframe.getInstance(), text);
 			}
 		});
 		JMenuItem ExcelExport = new JMenuItem("CSV Export");
@@ -399,15 +389,15 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int antwort = JOptionPane.showConfirmDialog(null,
+				int antwort = JOptionPane.showConfirmDialog(getParent(),
 						"Es wird eine csv Datei im Programmpfad abgelegt.\nFortfahren?", "Export",
 						JOptionPane.YES_NO_OPTION);
 				if (antwort == JOptionPane.YES_OPTION) {
 					boolean check = Database.CSVExport();
 					if (check) {
-						JOptionPane.showMessageDialog(null, "Liste erfolgreich exportiert!");
+						JOptionPane.showMessageDialog(Mainframe.getInstance(), "Liste erfolgreich exportiert!");
 					} else {
-						JOptionPane.showMessageDialog(null, "Datei konnte nicht geschrieben werden!");
+						JOptionPane.showMessageDialog(Mainframe.getInstance(), "Datei konnte nicht geschrieben werden!");
 					}
 				}
 			}
@@ -428,34 +418,55 @@ public class Mainframe extends JFrame {
 				new Dialog_info();
 			}
 		});
-		JMenuItem apiAbruf = new JMenuItem("API Abruf");
+		apiAbruf = new JMenuItem("API Abruf");
 		apiAbruf.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!HandleConfig.apiToken.equals("") && !HandleConfig.apiURL.equals("")) {
+				Mainframe.executor.submit(() -> {
 					downloadFromApi();
-				} else {
-					JOptionPane.showMessageDialog(null,
-							"API Token oder URL nicht gefunden.\nBitte die Einstellungen überprüfen!");
-				}
+				});
 			}
 		});
 
-		JMenuItem apiUpload = new JMenuItem("API Upload");
+		apiUpload = new JMenuItem("API Upload");
 		apiUpload.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!HandleConfig.apiToken.equals("") && !HandleConfig.apiURL.equals("")) {
+				Mainframe.executor.submit(() -> {
 					uploadToApi();
-				} else {
-					JOptionPane.showMessageDialog(null,
-							"API Token oder URL nicht gefunden.\nBitte die Einstellungen überprüfen!");
-				}
+				});
+				
 			}
 
 		});
+		openWebApi = new JMenuItem("API Öffnen");
+		openWebApi.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				logger.info("open Web API Website");
+				Desktop desktop = java.awt.Desktop.getDesktop();
+				URI oURL;
+				try {
+					oURL = new URI(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
+					desktop.browse(oURL);
+				} catch (URISyntaxException e1) {
+					logger.error(e1.getMessage());
+				} catch (IOException e1) {
+					logger.error(e1.getMessage());
+				}
+
+			}
+
+		});
+
+		if (!apiConnected) {
+			openWebApi.setEnabled(false);
+			apiAbruf.setEnabled(false);
+			apiUpload.setEnabled(false);
+		}
 
 		menue.add(datei);
 		menue.add(extras);
@@ -468,6 +479,7 @@ public class Mainframe extends JFrame {
 		extras.add(wishlist);
 		extras.add(apiAbruf);
 		extras.add(apiUpload);
+		extras.add(openWebApi);
 		extras.add(info);
 		hilfe.add(update);
 		hilfe.add(about);
@@ -730,9 +742,9 @@ public class Mainframe extends JFrame {
 							JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
 						boolean ret = createBackup();
 						if (ret)
-							JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
+							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
 						else
-							JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen oder nicht vollständig.");
+							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup fehlgeschlagen oder nicht vollständig.");
 					}
 				}
 				logger.trace("Window closing");
@@ -746,9 +758,9 @@ public class Mainframe extends JFrame {
 							JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
 						boolean ret = createBackup();
 						if (ret)
-							JOptionPane.showMessageDialog(getParent(), "Backup erfolgreich.");
+							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
 						else
-							JOptionPane.showMessageDialog(getParent(), "Backup fehlgeschlagen oder nicht vollständig.");
+							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup fehlgeschlagen oder nicht vollständig.");
 					}
 				}
 				logger.trace("Window closed");
@@ -777,7 +789,7 @@ public class Mainframe extends JFrame {
 				}
 				BookListModel.checkAuthors();
 			} else {
-				JOptionPane.showMessageDialog(null, "Es wurde kein Buch ausgewählt");
+				JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es wurde kein Buch ausgewählt");
 			}
 			logger.trace("Book deleted: " + searchAutor + ";" + searchTitel);
 		}
@@ -947,7 +959,7 @@ public class Mainframe extends JFrame {
 			table.setModel(tableDisplay);
 			setTableLayout();
 		} else {
-			JOptionPane.showMessageDialog(null, "Es gab leider keine Treffer!");
+			JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es gab leider keine Treffer!");
 			updateModel();
 		}
 	}
@@ -998,6 +1010,7 @@ public class Mainframe extends JFrame {
 			URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
 			HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
 			con.setRequestMethod("GET");
+			con.setConnectTimeout(5000);
 			int responseCode = con.getResponseCode();
 			logger.trace("Web API GET responseCode: " + responseCode);
 			if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -1068,7 +1081,7 @@ public class Mainframe extends JFrame {
 					importString = "Anzahl Bücher importiert: " + imported + "\n" + importedBooks;
 				if (imported >= 1 || rejected > 0) {
 
-					JOptionPane.showMessageDialog(null, importString);
+					JOptionPane.showMessageDialog(Mainframe.getInstance(), importString);
 
 					try {
 						// URL des Endpunkts
@@ -1095,21 +1108,21 @@ public class Mainframe extends JFrame {
 						logger.error(e.getMessage());
 					}
 				} else {
-					JOptionPane.showMessageDialog(null, "Keine Bücher zum abrufen gefunden.");
+					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Bücher zum abrufen gefunden.");
 				}
 				con.disconnect();
 			} else {
-				JOptionPane.showMessageDialog(null, "Get request failed.");
+				JOptionPane.showMessageDialog(Mainframe.getInstance(), "Get request failed.");
 			}
 		} catch (URISyntaxException e) {
 			logger.error(e.getMessage());
-			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+			JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Abruf.");
 		} catch (MalformedURLException e) {
 			logger.error(e.getMessage());
-			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+			JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Abruf.");
 		} catch (IOException e) {
 			logger.error(e.getMessage());
-			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+			JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Abruf.");
 		}
 	}
 
@@ -1126,6 +1139,7 @@ public class Mainframe extends JFrame {
 			con.setRequestMethod("POST");
 			con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			con.setDoOutput(true);
+			con.setConnectTimeout(5000);
 
 			// Der Token, der gesendet werden soll
 			String postData = "token=" + HandleConfig.apiToken;
@@ -1153,6 +1167,7 @@ public class Mainframe extends JFrame {
 			con.setRequestProperty("Content-Type", "application/json; utf-8");
 			con.setRequestProperty("Accept", "application/json");
 			con.setDoOutput(true);
+			con.setConnectTimeout(5000);
 
 			// GSON-Instanz erstellen
 			Gson gson = new Gson();
@@ -1190,13 +1205,13 @@ public class Mainframe extends JFrame {
 			con.disconnect();
 		} catch (MalformedURLException | URISyntaxException e) {
 			logger.error(e.getMessage());
-			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+			JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Upload.");
 		} catch (ProtocolException e) {
 			logger.error(e.getMessage());
-			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+			JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Upload.");
 		} catch (IOException e) {
 			logger.error(e.getMessage());
-			JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten.");
+			JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Upload.");
 		}
 
 	}
@@ -1278,15 +1293,196 @@ public class Mainframe extends JFrame {
 	}
 
 	/**
+	 * downloads the latest Release jar and checks the versions. If there is a new
+	 * version. Update is started immediately
+	 * 
+	 */
+	private void checkUpdate() {
+		URL url = null;
+		try {
+			url = new URI("https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar").toURL();
+			try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+					FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
+				byte dataBuffer[] = new byte[1024];
+				int bytesRead;
+				while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+					fileOutputStream.write(dataBuffer, 0, bytesRead);
+				}
+				ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
+				logger.info("Update - Command: " + pb.command());
+				Process proc = pb.start();
+				// Warte darauf, dass der Prozess abgeschlossen wird
+				int exitCode = proc.waitFor();
+				logger.info("Update - Process closed with Exit-Code: " + exitCode);
+
+				// InputStream lesen (kontinuierlich statt mit available())
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+						BufferedReader errorReader = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
+
+					// Ausgabe des Prozesses lesen
+					String line;
+					while ((line = reader.readLine()) != null) {
+						logger.info("Update - detected version: " + line);
+						String strCurVer = "";
+						int intCurVer = 0;
+						String[] splitString = version.split("[.]");
+						for (int i = 0; i < splitString.length; i++) {
+							strCurVer += splitString[i];
+						}
+						intCurVer = Integer.parseInt(strCurVer);
+
+						String strDownloadedVer = "";
+						int intDownloadedVer = 0;
+						splitString = line.split("[.]");
+						for (int i = 0; i < splitString.length; i++) {
+							strDownloadedVer += splitString[i];
+						}
+						intDownloadedVer = Integer.parseInt(strDownloadedVer);
+
+						if (intDownloadedVer > intCurVer) {
+							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es ist ein Update auf Version " + line + " verfügbar");
+							String fileName = new java.io.File(
+									Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+									.getName();
+							pb = new ProcessBuilder("java", "-jar", fileName, "update");
+							logger.info("Update - Command: " + pb.command());
+							proc = pb.start();
+							logger.info("Update - Process started");
+							System.exit(0);
+						} else {
+							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Kein Update verfügbar");
+						}
+					}
+
+					// Fehlerausgabe lesen (falls vorhanden)
+					while ((line = errorReader.readLine()) != null) {
+						logger.error("Update - Error: " + line);
+					}
+				}
+			} catch (IOException e1) {
+				logger.error(e1.getMessage());
+			} catch (InterruptedException e1) {
+				logger.error(e1.getMessage());
+			}
+		} catch (MalformedURLException | URISyntaxException e1) {
+			logger.error(e1.getMessage());
+		}
+
+	}
+
+	/**
+	 * update the jar file with the already downloaded latest.jar
+	 * 
+	 */
+	public static void update() {
+		String fileName = new java.io.File(
+				Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
+		try (PrintWriter out = new PrintWriter("update.log")) {
+			Thread.sleep(2000);
+			File source = new File("latest.jar");
+			File dest = new File(fileName);
+			InputStream is = null;
+			OutputStream os = null;
+			out.println("UPDATER: initialize");
+			out.println("UPDATER: detected fileName: " + fileName);
+			try {
+				is = new FileInputStream(source);
+				os = new FileOutputStream(dest);
+				byte[] buffer = new byte[1024];
+				int length;
+				out.println("UPDATER: overwriting file");
+				while ((length = is.read(buffer)) > 0) {
+					os.write(buffer, 0, length);
+				}
+				out.println("UPDATER: wrinting complete");
+				out.println("UPDATER: build process");
+				ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName);
+				out.println("UPDATER: " + pb.command());
+				pb.start();
+				out.println("UPDATER: process started");
+				out.println("UPDATER: SUCCESS");
+			} catch (IOException e) {
+				out.println(e.getMessage());
+			} finally {
+				try {
+					is.close();
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+			out.println("UPDATER: update finished");
+		} catch (FileNotFoundException ex) {
+			ex.printStackTrace();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+
+	}
+
+	public static void checkApiConnection() {
+		if (HandleConfig.apiURL.length() > 0) {
+			try {
+				Mainframe.logger.trace("Web API request: " + HandleConfig.apiURL + "/api/get.php");
+				URL getUrl;
+				getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
+				HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
+				con.setConnectTimeout(2000);
+				con.setRequestMethod("GET");
+				int responseCode = con.getResponseCode();
+				Mainframe.logger.trace("Web API GET responseCode: " + responseCode);
+				if (responseCode == HttpURLConnection.HTTP_OK) {
+					apiConnected = true;
+					openWebApi.setEnabled(true);
+					apiAbruf.setEnabled(true);
+					apiUpload.setEnabled(true);
+				}
+			} catch (MalformedURLException e) {
+				Mainframe.logger.error("MalformedURLException");
+				Mainframe.logger.error(e.getMessage());
+			} catch (URISyntaxException e) {
+				Mainframe.logger.error("URISyntaxException");
+				Mainframe.logger.error(e.getMessage());
+			} catch (ProtocolException e) {
+				Mainframe.logger.error("ProtocolException");
+				Mainframe.logger.error(e.getMessage());
+			} catch (IOException e) {
+				Mainframe.logger.error("Verbindung zur API fehlgeschlagen");
+				apiConnected = false;
+				openWebApi.setEnabled(false);
+				apiAbruf.setEnabled(false);
+				apiUpload.setEnabled(false);
+				Mainframe.logger.error(e.getMessage());
+			}
+
+		}
+	}
+
+	public static boolean isApiConnected() {
+		return apiConnected;
+	}
+	
+	/**
 	 * start Instance of Mainframe
 	 * 
-	 * @param args -
+	 * @param args - Arguments to trigger different functions
 	 */
 	public static void main(String[] args) {
 		if (args.length > 0) {
 			for (String s : args) {
-				if (s.equals("version")) {
+				switch (s) {
+				case "version":
 					System.out.println(version);
+					System.exit(0);
+					break;
+				case "update":
+					System.out.println("update");
+					update();
+					System.exit(0);
+				default:
+					System.out.println("no argument recognized. Exiting.");
+					System.exit(0);
 				}
 			}
 		} else {

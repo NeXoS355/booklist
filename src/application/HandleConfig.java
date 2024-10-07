@@ -22,7 +22,7 @@ public class HandleConfig {
 	public static int backup = 2;
 	public static String apiToken = generateRandomToken(64);
 	public static String apiURL = "";
-	public static int darkmode = 0;
+	public static int darkmode = 1;
 
 	public static void readConfig() {
 		File f = new File("config.conf");
@@ -186,23 +186,26 @@ public class HandleConfig {
 				Mainframe.logger.error(e.getMessage());
 			}
 		} else {
-			try (PrintWriter out = new PrintWriter("config.conf")) {
-				out.println("fontSize=" + Mainframe.defaultFont.getSize());
-				out.println("descFontSize=" + Mainframe.descFont.getSize());
-				out.println("autoDownload=" + autoDownload);
-				out.println("loadOnDemand=" + loadOnDemand);
-				out.println("useDB=" + BookListModel.useDB);
-				out.println("searchParam=" + searchParam);
-				out.println("debug=" + debug);
-				out.println("backup=" + backup);
-				String token = generateRandomToken(64);
-				apiToken = token;
-				out.println("apiToken=" + token);
-				out.println("apiURL=" + apiURL);
+			Mainframe.executor.submit(() -> {
+				try (PrintWriter out = new PrintWriter("config.conf")) {
+					out.println("fontSize=" + Mainframe.defaultFont.getSize());
+					out.println("descFontSize=" + Mainframe.descFont.getSize());
+					out.println("autoDownload=" + autoDownload);
+					out.println("loadOnDemand=" + loadOnDemand);
+					out.println("useDB=" + BookListModel.useDB);
+					out.println("searchParam=" + searchParam);
+					out.println("debug=" + debug);
+					out.println("backup=" + backup);
+					String token = generateRandomToken(64);
+					apiToken = token;
+					out.println("apiToken=" + token);
+					out.println("apiURL=" + apiURL);
+					out.println("darkmode=" + darkmode);
 
-			} catch (FileNotFoundException e) {
-				Mainframe.logger.error(e.getMessage());
-			}
+				} catch (FileNotFoundException e) {
+					Mainframe.logger.error(e.getMessage());
+				}
+			});
 		}
 
 	}
