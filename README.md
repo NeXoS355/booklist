@@ -1,4 +1,5 @@
-This is just a small Project which i did for my family. We couldn't get track of all the books we owned so i decided to write this little program.
+This is just a small Project which i did for my family. 
+We couldn't get track of all the books we owned so i decided to write this little program.
 I have created a self hosted webApp for adding Books on the go (https://github.com/NeXoS355/booklist_webapp).
 
 Features:
@@ -13,6 +14,7 @@ Features:
     add Books to your Wishlist
     rate the Book you just read with 1-5 Stars
     display interesting informations about your Database e.g. most popular series or author
+    connect your local App with the self hosted WebApp to add Books on every device
 
 Tested with jdk21 and the following dependencies
 
