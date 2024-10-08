@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -47,11 +48,11 @@ public class Dialog_edit_Wishlist extends JDialog {
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_edit_Wishlist(WishlistListModel einträge, int index) {
+	public Dialog_edit_Wishlist(Frame owner, WishlistListModel einträge, int index) {
 		Mainframe.logger.trace("Wishlist Book edit: start creating Frame");
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(500, 300));
-		this.setLocation(200, 200);
+		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
 
 		Book_Wishlist eintrag = einträge.getElementAt(index);

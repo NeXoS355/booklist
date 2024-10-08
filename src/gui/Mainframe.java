@@ -139,7 +139,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private static String version = "3.1.2";
+	private static String version = "3.1.3";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -251,7 +251,7 @@ public class Mainframe extends JFrame {
 		txt_search = new CustomTextField();
 		txt_search.setToolTipText("Suchtext");
 		txt_search.setText("Suche ... (" + entries.getSize() + ")");
-		setSearchTextInactive();
+		setSearchTextColorActive(false);
 		txt_search.setMargin(new Insets(0, 10, 0, 0));
 		txt_search.addMouseListener(new MouseAdapter() {
 
@@ -281,14 +281,14 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				setSearchTextInactive();
+				setSearchTextColorActive(false);
 			}
 
 			@Override
 			public void focusGained(FocusEvent e) {
 				if (txt_search.getText().contains("Suche ..."))
 					txt_search.setText("");
-				setSearchTextActive();
+				setSearchTextColorActive(true);
 			}
 		});
 		panel.add(txt_search, BorderLayout.CENTER);
@@ -299,7 +299,7 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Dialog_add_Booklist(entries, treeModel, rootNode);
+				new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel, rootNode);
 				txt_search.setText("Suche ... (" + entries.getSize() + ")");
 			}
 		});
@@ -313,7 +313,7 @@ public class Mainframe extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				search(txt_search.getText());
-				setSearchTextInactive();
+				setSearchTextColorActive(false);
 				tree.clearSelection();
 				setLastSearch(txt_search.getText());
 				if (entries.getSize() == 0) {
@@ -343,7 +343,8 @@ public class Mainframe extends JFrame {
 				if (ret)
 					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
 				else
-					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup fehlgeschlagen oder nicht vollständig.");
+					JOptionPane.showMessageDialog(Mainframe.getInstance(),
+							"Backup fehlgeschlagen oder nicht vollständig.");
 			}
 		});
 		JMenuItem close = new JMenuItem("Schließen");
@@ -359,7 +360,7 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new wishlist();
+				new wishlist(Mainframe.getInstance());
 			}
 		});
 		JMenuItem update = new JMenuItem("auf Aktualisierung prüfen...");
@@ -389,7 +390,7 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int antwort = JOptionPane.showConfirmDialog(getParent(),
+				int antwort = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
 						"Es wird eine csv Datei im Programmpfad abgelegt.\nFortfahren?", "Export",
 						JOptionPane.YES_NO_OPTION);
 				if (antwort == JOptionPane.YES_OPTION) {
@@ -397,7 +398,8 @@ public class Mainframe extends JFrame {
 					if (check) {
 						JOptionPane.showMessageDialog(Mainframe.getInstance(), "Liste erfolgreich exportiert!");
 					} else {
-						JOptionPane.showMessageDialog(Mainframe.getInstance(), "Datei konnte nicht geschrieben werden!");
+						JOptionPane.showMessageDialog(Mainframe.getInstance(),
+								"Datei konnte nicht geschrieben werden!");
 					}
 				}
 			}
@@ -407,7 +409,7 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Dialog_settings();
+				new Dialog_settings(Mainframe.getInstance(), true);
 			}
 		});
 		JMenuItem info = new JMenuItem("Info");
@@ -415,10 +417,10 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Dialog_info();
+				new Dialog_info(Mainframe.getInstance());
 			}
 		});
-		apiAbruf = new JMenuItem("API Abruf");
+		apiAbruf = new JMenuItem("Web API Abruf");
 		apiAbruf.addActionListener(new ActionListener() {
 
 			@Override
@@ -429,7 +431,7 @@ public class Mainframe extends JFrame {
 			}
 		});
 
-		apiUpload = new JMenuItem("API Upload");
+		apiUpload = new JMenuItem("Web API Upload");
 		apiUpload.addActionListener(new ActionListener() {
 
 			@Override
@@ -437,11 +439,11 @@ public class Mainframe extends JFrame {
 				Mainframe.executor.submit(() -> {
 					uploadToApi();
 				});
-				
+
 			}
 
 		});
-		openWebApi = new JMenuItem("API Öffnen");
+		openWebApi = new JMenuItem("Webapp öffnen");
 		openWebApi.addActionListener(new ActionListener() {
 
 			@Override
@@ -529,7 +531,7 @@ public class Mainframe extends JFrame {
 					String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
 					String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
 					int index = entries.getIndexOf(searchAutor, searchTitel);
-					new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
+					new Dialog_edit_Booklist(Mainframe.getInstance(), entries, index, treeModel, rootNode);
 				}
 				txt_search.setText("Suche ... (" + entries.getSize() + ")");
 				if (SwingUtilities.isRightMouseButton(e)) {
@@ -564,7 +566,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch hinzufügen") {
-							new Dialog_add_Booklist(entries, treeModel, rootNode);
+							new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel, rootNode);
 						}
 					}
 				});
@@ -585,7 +587,7 @@ public class Mainframe extends JFrame {
 							String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
 							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
 							int index = entries.getIndexOf(searchAutor, searchTitel);
-							new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
+							new Dialog_edit_Booklist(Mainframe.getInstance(), entries, index, treeModel, rootNode);
 						}
 					}
 				});
@@ -594,7 +596,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Autor analysieren (Beta)") {
-							new wishlist();
+							new wishlist(Mainframe.getInstance());
 							BookListModel.analyzeAuthor((String) table.getValueAt(table.getSelectedRow(), 1));
 							gui.wishlist.updateModel();
 						}
@@ -685,7 +687,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand().equals("Buch hinzufügen")) {
-							new Dialog_add_Booklist(entries, treeModel, rootNode);
+							new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel, rootNode);
 						}
 					}
 				});
@@ -744,7 +746,8 @@ public class Mainframe extends JFrame {
 						if (ret)
 							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
 						else
-							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup fehlgeschlagen oder nicht vollständig.");
+							JOptionPane.showMessageDialog(Mainframe.getInstance(),
+									"Backup fehlgeschlagen oder nicht vollständig.");
 					}
 				}
 				logger.trace("Window closing");
@@ -760,7 +763,8 @@ public class Mainframe extends JFrame {
 						if (ret)
 							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
 						else
-							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup fehlgeschlagen oder nicht vollständig.");
+							JOptionPane.showMessageDialog(Mainframe.getInstance(),
+									"Backup fehlgeschlagen oder nicht vollständig.");
 					}
 				}
 				logger.trace("Window closed");
@@ -1272,24 +1276,19 @@ public class Mainframe extends JFrame {
 	}
 
 	/**
-	 * set Inactive Color of search TextField
-	 */
-	public void setSearchTextInactive() {
-		txt_search.setForeground(Color.GRAY);
-
-	}
-
-	/**
 	 * set Active Color of search TextField
 	 */
-	public void setSearchTextActive() {
-		if (HandleConfig.darkmode == 1) {
-			txt_search.setForeground(Color.WHITE);
-			txt_search.setCaretColor(Color.WHITE);
+	public void setSearchTextColorActive(boolean value) {
+		if (value) {
+			if (HandleConfig.darkmode == 1) {
+				txt_search.setForeground(Color.WHITE);
+				txt_search.setCaretColor(Color.WHITE);
+			} else {
+				txt_search.setForeground(Color.BLACK);
+			}
 		} else {
-			txt_search.setForeground(Color.BLACK);
+			txt_search.setForeground(Color.GRAY);
 		}
-
 	}
 
 	/**
@@ -1340,15 +1339,20 @@ public class Mainframe extends JFrame {
 						intDownloadedVer = Integer.parseInt(strDownloadedVer);
 
 						if (intDownloadedVer > intCurVer) {
-							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es ist ein Update auf Version " + line + " verfügbar");
-							String fileName = new java.io.File(
-									Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath())
-									.getName();
-							pb = new ProcessBuilder("java", "-jar", fileName, "update");
-							logger.info("Update - Command: " + pb.command());
-							proc = pb.start();
-							logger.info("Update - Process started");
-							System.exit(0);
+							int antwort = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
+									"Es ist ein Update auf Version " + line + " verfügbar,\n Jetzt durcführen?",
+									"Update", JOptionPane.YES_NO_OPTION);
+							if (antwort == JOptionPane.YES_OPTION) {
+								String fileName = new java.io.File(
+										Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+										.getName();
+								pb = new ProcessBuilder("java", "-jar", fileName, "update");
+								logger.info("Update - Command: " + pb.command());
+								proc = pb.start();
+								logger.info("Update - Process started");
+								System.exit(0);
+							}
+
 						} else {
 							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Kein Update verfügbar");
 						}
@@ -1394,7 +1398,7 @@ public class Mainframe extends JFrame {
 				while ((length = is.read(buffer)) > 0) {
 					os.write(buffer, 0, length);
 				}
-				out.println("UPDATER: wrinting complete");
+				out.println("UPDATER: writing complete");
 				out.println("UPDATER: build process");
 				ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName);
 				out.println("UPDATER: " + pb.command());
@@ -1421,6 +1425,10 @@ public class Mainframe extends JFrame {
 
 	}
 
+	/**
+	 * checks the Connection to the supplied WebAPI URL with a short GET Request
+	 * 
+	 */
 	public static void checkApiConnection() {
 		if (HandleConfig.apiURL.length() > 0) {
 			try {
@@ -1430,8 +1438,11 @@ public class Mainframe extends JFrame {
 				HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
 				con.setConnectTimeout(2000);
 				con.setRequestMethod("GET");
+				long startTime = System.currentTimeMillis();
 				int responseCode = con.getResponseCode();
-				Mainframe.logger.trace("Web API GET responseCode: " + responseCode);
+				long responseTime = System.currentTimeMillis() - startTime;
+				Mainframe.logger.trace("Web API request: responseCode: " + responseCode);
+				Mainframe.logger.trace("Web API request: responseTime: " + Long.toString(responseTime) + "ms");
 				if (responseCode == HttpURLConnection.HTTP_OK) {
 					apiConnected = true;
 					openWebApi.setEnabled(true);
@@ -1462,7 +1473,7 @@ public class Mainframe extends JFrame {
 	public static boolean isApiConnected() {
 		return apiConnected;
 	}
-	
+
 	/**
 	 * start Instance of Mainframe
 	 * 

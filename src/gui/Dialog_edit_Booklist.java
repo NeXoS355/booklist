@@ -3,6 +3,7 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -86,13 +87,13 @@ public class Dialog_edit_Booklist extends JDialog {
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_edit_Booklist(BookListModel entries, int index, DefaultTreeModel treeModel,
+	public Dialog_edit_Booklist(Frame owner, BookListModel entries, int index, DefaultTreeModel treeModel,
 			DefaultMutableTreeNode rootNode) {
 
 		Mainframe.logger.trace("Book edit: start creating Frame");
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(600, 645));
-		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 100);
+		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
 		
 		entry = entries.getElementAt(index);
@@ -170,7 +171,7 @@ public class Dialog_edit_Booklist extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						entry.setIsbn(null, true);
 						dispose();
-						new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
+						new Dialog_edit_Booklist(owner, entries, index, treeModel, rootNode);
 					}
 				});
 			}
@@ -227,7 +228,7 @@ public class Dialog_edit_Booklist extends JDialog {
 								// JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
 								entry.setPic(null);
 								dispose();
-								new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
+								new Dialog_edit_Booklist(owner, entries, index, treeModel, rootNode);
 							} else {
 								JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten");
 							}
@@ -257,7 +258,7 @@ public class Dialog_edit_Booklist extends JDialog {
 					}
 
 					dispose();
-					new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
+					new Dialog_edit_Booklist(owner, entries, index, treeModel, rootNode);
 				}
 			});
 			panelEastBorder.add(btnDownloadInfo, BorderLayout.CENTER);
@@ -908,7 +909,7 @@ public class Dialog_edit_Booklist extends JDialog {
 							// JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich gelöscht");
 							entry.setDesc(null, true);
 							dispose();
-							new Dialog_edit_Booklist(entries, index, treeModel, rootNode);
+							new Dialog_edit_Booklist(owner, entries, index, treeModel, rootNode);
 						} else {
 							JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten");
 						}

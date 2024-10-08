@@ -17,9 +17,9 @@ public class HandleConfig {
 
 	public static int autoDownload = 0;
 	public static int loadOnDemand = 1;
-	public static String debug = "TRACE";
+	public static String debug = "WARN";
 	public static String searchParam = "at";
-	public static int backup = 2;
+	public static int backup = 0;
 	public static String apiToken = generateRandomToken(64);
 	public static String apiURL = "";
 	public static int darkmode = 1;

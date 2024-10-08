@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -59,24 +60,23 @@ public class Dialog_settings extends JDialog {
 	private URL connectionUrl;
 	private URL copyUrl;
 
-	public Dialog_settings() {
-
+	public Dialog_settings(Frame owner, boolean modal) {
 		this.setTitle("Einstellungen");
-		this.setModal(true);
+		this.setModal(modal);
 		this.setLayout(new BorderLayout());
 		this.setSize(670, 475);
-		this.setLocationByPlatform(true);
+		this.setLocationRelativeTo(owner);
 
 		if (Mainframe.isApiConnected())
 			connectionUrl = getClass().getResource("/resources/connection_good.png");
 		else
 			connectionUrl = getClass().getResource("/resources/connection_bad.png");
 		ImageIcon conIcon = new ImageIcon(connectionUrl);
-		
-		if (HandleConfig.darkmode==1)
-			copyUrl =  getClass().getResource("/resources/copy_inv.png");
+
+		if (HandleConfig.darkmode == 1)
+			copyUrl = getClass().getResource("/resources/copy_inv.png");
 		else
-			copyUrl =  getClass().getResource("/resources/copy.png");		
+			copyUrl = getClass().getResource("/resources/copy.png");
 		ImageIcon copyIcon = new ImageIcon(copyUrl);
 
 		JPanel pnlLeft = new JPanel();
@@ -269,7 +269,7 @@ public class Dialog_settings extends JDialog {
 		pnlRight.add(txtApiUrl, c);
 		JButton btnTokenCopy = ButtonsFactory.createButton(copyIcon);
 		btnTokenCopy.addMouseListener(new MouseAdapter() {
-			
+
 			@Override
 			public void mousePressed(MouseEvent e) {
 				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -331,7 +331,6 @@ public class Dialog_settings extends JDialog {
 		c.gridheight = 7;
 		pnlRight.add(qrPanel, c);
 
-
 		this.add(pnlLeft, BorderLayout.WEST);
 		this.add(pnlRight, BorderLayout.CENTER);
 
@@ -340,24 +339,24 @@ public class Dialog_settings extends JDialog {
 
 	public static void saveSettings() {
 		Mainframe.executor.submit(() -> {
-			try (PrintWriter out = new PrintWriter("config.conf")) {
-				Mainframe.logger.info("Save Settings");
-				// set Parameters which can be changed on the fly
-				HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
-				HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
-				HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
-				HandleConfig.debug = (String) cmbDebug.getSelectedItem();
-				HandleConfig.backup = (int) cmbBackup.getSelectedItem();
-				HandleConfig.apiToken = txtApiToken.getText();
-				HandleConfig.apiURL = txtApiUrl.getText();
-				if (HandleConfig.apiURL.length() > 0) {
-					if (HandleConfig.apiURL.substring(HandleConfig.apiURL.length() - 1).equals("/")) {
-						HandleConfig.apiURL = HandleConfig.apiURL.substring(0, HandleConfig.apiURL.length() - 1);
-						System.out.println(HandleConfig.apiURL);
-					}
+			Mainframe.logger.info("Save Settings");
+			// set Parameters which can be changed on the fly
+			HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
+			HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
+			HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
+			HandleConfig.debug = (String) cmbDebug.getSelectedItem();
+			HandleConfig.backup = (int) cmbBackup.getSelectedItem();
+			HandleConfig.apiToken = txtApiToken.getText();
+			HandleConfig.apiURL = txtApiUrl.getText();
+			if (HandleConfig.apiURL.length() > 0) {
+				if (HandleConfig.apiURL.substring(HandleConfig.apiURL.length() - 1).equals("/")) {
+					HandleConfig.apiURL = HandleConfig.apiURL.substring(0, HandleConfig.apiURL.length() - 1);
+					System.out.println(HandleConfig.apiURL);
 				}
-				Mainframe.checkApiConnection();
+			}
+			Mainframe.checkApiConnection();
 
+			try (PrintWriter out = new PrintWriter("config.conf")) {
 				out.println("fontSize=" + cmbFont.getSelectedItem());
 				out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
 				out.println("autoDownload=" + cmbAutoDownload.getSelectedItem());

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,17 +39,19 @@ public class wishlist extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static wishlist instance;
 	private static WishlistTableModel display;
 	public static WishlistListModel wishlistEntries;
 	private static JTable table = new JTable();
 	private static int lastHoverRow = -1;
 	public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
 
-	public wishlist() {
+	public wishlist(Frame owner) {
 		super("Wunschliste");
+		instance = this;
 		this.setLayout(new BorderLayout(10, 10));
 		this.setSize(700, 700);
-		this.setLocationByPlatform(true);
+		this.setLocationRelativeTo(owner);
 		
 		if (HandleConfig.darkmode == 1) {
 			table.getTableHeader().setOpaque(false);
@@ -74,7 +77,7 @@ public class wishlist extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Dialog_add_Wishlist(wishlistEntries);
+				new Dialog_add_Wishlist(instance, wishlistEntries);
 			}
 		});
 		north_panel.add(btnAdd, BorderLayout.WEST);
@@ -99,7 +102,7 @@ public class wishlist extends JFrame {
 					String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
 					int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
 					Mainframe.logger.trace("Clickcount: " + e.getClickCount() + ";Wishlist open Edit Dialog ");
-					new Dialog_edit_Wishlist(wishlistEntries, index);
+					new Dialog_edit_Wishlist(instance, wishlistEntries, index);
 				}
 				if (SwingUtilities.isRightMouseButton(e)) {
 					JTable table2 = (JTable) e.getSource();
@@ -139,7 +142,7 @@ public class wishlist extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch hinzufügen") {
-							new Dialog_add_Wishlist(wishlistEntries);
+							new Dialog_add_Wishlist(instance, wishlistEntries);
 							Mainframe.logger.trace("Menu;Wishlist open Add Dialog");
 						}
 						updateModel();
@@ -164,7 +167,7 @@ public class wishlist extends JFrame {
 							String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
 							int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
 							Mainframe.logger.trace("Menu;Wishlist open Edit Dialog");
-							new Dialog_edit_Wishlist(wishlistEntries, index);
+							new Dialog_edit_Wishlist(instance, wishlistEntries, index);
 							updateModel();
 						}
 					}

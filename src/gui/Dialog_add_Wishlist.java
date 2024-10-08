@@ -3,6 +3,7 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -44,11 +45,11 @@ public class Dialog_add_Wishlist extends JDialog {
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_add_Wishlist(WishlistListModel einträge) {
+	public Dialog_add_Wishlist(Frame owner, WishlistListModel einträge) {
 		Mainframe.logger.trace("Wishlist Book add: start creating Frame");
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 320));
-		this.setLocationByPlatform(true);
+		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");

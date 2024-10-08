@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -16,13 +17,12 @@ public class Dialog_info extends JDialog {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public Dialog_info() {
+	public Dialog_info(Frame owner) {
 
 		this.setTitle("Einstellungen");
 		this.setModal(true);
 		this.setLayout(new GridBagLayout());
-		this.setSize(400, 400);
-		this.setLocation(Mainframe.getInstance().getX() + 500, Mainframe.getInstance().getY() + 200);
+		this.setLocationRelativeTo(owner);
 
 		GridBagConstraints c = new GridBagConstraints();
 
@@ -127,10 +127,12 @@ public class Dialog_info extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		JLabel lbl_Year = new JLabel();
+		String bookOverview = BookListModel.getBooksPerYear();
+		int countYears = bookOverview.split("<br>").length;
 		lbl_Year.setText(BookListModel.getBooksPerYear());
 		this.add(lbl_Year, c);
 		
-
+		this.setSize(400, 175+28*countYears);
 		this.setVisible(true);
 	}
 
