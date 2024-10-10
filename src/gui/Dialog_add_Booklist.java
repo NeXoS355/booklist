@@ -31,7 +31,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import application.Book_Booklist;
 import application.HandleConfig;
-import application.GetBookCoversFromWeb;
+import application.GetBookInfosFromWeb;
 import application.BookListModel;
 
 /**
@@ -592,7 +592,7 @@ public class Dialog_add_Booklist extends JDialog {
 					Mainframe.entries.add(book);
 				}
 				if (HandleConfig.autoDownload == 1) {
-					GetBookCoversFromWeb.DownloadWebPage(book, 2, false);
+					GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(book, 2, false);
 				}
 				BookListModel.checkAuthors();
 				Mainframe.setLastSearch(txtAuthor.getText());

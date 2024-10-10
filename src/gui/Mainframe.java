@@ -613,7 +613,10 @@ public class Mainframe extends JFrame {
 								whishlist_instance = new wishlist(Mainframe.getInstance());
 							else
 								whishlist_instance.setVisible(true);
-							BookListModel.analyzeAuthor((String) table.getValueAt(table.getSelectedRow(), 1));
+//							BookListModel.analyzeAuthor((String) table.getValueAt(table.getSelectedRow(), 1));
+							String seriesName = (String) table.getValueAt(table.getSelectedRow(), 3);
+							seriesName = seriesName.split("[ ][-][ ][0-9]")[0];
+							BookListModel.analyzeSeries(seriesName, (String) table.getValueAt(table.getSelectedRow(), 1));
 							gui.wishlist.updateModel();
 						}
 					}

@@ -27,9 +27,9 @@ import gui.Mainframe;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class GetBookCoversFromWeb {
+public class GetBookInfosFromWeb {
 
-	public static int DownloadWebPage(Book_Booklist entry, int maxResults, boolean retry) {
+	public static int doAuthorGoogleApiWebRequest(Book_Booklist entry, int maxResults, boolean retry) {
 		int compareReturn = 0;
 		try {
 
@@ -77,7 +77,7 @@ public class GetBookCoversFromWeb {
 
 				// JSON-Antwort in ein JsonObject umwandeln
 				JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
-				compareReturn = analyseApiRequst(jsonObject, entry);
+				compareReturn = analyseApiRequestSingle(jsonObject, entry);
 			}
 			// Verbindung schlieÃŸen
 			connection.disconnect();
@@ -86,13 +86,62 @@ public class GetBookCoversFromWeb {
 			Mainframe.logger.error(e.getMessage());
 		}
 		Mainframe.logger.info("checkWebInfo " + "Retry: " + retry);
-		Mainframe.logger.info("checkWebInfo " + "Overall Score: " + entry.getAuthor() + "-" + entry.getTitle() + ":"
-				+ compareReturn);
+		Mainframe.logger.info(
+				"checkWebInfo " + "Overall Score: " + entry.getAuthor() + "-" + entry.getTitle() + ":" + compareReturn);
+		return compareReturn;
+
+	}
+	
+	public static String[][] doAuthorGoogleApiWebRequestMulti(String str, int maxResults) {
+		String[][] compareReturn = new String[3][10];
+		try {
+
+			str = sanitizeString(str);
+			
+			// Die URL der REST-API
+			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults="
+					+ maxResults + "&printType=books";
+
+			Mainframe.logger.info("Search API: " + str);
+			Mainframe.logger.info("Search API URL: " + apiUrl);
+
+			// HttpURLConnection erstellen
+			URL url = new URI(apiUrl).toURL();
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+			// GET-Methode festlegen
+			connection.setRequestMethod("GET");
+
+			// Verbindung öffnen und Response-Code überprüfen
+			int responseCode = connection.getResponseCode();
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				// InputStream lesen und in einen String umwandeln
+				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+				StringBuilder response = new StringBuilder();
+				String line;
+				while ((line = reader.readLine()) != null) {
+					response.append(line);
+				}
+				reader.close();
+
+				// JSON-Antwort in ein JsonObject umwandeln
+				JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
+				compareReturn = analyseApiRequestMulti(jsonObject, maxResults);
+			}
+			// Verbindung schlieÃŸen
+			connection.disconnect();
+
+		} catch (Exception e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+//		Mainframe.logger.info("checkWebInfo " + "Retry: " + retry);
+//		Mainframe.logger.info(
+//				"checkWebInfo " + "Overall Score: " + entry.getAuthor() + "-" + entry.getTitle() + ":" + compareReturn);
 		return compareReturn;
 
 	}
 
-	private static int analyseApiRequst(JsonObject jsonObject, Book_Booklist entry) {
+	private static int analyseApiRequestSingle(JsonObject jsonObject, Book_Booklist entry) {
 		// Auf den Titel zugreifen
 		int i = 0;
 		int cCover = 0;
@@ -170,6 +219,57 @@ public class GetBookCoversFromWeb {
 			i++;
 		}
 		return (cCompAuthor + cCompTitle) / 2;
+	}
+	
+	private static String[][] analyseApiRequestMulti(JsonObject jsonObject, int maxResults) {
+		// Auf den Titel zugreifen
+		int i = 0;
+		String[][] returnArray = new String[3][maxResults];
+		while (i < maxResults) {
+			if (jsonObject.has("items")) {
+				var itemsArray = jsonObject.getAsJsonArray("items");
+				if (itemsArray.size() > 0) {
+					var firstItem = itemsArray.get(i).getAsJsonObject();
+					if (firstItem.has("volumeInfo")) {
+						var volumeInfo = firstItem.getAsJsonObject("volumeInfo");
+						if (volumeInfo.has("industryIdentifiers")) {
+							
+							var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
+							for (int j = 0; j < isbnidentifiers.size(); j++) {
+								var isbnidentifiers13 = isbnidentifiers.get(j).getAsJsonObject();
+								if (isbnidentifiers13.has("identifier")) {
+									String type = isbnidentifiers13.get("type").getAsString();
+									if (type.equals("ISBN_13")) {
+										returnArray[2][i] = isbnidentifiers13.get("identifier").getAsString();										
+									}
+								}
+							}
+
+						} else {
+							Mainframe.logger.trace("WebInfo Download: 'industryIdentifiers' not found!");
+						}
+						if (volumeInfo.has("title")) {
+							returnArray[1][i] = volumeInfo.get("title").getAsString();
+//							cCompTitle = compareString(title[i], entry.getTitle());
+						}
+						if (volumeInfo.has("authors")) {
+							var authors = volumeInfo.getAsJsonArray("authors");
+							returnArray[0][i] = authors.get(0).getAsString();
+//							cCompAuthor = compareString(author[i], entry.getAuthor());
+						}
+					} else {
+						Mainframe.logger.trace("WebInfo Download: 'VolumeInfo' not found!");
+					}
+				} else {
+					Mainframe.logger.trace("WebInfo Download: no elements found in 'items'!");
+				}
+			} else {
+				Mainframe.logger.trace("WebInfo Download: 'items' not found!");
+			}
+			i++;
+		}
+		
+		return returnArray;
 	}
 
 	public static int compareString(String str1, String str2) {

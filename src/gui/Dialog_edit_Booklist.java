@@ -46,7 +46,7 @@ import javax.swing.tree.DefaultTreeModel;
 import application.Book_Booklist;
 import application.HandleConfig;
 import application.BookListModel;
-import application.GetBookCoversFromWeb;
+import application.GetBookInfosFromWeb;
 import data.Database;
 
 /**
@@ -214,7 +214,7 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
 							if (webpage != null && webpage != "") {
-								GetBookCoversFromWeb.DownloadWebPage(entry, 2, false);
+								GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(entry, 2, false);
 								lblPic = new JLabel(showImg(entry));
 							}
 						}
@@ -223,7 +223,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							boolean state = GetBookCoversFromWeb.deletePic(entry.getBid());
+							boolean state = GetBookInfosFromWeb.deletePic(entry.getBid());
 							if (state == true) {
 								// JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
 								entry.setPic(null);
@@ -249,11 +249,11 @@ public class Dialog_edit_Booklist extends JDialog {
 					int compResult1 = 0;
 					int compResult2 = 0;
 
-					compResult1 = GetBookCoversFromWeb.DownloadWebPage(entry, 2, false);
+					compResult1 = GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(entry, 2, false);
 					if (compResult1 < 75) {
-						compResult2 = GetBookCoversFromWeb.DownloadWebPage(entry, 2, true);
+						compResult2 = GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(entry, 2, true);
 						if (compResult1 > compResult2) {
-							GetBookCoversFromWeb.DownloadWebPage(entry, 2, true);
+							GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(entry, 2, true);
 						}
 					}
 

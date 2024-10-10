@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
@@ -558,6 +560,67 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 			}
 		}
+	}
+
+	/**
+	 * check one specific series
+	 * 
+	 * @param series - Name of Series
+	 */
+	public static void analyzeSeries(String series, String author) {
+		ArrayList<Integer> ownedBooksOfSeries = new ArrayList<Integer>();
+		int maxVol = 0;
+		for (int i = 0; i < books.size(); i++) {
+			if (books.get(i).getSeries().equals(series)) {
+				ownedBooksOfSeries.add(Integer.parseInt(books.get(i).getSeriesVol()));
+				if (maxVol < Integer.parseInt(books.get(i).getSeriesVol()))
+					maxVol = Integer.parseInt(books.get(i).getSeriesVol());
+			}
+		}
+		ArrayList<Integer> missingBooksOfSeries = new ArrayList<Integer>();
+		boolean missing = true;
+		for (int i = 1; i < maxVol; i++) {
+			for (int j = 0; j < ownedBooksOfSeries.size(); j++) {
+				if (ownedBooksOfSeries.get(j) == i) {
+					missing = false;
+
+				}
+			}
+			if (missing) {
+				missingBooksOfSeries.add(i);
+			}
+			missing = true;
+		}
+		int returnCount = 3;
+		for (int i = 0; i < missingBooksOfSeries.size(); i++) {
+			
+			String[][] returnArray = GetBookInfosFromWeb.doAuthorGoogleApiWebRequestMulti(series + "+" + missingBooksOfSeries.get(i), returnCount);
+			for(int j = 0;j < returnCount;j++) {
+				String foundAuthor = returnArray[0][j];
+				String foundTitle = returnArray[1][j];
+				boolean owned = false;
+				int counter = 0;
+				for(int k = 0;k < books.size();k++) {
+					Book_Booklist book = books.get(k);
+					String listAuthor = book.getAuthor();
+					String listTitle = book.getTitle();
+					if(foundAuthor.equals(listAuthor) && foundTitle.equals(listTitle)) {
+						owned=true;
+					}
+				}
+				if(!owned && foundAuthor.equals(author)) {
+					String[][] newBooks = new String[3][returnCount];
+					newBooks[0][counter] = returnArray[0][j];
+					newBooks[1][counter] = returnArray[1][j];
+					newBooks[2][counter] = returnArray[2][j];
+					counter++;
+				}
+
+			}
+			
+			
+		}
+
 	}
 
 }
