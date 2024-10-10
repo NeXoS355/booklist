@@ -23,7 +23,61 @@ public class ButtonsFactory {
 		button.setOpaque(true);
 		button.setFocusPainted(false);
 
-		if (HandleConfig.darkmode == 1) {
+		if (HandleConfig.darkmode == 0) {
+			button.setForeground(new Color(75, 75, 75));
+
+			if (text.equals("suchen")) {
+
+				try {
+					imageActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe.png"));
+					imageInActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe_inactive.png"));
+					button.setIcon(new ImageIcon(imageInActive));
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+
+			}
+
+			button.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseExited(MouseEvent e) {
+					button.setBackground(new Color(240, 240, 240));
+					button.setForeground(new Color(50, 50, 50));
+
+					if (text.equals("suchen")) {
+						button.setIcon(new ImageIcon(imageInActive));
+					}
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					button.setBackground(new Color(220, 220, 220));
+					button.setForeground(Color.BLACK);
+
+					if (text.equals("suchen")) {
+						button.setIcon(new ImageIcon(imageActive));
+					}
+
+				}
+
+				@Override
+				public void mousePressed(MouseEvent e) {
+					Mainframe.executor.submit(() -> {
+						try {
+							button.setBackground(new Color(200, 200, 200));
+							Thread.sleep(200);
+							button.setBackground(new Color(220, 220, 220));
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+
+					});
+				}
+
+			});
+
+		} else {
+
 			button.setBackground(Color.DARK_GRAY);
 			button.setForeground(Color.LIGHT_GRAY);
 
@@ -72,59 +126,7 @@ public class ButtonsFactory {
 						} catch (InterruptedException e1) {
 							e1.printStackTrace();
 						}
-						
-					});
-				}
 
-			});
-		} else {
-			button.setForeground(new Color(75, 75, 75));
-
-			if (text.equals("suchen")) {
-
-				try {
-					imageActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe.png"));
-					imageInActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe_inactive.png"));
-					button.setIcon(new ImageIcon(imageInActive));
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-
-			}
-
-			button.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseExited(MouseEvent e) {
-					button.setBackground(new Color(240, 240, 240));
-					button.setForeground(new Color(75, 75, 75));
-
-					if (text.equals("suchen")) {
-						button.setIcon(new ImageIcon(imageInActive));
-					}
-				}
-
-				@Override
-				public void mouseEntered(MouseEvent e) {
-					button.setBackground(new Color(220, 220, 220));
-					button.setForeground(Color.BLACK);
-
-					if (text.equals("suchen")) {
-						button.setIcon(new ImageIcon(imageActive));
-					}
-
-				}
-
-				@Override
-				public void mousePressed(MouseEvent e) {
-					Mainframe.executor.submit(() -> {
-						try {
-							button.setBackground(new Color(200, 200, 200));
-							Thread.sleep(200);
-							button.setBackground(new Color(220, 220, 220));
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
-						}
-						
 					});
 				}
 
@@ -167,7 +169,7 @@ public class ButtonsFactory {
 						} catch (InterruptedException e1) {
 							e1.printStackTrace();
 						}
-						
+
 					});
 				}
 
@@ -197,9 +199,9 @@ public class ButtonsFactory {
 						} catch (InterruptedException e1) {
 							e1.printStackTrace();
 						}
-						
+
 					});
-					
+
 				}
 
 			});

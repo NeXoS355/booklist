@@ -139,7 +139,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private static String version = "3.1.3";
+	private static String version = "3.1.4";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -232,6 +232,15 @@ public class Mainframe extends JFrame {
 
 			} else {
 				UIManager.put("TextArea.inactiveForeground", Color.BLACK);
+				UIManager.put("Panel.background", Color.WHITE);
+				
+				UIManager.put("ComboBox.background", Color.WHITE);
+				
+				UIManager.put("CheckBox.background", Color.WHITE);
+				
+				UIManager.put("OptionPane.background", Color.WHITE);
+				
+				this.getContentPane().setBackground(Color.WHITE);
 			}
 		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
 				| IllegalAccessException e) {
@@ -1343,14 +1352,17 @@ public class Mainframe extends JFrame {
 									"Es ist ein Update auf Version " + line + " verfügbar,\n Jetzt durcführen?",
 									"Update", JOptionPane.YES_NO_OPTION);
 							if (antwort == JOptionPane.YES_OPTION) {
-								String fileName = new java.io.File(
-										Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath())
-										.getName();
-								pb = new ProcessBuilder("java", "-jar", fileName, "update");
-								logger.info("Update - Command: " + pb.command());
-								proc = pb.start();
-								logger.info("Update - Process started");
-								System.exit(0);
+								boolean ret = createBackup();
+								if(ret) {
+									String fileName = new java.io.File(
+											Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+											.getName();
+									pb = new ProcessBuilder("java", "-jar", fileName, "update");
+									logger.info("Update - Command: " + pb.command());
+									proc = pb.start();
+									logger.info("Update - Process started");
+									System.exit(0);
+								}
 							}
 
 						} else {

@@ -56,6 +56,7 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 		// Table Header Settings
 		if (row == -1) {
 			setFont(new Font("Roboto", Font.BOLD, 16));
+			setBackground(new Color(240,240,240));
 			if (HandleConfig.darkmode == 1)
 				component.setForeground(Color.WHITE);
 			else
