@@ -37,7 +37,7 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 				component.setForeground(Color.BLACK);
 				component.setBackground(Color.LIGHT_GRAY);
 			} else {
-				component.setForeground(new Color(220,220,220));
+				component.setForeground(new Color(220, 220, 220));
 				component.setBackground(Color.DARK_GRAY);
 			}
 		} else {
@@ -56,12 +56,12 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 		// Table Header Settings
 		if (row == -1) {
 			setFont(new Font("Roboto", Font.BOLD, 16));
-			setBackground(new Color(240,240,240));
 			if (HandleConfig.darkmode == 1)
 				component.setForeground(Color.WHITE);
-			else
+			else {
 				component.setForeground(Color.BLACK);
-
+				component.setBackground(new Color(240, 240, 240));
+			}
 		}
 
 		return component;

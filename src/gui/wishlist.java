@@ -52,15 +52,16 @@ public class wishlist extends JFrame {
 		this.setLayout(new BorderLayout(10, 10));
 		this.setSize(700, 700);
 		this.setLocationRelativeTo(owner);
-		
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+
 		if (HandleConfig.darkmode == 1) {
 			table.getTableHeader().setOpaque(false);
 			table.setBackground(Color.DARK_GRAY);
 			table.getTableHeader().setBackground(Color.DARK_GRAY);
 			table.getTableHeader().setForeground(Color.WHITE);
 			this.getContentPane().setBackground(Color.DARK_GRAY);
-		} 
-		
+		}
+
 		Mainframe.logger.trace("Wishlist: start creating Frame");
 
 		wishlistEntries = new WishlistListModel();
@@ -82,7 +83,6 @@ public class wishlist extends JFrame {
 		});
 		north_panel.add(btnAdd, BorderLayout.WEST);
 
-		
 		table.setModel(display);
 		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer();
 		table.setDefaultRenderer(Object.class, tableRenderer);
@@ -119,7 +119,7 @@ public class wishlist extends JFrame {
 					showMenu(e);
 				}
 			}
-			
+
 			public void mouseExited(MouseEvent e) {
 				tableRenderer.clearHoveredRow();
 				table.repaint();
@@ -191,7 +191,8 @@ public class wishlist extends JFrame {
 							Image pic = null;
 							String desc = "";
 							String isbn = "";
-							Timestamp date = new Timestamp(System.currentTimeMillis());;
+							Timestamp date = new Timestamp(System.currentTimeMillis());
+							;
 							boolean ebook = false;
 							String borrowedTo = "";
 							String borrowedFrom = "";
@@ -235,24 +236,13 @@ public class wishlist extends JFrame {
 			}
 		});
 
-
-
 		JPanel mid_panel = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		listScrollPane.getViewport().setBackground(new Color(75,75,75));
-//		JScrollBar verticalScrollBar = listScrollPane.getVerticalScrollBar();
-//		verticalScrollBar.setBackground(Color.DARK_GRAY);
-//		verticalScrollBar.setForeground(Color.GRAY);  // Daumenfarbe
-//		verticalScrollBar.setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
-//		    @Override
-//		    protected void configureScrollBarColors() {
-//		        this.thumbColor = Color.GRAY;       // Daumenfarbe
-//		        this.trackColor = Color.BLACK;      // Hintergrund der Scrollbar
-//		    }
-//		});
+		if (HandleConfig.darkmode == 1)
+			listScrollPane.getViewport().setBackground(new Color(75, 75, 75));
 		mid_panel.add(listScrollPane, BorderLayout.CENTER);
-		
+
 		Mainframe.logger.trace("Wishlist: Frame created successfully");
 		this.add(north_panel, BorderLayout.NORTH);
 		this.add(mid_panel, BorderLayout.CENTER);

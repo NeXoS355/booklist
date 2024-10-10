@@ -128,6 +128,7 @@ public class Mainframe extends JFrame {
 	private static String treeSelection;
 	private static String lastSearch = "";
 	private static boolean apiConnected = false;
+	private static wishlist whishlist_instance;
 
 	private static JMenuItem openWebApi;
 	private static JMenuItem apiAbruf;
@@ -143,7 +144,6 @@ public class Mainframe extends JFrame {
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
-		super.setBackground(Color.BLACK);
 
 		logger = LogManager.getLogger(getClass());
 		logger.trace("start creating Frame & readConfig");
@@ -178,6 +178,7 @@ public class Mainframe extends JFrame {
 		this.setLocationByPlatform(true);
 		this.setSize(1300, 800);
 		this.setResizable(true);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
@@ -233,13 +234,13 @@ public class Mainframe extends JFrame {
 			} else {
 				UIManager.put("TextArea.inactiveForeground", Color.BLACK);
 				UIManager.put("Panel.background", Color.WHITE);
-				
+
 				UIManager.put("ComboBox.background", Color.WHITE);
-				
+
 				UIManager.put("CheckBox.background", Color.WHITE);
-				
+
 				UIManager.put("OptionPane.background", Color.WHITE);
-				
+
 				this.getContentPane().setBackground(Color.WHITE);
 			}
 		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
@@ -369,7 +370,10 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new wishlist(Mainframe.getInstance());
+				if (whishlist_instance == null)
+					whishlist_instance = new wishlist(Mainframe.getInstance());
+				else
+					whishlist_instance.setVisible(true);
 			}
 		});
 		JMenuItem update = new JMenuItem("auf Aktualisierung prüfen...");
@@ -605,7 +609,10 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Autor analysieren (Beta)") {
-							new wishlist(Mainframe.getInstance());
+							if (whishlist_instance == null)
+								whishlist_instance = new wishlist(Mainframe.getInstance());
+							else
+								whishlist_instance.setVisible(true);
 							BookListModel.analyzeAuthor((String) table.getValueAt(table.getSelectedRow(), 1));
 							gui.wishlist.updateModel();
 						}
@@ -736,8 +743,6 @@ public class Mainframe extends JFrame {
 		logger.trace("Finished creating Tree Contents + ScrollPane. Start Update Model & show GUI");
 
 		updateModel();
-
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		this.setVisible(true);
 		addWindowListener(new WindowAdapter() {
@@ -1353,10 +1358,9 @@ public class Mainframe extends JFrame {
 									"Update", JOptionPane.YES_NO_OPTION);
 							if (antwort == JOptionPane.YES_OPTION) {
 								boolean ret = createBackup();
-								if(ret) {
-									String fileName = new java.io.File(
-											Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath())
-											.getName();
+								if (ret) {
+									String fileName = new java.io.File(Mainframe.class.getProtectionDomain()
+											.getCodeSource().getLocation().getPath()).getName();
 									pb = new ProcessBuilder("java", "-jar", fileName, "update");
 									logger.info("Update - Command: " + pb.command());
 									proc = pb.start();
