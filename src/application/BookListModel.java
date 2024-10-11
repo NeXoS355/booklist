@@ -9,8 +9,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractListModel;
@@ -570,6 +568,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	public static void analyzeSeries(String series, String author) {
 		ArrayList<Integer> ownedBooksOfSeries = new ArrayList<Integer>();
 		int maxVol = 0;
+		// get the last owned Book of the Series and store the number in maxVol
 		for (int i = 0; i < books.size(); i++) {
 			if (books.get(i).getSeries().equals(series)) {
 				ownedBooksOfSeries.add(Integer.parseInt(books.get(i).getSeriesVol()));
@@ -577,6 +576,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					maxVol = Integer.parseInt(books.get(i).getSeriesVol());
 			}
 		}
+		// create a list with the missing parts in the series based on maxVol
 		ArrayList<Integer> missingBooksOfSeries = new ArrayList<Integer>();
 		boolean missing = true;
 		for (int i = 1; i < maxVol; i++) {
@@ -591,36 +591,63 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			}
 			missing = true;
 		}
+		// how many Books should be requested from the Google Books API for every missing Volume
 		int returnCount = 3;
+		// create a list with new Books which are not in the current list
+		ArrayList<String[]> newBooksList = new ArrayList<String[]>();
+		// query the Google Book API with every missing Volume
 		for (int i = 0; i < missingBooksOfSeries.size(); i++) {
-			
-			String[][] returnArray = GetBookInfosFromWeb.doAuthorGoogleApiWebRequestMulti(series + "+" + missingBooksOfSeries.get(i), returnCount);
-			for(int j = 0;j < returnCount;j++) {
-				String foundAuthor = returnArray[0][j];
-				String foundTitle = returnArray[1][j];
-				boolean owned = false;
-				int counter = 0;
-				for(int k = 0;k < books.size();k++) {
-					Book_Booklist book = books.get(k);
-					String listAuthor = book.getAuthor();
-					String listTitle = book.getTitle();
-					if(foundAuthor.equals(listAuthor) && foundTitle.equals(listTitle)) {
-						owned=true;
+			String[][] returnArray = GetBookInfosFromWeb
+					.doAuthorGoogleApiWebRequestMulti(series + "+" + missingBooksOfSeries.get(i), returnCount);
+			int versuch = 0;
+			// go through all returned Books to analyze them
+			for (int j = 0; j < returnCount; j++) {
+				String foundAuthor = returnArray[j][0];
+				String foundTitle = returnArray[j][1];
+				String foundIsbn = returnArray[j][2];
+				// Abort attempt if Author or Title is null
+				if (foundAuthor != null && foundTitle != null) {
+					boolean owned = false;
+					// check if found book is already in the main Booklist
+					for (int k = 0; k < books.size(); k++) {
+						Book_Booklist book = books.get(k);
+						String listAuthor = book.getAuthor();
+						String listTitle = book.getTitle();
+						if (foundAuthor.equals(listAuthor) && foundTitle.equals(listTitle)) {
+							owned = true;
+						}
+					}
+					// progress only if book is not already owned and the author is the same as the requested one
+					if (!owned && foundAuthor.equals(author)) {
+						boolean added = false;
+						// check if Book was already previously added
+						for (int k = 0; k < newBooksList.size(); k++) {
+							if (foundAuthor.equals(newBooksList.get(k)[0]) && foundTitle.equals(newBooksList.get(k)[1]))
+								added = true;
+
+						}
+						// add the Book to the list and create wishlist Entry
+						if (!added) {
+							newBooksList.add(returnArray[1]);
+							Mainframe.logger.trace("AnalyseSeries: " + "-Versuch: " + versuch);
+							Mainframe.logger.trace("AnalyseSeries: " + "Band: " + missingBooksOfSeries.get(i));
+							Mainframe.logger.trace("AnalyseSeries: " + "Autor: " + foundAuthor);
+							Mainframe.logger.trace("AnalyseSeries: " + "Titel: " + foundTitle);
+							Mainframe.logger.trace("AnalyseSeries: " + "ISBN: " + foundIsbn);
+							added = true;
+							try {
+								wishlist.wishlistEntries.add(new Book_Wishlist(foundAuthor, foundTitle, "", series, Integer.toString(missingBooksOfSeries.get(i)), new Timestamp(System.currentTimeMillis()), true));
+							} catch (SQLException e) {
+								Mainframe.logger.error("SQL Exception while saving Book to wishlist");
+								Mainframe.logger.error(e.getMessage());
+								
+							}
+						}
 					}
 				}
-				if(!owned && foundAuthor.equals(author)) {
-					String[][] newBooks = new String[3][returnCount];
-					newBooks[0][counter] = returnArray[0][j];
-					newBooks[1][counter] = returnArray[1][j];
-					newBooks[2][counter] = returnArray[2][j];
-					counter++;
-				}
-
+				versuch++;
 			}
-			
-			
 		}
-
 	}
 
 }

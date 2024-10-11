@@ -568,7 +568,7 @@ public class Mainframe extends JFrame {
 				JMenuItem itemAddBuch = new JMenuItem("Buch hinzufügen");
 				JMenuItem itemDelBuch = new JMenuItem("Buch löschen");
 				JMenuItem itemChanBuch = new JMenuItem("Buch bearbeiten");
-				JMenuItem itemAnalyzeAuthor = new JMenuItem("Autor analysieren (Beta)");
+				JMenuItem itemAnalyzeAuthor = new JMenuItem("Serie analysieren (Beta)");
 				menu.add(itemAddBuch);
 				menu.add(itemChanBuch);
 				menu.add(itemDelBuch);
@@ -608,7 +608,7 @@ public class Mainframe extends JFrame {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						if (e.getActionCommand() == "Autor analysieren (Beta)") {
+						if (e.getActionCommand() == "Serie analysieren (Beta)") {
 							if (whishlist_instance == null)
 								whishlist_instance = new wishlist(Mainframe.getInstance());
 							else

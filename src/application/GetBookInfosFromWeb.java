@@ -224,7 +224,7 @@ public class GetBookInfosFromWeb {
 	private static String[][] analyseApiRequestMulti(JsonObject jsonObject, int maxResults) {
 		// Auf den Titel zugreifen
 		int i = 0;
-		String[][] returnArray = new String[3][maxResults];
+		String[][] returnArray = new String[maxResults][3];
 		while (i < maxResults) {
 			if (jsonObject.has("items")) {
 				var itemsArray = jsonObject.getAsJsonArray("items");
@@ -240,7 +240,7 @@ public class GetBookInfosFromWeb {
 								if (isbnidentifiers13.has("identifier")) {
 									String type = isbnidentifiers13.get("type").getAsString();
 									if (type.equals("ISBN_13")) {
-										returnArray[2][i] = isbnidentifiers13.get("identifier").getAsString();										
+										returnArray[i][2] = isbnidentifiers13.get("identifier").getAsString();										
 									}
 								}
 							}
@@ -249,12 +249,12 @@ public class GetBookInfosFromWeb {
 							Mainframe.logger.trace("WebInfo Download: 'industryIdentifiers' not found!");
 						}
 						if (volumeInfo.has("title")) {
-							returnArray[1][i] = volumeInfo.get("title").getAsString();
+							returnArray[i][1] = volumeInfo.get("title").getAsString();
 //							cCompTitle = compareString(title[i], entry.getTitle());
 						}
 						if (volumeInfo.has("authors")) {
 							var authors = volumeInfo.getAsJsonArray("authors");
-							returnArray[0][i] = authors.get(0).getAsString();
+							returnArray[i][0] = authors.get(0).getAsString();
 //							cCompAuthor = compareString(author[i], entry.getAuthor());
 						}
 					} else {
