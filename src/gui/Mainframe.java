@@ -145,6 +145,17 @@ public class Mainframe extends JFrame {
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
 
+		this.setLayout(new BorderLayout(10, 10));
+		this.setLocationByPlatform(true);
+		this.setSize(1300, 800);
+		this.setResizable(true);
+		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		URL iconURL = getClass().getResource("/resources/Icon.png");
+		// iconURL is null when not found
+		ImageIcon icon = new ImageIcon(iconURL);
+		this.setIconImage(icon.getImage());
+
 		logger = LogManager.getLogger(getClass());
 		logger.trace("start creating Frame & readConfig");
 		HandleConfig.readConfig();
@@ -174,16 +185,6 @@ public class Mainframe extends JFrame {
 
 		});
 
-		this.setLayout(new BorderLayout(10, 10));
-		this.setLocationByPlatform(true);
-		this.setSize(1300, 800);
-		this.setResizable(true);
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-		URL iconURL = getClass().getResource("/resources/Icon.png");
-		// iconURL is null when not found
-		ImageIcon icon = new ImageIcon(iconURL);
-		this.setIconImage(icon.getImage());
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			if (HandleConfig.darkmode == 1) {

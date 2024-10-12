@@ -495,75 +495,12 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		return books;
 	}
 
-	/**
-	 * check all series from author and add missing entries to wishlist
-	 * 
-	 * @param author - Full name of author
-	 */
-	public static void analyzeAuthor(String author) {
-		ResultSet rs = Database.getSeriesInfo(author);
-		String[] series = new String[10];
-		int[] maxPart = new int[30];
-		String oldSeries = "";
-		int newSeries = 1;
-		int i = 0;
-		int rowCount = 0;
-
-		try {
-			while (rs.next()) {
-				String realSeries = rs.getString("serie").trim();
-				int seriesVolume = rs.getInt("seriePart");
-
-				if (!realSeries.equals(oldSeries) && rowCount != 0) {
-					i++;
-					newSeries = 1;
-				}
-
-				series[i] = realSeries;
-				if (seriesVolume > maxPart[i] || newSeries == 1) {
-					maxPart[i] = seriesVolume;
-
-				}
-
-				newSeries = 0;
-				oldSeries = realSeries;
-				rowCount++;
-			}
-		} catch (SQLException e) {
-			Mainframe.logger.error(e.getMessage());
-		}
-
-		boolean found = false;
-		for (i = 0; i < series.length; i++) {
-			if (series[i] != null) {
-				for (int j = 1; j < maxPart[i]; j++) {
-					for (int k = 0; k < books.size(); k++) {
-						Book_Booklist book = books.get(k);
-						if (book.getSeries().equals(series[i]) && Integer.parseInt(book.getSeriesVol()) == j) {
-							found = true;
-						}
-
-					}
-					if (!found) {
-						try {
-							Mainframe.logger.info("Analyze Author: Serie: " + series[i] + " fehlender Part: " + j);
-							wishlist.wishlistEntries.add(new Book_Wishlist(author, Integer.toString(j), "", series[i],
-									String.valueOf(j), new Timestamp(System.currentTimeMillis()), true));
-						} catch (SQLException e) {
-							Mainframe.logger.info(e.getMessage());
-						}
-					}
-					found = false;
-				}
-
-			}
-		}
-	}
 
 	/**
-	 * check one specific series
+	 * analyzes one specified Bookseries
 	 * 
 	 * @param series - Name of Series
+	 * @param author - Name of corresponding author
 	 */
 	public static void analyzeSeries(String series, String author) {
 		ArrayList<Integer> ownedBooksOfSeries = new ArrayList<Integer>();
@@ -576,7 +513,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					maxVol = Integer.parseInt(books.get(i).getSeriesVol());
 			}
 		}
-		// create a list with the missing parts in the series based on maxVol
+		// create a list with the missing parts in the series up to maxVol
 		ArrayList<Integer> missingBooksOfSeries = new ArrayList<Integer>();
 		boolean missing = true;
 		for (int i = 1; i < maxVol; i++) {
@@ -595,10 +532,10 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		int returnCount = 3;
 		// create a list with new Books which are not in the current list
 		ArrayList<String[]> newBooksList = new ArrayList<String[]>();
-		// query the Google Book API with every missing Volume
+		// query the Google Book API for every missing Volume
 		for (int i = 0; i < missingBooksOfSeries.size(); i++) {
 			String[][] returnArray = GetBookInfosFromWeb
-					.doAuthorGoogleApiWebRequestMulti(series + "+" + missingBooksOfSeries.get(i), returnCount);
+					.getSeriesInfoFromGoogleApiWebRequest(series + "+" + missingBooksOfSeries.get(i), returnCount);
 			int versuch = 0;
 			// go through all returned Books to analyze them
 			for (int j = 0; j < returnCount; j++) {
@@ -636,7 +573,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 							Mainframe.logger.trace("AnalyseSeries: " + "ISBN: " + foundIsbn);
 							added = true;
 							try {
-								wishlist.wishlistEntries.add(new Book_Wishlist(foundAuthor, foundTitle, "", series, Integer.toString(missingBooksOfSeries.get(i)), new Timestamp(System.currentTimeMillis()), true));
+								wishlist.wishlistEntries.add(new Book_Wishlist(foundAuthor, foundTitle, "Automatisch hinzugefügt", series, Integer.toString(missingBooksOfSeries.get(i)), new Timestamp(System.currentTimeMillis()), true));
 							} catch (SQLException e) {
 								Mainframe.logger.error("SQL Exception while saving Book to wishlist");
 								Mainframe.logger.error(e.getMessage());

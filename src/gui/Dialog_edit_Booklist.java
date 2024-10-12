@@ -214,7 +214,7 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
 							if (webpage != null && webpage != "") {
-								GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(entry, 2, false);
+								GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, false);
 								lblPic = new JLabel(showImg(entry));
 							}
 						}
@@ -249,11 +249,11 @@ public class Dialog_edit_Booklist extends JDialog {
 					int compResult1 = 0;
 					int compResult2 = 0;
 
-					compResult1 = GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(entry, 2, false);
+					compResult1 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, false);
 					if (compResult1 < 75) {
-						compResult2 = GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(entry, 2, true);
+						compResult2 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, true);
 						if (compResult1 > compResult2) {
-							GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(entry, 2, true);
+							GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, true);
 						}
 					}
 

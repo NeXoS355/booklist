@@ -592,7 +592,7 @@ public class Dialog_add_Booklist extends JDialog {
 					Mainframe.entries.add(book);
 				}
 				if (HandleConfig.autoDownload == 1) {
-					GetBookInfosFromWeb.doAuthorGoogleApiWebRequest(book, 2, false);
+					GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(book, 2, false);
 				}
 				BookListModel.checkAuthors();
 				Mainframe.setLastSearch(txtAuthor.getText());

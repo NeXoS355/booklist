@@ -28,8 +28,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class GetBookInfosFromWeb {
-
-	public static int doAuthorGoogleApiWebRequest(Book_Booklist entry, int maxResults, boolean retry) {
+	
+	public static int getBookInfoFromGoogleApiWebRequest(Book_Booklist entry, int maxResults, boolean retry) {
 		int compareReturn = 0;
 		try {
 
@@ -77,7 +77,7 @@ public class GetBookInfosFromWeb {
 
 				// JSON-Antwort in ein JsonObject umwandeln
 				JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
-				compareReturn = analyseApiRequestSingle(jsonObject, entry);
+				compareReturn = analyseApiRequestBookInfo(jsonObject, entry);
 			}
 			// Verbindung schlieÃŸen
 			connection.disconnect();
@@ -92,18 +92,18 @@ public class GetBookInfosFromWeb {
 
 	}
 	
-	public static String[][] doAuthorGoogleApiWebRequestMulti(String str, int maxResults) {
+	public static String[][] getSeriesInfoFromGoogleApiWebRequest(String str, int maxResults) {
 		String[][] compareReturn = new String[3][10];
 		try {
-
+			
 			str = sanitizeString(str);
 			
 			// Die URL der REST-API
 			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults="
 					+ maxResults + "&printType=books";
 
-			Mainframe.logger.info("Search API: " + str);
-			Mainframe.logger.info("Search API URL: " + apiUrl);
+			Mainframe.logger.trace("Search API: " + str);
+			Mainframe.logger.trace("Search API URL: " + apiUrl);
 
 			// HttpURLConnection erstellen
 			URL url = new URI(apiUrl).toURL();
@@ -114,6 +114,7 @@ public class GetBookInfosFromWeb {
 
 			// Verbindung öffnen und Response-Code überprüfen
 			int responseCode = connection.getResponseCode();
+			Mainframe.logger.trace("Search API response: " + responseCode);
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				// InputStream lesen und in einen String umwandeln
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
@@ -126,7 +127,7 @@ public class GetBookInfosFromWeb {
 
 				// JSON-Antwort in ein JsonObject umwandeln
 				JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
-				compareReturn = analyseApiRequestMulti(jsonObject, maxResults);
+				compareReturn = analyseApiRequestSeries(jsonObject, maxResults);
 			}
 			// Verbindung schlieÃŸen
 			connection.disconnect();
@@ -134,14 +135,11 @@ public class GetBookInfosFromWeb {
 		} catch (Exception e) {
 			Mainframe.logger.error(e.getMessage());
 		}
-//		Mainframe.logger.info("checkWebInfo " + "Retry: " + retry);
-//		Mainframe.logger.info(
-//				"checkWebInfo " + "Overall Score: " + entry.getAuthor() + "-" + entry.getTitle() + ":" + compareReturn);
 		return compareReturn;
 
 	}
-
-	private static int analyseApiRequestSingle(JsonObject jsonObject, Book_Booklist entry) {
+	
+	private static int analyseApiRequestBookInfo(JsonObject jsonObject, Book_Booklist entry) {
 		// Auf den Titel zugreifen
 		int i = 0;
 		int cCover = 0;
@@ -221,7 +219,7 @@ public class GetBookInfosFromWeb {
 		return (cCompAuthor + cCompTitle) / 2;
 	}
 	
-	private static String[][] analyseApiRequestMulti(JsonObject jsonObject, int maxResults) {
+	private static String[][] analyseApiRequestSeries(JsonObject jsonObject, int maxResults) {
 		// Auf den Titel zugreifen
 		int i = 0;
 		String[][] returnArray = new String[maxResults][3];
@@ -364,19 +362,15 @@ public class GetBookInfosFromWeb {
 					Path file = Paths.get(path);
 					Files.delete(file);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Mainframe.logger.error(e.getMessage());
 				}
 			});
 
 		} catch (MalformedURLException e) {
 			Mainframe.logger.error(e.getMessage());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			Mainframe.logger.error(e.getMessage());
-
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			Mainframe.logger.error(e.getMessage());
 		}
 		return true;
