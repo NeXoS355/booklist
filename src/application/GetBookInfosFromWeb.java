@@ -29,6 +29,13 @@ import com.google.gson.JsonParser;
 
 public class GetBookInfosFromWeb {
 	
+	/**
+	 * request Book Infos from Google API to save Covers, description and ISBN No.
+	 * 
+	 * @param entry - Book entry to search for
+	 * @param maxResults - how many Results should be requested from Google Books API
+	 * @param retry - change Setting if first request was not sufficient
+	 */
 	public static int getBookInfoFromGoogleApiWebRequest(Book_Booklist entry, int maxResults, boolean retry) {
 		int compareReturn = 0;
 		try {
@@ -92,6 +99,12 @@ public class GetBookInfosFromWeb {
 
 	}
 	
+	/**
+	 * request Series Infos from Google API to save new Books from that series.
+	 * 
+	 * @param str - search String for API request
+	 * @param maxResults - how many Results should be requested from Google Books API
+	 */
 	public static String[][] getSeriesInfoFromGoogleApiWebRequest(String str, int maxResults) {
 		String[][] compareReturn = new String[3][10];
 		try {
@@ -139,6 +152,12 @@ public class GetBookInfosFromWeb {
 
 	}
 	
+	/**
+	 * Analyze the JSON response from Google Books API
+	 * 
+	 * @param jsonObject - JSON response from the request
+	 * @param entry - Book entry to save the Information
+	 */
 	private static int analyseApiRequestBookInfo(JsonObject jsonObject, Book_Booklist entry) {
 		// Auf den Titel zugreifen
 		int i = 0;
@@ -219,6 +238,12 @@ public class GetBookInfosFromWeb {
 		return (cCompAuthor + cCompTitle) / 2;
 	}
 	
+	/**
+	 * Analyze the JSON response from Google Books API
+	 * 
+	 * @param jsonObject - JSON response from the request
+	 * @param maxResults - how many Results were requested from Google Books API
+	 */
 	private static String[][] analyseApiRequestSeries(JsonObject jsonObject, int maxResults) {
 		// Auf den Titel zugreifen
 		int i = 0;
@@ -270,6 +295,14 @@ public class GetBookInfosFromWeb {
 		return returnArray;
 	}
 
+	/**
+	 * Compare to Strings to rate the quality of the found Information
+	 * 
+	 * @param str1 - String to compare
+	 * @param str2 - String to compare
+	 * 
+	 * @return int - returns a percentage Number of the comparison
+	 */
 	public static int compareString(String str1, String str2) {
 		int equalPercentage = 0;
 		int hit = 0;
@@ -321,10 +354,25 @@ public class GetBookInfosFromWeb {
 		return equalPercentage;
 	}
 
+	/**
+	 * Delete a pic from an Book entry
+	 * 
+	 * @param bid - Bookid
+	 * 
+	 * @return boolean - returns boolean as success
+	 */
 	public static boolean deletePic(int bid) {
 		return Database.delPic(bid);
 	}
 
+	/**
+	 * Saves a pic from an Book entry
+	 * 
+	 * @param weblink - Link where to get the Bookcover
+	 * @param entry - Bookentry to save the Cover
+	 * 
+	 * @return boolean - returns boolean as success
+	 */
 	public static boolean savePic(String weblink, Book_Booklist entry) {
 		BufferedInputStream in;
 		try {
@@ -376,6 +424,13 @@ public class GetBookInfosFromWeb {
 		return true;
 	}
 
+	/**
+	 * Sanitize String for a Web request
+	 * 
+	 * @param input - String to sanitize
+	 * 
+	 * @return String - sanitized input String
+	 */
 	private static String sanitizeString(String input) {
 		String newString = input.replace("\u00fc", "ue").replace("\u00f6", "oe").replace("\u00e4", "ae")
 				.replace("\u00df", "ss").replaceAll("\u00dc(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Ue")

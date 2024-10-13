@@ -24,6 +24,10 @@ public class HandleConfig {
 	public static String apiURL = "";
 	public static int darkmode = 1;
 
+	/**
+	 * Constructor 
+	 * reads the config.conf file and sets the found Parameters
+	 */
 	public static void readConfig() {
 		File f = new File("config.conf");
 		if (f.exists() && !f.isDirectory()) {
@@ -210,7 +214,9 @@ public class HandleConfig {
 
 	}
 
-	// Method to generate a random token with 64 characters
+	/**
+	 * Method to generate a random token with 64 characters
+	 */
 	public static String generateRandomToken(int length) {
 
 		final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

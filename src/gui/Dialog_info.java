@@ -17,6 +17,11 @@ public class Dialog_info extends JDialog {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Dialog Info Constructor
+	 * 
+	 * @param owner - set the owner of this Frame
+	 */
 	public Dialog_info(Frame owner) {
 
 		this.setTitle("Einstellungen");

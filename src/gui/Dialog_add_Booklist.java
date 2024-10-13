@@ -26,7 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import application.Book_Booklist;
@@ -54,7 +53,14 @@ public class Dialog_add_Booklist extends JDialog {
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_add_Booklist(Frame owner, BookListModel einträge, DefaultTreeModel treeModel, DefaultMutableTreeNode rootNode) {
+	/**
+	 * Dialog Add Constructor
+	 * 
+	 * @param owner - set the owner of this Frame
+	 * @param bookModel - current entries of the Booktable
+	 * @param treeModel - current entries of the Authortree
+	 */
+	public Dialog_add_Booklist(Frame owner, BookListModel bookModel, DefaultTreeModel treeModel) {
 		Mainframe.logger.trace("Book add: start creating Frame");
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 400));

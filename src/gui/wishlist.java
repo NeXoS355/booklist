@@ -35,9 +35,7 @@ import application.WishlistTableModel;
 
 public class wishlist extends JFrame {
 
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private static wishlist instance;
 	private static WishlistTableModel display;
@@ -46,7 +44,13 @@ public class wishlist extends JFrame {
 	private static int lastHoverRow = -1;
 	public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
 
-	public wishlist(Frame owner) {
+	/**
+	 * wishlist Constructor
+	 * 
+	 * @param owner - set the owner of this Frame
+	 * @param visible - set the default visible state
+	 */
+	public wishlist(Frame owner, boolean visible) {
 		super("Wunschliste");
 		instance = this;
 		this.setLayout(new BorderLayout(10, 10));
@@ -247,16 +251,24 @@ public class wishlist extends JFrame {
 		this.add(north_panel, BorderLayout.NORTH);
 		this.add(mid_panel, BorderLayout.CENTER);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		this.setVisible(true);
+		this.setVisible(visible);
 
 	}
 
+	/**
+	 * updates the table Model to paint the changes
+	 * 
+	 */
 	public static void updateModel() {
 		display = new WishlistTableModel(wishlistEntries);
 		table.setModel(display);
 		Mainframe.logger.trace("Wishlist Model updated");
 	}
 
+	/**
+	 * deletes a book from the wishlist depending on the currently selected entry
+	 * 
+	 */
 	public void deleteBook() {
 		int[] selected = table.getSelectedRows();
 		for (int i = 0; i < selected.length; i++) {

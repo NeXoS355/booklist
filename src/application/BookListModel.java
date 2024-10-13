@@ -18,7 +18,7 @@ import gui.Mainframe;
 import gui.wishlist;
 
 /**
- * Manages the Booklist and Authorlist
+ * 
  */
 public class BookListModel extends AbstractListModel<Book_Booklist> {
 
@@ -27,6 +27,10 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	public static ArrayList<String> authors = new ArrayList<String>();
 	public static boolean useDB = false;
 
+	/**
+	 * Constructor 
+	 * Manages the Booklist and Authorlist
+	 */
 	public BookListModel() {
 		Database.createConnection();
 		ResultSet rs = null;
@@ -495,14 +499,15 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		return books;
 	}
 
-
 	/**
 	 * analyzes one specified Bookseries
 	 * 
 	 * @param series - Name of Series
 	 * @param author - Name of corresponding author
+	 * 
+	 * @return true if Book was found else false
 	 */
-	public static void analyzeSeries(String series, String author) {
+	public static boolean analyzeSeries(String series, String author) {
 		ArrayList<Integer> ownedBooksOfSeries = new ArrayList<Integer>();
 		int maxVol = 0;
 		// get the last owned Book of the Series and store the number in maxVol
@@ -528,7 +533,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			}
 			missing = true;
 		}
-		// how many Books should be requested from the Google Books API for every missing Volume
+		// how many Books should be requested from the Google Books API for every
+		// missing Volume
 		int returnCount = 3;
 		// create a list with new Books which are not in the current list
 		ArrayList<String[]> newBooksList = new ArrayList<String[]>();
@@ -554,36 +560,57 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 							owned = true;
 						}
 					}
-					// progress only if book is not already owned and the author is the same as the requested one
-					if (!owned && foundAuthor.equals(author)) {
-						boolean added = false;
-						// check if Book was already previously added
-						for (int k = 0; k < newBooksList.size(); k++) {
-							if (foundAuthor.equals(newBooksList.get(k)[0]) && foundTitle.equals(newBooksList.get(k)[1]))
-								added = true;
+					// filter out some cases where the Title is too long or might be a collection
+					if (foundTitle.length() <= 50 && !foundTitle.contains(" / ")) {
+						// progress only if book is not already owned, author is the same as the
+						// requested one
+						if (!owned && foundAuthor.equals(author)) {
+							boolean added = false;
+							// check if Book was previously added
+							for (int k = 0; k < newBooksList.size(); k++) {
+								if (foundAuthor.contains(newBooksList.get(k)[0])
+										&& foundTitle.contains(newBooksList.get(k)[1])) {
+									added = true;
+								}
 
-						}
-						// add the Book to the list and create wishlist Entry
-						if (!added) {
-							newBooksList.add(returnArray[1]);
-							Mainframe.logger.trace("AnalyseSeries: " + "-Versuch: " + versuch);
-							Mainframe.logger.trace("AnalyseSeries: " + "Band: " + missingBooksOfSeries.get(i));
-							Mainframe.logger.trace("AnalyseSeries: " + "Autor: " + foundAuthor);
-							Mainframe.logger.trace("AnalyseSeries: " + "Titel: " + foundTitle);
-							Mainframe.logger.trace("AnalyseSeries: " + "ISBN: " + foundIsbn);
-							added = true;
-							try {
-								wishlist.wishlistEntries.add(new Book_Wishlist(foundAuthor, foundTitle, "Automatisch hinzugefügt", series, Integer.toString(missingBooksOfSeries.get(i)), new Timestamp(System.currentTimeMillis()), true));
-							} catch (SQLException e) {
-								Mainframe.logger.error("SQL Exception while saving Book to wishlist");
-								Mainframe.logger.error(e.getMessage());
-								
+							}
+							// check if Book is already in wishlist
+							for (int k = 0; k < wishlist.wishlistEntries.getSize(); k++) {
+								if (foundAuthor.contains(wishlist.wishlistEntries.getElementAt(k).getAuthor()) && foundTitle.contains(wishlist.wishlistEntries.getElementAt(k).getTitle())) {
+									added = true;
+								}
+
+							}
+							// add the Book to the list and create wishlist Entry
+							if (!added) {
+								newBooksList.add(returnArray[j]);
+								Mainframe.logger.trace("AnalyseSeries: " + "-Versuch: " + versuch);
+								Mainframe.logger.trace("AnalyseSeries: " + "Band: " + missingBooksOfSeries.get(i));
+								Mainframe.logger.trace("AnalyseSeries: " + "Autor: " + foundAuthor);
+								Mainframe.logger.trace("AnalyseSeries: " + "Titel: " + foundTitle);
+								Mainframe.logger.trace("AnalyseSeries: " + "ISBN: " + foundIsbn);
+								added = true;
+								try {
+									wishlist.wishlistEntries
+											.add(new Book_Wishlist(foundAuthor, foundTitle, "Automatisch hinzugefügt",
+													series, Integer.toString(missingBooksOfSeries.get(i)),
+													new Timestamp(System.currentTimeMillis()), true));
+								} catch (SQLException e) {
+									Mainframe.logger.error("SQL Exception while saving Book to wishlist");
+									Mainframe.logger.error(e.getMessage());
+
+								}
 							}
 						}
 					}
 				}
 				versuch++;
 			}
+		}
+		if (newBooksList.size() > 0) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 

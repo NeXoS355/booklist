@@ -140,7 +140,7 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private static String version = "3.1.4";
+	private static String version = "3.1.5";
 
 	private Mainframe() throws HeadlessException {
 		super("Bücherliste");
@@ -150,7 +150,7 @@ public class Mainframe extends JFrame {
 		this.setSize(1300, 800);
 		this.setResizable(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		
+
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
 		ImageIcon icon = new ImageIcon(iconURL);
@@ -310,7 +310,7 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel, rootNode);
+				new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel);
 				txt_search.setText("Suche ... (" + entries.getSize() + ")");
 			}
 		});
@@ -372,7 +372,7 @@ public class Mainframe extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (whishlist_instance == null)
-					whishlist_instance = new wishlist(Mainframe.getInstance());
+					whishlist_instance = new wishlist(Mainframe.getInstance(), true);
 				else
 					whishlist_instance.setVisible(true);
 			}
@@ -545,7 +545,7 @@ public class Mainframe extends JFrame {
 					String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
 					String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
 					int index = entries.getIndexOf(searchAutor, searchTitel);
-					new Dialog_edit_Booklist(Mainframe.getInstance(), entries, index, treeModel, rootNode);
+					new Dialog_edit_Booklist(Mainframe.getInstance(), entries, index, treeModel);
 				}
 				txt_search.setText("Suche ... (" + entries.getSize() + ")");
 				if (SwingUtilities.isRightMouseButton(e)) {
@@ -580,7 +580,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Buch hinzufügen") {
-							new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel, rootNode);
+							new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel);
 						}
 					}
 				});
@@ -601,7 +601,7 @@ public class Mainframe extends JFrame {
 							String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
 							String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
 							int index = entries.getIndexOf(searchAutor, searchTitel);
-							new Dialog_edit_Booklist(Mainframe.getInstance(), entries, index, treeModel, rootNode);
+							new Dialog_edit_Booklist(Mainframe.getInstance(), entries, index, treeModel);
 						}
 					}
 				});
@@ -610,15 +610,20 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand() == "Serie analysieren (Beta)") {
-							if (whishlist_instance == null)
-								whishlist_instance = new wishlist(Mainframe.getInstance());
-							else
-								whishlist_instance.setVisible(true);
-//							BookListModel.analyzeAuthor((String) table.getValueAt(table.getSelectedRow(), 1));
 							String seriesName = (String) table.getValueAt(table.getSelectedRow(), 3);
 							seriesName = seriesName.split("[ ][-][ ][0-9]")[0];
-							BookListModel.analyzeSeries(seriesName, (String) table.getValueAt(table.getSelectedRow(), 1));
+							if (whishlist_instance == null)
+								whishlist_instance = new wishlist(Mainframe.getInstance(), false);
+							boolean success = BookListModel.analyzeSeries(seriesName,
+									(String) table.getValueAt(table.getSelectedRow(), 1));
 							gui.wishlist.updateModel();
+							if (!success) {
+								JOptionPane.showMessageDialog(Mainframe.getInstance(),
+										"Es wurden keine Bücher gefunden");
+							} else {
+								whishlist_instance.setVisible(true);
+							}
+
 						}
 					}
 				});
@@ -707,7 +712,7 @@ public class Mainframe extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand().equals("Buch hinzufügen")) {
-							new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel, rootNode);
+							new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel);
 						}
 					}
 				});
