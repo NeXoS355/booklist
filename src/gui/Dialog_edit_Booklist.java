@@ -39,7 +39,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
 import javax.swing.tree.DefaultTreeModel;
 
 import application.Book_Booklist;
@@ -83,8 +82,6 @@ public class Dialog_edit_Booklist extends JDialog {
 	private boolean ack = false;
 	private JPanel panelEastRating = new JPanel(new GridBagLayout());
 	private Book_Booklist entry;
-	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
-	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	/**
 	 * Dialog Edit Constructor
@@ -407,7 +404,6 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		txtAuthor = new CustomTextField(entry.getAuthor());
 		txtAuthor.setPreferredSize(new Dimension(50, heigth));
-		txtAuthor.setBorder(standardBorder);
 
 		txtAuthor.addKeyListener(new KeyAdapter() {
 
@@ -448,43 +444,16 @@ public class Dialog_edit_Booklist extends JDialog {
 				if (txtAuthor.getText().length() > 50) {
 					txtAuthor.setEditable(false);
 					txtAuthor.setText("Nicht mehr als 50 Zeichen!");
-					txtAuthor.setBackground(new Color(255, 105, 105));
 				}
 			}
 
 		});
-		txtAuthor.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				txtAuthor.setBorder(standardBorder);
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				txtAuthor.setBorder(activeBorder);
-
-			}
-			
-			@Override
-			public void mousePressed(MouseEvent e) {
-				if (!txtAuthor.isEditable()) {
-					txtAuthor.setEditable(true);
-					txtAuthor.setForeground(UIManager.getColor("TextField.foreground"));
-					txtAuthor.setBackground(UIManager.getColor("TextField.background"));
-					txtAuthor.setText("");
-				}
-			}
-		});
-
 		JLabel lblTitle = new JLabel("Titel:");
 		lblTitle.setFont(Mainframe.defaultFont);
 		lblTitle.setPreferredSize(new Dimension(width, heigth));
 		
 		txtTitle = new CustomTextField(entry.getTitle());
 		txtTitle.setPreferredSize(new Dimension(50, heigth));
-		txtTitle.setBorder(standardBorder);
 		txtTitle.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -506,31 +475,6 @@ public class Dialog_edit_Booklist extends JDialog {
 				}
 			}
 		});
-		txtTitle.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				txtTitle.setBorder(standardBorder);
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				txtTitle.setBorder(activeBorder);
-
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				if (!txtTitle.isEditable()) {
-					txtTitle.setEditable(true);
-					txtTitle.setForeground(UIManager.getColor("TextField.foreground"));
-					txtTitle.setBackground(UIManager.getColor("TextField.background"));
-					txtTitle.setText("");
-				}
-			}
-
-		});
 
 		JLabel lblNote = new JLabel("Bemerkung:");
 		lblNote.setFont(Mainframe.defaultFont);
@@ -538,7 +482,6 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		txtNote = new CustomTextField(entry.getNote());
 		txtNote.setPreferredSize(new Dimension(50, heigth));
-		txtNote.setBorder(standardBorder);
 		txtNote.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -550,21 +493,6 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		txtNote.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				txtNote.setBorder(standardBorder);
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				txtNote.setBorder(activeBorder);
-
-			}
-
-		});
 
 		JLabel lblSeries = new JLabel("Serie | Band:");
 		lblSeries.setFont(Mainframe.defaultFont);
@@ -572,7 +500,6 @@ public class Dialog_edit_Booklist extends JDialog {
 
 		txtSeries = new CustomTextField(entry.getSeries());
 		txtSeries.setPreferredSize(new Dimension(50, heigth));
-		txtSeries.setBorder(standardBorder);
 		txtSeries.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -609,25 +536,9 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		txtSeries.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				txtSeries.setBorder(standardBorder);
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				txtSeries.setBorder(activeBorder);
-
-			}
-
-		});
 
 		txtSeriesVol = new CustomTextField(entry.getSeriesVol());
 		txtSeriesVol.setPreferredSize(new Dimension(50, heigth));
-		txtSeriesVol.setBorder(standardBorder);
 		txtSeriesVol.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -640,21 +551,6 @@ public class Dialog_edit_Booklist extends JDialog {
 					txtSeriesVol.setBackground(new Color(255, 105, 105));
 				} else
 					txtSeriesVol.setBackground(UIManager.getColor("TextField.background"));
-			}
-
-		});
-		txtSeriesVol.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				txtSeriesVol.setBorder(standardBorder);
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				txtSeriesVol.setBorder(activeBorder);
-
 			}
 
 		});
@@ -782,7 +678,6 @@ public class Dialog_edit_Booklist extends JDialog {
 		});
 
 		txtBorrowedFrom = new CustomTextField(entry.getBorrowedFrom());
-		txtBorrowedFrom.setBorder(standardBorder);
 		if (entry.getBorrowedFrom().isEmpty())
 			txtBorrowedFrom.setVisible(false);
 		txtBorrowedFrom.addKeyListener(new KeyAdapter() {
@@ -796,24 +691,8 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		txtBorrowedFrom.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				txtBorrowedFrom.setBorder(standardBorder);
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				txtBorrowedFrom.setBorder(activeBorder);
-
-			}
-
-		});
-
+		
 		txtBorrowedTo = new CustomTextField(entry.getBorrowedTo());
-		txtBorrowedTo.setBorder(standardBorder);
 		if (entry.getBorrowedTo().isEmpty())
 			txtBorrowedTo.setVisible(false);
 		txtBorrowedTo.addKeyListener(new KeyAdapter() {
@@ -824,21 +703,6 @@ public class Dialog_edit_Booklist extends JDialog {
 					save(entry);
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
-			}
-
-		});
-		txtBorrowedTo.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				txtBorrowedTo.setBorder(standardBorder);
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				txtBorrowedTo.setBorder(activeBorder);
-
 			}
 
 		});
