@@ -45,7 +45,6 @@ class JUnitTest {
 		book.setBorrowedTo("TestAusleihe");
 		assertEquals("EditTest", book.getAuthor());
 		assertEquals("TestAusleihe", book.getBorrowedTo());
-
 	}
 
 	@Test
