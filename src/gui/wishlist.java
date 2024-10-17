@@ -132,8 +132,8 @@ public class wishlist extends JFrame {
 
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
-				JMenuItem itemAddBook = new JMenuItem("Buch hinzufügen");
-				JMenuItem itemDelBook = new JMenuItem("Buch löschen");
+				JMenuItem itemAddBook = new JMenuItem("Buch hinzufÃ¼gen");
+				JMenuItem itemDelBook = new JMenuItem("Buch lÃ¶schen");
 				JMenuItem itemChanBook = new JMenuItem("Buch bearbeiten");
 				JMenuItem itemConvertBook = new JMenuItem("Buch konvertieren");
 				menu.add(itemAddBook);
@@ -145,7 +145,7 @@ public class wishlist extends JFrame {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						if (e.getActionCommand() == "Buch hinzufügen") {
+						if (e.getActionCommand() == "Buch hinzufÃ¼gen") {
 							new Dialog_add_Wishlist(instance, wishlistEntries);
 							Mainframe.logger.trace("Menu;Wishlist open Add Dialog");
 						}
@@ -156,7 +156,7 @@ public class wishlist extends JFrame {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						if (e.getActionCommand() == "Buch löschen") {
+						if (e.getActionCommand() == "Buch lÃ¶schen") {
 							deleteBook();
 							updateModel();
 						}
@@ -276,13 +276,13 @@ public class wishlist extends JFrame {
 			String searchTitle = (String) table.getValueAt(selected[i], 1);
 			int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
 			if (selected.length != 0) {
-				int response = JOptionPane.showConfirmDialog(this, "Wirklich '" + searchTitle + "' löschen?", "Löschen",
+				int response = JOptionPane.showConfirmDialog(this, "Wirklich '" + searchTitle + "' lÃ¶schen?", "lÃ¶schen",
 						JOptionPane.YES_NO_OPTION);
 				if (response == JOptionPane.YES_OPTION) {
 					wishlistEntries.delete(index);
 				}
 			} else {
-				JOptionPane.showMessageDialog(this, "Es wurde kein Buch ausgewählt");
+				JOptionPane.showMessageDialog(this, "Es wurde kein Buch ausgewÃ¤hlt");
 			}
 			Mainframe.logger.trace("Wishlist Book deleted: " + searchAuthor + ";" + searchTitle);
 		}

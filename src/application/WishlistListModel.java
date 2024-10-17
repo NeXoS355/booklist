@@ -35,7 +35,7 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 							seriesVol, date, false));
 
 				} catch (DateTimeParseException ex1) {
-					System.err.println("Datum falsch während DB auslesen");
+					System.err.println("Datum falsch waehrend DB auslesen");
 				}
 
 			}
@@ -47,7 +47,7 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 	public void add(Book_Wishlist book) {
 		books.add(book);
 		fireIntervalAdded(this, 0, books.size());
-		System.out.println("Wishlist Buch hinzugefügt: " + book.getAuthor() + "," + book.getTitle());
+		System.out.println("Wishlist Buch hinzugefuegt: " + book.getAuthor() + "," + book.getTitle());
 	}
 	
 	public static void clear() {
@@ -59,7 +59,7 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 	public void delete(Book_Wishlist book) {
 		books.remove(book);
 		fireIntervalRemoved(this, 0, books.size());
-		System.out.println("Wischlist Buch gelöscht: " + book.getAuthor() + "," + book.getTitle());
+		System.out.println("Wischlist Buch geloescht: " + book.getAuthor() + "," + book.getTitle());
 	}
 
 	public void delete(int index) {

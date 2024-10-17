@@ -45,9 +45,9 @@ public class Dialog_add_Wishlist extends JDialog {
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_add_Wishlist(Frame owner, WishlistListModel einträge) {
+	public Dialog_add_Wishlist(Frame owner, WishlistListModel entries) {
 		Mainframe.logger.trace("Wishlist Book add: start creating Frame");
-		this.setTitle("Buch hinzufügen");
+		this.setTitle("Buch hinzufÃ¼gen");
 		this.setSize(new Dimension(500, 320));
 		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
@@ -63,21 +63,21 @@ public class Dialog_add_Wishlist extends JDialog {
 		panel_center.setLayout(new GridBagLayout());
 		
 		
-		int höhe = 60;
-		int breite = 100;
+		int height = 60;
+		int width = 100;
 		
 		/*
 		 * Create Components for Panel West
 		 */
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.defaultFont);
-		lbl_author.setSize(new Dimension(breite, höhe));
+		lbl_author.setSize(new Dimension(width, height));
 		
 		/*
 		 * Create Components for Panel Center
 		 */
 		txtAuthor = new CustomTextField();
-		txtAuthor.setPreferredSize(new Dimension(50, höhe));
+		txtAuthor.setPreferredSize(new Dimension(50, height));
 		txtAuthor.setBorder(standardBorder);
 		txtAuthor.addKeyListener(new KeyAdapter() {
 
@@ -111,10 +111,10 @@ public class Dialog_add_Wishlist extends JDialog {
 		
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(Mainframe.defaultFont);
-		lbl_title.setPreferredSize(new Dimension(breite, höhe));
+		lbl_title.setPreferredSize(new Dimension(width, height));
 		
 		txtTitle = new CustomTextField();
-		txtTitle.setPreferredSize(new Dimension(50, höhe));
+		txtTitle.setPreferredSize(new Dimension(50, height));
 		txtTitle.setBorder(standardBorder);
 		txtTitle.addKeyListener(new KeyAdapter() {
 
@@ -166,11 +166,11 @@ public class Dialog_add_Wishlist extends JDialog {
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
 		lbl_merk.setFont(Mainframe.defaultFont);
-		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
+		lbl_merk.setPreferredSize(new Dimension(width, height));
 		
 
 		txtNote = new CustomTextField();
-		txtNote.setPreferredSize(new Dimension(50, höhe));
+		txtNote.setPreferredSize(new Dimension(50, height));
 		txtNote.setBorder(standardBorder);
 		txtNote.addKeyListener(new KeyAdapter() {
 
@@ -202,11 +202,11 @@ public class Dialog_add_Wishlist extends JDialog {
 		
 		JLabel lbl_serie = new JLabel("Serie | Band:");
 		lbl_serie.setFont(Mainframe.defaultFont);
-		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
+		lbl_serie.setPreferredSize(new Dimension(width, height));
 		
 
 		txtSeries = new CustomTextField();
-		txtSeries.setPreferredSize(new Dimension(50, höhe));
+		txtSeries.setPreferredSize(new Dimension(50, height));
 		txtSeries.setBorder(standardBorder);
 		txtSeries.addKeyListener(new KeyAdapter() {
 
@@ -237,7 +237,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		});
 		
 		txtSeriesVol = new CustomTextField();
-		txtSeriesVol.setPreferredSize(new Dimension(50, höhe));
+		txtSeriesVol.setPreferredSize(new Dimension(50, height));
 		txtSeriesVol.setBorder(standardBorder);
 		txtSeriesVol.addKeyListener(new KeyAdapter() {
 
@@ -329,7 +329,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		c.insets = new Insets(10, 10, 0, 0);
 		panel_center.add(txtSeriesVol, c);
 
-		JButton btn_add = ButtonsFactory.createButton("hinzufügen");
+		JButton btn_add = ButtonsFactory.createButton("hinzufÃ¼gen");
 		btn_add.setFont(Mainframe.defaultFont);
 		btn_add.addActionListener(new ActionListener() {
 
@@ -371,7 +371,7 @@ public class Dialog_add_Wishlist extends JDialog {
 
 	public void addBuch() {
 		try {
-			Mainframe.logger.trace("Book add: start saving");
+			Mainframe.logger.trace("Wishlist Book add: start saving");
 			if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
 				String autor = txtAuthor.getText();
 				String titel = txtTitle.getText();

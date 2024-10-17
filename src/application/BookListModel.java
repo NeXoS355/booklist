@@ -198,7 +198,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	public void add(Book_Booklist book) {
 		books.add(book);
 		fireIntervalAdded(this, 0, books.size());
-		Mainframe.logger.info("Booklist Buch hinzugefügt: " + book.getAuthor() + "," + book.getTitle());
+		Mainframe.logger.info("Booklist Buch hinzugefuegt: " + book.getAuthor() + "," + book.getTitle());
 	}
 
 	/**
@@ -210,7 +210,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	public void delete(Book_Booklist book) {
 		getBooks().remove(book);
 		fireIntervalRemoved(this, 0, getBooks().size());
-		Mainframe.logger.info("Booklist Buch gelöscht: " + book.getAuthor() + "," + book.getTitle());
+		Mainframe.logger.info("Booklist Buch geloescht: " + book.getAuthor() + "," + book.getTitle());
 	}
 
 	/**
@@ -592,7 +592,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 								added = true;
 								try {
 									wishlist.wishlistEntries
-											.add(new Book_Wishlist(foundAuthor, foundTitle, "Automatisch hinzugefügt",
+											.add(new Book_Wishlist(foundAuthor, foundTitle, "Automatisch hinzugefuegt",
 													series, Integer.toString(missingBooksOfSeries.get(i)),
 													new Timestamp(System.currentTimeMillis()), true));
 								} catch (SQLException e) {

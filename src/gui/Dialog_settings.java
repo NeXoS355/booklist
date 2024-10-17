@@ -90,7 +90,7 @@ public class Dialog_settings extends JDialog {
 		c.anchor = GridBagConstraints.CENTER;
 		c.ipady = 5;
 		c.insets = new Insets(10, 10, 0, 10);
-		JLabel lblFontSize = new JLabel("Schriftgrößen");
+		JLabel lblFontSize = new JLabel("SchriftgrÃ¶ÃŸen");
 		lblFontSize.setFont(Mainframe.defaultFont);
 		pnlLeft.add(lblFontSize, c);
 		c.anchor = GridBagConstraints.WEST;
@@ -141,7 +141,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 0;
 		c.gridy = 5;
 		JLabel lblOnDemand = new JLabel("Load on Demand");
-		lblOnDemand.setToolTipText("Cover & Beschreibungen werden erst beim öffnen des Bearbeiten Dialogs geladen.");
+		lblOnDemand.setToolTipText("Cover & Beschreibungen werden erst beim Ã¶ffnen des Bearbeiten Dialogs geladen.");
 		pnlLeft.add(lblOnDemand, c);
 		c.gridx = 1;
 		c.gridy = 5;
@@ -152,7 +152,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 0;
 		c.gridy = 6;
 		JLabel lblUseDB = new JLabel("Nutze Datenbank");
-		lblUseDB.setToolTipText("Benutzt die Datenbank für Suchanfragen, Vergleiche und andere Abfragen");
+		lblUseDB.setToolTipText("Benutzt die Datenbank fÃ¼r Suchanfragen, Vergleiche und andere Abfragen");
 		pnlLeft.add(lblUseDB, c);
 		c.gridx = 1;
 		c.gridy = 6;
@@ -174,7 +174,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 0;
 		c.gridy = 8;
 		JLabel lblDebug = new JLabel("Debug");
-		lblDebug.setToolTipText("Ausführlichkeit der Logging Aktivität");
+		lblDebug.setToolTipText("AusfÃ¼hrlichkeit der Logging Aktivitï¿½t");
 		pnlLeft.add(lblDebug, c);
 		c.gridx = 1;
 		c.gridy = 8;
@@ -186,7 +186,7 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 9;
 		JLabel lblBackup = new JLabel("Backupverhalten");
 		lblBackup.setToolTipText(
-				"0= Kein Backup beim schließen; 1=Abfrage beim schließen; 2=automatisches Backup beim schließen");
+				"0= Kein Backup beim schlieï¿½en; 1=Abfrage beim schlieÃŸen; 2=automatisches Backup beim schlieï¿½en");
 		pnlLeft.add(lblBackup, c);
 		c.gridx = 1;
 		c.gridy = 9;
@@ -304,7 +304,7 @@ public class Dialog_settings extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int antwort = JOptionPane.showConfirmDialog(null,
-						"Wirklich neuen Token genrieren?\nDie ausstehenden Bücher mit dem alten Token können dann nicht mehr abgerufen werden.",
+						"Wirklich neuen Token genrieren?\nDie ausstehenden bÃ¼cher mit dem alten Token kÃ¶nnen dann nicht mehr abgerufen werden.",
 						"generieren", JOptionPane.YES_NO_OPTION);
 				if (antwort == JOptionPane.YES_OPTION) {
 					String token = HandleConfig.generateRandomToken(64);

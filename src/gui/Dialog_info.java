@@ -112,7 +112,7 @@ public class Dialog_info extends JDialog {
 		c.gridy = 6;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_DescNotEbook = new JLabel("Anzahl Physische Bücher:");
+		JLabel lbl_DescNotEbook = new JLabel("Anzahl Physische bÃ¼cher:");
 		this.add(lbl_DescNotEbook, c);
 		c.gridx = 1;
 		c.gridy = 6;
@@ -125,7 +125,7 @@ public class Dialog_info extends JDialog {
 		c.gridy = 7;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_DescYear = new JLabel("Anzahl Bücher pro Jahr:");
+		JLabel lbl_DescYear = new JLabel("Anzahl bÃ¼cher pro Jahr:");
 		this.add(lbl_DescYear, c);
 		c.gridx = 1;
 		c.gridy = 7;

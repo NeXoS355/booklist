@@ -59,7 +59,7 @@ public class Dialog_add_Booklist extends JDialog {
 	 */
 	public Dialog_add_Booklist(Frame owner, BookListModel bookModel, DefaultTreeModel treeModel) {
 		Mainframe.logger.trace("Book add: start creating Frame");
-		this.setTitle("Buch hinzufügen");
+		this.setTitle("Buch hinzufÃ¼gen");
 		this.setSize(new Dimension(500, 420));
 		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
@@ -74,22 +74,22 @@ public class Dialog_add_Booklist extends JDialog {
 		JPanel panel_center = new JPanel();
 		panel_center.setLayout(new GridBagLayout());
 
-		int höhe = 60;
-		int breite = 100;
+		int height = 60;
+		int width = 100;
 
 		/*
 		 * Create Components for Panel West
 		 */
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.defaultFont);
-		lbl_author.setSize(new Dimension(breite, höhe));
+		lbl_author.setSize(new Dimension(width, height));
 
 		/*
 		 * Create Components for Panel Center
 		 */
 		txtAuthor = new CustomTextField();
 		txtAuthor.setText(Mainframe.getTreeSelection());
-		txtAuthor.setPreferredSize(new Dimension(50, höhe));
+		txtAuthor.setPreferredSize(new Dimension(50, height));
 		txtAuthor.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -136,10 +136,10 @@ public class Dialog_add_Booklist extends JDialog {
 
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(Mainframe.defaultFont);
-		lbl_title.setPreferredSize(new Dimension(breite, höhe));
+		lbl_title.setPreferredSize(new Dimension(width, height));
 
 		txtTitle = new CustomTextField();
-		txtTitle.setPreferredSize(new Dimension(50, höhe));
+		txtTitle.setPreferredSize(new Dimension(50, height));
 		txtTitle.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -163,10 +163,10 @@ public class Dialog_add_Booklist extends JDialog {
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
 		lbl_merk.setFont(Mainframe.defaultFont);
-		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
+		lbl_merk.setPreferredSize(new Dimension(width, height));
 
 		txtNote = new CustomTextField();
-		txtNote.setPreferredSize(new Dimension(50, höhe));
+		txtNote.setPreferredSize(new Dimension(50, height));
 		txtNote.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -182,10 +182,10 @@ public class Dialog_add_Booklist extends JDialog {
 
 		JLabel lbl_serie = new JLabel("Serie | Band:");
 		lbl_serie.setFont(Mainframe.defaultFont);
-		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
+		lbl_serie.setPreferredSize(new Dimension(width, height));
 
 		txtSerie = new CustomTextField();
-		txtSerie.setPreferredSize(new Dimension(50, höhe));
+		txtSerie.setPreferredSize(new Dimension(50, height));
 		txtSerie.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -223,7 +223,7 @@ public class Dialog_add_Booklist extends JDialog {
 		});
 
 		txtSeriesVol = new CustomTextField();
-		txtSeriesVol.setPreferredSize(new Dimension(50, höhe));
+		txtSeriesVol.setPreferredSize(new Dimension(50, height));
 		txtSeriesVol.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -243,7 +243,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 		JLabel lbl_ebook = new JLabel("E-Book:");
 		lbl_ebook.setFont(Mainframe.defaultFont);
-		lbl_ebook.setPreferredSize(new Dimension(breite, höhe));
+		lbl_ebook.setPreferredSize(new Dimension(width, height));
 
 		checkEbook = new JCheckBox();
 		checkEbook.setFont(Mainframe.defaultFont);
@@ -387,7 +387,7 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 		});
 
-		btn_add = ButtonsFactory.createButton("hinzufügen");
+		btn_add = ButtonsFactory.createButton("hinzufÃ¼gen");
 		btn_add.setFont(Mainframe.defaultFont);
 		btn_add.addActionListener(new ActionListener() {
 
@@ -440,7 +440,7 @@ public class Dialog_add_Booklist extends JDialog {
 	 * 
 	 */
 	public void addBook() {
-
+		Mainframe.logger.trace("Book add: start saving");
 		if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
 			String autor = txtAuthor.getText();
 			String titel = txtTitle.getText();

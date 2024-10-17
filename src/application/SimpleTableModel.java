@@ -16,7 +16,7 @@ public class SimpleTableModel extends DefaultTableModel {
 	private String[] rowData = new String[cols];
 
 	
-	public SimpleTableModel(BookListModel bücher) {
+	public SimpleTableModel(BookListModel books) {
 
 		super();
 		this.setColumnIdentifiers(columnNames);
@@ -44,24 +44,24 @@ public class SimpleTableModel extends DefaultTableModel {
 				columnRating = i;
 		}
 
-		for (int i = 0; i < bücher.getSize(); i++) {
+		for (int i = 0; i < books.getSize(); i++) {
 			for (int j = 0; j < cols; j++) {
 				if (j == columnEbook) {
-					boolean isEbook = bücher.getElementAt(i).isEbook();
+					boolean isEbook = books.getElementAt(i).isEbook();
 					if (isEbook) {
 						rowData[j] = "X";
 					} else {
 						rowData[j] = "";
 					}
 				} else if (j == columnAuthor) {
-					rowData[j] = bücher.getElementAt(i).getAuthor();
+					rowData[j] = books.getElementAt(i).getAuthor();
 				} else if (j == columnTitle) {
-					rowData[j] = bücher.getElementAt(i).getTitle();
+					rowData[j] = books.getElementAt(i).getTitle();
 				} else if (j == columnSeries) {
-					rowData[j] = bücher.getElementAt(i).getSeries() + " - " + bücher.getElementAt(i).getSeriesVol();
+					rowData[j] = books.getElementAt(i).getSeries() + " - " + books.getElementAt(i).getSeriesVol();
 				} else if (j == columnRating) {
-					if (bücher.getElementAt(i).getRating() > 0) {
-						rowData[j] = Integer.toString(bücher.getElementAt(i).getRating());
+					if (books.getElementAt(i).getRating() > 0) {
+						rowData[j] = Integer.toString(books.getElementAt(i).getRating());
 					} else {
 						rowData[j] = "";
 					}
@@ -72,7 +72,7 @@ public class SimpleTableModel extends DefaultTableModel {
 
 	}
 
-	public SimpleTableModel(DefaultListModel<Book_Booklist> bücher) {
+	public SimpleTableModel(DefaultListModel<Book_Booklist> books) {
 
 		super();
 		this.setColumnIdentifiers(columnNames);
@@ -81,24 +81,24 @@ public class SimpleTableModel extends DefaultTableModel {
 			this.removeRow(i);
 		}
 
-		for (int i = 0; i < bücher.getSize(); i++) {
+		for (int i = 0; i < books.getSize(); i++) {
 			for (int j = 0; j < cols; j++) {
 				if (j == 0) {
-					boolean isEbook = bücher.getElementAt(i).isEbook();
+					boolean isEbook = books.getElementAt(i).isEbook();
 					if (isEbook) {
 						rowData[j] = "X";
 					} else {
 						rowData[j] = "";
 					}
 				} else if (j == 1) {
-					rowData[j] = bücher.getElementAt(i).getAuthor();
+					rowData[j] = books.getElementAt(i).getAuthor();
 				} else if (j == 2) {
-					rowData[j] = bücher.getElementAt(i).getTitle();
+					rowData[j] = books.getElementAt(i).getTitle();
 				} else if (j == 3) {
-					rowData[j] = bücher.getElementAt(i).getSeries() + " - " + bücher.getElementAt(i).getSeriesVol();
+					rowData[j] = books.getElementAt(i).getSeries() + " - " + books.getElementAt(i).getSeriesVol();
 				} else if (j == 4) {
-					if (bücher.getElementAt(i).getRating() > 0) {
-						rowData[j] = Integer.toString(bücher.getElementAt(i).getRating());
+					if (books.getElementAt(i).getRating() > 0) {
+						rowData[j] = Integer.toString(books.getElementAt(i).getRating());
 					} else {
 						rowData[j] = "";
 					}

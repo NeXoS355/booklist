@@ -44,6 +44,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -140,10 +141,10 @@ public class Mainframe extends JFrame {
 	public static int prozSeries = 0;
 	public static int prozRating = 0;
 
-	private static String version = "3.1.5";
+	private static String version;
 
 	private Mainframe() throws HeadlessException {
-		super("Bücherliste");
+		super("bÃ¼cherliste");
 
 		this.setLayout(new BorderLayout(10, 10));
 		this.setLocationByPlatform(true);
@@ -158,6 +159,15 @@ public class Mainframe extends JFrame {
 
 		logger = LogManager.getLogger(getClass());
 		logger.trace("start creating Frame & readConfig");
+		final Properties properties = new Properties();
+		try {
+			properties.load(this.getClass().getClassLoader().getResourceAsStream("project.properties"));
+			version=properties.getProperty("version");
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+		}
+
+		
 		HandleConfig.readConfig();
 		if (HandleConfig.debug.equals("WARN")) {
 			Configurator.setLevel(logger, Level.WARN);
@@ -283,7 +293,7 @@ public class Mainframe extends JFrame {
 					setLastSearch(txt_search.getText());
 					if (tableDisplay.getRowCount() == 0) {
 						updateModel();
-						JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Übereinstimmung gefunden");
+						JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Ã¼bereinstimmung gefunden");
 					}
 				}
 			}
@@ -329,16 +339,16 @@ public class Mainframe extends JFrame {
 				setLastSearch(txt_search.getText());
 				if (entries.getSize() == 0) {
 					updateModel();
-					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Übereinstimmung gefunden");
+					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Ã¼bereinstimmung gefunden");
 				}
 			}
 		});
 
 		panel.add(btn_search, BorderLayout.EAST);
 
-		JPanel pnlMenü = new JPanel();
-		pnlMenü.setLayout(new BorderLayout());
-		panel.add(pnlMenü, BorderLayout.NORTH);
+		JPanel pnlMenu = new JPanel();
+		pnlMenu.setLayout(new BorderLayout());
+		panel.add(pnlMenu, BorderLayout.NORTH);
 
 		JMenuBar menue = new JMenuBar();
 		JMenu datei = new JMenu("Datei");
@@ -355,10 +365,10 @@ public class Mainframe extends JFrame {
 					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
 				else
 					JOptionPane.showMessageDialog(Mainframe.getInstance(),
-							"Backup fehlgeschlagen oder nicht vollständig.");
+							"Backup fehlgeschlagen oder nicht vollstÃ¤ndig.");
 			}
 		});
-		JMenuItem close = new JMenuItem("Schließen");
+		JMenuItem close = new JMenuItem("SchlieÃŸen");
 		close.addActionListener(new ActionListener() {
 
 			@Override
@@ -377,7 +387,7 @@ public class Mainframe extends JFrame {
 					whishlist_instance.setVisible(true);
 			}
 		});
-		JMenuItem update = new JMenuItem("auf Aktualisierung prüfen...");
+		JMenuItem update = new JMenuItem("auf Aktualisierung prÃ¼fen...");
 		update.addActionListener(new ActionListener() {
 
 			@Override
@@ -387,7 +397,7 @@ public class Mainframe extends JFrame {
 			}
 
 		});
-		JMenuItem about = new JMenuItem("Über");
+		JMenuItem about = new JMenuItem("Ã¼ber");
 		about.addActionListener(new ActionListener() {
 
 			@Override
@@ -457,7 +467,7 @@ public class Mainframe extends JFrame {
 			}
 
 		});
-		openWebApi = new JMenuItem("Webapp öffnen");
+		openWebApi = new JMenuItem("Webapp Ã¶ffnen");
 		openWebApi.addActionListener(new ActionListener() {
 
 			@Override
@@ -499,14 +509,14 @@ public class Mainframe extends JFrame {
 		extras.add(info);
 		hilfe.add(update);
 		hilfe.add(about);
-		pnlMenü.add(menue, BorderLayout.WEST);
+		pnlMenu.add(menue, BorderLayout.WEST);
 
 		JLabel lblVersion = new JLabel("Version: " + version);
 
 		lblVersion.setFont(new Font(lblVersion.getFont().getName(), Font.BOLD, lblVersion.getFont().getSize()));
 		lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
-		pnlMenü.add(lblVersion, BorderLayout.EAST);
-		pnlMenü.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+		pnlMenu.add(lblVersion, BorderLayout.EAST);
+		pnlMenu.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 
 		logger.trace("Finished creating GUI Components. Start creating Table Contents");
 
@@ -566,8 +576,8 @@ public class Mainframe extends JFrame {
 
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
-				JMenuItem itemAddBuch = new JMenuItem("Buch hinzufügen");
-				JMenuItem itemDelBuch = new JMenuItem("Buch löschen");
+				JMenuItem itemAddBuch = new JMenuItem("Buch hinzufÃ¼gen");
+				JMenuItem itemDelBuch = new JMenuItem("Buch lÃ¶schen");
 				JMenuItem itemChanBuch = new JMenuItem("Buch bearbeiten");
 				JMenuItem itemAnalyzeAuthor = new JMenuItem("Serie analysieren (Beta)");
 				menu.add(itemAddBuch);
@@ -579,7 +589,7 @@ public class Mainframe extends JFrame {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						if (e.getActionCommand() == "Buch hinzufügen") {
+						if (e.getActionCommand() == "Buch hinzufÃ¼gen") {
 							new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel);
 						}
 					}
@@ -588,7 +598,7 @@ public class Mainframe extends JFrame {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						if (e.getActionCommand() == "Buch löschen") {
+						if (e.getActionCommand() == "Buch lÃ¶schen") {
 							deleteBook();
 						}
 					}
@@ -619,7 +629,7 @@ public class Mainframe extends JFrame {
 							gui.wishlist.updateModel();
 							if (!success) {
 								JOptionPane.showMessageDialog(Mainframe.getInstance(),
-										"Es wurden keine Bücher gefunden");
+										"Es wurden keine bÃ¼cher gefunden");
 							} else {
 								whishlist_instance.setVisible(true);
 							}
@@ -704,14 +714,14 @@ public class Mainframe extends JFrame {
 
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
-				JMenuItem itemAddBuch = new JMenuItem("Buch hinzufügen");
+				JMenuItem itemAddBuch = new JMenuItem("Buch hinzufÃ¼gen");
 				menu.add(itemAddBuch);
 				menu.show(tree, e.getX(), e.getY());
 				itemAddBuch.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						if (e.getActionCommand().equals("Buch hinzufügen")) {
+						if (e.getActionCommand().equals("Buch hinzufÃ¼gen")) {
 							new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel);
 						}
 					}
@@ -719,14 +729,14 @@ public class Mainframe extends JFrame {
 			}
 
 		});
-		// Füge einen MouseMotionListener hinzu, um die Mausposition zu verfolgen
+		// add MouseMotionListener to track the Mouseposition
 		tree.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				// Berechne die Zeile, über der die Maus schwebt
+				// get current row of Mouse Location
 				int row = tree.getRowForLocation(e.getX(), e.getY());
 
-//				 Wenn sich die Zeile geändert hat, aktualisiere den Renderer
+				// refresh if row changed
 				if (row != renderer.hoveredRow) {
 					TreePath currentPath = tree.getPathForLocation(e.getX(), e.getY());
 					if (currentPath != null && !currentPath.equals(lastPath)) {
@@ -770,7 +780,7 @@ public class Mainframe extends JFrame {
 							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
 						else
 							JOptionPane.showMessageDialog(Mainframe.getInstance(),
-									"Backup fehlgeschlagen oder nicht vollständig.");
+									"Backup fehlgeschlagen oder nicht vollstÃ¤ndig.");
 					}
 				}
 				logger.trace("Window closing");
@@ -787,7 +797,7 @@ public class Mainframe extends JFrame {
 							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
 						else
 							JOptionPane.showMessageDialog(Mainframe.getInstance(),
-									"Backup fehlgeschlagen oder nicht vollständig.");
+									"Backup fehlgeschlagen oder nicht vollstÃ¤ndig.");
 					}
 				}
 				logger.trace("Window closed");
@@ -809,14 +819,14 @@ public class Mainframe extends JFrame {
 			int index = entries.getIndexOf(searchAutor, searchTitel);
 			if (selected.length != 0) {
 				int antwort = JOptionPane.showConfirmDialog(null,
-						"Wirklich '" + searchAutor + " - " + searchTitel + "' löschen?", "Löschen",
+						"Wirklich '" + searchAutor + " - " + searchTitel + "' lÃ¶schen?", "lÃ¶schen",
 						JOptionPane.YES_NO_OPTION);
 				if (antwort == JOptionPane.YES_OPTION) {
 					entries.delete(index);
 				}
 				BookListModel.checkAuthors();
 			} else {
-				JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es wurde kein Buch ausgewählt");
+				JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es wurde kein Buch ausgewÃ¤hlt");
 			}
 			logger.trace("Book deleted: " + searchAutor + ";" + searchTitel);
 		}
@@ -1102,10 +1112,10 @@ public class Mainframe extends JFrame {
 				in.close();
 				String importString = "";
 				if (rejected > 0)
-					importString = "Anzahl Bücher importiert: " + imported + importedBooks + "\nDupletten erkannt:"
+					importString = "Anzahl bÃ¼cher importiert: " + imported + importedBooks + "\nDupletten erkannt:"
 							+ rejectedBooks;
 				else
-					importString = "Anzahl Bücher importiert: " + imported + "\n" + importedBooks;
+					importString = "Anzahl bÃ¼cher importiert: " + imported + "\n" + importedBooks;
 				if (imported >= 1 || rejected > 0) {
 
 					JOptionPane.showMessageDialog(Mainframe.getInstance(), importString);
@@ -1128,14 +1138,14 @@ public class Mainframe extends JFrame {
 							os.write(input, 0, input.length);
 						}
 
-						// Antwortcode überprüfen
+						// Antwortcode Ã¼berprÃ¼fen
 						responseCode = con.getResponseCode();
 						logger.trace("Web API DELETE books responseCode: " + responseCode);
 					} catch (Exception e) {
 						logger.error(e.getMessage());
 					}
 				} else {
-					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Bücher zum abrufen gefunden.");
+					JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine bÃ¼cher zum abrufen gefunden.");
 				}
 				con.disconnect();
 			} else {
@@ -1221,14 +1231,14 @@ public class Mainframe extends JFrame {
 			// Antwort vom Server lesen
 			int responseCode = con.getResponseCode();
 			if (responseCode == HttpURLConnection.HTTP_OK) {
-				logger.trace("Bücher erfolgreich hochgeladen!");
-				JOptionPane.showMessageDialog(this, "Bücher erfolgreich hochgeladen!");
+				logger.trace("bÃ¼cher erfolgreich hochgeladen!");
+				JOptionPane.showMessageDialog(this, "bÃ¼cher erfolgreich hochgeladen!");
 			} else {
-				logger.error("Fehler beim Hochladen der Bücher: " + responseCode);
-				JOptionPane.showMessageDialog(this, "Fehler beim Hochladen der Bücher: " + responseCode);
+				logger.error("Fehler beim Hochladen der bÃ¼cher: " + responseCode);
+				JOptionPane.showMessageDialog(this, "Fehler beim Hochladen der bÃ¼cher: " + responseCode);
 			}
 
-			// Verbindung schließen
+			// Verbindung schlieÃŸen
 			con.disconnect();
 		} catch (MalformedURLException | URISyntaxException e) {
 			logger.error(e.getMessage());
@@ -1363,7 +1373,7 @@ public class Mainframe extends JFrame {
 
 						if (intDownloadedVer > intCurVer) {
 							int antwort = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
-									"Es ist ein Update auf Version " + line + " verfügbar,\n Jetzt durcführen?",
+									"Es ist ein Update auf Version " + line + " verfÃ¼gbar,\n Jetzt durchfÃ¼hren?",
 									"Update", JOptionPane.YES_NO_OPTION);
 							if (antwort == JOptionPane.YES_OPTION) {
 								boolean ret = createBackup();
@@ -1379,7 +1389,7 @@ public class Mainframe extends JFrame {
 							}
 
 						} else {
-							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Kein Update verfügbar");
+							JOptionPane.showMessageDialog(Mainframe.getInstance(), "Kein Update verfÃ¼gbar");
 						}
 					}
 

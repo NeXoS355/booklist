@@ -48,14 +48,14 @@ public class Dialog_edit_Wishlist extends JDialog {
 	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_edit_Wishlist(Frame owner, WishlistListModel einträge, int index) {
+	public Dialog_edit_Wishlist(Frame owner, WishlistListModel entries, int index) {
 		Mainframe.logger.trace("Wishlist Book edit: start creating Frame");
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(500, 300));
 		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
 
-		Book_Wishlist eintrag = einträge.getElementAt(index);
+		Book_Wishlist eintrag = entries.getElementAt(index);
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
@@ -85,8 +85,8 @@ public class Dialog_edit_Wishlist extends JDialog {
 		panelSouth.setLayout(new GridLayout(1, 2, 10, 10));
 //		panel_south.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
-		int höhe = 60;
-		int breite = 100;
+		int height = 60;
+		int width = 100;
 
 		JLabel lbl_datum = new JLabel("Datum: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDate()));
 		panelNorth.add(lbl_datum);
@@ -94,7 +94,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		// Empty Panel top Gap
 		JLabel lbl_empty1 = new JLabel("");
 		lbl_empty1.setFont(Mainframe.defaultFont);
-		lbl_empty1.setPreferredSize(new Dimension(breite, 10));
+		lbl_empty1.setPreferredSize(new Dimension(width, 10));
 		panelNorth.add(lbl_empty1);
 		// Ende topGap
 
@@ -103,9 +103,9 @@ public class Dialog_edit_Wishlist extends JDialog {
 		 */
 		JLabel lbl_author = new JLabel("Autor:");
 		lbl_author.setFont(Mainframe.defaultFont);
-		lbl_author.setPreferredSize(new Dimension(breite, höhe));
+		lbl_author.setPreferredSize(new Dimension(width, height));
 		txtAuthor = new CustomTextField(eintrag.getAuthor());
-		txtAuthor.setPreferredSize(new Dimension(50, höhe));
+		txtAuthor.setPreferredSize(new Dimension(50, height));
 		txtAuthor.setBorder(standardBorder);
 		txtAuthor.addKeyListener(new KeyAdapter() {
 
@@ -137,9 +137,9 @@ public class Dialog_edit_Wishlist extends JDialog {
 		});
 		JLabel lbl_title = new JLabel("Titel:");
 		lbl_title.setFont(Mainframe.defaultFont);
-		lbl_title.setPreferredSize(new Dimension(breite, höhe));
+		lbl_title.setPreferredSize(new Dimension(width, height));
 		txtTitle = new CustomTextField(eintrag.getTitle());
-		txtTitle.setPreferredSize(new Dimension(50, höhe));
+		txtTitle.setPreferredSize(new Dimension(50, height));
 		txtTitle.setBorder(standardBorder);
 		txtTitle.addKeyListener(new KeyAdapter() {
 
@@ -191,10 +191,10 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		JLabel lbl_merk = new JLabel("Bemerkung:");
 		lbl_merk.setFont(Mainframe.defaultFont);
-		lbl_merk.setPreferredSize(new Dimension(breite, höhe));
+		lbl_merk.setPreferredSize(new Dimension(width, height));
 
 		txtNote = new CustomTextField(eintrag.getNote());
-		txtNote.setPreferredSize(new Dimension(50, höhe));
+		txtNote.setPreferredSize(new Dimension(50, height));
 		txtNote.setBorder(standardBorder);
 		txtNote.addKeyListener(new KeyAdapter() {
 
@@ -225,10 +225,10 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		JLabel lbl_serie = new JLabel("Serie | Band:");
 		lbl_serie.setFont(Mainframe.defaultFont);
-		lbl_serie.setPreferredSize(new Dimension(breite, höhe));
+		lbl_serie.setPreferredSize(new Dimension(width, height));
 
 		txtSeries = new CustomTextField(eintrag.getSeries());
-		txtSeries.setPreferredSize(new Dimension(50, höhe));
+		txtSeries.setPreferredSize(new Dimension(50, height));
 		txtSeries.setBorder(standardBorder);
 		txtSeries.addKeyListener(new KeyAdapter() {
 
@@ -259,7 +259,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		});
 
 		txtSeriesVol = new CustomTextField(eintrag.getSeriesVol());
-		txtSeriesVol.setPreferredSize(new Dimension(50, höhe));
+		txtSeriesVol.setPreferredSize(new Dimension(50, height));
 		txtSeriesVol.setBorder(standardBorder);
 		txtSeriesVol.addKeyListener(new KeyAdapter() {
 

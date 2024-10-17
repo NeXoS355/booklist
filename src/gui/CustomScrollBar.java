@@ -23,7 +23,7 @@ public class CustomScrollBar extends BasicScrollBarUI {
     }
     @Override
     protected JButton createDecreaseButton(int orientation) {
-        // Gibt einen Button mit Größe (0, 0) zurück, um den Pfeil zu verstecken
+        // Gibt einen Button mit Groesse (0, 0) zurueck, um den Pfeil zu0 verstecken
         return new JButton() {
             /**
 			 * 
@@ -39,7 +39,7 @@ public class CustomScrollBar extends BasicScrollBarUI {
 
     @Override
     protected JButton createIncreaseButton(int orientation) {
-        // Gibt einen Button mit Größe (0, 0) zurück, um den Pfeil zu verstecken
+        // Gibt einen Button mit Groesse (0, 0) zurueck, um den Pfeil zu verstecken
         return new JButton() {
             /**
 			 * 

@@ -56,24 +56,21 @@ public class GetBookInfosFromWeb {
 			}
 			str.append(sanitizeString(entry.getTitle()));
 
-			// Die URL der REST-API
+			// URL of REST-API
 			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str.toString() + "&maxResults="
 					+ maxResults + "&printType=books";
 
 			Mainframe.logger.info("Search API: " + entry.toString().toString());
 			Mainframe.logger.info("Search API URL: " + apiUrl);
 
-			// HttpURLConnection erstellen
 			URL url = new URI(apiUrl).toURL();
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-			// GET-Methode festlegen
 			connection.setRequestMethod("GET");
 
-			// Verbindung öffnen und Response-Code überprüfen
+			// open connection and check response Code
 			int responseCode = connection.getResponseCode();
 			if (responseCode == HttpURLConnection.HTTP_OK) {
-				// InputStream lesen und in einen String umwandeln
+				// read InputStream and create String
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 				StringBuilder response = new StringBuilder();
 				String line;
@@ -82,11 +79,10 @@ public class GetBookInfosFromWeb {
 				}
 				reader.close();
 
-				// JSON-Antwort in ein JsonObject umwandeln
+				// create JSONObject from response
 				JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
 				compareReturn = analyseApiRequestBookInfo(jsonObject, entry);
 			}
-			// Verbindung schlieÃŸen
 			connection.disconnect();
 
 		} catch (Exception e) {
@@ -111,25 +107,22 @@ public class GetBookInfosFromWeb {
 			
 			str = sanitizeString(str);
 			
-			// Die URL der REST-API
+			// URL of REST-API
 			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults="
 					+ maxResults + "&printType=books";
 
 			Mainframe.logger.trace("Search API: " + str);
 			Mainframe.logger.trace("Search API URL: " + apiUrl);
 
-			// HttpURLConnection erstellen
 			URL url = new URI(apiUrl).toURL();
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-			// GET-Methode festlegen
 			connection.setRequestMethod("GET");
 
-			// Verbindung öffnen und Response-Code überprüfen
+			// open connection and check response Code
 			int responseCode = connection.getResponseCode();
 			Mainframe.logger.trace("Search API response: " + responseCode);
 			if (responseCode == HttpURLConnection.HTTP_OK) {
-				// InputStream lesen und in einen String umwandeln
+				// read InputStream and create String
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
 				StringBuilder response = new StringBuilder();
 				String line;
@@ -138,11 +131,10 @@ public class GetBookInfosFromWeb {
 				}
 				reader.close();
 
-				// JSON-Antwort in ein JsonObject umwandeln
+				// create JSONObject from response
 				JsonObject jsonObject = JsonParser.parseString(response.toString()).getAsJsonObject();
 				compareReturn = analyseApiRequestSeries(jsonObject, maxResults);
 			}
-			// Verbindung schlieÃŸen
 			connection.disconnect();
 
 		} catch (Exception e) {
@@ -159,7 +151,6 @@ public class GetBookInfosFromWeb {
 	 * @param entry - Book entry to save the Information
 	 */
 	private static int analyseApiRequestBookInfo(JsonObject jsonObject, Book_Booklist entry) {
-		// Auf den Titel zugreifen
 		int i = 0;
 		int cCover = 0;
 		int cDesc = 0;
@@ -245,7 +236,6 @@ public class GetBookInfosFromWeb {
 	 * @param maxResults - how many Results were requested from Google Books API
 	 */
 	private static String[][] analyseApiRequestSeries(JsonObject jsonObject, int maxResults) {
-		// Auf den Titel zugreifen
 		int i = 0;
 		String[][] returnArray = new String[maxResults][3];
 		while (i < maxResults) {

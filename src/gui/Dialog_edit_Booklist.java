@@ -138,7 +138,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		/*
 		 * create and add components to Panel North
 		 */
-		JLabel lblDate = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
+		JLabel lblDate = new JLabel("hinzugefuegt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
 
 		JLabel lblIsbn = new JLabel("ISBN: " + entry.getIsbn(), SwingConstants.RIGHT);
 		lblIsbn.addMouseListener(new MouseAdapter() {
@@ -154,7 +154,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
 				JMenuItem itemCopy = new JMenuItem("kopieren");
-				JMenuItem itemDel = new JMenuItem("löschen");
+				JMenuItem itemDel = new JMenuItem("lÃ¶schen");
 				menu.add(itemCopy);
 				menu.add(itemDel);
 				menu.show(lblIsbn, e.getX(), e.getY());
@@ -205,7 +205,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 				private void showMenu(MouseEvent e) {
 					JPopupMenu menu = new JPopupMenu();
-					JMenuItem itemDelPic = new JMenuItem("Bild löschen");
+					JMenuItem itemDelPic = new JMenuItem("Bild lÃ¶schen");
 					JMenuItem itemChanPic = new JMenuItem("Bild bearbeiten");
 					menu.add(itemChanPic);
 					menu.add(itemDelPic);
@@ -214,7 +214,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
+							String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfÃ¼gen");
 							if (webpage != null && webpage != "") {
 								GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, false);
 								lblPic = new JLabel(showImg(entry));
@@ -227,7 +227,7 @@ public class Dialog_edit_Booklist extends JDialog {
 						public void actionPerformed(ActionEvent e) {
 							boolean state = GetBookInfosFromWeb.deletePic(entry.getBid());
 							if (state == true) {
-								// JOptionPane.showMessageDialog(null, "Bild erfolgreich gelöscht");
+								// JOptionPane.showMessageDialog(null, "Bild erfolgreich geloescht");
 								entry.setPic(null);
 								dispose();
 								new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
@@ -366,14 +366,14 @@ public class Dialog_edit_Booklist extends JDialog {
 			
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
-				JMenuItem itemDeleteRating = new JMenuItem("Rating löschen");
+				JMenuItem itemDeleteRating = new JMenuItem("Rating lÃ¶schen");
 				menu.add(itemDeleteRating);
 				menu.show(lblStars, e.getX(), e.getY());
 				itemDeleteRating.addActionListener(new ActionListener() {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						if (e.getActionCommand() == "Rating löschen") {
+						if (e.getActionCommand() == "Rating lÃ¶schen") {
 							setRating(0);
 							setRatingIcon();
 						}
@@ -766,7 +766,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
-				JMenuItem itemDelDesc = new JMenuItem("Beschreibung löschen");
+				JMenuItem itemDelDesc = new JMenuItem("Beschreibung lÃ¶schen");
 				menu.add(itemDelDesc);
 				menu.show(txtDesc, e.getX(), e.getY());
 				itemDelDesc.addActionListener(new ActionListener() {
@@ -775,7 +775,7 @@ public class Dialog_edit_Booklist extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						boolean state = Database.delDesc(entry.getBid());
 						if (state == true) {
-							// JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich gelöscht");
+							// JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich geloescht");
 							entry.setDesc(null, true);
 							dispose();
 							new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
@@ -940,10 +940,10 @@ public class Dialog_edit_Booklist extends JDialog {
 						Database.updateBooklistEntry(bid, "name", txtBorrowedFrom.getText());
 					}
 				}
-				Mainframe.logger.info("Buch geändert: " + entry.getAuthor() + "-" + entry.getTitle());
+				Mainframe.logger.info("Buch geÃ¤ndert: " + entry.getAuthor() + "-" + entry.getTitle());
 				dispose();
 			} else {
-				Mainframe.logger.info("Buch ändern: Bereits vorhanden!");
+				Mainframe.logger.info("Buch Ã¤ndern: Bereits vorhanden!");
 				txtTitle.setText("Buch bereits vorhanden!");
 				txtTitle.setBackground(new Color(255, 105, 105));
 				btnAdd.setEnabled(false);

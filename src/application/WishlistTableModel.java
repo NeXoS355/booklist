@@ -14,7 +14,7 @@ public class WishlistTableModel extends DefaultTableModel {
 	private String[] rowData = new String[cols];
 	private String[] columnNames = { "Autor", "Titel", "Serie", "Bemerkung" };
 
-	public WishlistTableModel(WishlistListModel bücher) {
+	public WishlistTableModel(WishlistListModel books) {
 
 		super();
 		this.setColumnIdentifiers(columnNames);
@@ -23,16 +23,16 @@ public class WishlistTableModel extends DefaultTableModel {
 			this.removeRow(i);
 		}
 		
-		for (int i = 0; i < bücher.getSize(); i++) {
+		for (int i = 0; i < books.getSize(); i++) {
 			for (int j = 0; j < cols; j++) {
 				if (j == 0) {
-					rowData[j] = bücher.getElementAt(i).getAuthor();
+					rowData[j] = books.getElementAt(i).getAuthor();
 				} else if (j == 1) {
-					rowData[j] = bücher.getElementAt(i).getTitle();
+					rowData[j] = books.getElementAt(i).getTitle();
 				} else if (j == 2) {
-					rowData[j] = bücher.getElementAt(i).getSeries() + " - " + bücher.getElementAt(i).getSeriesVol();
+					rowData[j] = books.getElementAt(i).getSeries() + " - " + books.getElementAt(i).getSeriesVol();
 				} else if (j == 3) {
-					rowData[j] = bücher.getElementAt(i).getNote();
+					rowData[j] = books.getElementAt(i).getNote();
 				}
 			}
 			this.addRow(rowData);

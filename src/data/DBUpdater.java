@@ -1,6 +1,7 @@
 package data;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,7 +32,7 @@ public class DBUpdater {
 		switch (currentVersion) {
 		case "2.2.0":
 			try {
-				sql = "ALTER TABLE bücher ADD description clob (64 M)";
+				sql = "ALTER TABLE bÃ¼cher ADD description clob (64 M)";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
@@ -46,7 +47,7 @@ public class DBUpdater {
 			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.0 aktualisiert!");
 		case "2.4.0":
 			try {
-				sql = "ALTER TABLE bücher ADD isbn varchar(13)";
+				sql = "ALTER TABLE bÃ¼cher ADD isbn varchar(13)";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
@@ -63,7 +64,7 @@ public class DBUpdater {
 		case "2.4.4":
 			int success = 0;
 			try {
-				sql = "ALTER TABLE bücher ADD bid numeric(6,0) NOT NULL DEFAULT 0";
+				sql = "ALTER TABLE bÃ¼cher ADD bid numeric(6,0) NOT NULL DEFAULT 0";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
@@ -73,7 +74,7 @@ public class DBUpdater {
 				while (rs.next()) {
 					String autor = rs.getString("autor").trim();
 					String titel = rs.getString("titel").trim();
-					sql = "UPDATE bücher set bid= ? WHERE autor = ? AND titel = ?";
+					sql = "UPDATE bÃ¼cher set bid= ? WHERE autor = ? AND titel = ?";
 					st = con.prepareStatement(sql);
 					st.setInt(1, bid);
 					st.setString(2, autor);
@@ -91,7 +92,7 @@ public class DBUpdater {
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
 			try {
-				sql = "ALTER TABLE bücher DROP CONSTRAINT buecher_pk";
+				sql = "ALTER TABLE bÃ¼cher DROP CONSTRAINT buecher_pk";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
@@ -101,7 +102,7 @@ public class DBUpdater {
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
 			try {
-				sql = "ALTER TABLE bücher ADD CONSTRAINT buecher_pk PRIMARY KEY (bid)";
+				sql = "ALTER TABLE bÃ¼cher ADD CONSTRAINT buecher_pk PRIMARY KEY (bid)";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
@@ -122,7 +123,7 @@ public class DBUpdater {
 					JOptionPane.showMessageDialog(null, e.getMessage());
 				}
 			} else
-				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die version nicht erhöht");
+				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die version nicht erhoeht");
 
 			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.5 aktualisiert!");
 			version_new = checkVersion(con);
@@ -134,7 +135,7 @@ public class DBUpdater {
 		case "2.4.5":
 			success = 0;
 			try {
-				sql = "ALTER TABLE bücher ADD ebook NUMERIC(1,0)";
+				sql = "ALTER TABLE bÃ¼cher ADD ebook NUMERIC(1,0)";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
@@ -157,7 +158,7 @@ public class DBUpdater {
 					JOptionPane.showMessageDialog(null, e.getMessage());
 				}
 			} else
-				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die Version nicht erhöht");
+				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die Version nicht erhoeht");
 
 			version_new = checkVersion(con);
 			if (!version_new.equals("2.5.0")) {
@@ -184,16 +185,15 @@ public class DBUpdater {
 					}
 				}
 				rs.close();
-				JOptionPane.showMessageDialog(null, counter + " Bücher wurden als E-Book markiert");
+				JOptionPane.showMessageDialog(null, counter + " Buecher wurden als E-Book markiert");
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 		case "2.5.0":
 			success = 0;
 			try {
-				sql = "ALTER TABLE bücher ADD rating NUMERIC(2,0)";
+				sql = "ALTER TABLE bÃ¼cher ADD rating NUMERIC(2,0)";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
@@ -216,7 +216,7 @@ public class DBUpdater {
 					JOptionPane.showMessageDialog(null, e.getMessage());
 				}
 			} else
-				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die Version nicht erhöht");
+				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die Version nicht erhoeht");
 
 			version_new = checkVersion(con);
 			if (!version_new.equals("2.6.0")) {
@@ -224,6 +224,59 @@ public class DBUpdater {
 				System.exit(1);
 			}
 		case "2.6.0":
+			success = 0;
+
+			try {
+				sql = "RENAME TABLE bÃ¼cher TO books";
+				st = con.prepareStatement(sql);
+				st.execute();
+				st.close();
+				success++;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
+				JOptionPane.showMessageDialog(null, e.getMessage());
+			}
+			
+			DatabaseMetaData metaDataForDatabaseConnection;
+			try {
+				metaDataForDatabaseConnection = con.getMetaData();
+			    ResultSet resultSetForTableNames = metaDataForDatabaseConnection.getTables(null, null, null, new String[]{"TABLE"});
+
+
+			    while (resultSetForTableNames.next()) {
+			    	if(resultSetForTableNames.getString(3).equals("BOOKS"))
+			    		success++;
+			        
+			    }
+			} catch (SQLException e) {
+				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
+				JOptionPane.showMessageDialog(null, e.getMessage());
+				success = 0;
+			}
+			System.out.println(success);
+			if (success == 2) {
+				try {
+
+				    
+					sql = "UPDATE versions set version='3.1.6'";
+					st = con.prepareStatement(sql);
+					st.execute();
+					st.close();
+					JOptionPane.showMessageDialog(null, "Datenbank auf Version 3.1.6 aktualisiert!");
+				} catch (SQLException e) {
+					JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
+					JOptionPane.showMessageDialog(null, e.getMessage());
+				}
+			} else
+				JOptionPane.showMessageDialog(null, "Aufgrund eines Fehlers wurde die Version nicht erhoeht");
+
+			version_new = checkVersion(con);
+			if (!version_new.equals("3.1.6")) {
+				JOptionPane.showMessageDialog(null, "Datenbank nicht aktuell! Bitte Prozess wiederholen!");
+				System.exit(1);
+			}
+		case "3.1.6":
 			// all good
 		}
 
