@@ -49,9 +49,9 @@ public class SimpleTableModel extends DefaultTableModel {
 				if (j == columnEbook) {
 					boolean isEbook = books.getElementAt(i).isEbook();
 					if (isEbook) {
-						rowData[j] = "X";
+						rowData[j] = "●";
 					} else {
-						rowData[j] = "";
+						rowData[j] = "○";
 					}
 				} else if (j == columnAuthor) {
 					rowData[j] = books.getElementAt(i).getAuthor();

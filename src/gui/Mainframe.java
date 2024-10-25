@@ -7,6 +7,7 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.HeadlessException;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -522,12 +523,34 @@ public class Mainframe extends JFrame {
 
 		table.setModel(tableDisplay);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+		ImageIcon scaledEbookIcon;
+		if(HandleConfig.darkmode==1) {
+			URL ebookIconURL = getClass().getResource("/resources/ebook_inv.png");
+			ImageIcon ebookIcon = new ImageIcon(ebookIconURL);
+			scaledEbookIcon = new ImageIcon(
+					ebookIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
+				);
+		} else {
+			URL ebookIconURL = getClass().getResource("/resources/ebook.png");
+			ImageIcon ebookIcon = new ImageIcon(ebookIconURL);
+			scaledEbookIcon = new ImageIcon(
+					ebookIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
+				);
+		}
+
+		URL starIconURL = getClass().getResource("/resources/star.png");
+		ImageIcon starIcon = new ImageIcon(starIconURL);
+		ImageIcon scaledStarIcon = new ImageIcon(
+				starIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
+			);
 		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer();
 		table.setDefaultRenderer(Object.class, tableRenderer);
+		CustomTableHeaderRenderer tableHeaderRenderer = new CustomTableHeaderRenderer();
+		tableHeaderRenderer.setColumnIcon(0, scaledEbookIcon);
+		tableHeaderRenderer.setColumnIcon(4, scaledStarIcon);
 		JTableHeader header = table.getTableHeader();
-		header.setDefaultRenderer(tableRenderer);
+		header.setDefaultRenderer(tableHeaderRenderer);
 		table.setFont(defaultFont);
-		table.setShowVerticalLines(false);
 		table.setShowHorizontalLines(false);
 		table.setIntercellSpacing(new Dimension(0, 0));
 		table.setRowHeight(table.getRowHeight() + 6);
