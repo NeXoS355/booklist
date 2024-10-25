@@ -51,7 +51,7 @@ public class wishlist extends JFrame {
 	 * @param visible - set the default visible state
 	 */
 	public wishlist(Frame owner, boolean visible) {
-		super("Wunschliste");
+		super("Wishlist");
 		instance = this;
 		this.setLayout(new BorderLayout(10, 10));
 		this.setSize(700, 700);
@@ -88,11 +88,11 @@ public class wishlist extends JFrame {
 		north_panel.add(btnAdd, BorderLayout.WEST);
 
 		table.setModel(display);
-		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer();
+		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer(this.getTitle());
 		table.setDefaultRenderer(Object.class, tableRenderer);
 		JTableHeader header = table.getTableHeader();
-		header.setDefaultRenderer(tableRenderer);
-		table.setShowVerticalLines(false);
+		CustomTableHeaderRenderer tableHeaderRenderer = new CustomTableHeaderRenderer(this.getTitle());
+		header.setDefaultRenderer(tableHeaderRenderer);
 		table.setShowHorizontalLines(false);
 		table.setIntercellSpacing(new Dimension(0, 0));
 		table.setFont(defaultFont);

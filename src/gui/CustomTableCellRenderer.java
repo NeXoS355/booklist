@@ -13,6 +13,13 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 	 */
 	private static final long serialVersionUID = 1L;
 	private int hoveredRow = -2;
+	
+	private String parent = "";
+
+	public CustomTableCellRenderer(String parent) {
+		this.parent = parent;
+		System.out.println(parent);
+	}
 
 	public void setHoveredRow(int row) {
 		this.hoveredRow = row;
@@ -29,7 +36,7 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 		setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY));
 
 	    // Ausrichtung für erste Spalte zentriert, rest bleibt linksbündig
-	    if (column == 0 || column == 4) {
+	    if (parent.equals("Booklist") && (column == 0 || column == 4)) {
 	        setHorizontalAlignment(SwingConstants.CENTER);
 	    } else {
 	        setHorizontalAlignment(SwingConstants.LEFT);

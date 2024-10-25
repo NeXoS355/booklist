@@ -16,6 +16,12 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 	private static final long serialVersionUID = 1L;
 	private final Map<Integer, Icon> columnIcons = new HashMap<>();
 
+	private String parent = "";
+
+	public CustomTableHeaderRenderer(String parent) {
+		this.parent = parent;
+	}
+
 	// Methode zum Setzen eines Icons für eine bestimmte Spalte
 	public void setColumnIcon(int column, Icon icon) {
 		columnIcons.put(column, icon);

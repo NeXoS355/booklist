@@ -145,7 +145,7 @@ public class Mainframe extends JFrame {
 	private static String version;
 
 	private Mainframe() throws HeadlessException {
-		super("bücherliste");
+		super("Booklist");
 
 		this.setLayout(new BorderLayout(10, 10));
 		this.setLocationByPlatform(true);
@@ -543,9 +543,9 @@ public class Mainframe extends JFrame {
 		ImageIcon scaledStarIcon = new ImageIcon(
 				starIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
 			);
-		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer();
+		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer(this.getTitle());
 		table.setDefaultRenderer(Object.class, tableRenderer);
-		CustomTableHeaderRenderer tableHeaderRenderer = new CustomTableHeaderRenderer();
+		CustomTableHeaderRenderer tableHeaderRenderer = new CustomTableHeaderRenderer(this.getTitle());
 		tableHeaderRenderer.setColumnIcon(0, scaledEbookIcon);
 		tableHeaderRenderer.setColumnIcon(4, scaledStarIcon);
 		JTableHeader header = table.getTableHeader();
