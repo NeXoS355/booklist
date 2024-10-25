@@ -18,7 +18,6 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 
 	public CustomTableCellRenderer(String parent) {
 		this.parent = parent;
-		System.out.println(parent);
 	}
 
 	public void setHoveredRow(int row) {

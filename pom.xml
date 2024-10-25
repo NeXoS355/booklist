@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>booklist</groupId>
 	<artifactId>booklist</artifactId>
-	<version>3.1.6</version>
+	<version>3.1.7</version>
 	<name>booklist</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
