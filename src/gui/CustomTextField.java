@@ -123,7 +123,7 @@ public class CustomTextField extends JTextField {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (isEditable()) {
+				if (!isEditable()) {
 					setEditable(true);
 					setForeground(UIManager.getColor("TextField.foreground"));
 					setBackground(UIManager.getColor("TextField.background"));
