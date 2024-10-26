@@ -258,19 +258,20 @@ public class Dialog_edit_Booklist extends JDialog {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					int compResult1 = 0;
-					int compResult2 = 0;
 
-					compResult1 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, false);
-					if (compResult1 < 75) {
-						compResult2 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, true);
-						if (compResult1 > compResult2) {
-							GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, true);
+					Mainframe.executor.submit(() -> {
+						int compResult1 = 0;
+						int compResult2 = 0;
+						compResult1 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, false);
+						if (compResult1 < 75) {
+							compResult2 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, true);
+							if (compResult1 > compResult2) {
+								GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, true);
+							}
 						}
-					}
-
-					dispose();
-					new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
+						dispose();
+						new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
+					});
 				}
 			});
 			panelEastBorder.add(btnDownloadInfo, BorderLayout.CENTER);
