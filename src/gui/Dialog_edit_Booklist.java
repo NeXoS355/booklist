@@ -4,11 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -19,6 +21,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 
@@ -86,7 +89,7 @@ public class Dialog_edit_Booklist extends JDialog {
 	/**
 	 * Dialog Edit Constructor
 	 * 
-	 * @param owner - set the owner of this Frame
+	 * @param owner     - set the owner of this Frame
 	 * @param bookModel - current entries of the Booktable
 	 * @param treeModel - current entries of the Authortree
 	 */
@@ -97,7 +100,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		this.setSize(new Dimension(600, 645));
 		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
-		
+
 		entry = bookModel.getElementAt(index);
 
 		if (HandleConfig.loadOnDemand == 1) {
@@ -188,10 +191,17 @@ public class Dialog_edit_Booklist extends JDialog {
 		 */
 		ImageIcon imgIcn = showImg(entry);
 		if (imgIcn != null) {
-			Image img = imgIcn.getImage();
-			Image newimg = img.getScaledInstance(128, 203, java.awt.Image.SCALE_SMOOTH);
-			imgIcn = new ImageIcon(newimg);
-			lblPic = new JLabel(imgIcn);
+			BufferedImage originalImage = new BufferedImage(imgIcn.getIconWidth(), imgIcn.getIconHeight(),
+					BufferedImage.TYPE_INT_ARGB);
+			// Original in BufferedImage zeichnen
+			Graphics2D g2d = originalImage.createGraphics();
+			g2d.drawImage(imgIcn.getImage(), 0, 0, null);
+			g2d.dispose();
+
+			// Höhenqualitative Skalierung
+			BufferedImage scaledImage = getScaledImage(originalImage, 128, 203);
+			lblPic = new JLabel(new ImageIcon(scaledImage));
+
 			lblPic.setPreferredSize(new Dimension(160, 280));
 			lblPic.addMouseListener(new MouseAdapter() {
 
@@ -266,7 +276,6 @@ public class Dialog_edit_Booklist extends JDialog {
 			panelEastBorder.add(btnDownloadInfo, BorderLayout.CENTER);
 		}
 
-		
 		/*
 		 * create and add components to Rating Panel
 		 */
@@ -356,14 +365,14 @@ public class Dialog_edit_Booklist extends JDialog {
 				int segmentWidth = lblStars.getWidth() / 10;
 				int mouse = e.getX();
 				int segment = mouse / segmentWidth + 1;
-				
+
 				if (SwingUtilities.isLeftMouseButton(e)) {
 					setRating(segment);
 				} else if (SwingUtilities.isRightMouseButton(e)) {
 					showMenu(e);
 				}
 			}
-			
+
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
 				JMenuItem itemDeleteRating = new JMenuItem("Rating löschen");
@@ -381,13 +390,13 @@ public class Dialog_edit_Booklist extends JDialog {
 				});
 			}
 		});
-		
+
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridx=0;
-		gbc.gridy=0;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
 		panelEastRating.add(lblStars, gbc);
-		gbc.gridx=0;
-		gbc.gridy=1;
+		gbc.gridx = 0;
+		gbc.gridy = 1;
 		gbc.anchor = GridBagConstraints.SOUTH;
 		panelEastRating.add(lblAckRating, gbc);
 
@@ -434,7 +443,7 @@ public class Dialog_edit_Booklist extends JDialog {
 					txtAuthor.setText(txtAuthor.getText().substring(0, typed));
 				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					save(entry);
-				} 
+				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 			}
@@ -451,7 +460,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		JLabel lblTitle = new JLabel("Titel:");
 		lblTitle.setFont(Mainframe.defaultFont);
 		lblTitle.setPreferredSize(new Dimension(width, heigth));
-		
+
 		txtTitle = new CustomTextField(entry.getTitle());
 		txtTitle.setPreferredSize(new Dimension(50, heigth));
 		txtTitle.addKeyListener(new KeyAdapter() {
@@ -691,7 +700,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 
 		});
-		
+
 		txtBorrowedTo = new CustomTextField(entry.getBorrowedTo());
 		if (entry.getBorrowedTo().isEmpty())
 			txtBorrowedTo.setVisible(false);
@@ -753,7 +762,7 @@ public class Dialog_edit_Booklist extends JDialog {
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		JScrollBar tableVerticalScrollBar = scrollDesc.getVerticalScrollBar();
 		tableVerticalScrollBar.setUI(new CustomScrollBar());
-		
+
 		txtDesc.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -1060,6 +1069,40 @@ public class Dialog_edit_Booklist extends JDialog {
 				Mainframe.logger.error(e1.getMessage());
 			}
 		});
+	}
+
+	private static BufferedImage getScaledImage(BufferedImage original, int targetWidth, int targetHeight) {
+		// Mehrstufige Skalierung für bessere Qualität
+		BufferedImage scaled = original;
+		int currentWidth = original.getWidth();
+		int currentHeight = original.getHeight();
+
+		// Schrittweise Verkleinerung für bessere Qualität
+		while (currentWidth > targetWidth * 2 || currentHeight > targetHeight * 2) {
+			currentWidth = Math.max(currentWidth / 2, targetWidth);
+			currentHeight = Math.max(currentHeight / 2, targetHeight);
+
+			BufferedImage temp = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D g2 = temp.createGraphics();
+			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+			g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.drawImage(scaled, 0, 0, currentWidth, currentHeight, null);
+			g2.dispose();
+
+			scaled = temp;
+		}
+
+		// Finale Skalierung auf die Zielgröße
+		BufferedImage finalImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2 = finalImage.createGraphics();
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.drawImage(scaled, 0, 0, targetWidth, targetHeight, null);
+		g2.dispose();
+
+		return finalImage;
 	}
 
 }
