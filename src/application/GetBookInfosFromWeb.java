@@ -1,13 +1,10 @@
 package application;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -15,11 +12,13 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Iterator;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 
 import data.Database;
 import gui.Mainframe;
@@ -28,13 +27,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class GetBookInfosFromWeb {
-	
+
 	/**
 	 * request Book Infos from Google API to save Covers, description and ISBN No.
 	 * 
-	 * @param entry - Book entry to search for
-	 * @param maxResults - how many Results should be requested from Google Books API
-	 * @param retry - change Setting if first request was not sufficient
+	 * @param entry      - Book entry to search for
+	 * @param maxResults - how many Results should be requested from Google Books
+	 *                   API
+	 * @param retry      - change Setting if first request was not sufficient
 	 */
 	public static int getBookInfoFromGoogleApiWebRequest(Book_Booklist entry, int maxResults, boolean retry) {
 		int compareReturn = 0;
@@ -94,22 +94,23 @@ public class GetBookInfosFromWeb {
 		return compareReturn;
 
 	}
-	
+
 	/**
 	 * request Series Infos from Google API to save new Books from that series.
 	 * 
-	 * @param str - search String for API request
-	 * @param maxResults - how many Results should be requested from Google Books API
+	 * @param str        - search String for API request
+	 * @param maxResults - how many Results should be requested from Google Books
+	 *                   API
 	 */
 	public static String[][] getSeriesInfoFromGoogleApiWebRequest(String str, int maxResults) {
 		String[][] compareReturn = new String[3][10];
 		try {
-			
+
 			str = sanitizeString(str);
-			
+
 			// URL of REST-API
-			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults="
-					+ maxResults + "&printType=books";
+			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults=" + maxResults
+					+ "&printType=books";
 
 			Mainframe.logger.info("Search API: " + str);
 			Mainframe.logger.info("Search API URL: " + apiUrl);
@@ -143,12 +144,12 @@ public class GetBookInfosFromWeb {
 		return compareReturn;
 
 	}
-	
+
 	/**
 	 * Analyze the JSON response from Google Books API
 	 * 
 	 * @param jsonObject - JSON response from the request
-	 * @param entry - Book entry to save the Information
+	 * @param entry      - Book entry to save the Information
 	 */
 	private static int analyseApiRequestBookInfo(JsonObject jsonObject, Book_Booklist entry) {
 		int i = 0;
@@ -228,7 +229,7 @@ public class GetBookInfosFromWeb {
 		}
 		return (cCompAuthor + cCompTitle) / 2;
 	}
-	
+
 	/**
 	 * Analyze the JSON response from Google Books API
 	 * 
@@ -246,14 +247,14 @@ public class GetBookInfosFromWeb {
 					if (firstItem.has("volumeInfo")) {
 						var volumeInfo = firstItem.getAsJsonObject("volumeInfo");
 						if (volumeInfo.has("industryIdentifiers")) {
-							
+
 							var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
 							for (int j = 0; j < isbnidentifiers.size(); j++) {
 								var isbnidentifiers13 = isbnidentifiers.get(j).getAsJsonObject();
 								if (isbnidentifiers13.has("identifier")) {
 									String type = isbnidentifiers13.get("type").getAsString();
 									if (type.equals("ISBN_13")) {
-										returnArray[i][2] = isbnidentifiers13.get("identifier").getAsString();										
+										returnArray[i][2] = isbnidentifiers13.get("identifier").getAsString();
 									}
 								}
 							}
@@ -281,7 +282,7 @@ public class GetBookInfosFromWeb {
 			}
 			i++;
 		}
-		
+
 		return returnArray;
 	}
 
@@ -359,46 +360,44 @@ public class GetBookInfosFromWeb {
 	 * Saves a pic from an Book entry
 	 * 
 	 * @param weblink - Link where to get the Bookcover
-	 * @param entry - Bookentry to save the Cover
+	 * @param entry   - Bookentry to save the Cover
 	 * 
 	 * @return boolean - returns boolean as success
 	 */
 	public static boolean savePic(String weblink, Book_Booklist entry) {
-		BufferedInputStream in;
-		try {
-			URL url = new URI(weblink).toURL();
-			in = new BufferedInputStream(url.openStream());
+		try (BufferedInputStream in = new BufferedInputStream(new URI(weblink).toURL().openStream())) {
 
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			byte[] buf = new byte[1024];
-			int n = 0;
-			while (-1 != (n = in.read(buf))) {
-				out.write(buf, 0, n);
+			BufferedImage originalImage = ImageIO.read(in);
+
+			// Erstellen eines neuen Bildes mit korrektem Farbtyp
+			BufferedImage convertedImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
+					BufferedImage.TYPE_INT_RGB);
+
+			convertedImage.createGraphics().drawImage(originalImage, 0, 0, null);
+
+			// Für JPEG-Bilder: Qualitätseinstellungen definieren
+			Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
+			ImageWriter writer = writers.next();
+			ImageWriteParam param = writer.getDefaultWriteParam();
+			param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+			param.setCompressionQuality(1.0f); // Höchste Qualität
+
+			// In ByteArray schreiben mit hoher Qualität
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
+				writer.setOutput(ios);
+				writer.write(null, new IIOImage(convertedImage, null, null), param);
 			}
 
-			byte[] response = out.toByteArray();
-			ByteArrayInputStream inStreambj = new ByteArrayInputStream(response);
-			BufferedImage newImage = ImageIO.read(inStreambj);
-			Image img = newImage;
-			entry.setPic(img);
+			byte[] imageData = baos.toByteArray();
+			entry.setPic(convertedImage);
 
-			BufferedInputStream photoStream = new BufferedInputStream(inStreambj);
-			photoStream.close();
-			out.close();
+			baos.close();
 			in.close();
 
-			String path = "tmp.jpg";
-			FileOutputStream fos = new FileOutputStream(path);
-			fos.write(response);
-			fos.close();
-			BufferedInputStream stream = new BufferedInputStream(new FileInputStream(path));
-
 			Mainframe.executor.submit(() -> {
-				try {
-					Database.updatePic(entry.getBid(), photoStream);
-					stream.close();
-					Path file = Paths.get(path);
-					Files.delete(file);
+				try (ByteArrayInputStream dbStream = new ByteArrayInputStream(imageData)) {
+					Database.updatePic(entry.getBid(), dbStream);
 				} catch (IOException e) {
 					Mainframe.logger.error(e.getMessage());
 				}
