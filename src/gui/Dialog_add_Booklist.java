@@ -53,7 +53,7 @@ public class Dialog_add_Booklist extends JDialog {
 	/**
 	 * Dialog Add Constructor
 	 * 
-	 * @param owner - set the owner of this Frame
+	 * @param owner     - set the owner of this Frame
 	 * @param bookModel - current entries of the Booktable
 	 * @param treeModel - current entries of the Authortree
 	 */
@@ -123,7 +123,7 @@ public class Dialog_add_Booklist extends JDialog {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (txtAuthor.getText().length() > 50) {
@@ -428,7 +428,7 @@ public class Dialog_add_Booklist extends JDialog {
 		this.setResizable(false);
 
 		Mainframe.logger.trace("Book add: Frame successfully created");
-		
+
 		if (!(Mainframe.getTreeSelection()).equals("")) {
 			txtTitle.requestFocus();
 		}
@@ -465,7 +465,10 @@ public class Dialog_add_Booklist extends JDialog {
 					Mainframe.entries.add(book);
 				}
 				if (HandleConfig.autoDownload == 1) {
-					GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(book, 2, false);
+					Mainframe.executor.submit(() -> {
+						Book_Booklist downloadBook = Mainframe.entries.getElementAt(Mainframe.entries.getIndexOf(autor, titel));
+						GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(downloadBook, 2, false);
+					});
 				}
 				BookListModel.checkAuthors();
 				Mainframe.setLastSearch(txtAuthor.getText());
