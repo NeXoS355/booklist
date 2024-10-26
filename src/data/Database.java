@@ -127,7 +127,7 @@ public class Database {
 		System.err.println("  SQL State:  " + e.getSQLState());
 		System.err.println("  Error Code: " + e.getErrorCode());
 		System.err.println("  Message:    " + e.getMessage());
-		// for stack traces, refer to derby.log or uncomment this:
+		// for stack infos, refer to derby.log or uncomment this:
 		Mainframe.logger.error(e.getMessage());
 	}
 
@@ -299,7 +299,7 @@ public class Database {
 	 */
 	public static boolean CSVExport() {
 		boolean success = false;
-		Mainframe.logger.trace("CSV Export");
+		Mainframe.logger.info("CSV Export");
 		String fileName = "books.csv";
 		try (CSVWriter writer = new CSVWriter(new FileWriter(fileName))) {
 			// Spaltenüberschriften hinzufügen

@@ -49,7 +49,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	public Dialog_edit_Wishlist(Frame owner, WishlistListModel entries, int index) {
-		Mainframe.logger.trace("Wishlist Book edit: start creating Frame");
+		Mainframe.logger.info("Wishlist Book edit: start creating Frame");
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(500, 300));
 		this.setLocationRelativeTo(owner);
@@ -394,7 +394,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		this.add(panelEastBorder, BorderLayout.EAST);
 		this.add(panelSouth, BorderLayout.SOUTH);
 
-		Mainframe.logger.trace("Wishlist Book edit: Frame created successfully");
+		Mainframe.logger.info("Wishlist Book edit: Frame created successfully");
 		this.setVisible(true);
 		this.setResizable(false);
 
@@ -420,7 +420,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 				eintrag.setSeriesVol(newSeriePart);
 				eintrag.setDate(datum);
 				dispose();
-				Mainframe.logger.trace("Wishlist Book edit: Book saved successfully");
+				Mainframe.logger.info("Wishlist Book edit: Book saved successfully");
 			} else {
 				txtTitle.setText("Buch bereits vorhanden!");
 				txtTitle.setBackground(new Color(255, 105, 105));
@@ -458,8 +458,8 @@ public class Dialog_edit_Wishlist extends JDialog {
 			try {
 				desktop.browse(uri);
 				return true;
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (Exception e1) {
+				Mainframe.logger.error(e1.getMessage());
 			}
 		}
 		return false;

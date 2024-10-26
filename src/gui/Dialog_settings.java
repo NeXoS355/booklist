@@ -178,7 +178,7 @@ public class Dialog_settings extends JDialog {
 		pnlLeft.add(lblDebug, c);
 		c.gridx = 1;
 		c.gridy = 8;
-		String[] arrayDebug = { "WARN", "INFO", "TRACE" };
+		String[] arrayDebug = { "WARN", "INFO" };
 		cmbDebug = new JComboBox<String>(arrayDebug);
 		cmbDebug.setSelectedItem(HandleConfig.debug);
 		pnlLeft.add(cmbDebug, c);
@@ -399,9 +399,9 @@ public class Dialog_settings extends JDialog {
 
 				out.println(strColumnTitle);
 
-			} catch (FileNotFoundException ex) {
-				ex.printStackTrace();
+			} catch (FileNotFoundException e1) {
 				Mainframe.logger.error("Fehler beim speichern der Einstellungen");
+				Mainframe.logger.error(e1.getMessage());
 			}
 		});
 	}
@@ -415,8 +415,9 @@ public class Dialog_settings extends JDialog {
 			BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 200, 200, hints);
 			BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
 			lblQrCode.setIcon(new ImageIcon(qrImage));
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception e1) {
+			Mainframe.logger.error("Fehler beim generieren des QRCodes");
+			Mainframe.logger.error(e1.getMessage());
 		}
 	}
 }

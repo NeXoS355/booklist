@@ -92,7 +92,7 @@ public class Dialog_edit_Booklist extends JDialog {
 	 */
 	public Dialog_edit_Booklist(Frame owner, BookListModel bookModel, int index, DefaultTreeModel treeModel) {
 
-		Mainframe.logger.trace("Book edit: start creating Frame");
+		Mainframe.logger.info("Book edit: start creating Frame");
 		this.setTitle("Buch bearbeiten");
 		this.setSize(new Dimension(600, 645));
 		this.setLocationRelativeTo(owner);
@@ -138,7 +138,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		/*
 		 * create and add components to Panel North
 		 */
-		JLabel lblDate = new JLabel("hinzugefuegt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
+		JLabel lblDate = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
 
 		JLabel lblIsbn = new JLabel("ISBN: " + entry.getIsbn(), SwingConstants.RIGHT);
 		lblIsbn.addMouseListener(new MouseAdapter() {
@@ -189,7 +189,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		ImageIcon imgIcn = showImg(entry);
 		if (imgIcn != null) {
 			Image img = imgIcn.getImage();
-			Image newimg = img.getScaledInstance(128, 192, java.awt.Image.SCALE_SMOOTH);
+			Image newimg = img.getScaledInstance(128, 203, java.awt.Image.SCALE_SMOOTH);
 			imgIcn = new ImageIcon(newimg);
 			lblPic = new JLabel(imgIcn);
 			lblPic.setPreferredSize(new Dimension(160, 280));
@@ -797,7 +797,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		this.add(panelEastBorder, BorderLayout.EAST);
 		this.add(panelSouthBorder, BorderLayout.SOUTH);
 
-		Mainframe.logger.trace("Book edit: Frame successfully created");
+		Mainframe.logger.info("Book edit: Frame successfully created");
 		this.setVisible(true);
 		this.setResizable(false);
 
@@ -960,7 +960,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		}
 		BookListModel.checkAuthors();
 		Mainframe.updateModel();
-		Mainframe.logger.trace("Book edit: saved");
+		Mainframe.logger.info("Book edit: saved");
 	}
 
 	/**
@@ -1045,7 +1045,7 @@ public class Dialog_edit_Booklist extends JDialog {
 	 */
 	private void setRating(int segment) {
 
-		Mainframe.logger.trace("Rating set: " + segment);
+		Mainframe.logger.info("Rating set: " + segment);
 		entry.setRating(segment, true);
 
 		Mainframe.executor.submit(() -> {

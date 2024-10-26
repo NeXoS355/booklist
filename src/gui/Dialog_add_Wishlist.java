@@ -46,7 +46,7 @@ public class Dialog_add_Wishlist extends JDialog {
 	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	public Dialog_add_Wishlist(Frame owner, WishlistListModel entries) {
-		Mainframe.logger.trace("Wishlist Book add: start creating Frame");
+		Mainframe.logger.info("Wishlist Book add: start creating Frame");
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 320));
 		this.setLocationRelativeTo(owner);
@@ -362,7 +362,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		this.add(panel_south, BorderLayout.SOUTH);
 //		this.add(new JLabel(""), BorderLayout.NORTH); // oberer Abstand vom JFrame
 
-		Mainframe.logger.trace("Wishlist Book add: Frame successfully created");
+		Mainframe.logger.info("Wishlist Book add: Frame successfully created");
 		this.setVisible(true);
 		this.setModal(true);
 		this.setResizable(false);
@@ -371,7 +371,7 @@ public class Dialog_add_Wishlist extends JDialog {
 
 	public void addBuch() {
 		try {
-			Mainframe.logger.trace("Wishlist Book add: start saving");
+			Mainframe.logger.info("Wishlist Book add: start saving");
 			if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
 				String autor = txtAuthor.getText();
 				String titel = txtTitle.getText();
@@ -386,7 +386,7 @@ public class Dialog_add_Wishlist extends JDialog {
 					txtTitle.setText("Buch bereits vorhanden!");
 					txtTitle.setBackground(new Color(255, 105, 105));
 				}
-				Mainframe.logger.trace("Book add: saved successfully");
+				Mainframe.logger.info("Book add: saved successfully");
 			} else {
 				if (txtAuthor.getText().isEmpty()) {
 					txtAuthor.setBackground(new Color(255, 105, 105));
@@ -395,11 +395,11 @@ public class Dialog_add_Wishlist extends JDialog {
 					txtTitle.setBackground(new Color(255, 105, 105));
 				}
 			}
-		} catch (SQLException ex) {
-			ex.printStackTrace();
+		} catch (SQLException e1) {
+			Mainframe.logger.error(e1.getMessage());
 			txtTitle.setForeground(Color.white);
 			txtTitle.setBackground(new Color(255, 105, 105));
-			if (ex.getSQLState() == "23505") {
+			if (e1.getSQLState() == "23505") {
 				txtTitle.setText("Buch bereits vorhanden!");
 			}
 		}

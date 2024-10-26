@@ -159,7 +159,7 @@ public class Mainframe extends JFrame {
 		this.setIconImage(icon.getImage());
 
 		logger = LogManager.getLogger(getClass());
-		logger.trace("start creating Frame & readConfig");
+		logger.info("start creating Frame & readConfig");
 		final Properties properties = new Properties();
 		try {
 			properties.load(this.getClass().getClassLoader().getResourceAsStream("project.properties"));
@@ -174,8 +174,6 @@ public class Mainframe extends JFrame {
 			Configurator.setLevel(logger, Level.WARN);
 		} else if (HandleConfig.debug.equals("INFO")) {
 			Configurator.setLevel(logger, Level.INFO);
-		} else if (HandleConfig.debug.equals("TRACE")) {
-			Configurator.setLevel(logger, Level.TRACE);
 		}
 
 		Mainframe.executor.submit(() -> {
@@ -185,7 +183,7 @@ public class Mainframe extends JFrame {
 					Path path = Paths.get("latest.jar");
 					boolean deleted = Files.deleteIfExists(path);
 					if (deleted)
-						logger.trace("File detected and deleted: " + path);
+						logger.info("File detected and deleted: " + path);
 					else
 						logger.warn("File detected but could not be deleted: " + path);
 				}
@@ -260,12 +258,12 @@ public class Mainframe extends JFrame {
 			logger.error(e.getMessage());
 		}
 
-		logger.trace("Finished create Frame & readConfig. Start creating Lists and readDB");
+		logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
 		entries = new BookListModel();
 		filter = new DefaultListModel<Book_Booklist>();
 		tableDisplay = new SimpleTableModel(entries);
 
-		logger.trace("Finished creating List & DB. Start creating GUI Components");
+		logger.info("Finished creating List & DB. Start creating GUI Components");
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(10, 5));
@@ -519,7 +517,7 @@ public class Mainframe extends JFrame {
 		pnlMenu.add(lblVersion, BorderLayout.EAST);
 		pnlMenu.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 
-		logger.trace("Finished creating GUI Components. Start creating Table Contents");
+		logger.info("Finished creating GUI Components. Start creating Table Contents");
 
 		table.setModel(tableDisplay);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
@@ -675,7 +673,7 @@ public class Mainframe extends JFrame {
 			}
 		});
 
-		logger.trace("end creating Table content. Start creating Tree Contents + ScrollPane");
+		logger.info("end creating Table content. Start creating Tree Contents + ScrollPane");
 
 		JPanel pnl_mid = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -782,7 +780,7 @@ public class Mainframe extends JFrame {
 		this.add(splitPane, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.NORTH);
 
-		logger.trace("Finished creating Tree Contents + ScrollPane. Start Update Model & show GUI");
+		logger.info("Finished creating Tree Contents + ScrollPane. Start Update Model & show GUI");
 
 		updateModel();
 
@@ -791,7 +789,7 @@ public class Mainframe extends JFrame {
 
 			@Override
 			public void windowClosing(WindowEvent et) {
-				logger.trace("Close Database");
+				logger.info("Close Database");
 				Database.closeConnection();
 				if (HandleConfig.backup == 2) {
 					createBackup();
@@ -806,7 +804,7 @@ public class Mainframe extends JFrame {
 									"Backup fehlgeschlagen oder nicht vollständig.");
 					}
 				}
-				logger.trace("Window closing");
+				logger.info("Window closing");
 			}
 
 			public void windowClosed(java.awt.event.WindowEvent windowEvent) {
@@ -823,11 +821,11 @@ public class Mainframe extends JFrame {
 									"Backup fehlgeschlagen oder nicht vollständig.");
 					}
 				}
-				logger.trace("Window closed");
+				logger.info("Window closed");
 				System.exit(1);
 			}
 		});
-		logger.trace("Init completed");
+		logger.info("Init completed");
 	}
 
 	/**
@@ -851,7 +849,7 @@ public class Mainframe extends JFrame {
 			} else {
 				JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es wurde kein Buch ausgewählt");
 			}
-			logger.trace("Book deleted: " + searchAutor + ";" + searchTitel);
+			logger.info("Book deleted: " + searchAutor + ";" + searchTitel);
 		}
 		if (!treeSelection.equals(""))
 			search(treeSelection);
@@ -889,7 +887,7 @@ public class Mainframe extends JFrame {
 		tree.setModel(treeModel);
 		tree.revalidate();
 		tree.repaint();
-		Mainframe.logger.trace("Mainframe Node updated");
+		Mainframe.logger.info("Mainframe Node updated");
 
 	}
 
@@ -902,7 +900,7 @@ public class Mainframe extends JFrame {
 		table.setModel(tableDisplay);
 		treeSelection = "";
 		setTableLayout();
-		Mainframe.logger.trace("Mainframe Model updated");
+		Mainframe.logger.info("Mainframe Model updated");
 	}
 
 	/**
@@ -923,7 +921,7 @@ public class Mainframe extends JFrame {
 					File n = new File(to.getAbsolutePath() + "/" + file.getName());
 					Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
-					e.printStackTrace();
+					Mainframe.logger.error(e.getMessage());
 				}
 			}
 		}
@@ -1049,12 +1047,10 @@ public class Mainframe extends JFrame {
 				return false;
 			}
 		} catch (IOException e1) {
-			e1.printStackTrace();
 			Mainframe.logger.error("Error while creating Backup. IOException");
 			Mainframe.logger.error(e1.toString());
 			return false;
 		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
 			Mainframe.logger.error("Error while creating Backup. URISyntaxException");
 			Mainframe.logger.error(e1.toString());
 			return false;
@@ -1066,13 +1062,13 @@ public class Mainframe extends JFrame {
 	 */
 	private void downloadFromApi() {
 		try {
-			logger.trace("Web API request: " + HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken);
+			logger.info("Web API request: " + HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken);
 			URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
 			HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
 			con.setRequestMethod("GET");
 			con.setConnectTimeout(5000);
 			int responseCode = con.getResponseCode();
-			logger.trace("Web API GET responseCode: " + responseCode);
+			logger.info("Web API GET responseCode: " + responseCode);
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				// API-Antwort lesen (Rohdaten)
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -1084,7 +1080,7 @@ public class Mainframe extends JFrame {
 				}
 
 				String jsonResponse = response.toString();
-				logger.trace("Web API GET response: " + jsonResponse);
+				logger.info("Web API GET response: " + jsonResponse);
 				JsonElement jsonElement = JsonParser.parseString(jsonResponse);
 				int imported = 0;
 				int rejected = 0;
@@ -1163,7 +1159,7 @@ public class Mainframe extends JFrame {
 
 						// Antwortcode überprüfen
 						responseCode = con.getResponseCode();
-						logger.trace("Web API DELETE books responseCode: " + responseCode);
+						logger.info("Web API DELETE books responseCode: " + responseCode);
 					} catch (Exception e) {
 						logger.error(e.getMessage());
 					}
@@ -1210,14 +1206,14 @@ public class Mainframe extends JFrame {
 				os.write(input, 0, input.length);
 			}
 			int responseCode = con.getResponseCode();
-			logger.trace("Web API DELETE SyncedBooks responseCode: " + responseCode);
+			logger.info("Web API DELETE SyncedBooks responseCode: " + responseCode);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
 
 		try {
 			// URL des API-Endpunkts
-			logger.trace("Web API request: " + HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken);
+			logger.info("Web API request: " + HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken);
 			URL postUrl;
 			postUrl = new URI(HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken).toURL();
 
@@ -1254,7 +1250,7 @@ public class Mainframe extends JFrame {
 			// Antwort vom Server lesen
 			int responseCode = con.getResponseCode();
 			if (responseCode == HttpURLConnection.HTTP_OK) {
-				logger.trace("bücher erfolgreich hochgeladen!");
+				logger.info("bücher erfolgreich hochgeladen!");
 				JOptionPane.showMessageDialog(this, "bücher erfolgreich hochgeladen!");
 			} else {
 				logger.error("Fehler beim Hochladen der bücher: " + responseCode);
@@ -1470,15 +1466,15 @@ public class Mainframe extends JFrame {
 					is.close();
 					os.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Mainframe.logger.error(e.getMessage());
 				}
 
 			}
 			out.println("UPDATER: update finished");
-		} catch (FileNotFoundException ex) {
-			ex.printStackTrace();
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
+		} catch (FileNotFoundException e1) {
+			Mainframe.logger.error(e1.getMessage());
+		} catch (InterruptedException e2) {
+			Mainframe.logger.error(e2.getMessage());
 		}
 
 	}
@@ -1490,7 +1486,7 @@ public class Mainframe extends JFrame {
 	public static void checkApiConnection() {
 		if (HandleConfig.apiURL.length() > 0) {
 			try {
-				Mainframe.logger.trace("Web API request: " + HandleConfig.apiURL + "/api/get.php");
+				Mainframe.logger.info("Web API request: " + HandleConfig.apiURL + "/api/get.php");
 				URL getUrl;
 				getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
 				HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
@@ -1499,8 +1495,8 @@ public class Mainframe extends JFrame {
 				long startTime = System.currentTimeMillis();
 				int responseCode = con.getResponseCode();
 				long responseTime = System.currentTimeMillis() - startTime;
-				Mainframe.logger.trace("Web API request: responseCode: " + responseCode);
-				Mainframe.logger.trace("Web API request: responseTime: " + Long.toString(responseTime) + "ms");
+				Mainframe.logger.info("Web API request: responseCode: " + responseCode);
+				Mainframe.logger.info("Web API request: responseTime: " + Long.toString(responseTime) + "ms");
 				if (responseCode == HttpURLConnection.HTTP_OK) {
 					apiConnected = true;
 					openWebApi.setEnabled(true);

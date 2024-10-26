@@ -93,7 +93,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 							seriesVolume, ebook, rating, buf_pic, desc, isbn, date, false);
 					book.setBid(bid);
 					getBooks().add(book);
-					Mainframe.logger.trace("Buch ausgelesen: " + book.getAuthor() + "-" + book.getTitle());
+					Mainframe.logger.info("Buch ausgelesen: " + book.getAuthor() + "-" + book.getTitle());
 					if (bid > Database.highestBid) {
 						Database.highestBid = bid;
 					}
@@ -151,7 +151,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						book.setBorrowedFrom(borrowedFrom);
 						book.setBorrowed(boolBorrowed);
 					}
-					Mainframe.logger.trace("loading Book info: " + book.getAuthor() + "-" + book.getTitle());
+					Mainframe.logger.info("loading Book info: " + book.getAuthor() + "-" + book.getTitle());
 				}
 			} catch (SQLException e) {
 				Mainframe.logger.error(e.getMessage());
@@ -175,7 +175,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				while (rs.next()) {
 					authors.add(rs.getString(1));
 				}
-				Mainframe.logger.trace("Updated Author List through DB");
+				Mainframe.logger.info("Updated Author List through DB");
 			} catch (SQLException e) {
 				Mainframe.logger.error(e.getMessage());
 			}
@@ -184,7 +184,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				if (!authors.contains(getBooks().get(i).getAuthor()))
 					authors.add(getBooks().get(i).getAuthor());
 			}
-			Mainframe.logger.trace("Updated Author List through Java Lists");
+			Mainframe.logger.info("Updated Author List through Java Lists");
 		}
 		Mainframe.updateNode();
 	}
@@ -243,7 +243,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					if (!series.isEmpty())
 						seriesList.add(series);
 				}
-				Mainframe.logger.trace("Got Series from Author through DB: " + author);
+				Mainframe.logger.info("Got Series from Author through DB: " + author);
 			} catch (SQLException e) {
 				Mainframe.logger.error(e.getMessage());
 			}
@@ -259,7 +259,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						}
 						if (newSeries) {
 							seriesList.add(book.getSeries());
-							Mainframe.logger.trace("Got Series from Author through Lists: " + author);
+							Mainframe.logger.info("Got Series from Author through Lists: " + author);
 						}
 					}
 				}
@@ -584,11 +584,11 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 							// add the Book to the list and create wishlist Entry
 							if (!added) {
 								newBooksList.add(returnArray[j]);
-								Mainframe.logger.trace("AnalyseSeries: " + "-Versuch: " + versuch);
-								Mainframe.logger.trace("AnalyseSeries: " + "Band: " + missingBooksOfSeries.get(i));
-								Mainframe.logger.trace("AnalyseSeries: " + "Autor: " + foundAuthor);
-								Mainframe.logger.trace("AnalyseSeries: " + "Titel: " + foundTitle);
-								Mainframe.logger.trace("AnalyseSeries: " + "ISBN: " + foundIsbn);
+								Mainframe.logger.info("AnalyseSeries: " + "-Versuch: " + versuch);
+								Mainframe.logger.info("AnalyseSeries: " + "Band: " + missingBooksOfSeries.get(i));
+								Mainframe.logger.info("AnalyseSeries: " + "Autor: " + foundAuthor);
+								Mainframe.logger.info("AnalyseSeries: " + "Titel: " + foundTitle);
+								Mainframe.logger.info("AnalyseSeries: " + "ISBN: " + foundIsbn);
 								added = true;
 								try {
 									wishlist.wishlistEntries

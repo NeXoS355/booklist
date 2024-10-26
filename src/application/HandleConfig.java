@@ -120,12 +120,12 @@ public class HandleConfig {
 
 					} else if (setting.equals("debug")) {
 						String tmp = value.trim();
-						if (tmp.equals("WARN") || tmp.equals("INFO") || tmp.equals("TRACE")) {
+						if (tmp.equals("WARN") || tmp.equals("INFO") || tmp.equals("info")) {
 							debug = tmp;
 							Mainframe.logger.info("debug: " + debug);
 						} else
 							JOptionPane.showMessageDialog(null,
-									"Fehler in der config (debug): Falscher Wert - erwartet WARN, INFO oder TRACE");
+									"Fehler in der config (debug): Falscher Wert - erwartet WARN, INFO oder info");
 					} else if (setting.equals("backup")) {
 						try {
 							int tmp = Integer.parseInt(value.trim());

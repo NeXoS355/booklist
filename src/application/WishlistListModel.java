@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import javax.swing.AbstractListModel;
 
 import data.Database;
+import gui.Mainframe;
 
 public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 
@@ -40,7 +41,7 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			Mainframe.logger.error(e.getMessage());
 		}
 	}
 

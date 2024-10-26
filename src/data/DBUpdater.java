@@ -41,7 +41,6 @@ public class DBUpdater {
 				st.execute();
 				st.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
 				Mainframe.logger.error("Fehler bei Aktualisierung auf 2.4.0");
 			}
 			JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.0 aktualisiert!");
@@ -57,7 +56,6 @@ public class DBUpdater {
 				st.close();
 				JOptionPane.showMessageDialog(null, "Datenbank auf Version 2.4.4 aktualisiert!");
 			} catch (SQLException e) {
-				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
@@ -87,7 +85,6 @@ public class DBUpdater {
 				rs.close();
 				success++;
 			} catch (SQLException e) {
-				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
@@ -141,7 +138,6 @@ public class DBUpdater {
 				st.close();
 				success++;
 			} catch (SQLException e) {
-				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
@@ -187,7 +183,7 @@ public class DBUpdater {
 				rs.close();
 				JOptionPane.showMessageDialog(null, counter + " Buecher wurden als E-Book markiert");
 			} catch (SQLException e) {
-				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Migration der Bücher ist fehlgeschlagen!");
 			}
 
 		case "2.5.0":
@@ -199,7 +195,6 @@ public class DBUpdater {
 				st.close();
 				success++;
 			} catch (SQLException e) {
-				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
@@ -233,7 +228,6 @@ public class DBUpdater {
 				st.close();
 				success++;
 			} catch (SQLException e) {
-				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Fehler bei der Datenbank Aktualisierung!");
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
@@ -299,7 +293,7 @@ public class DBUpdater {
 
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "version konnte nicht aus der Datenbank ausgelesen werden!");
 		}
 		return version;
 	}

@@ -58,7 +58,7 @@ public class Dialog_add_Booklist extends JDialog {
 	 * @param treeModel - current entries of the Authortree
 	 */
 	public Dialog_add_Booklist(Frame owner, BookListModel bookModel, DefaultTreeModel treeModel) {
-		Mainframe.logger.trace("Book add: start creating Frame");
+		Mainframe.logger.info("Book add: start creating Frame");
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 420));
 		this.setLocationRelativeTo(owner);
@@ -427,7 +427,7 @@ public class Dialog_add_Booklist extends JDialog {
 		this.setModal(true);
 		this.setResizable(false);
 
-		Mainframe.logger.trace("Book add: Frame successfully created");
+		Mainframe.logger.info("Book add: Frame successfully created");
 
 		if (!(Mainframe.getTreeSelection()).equals("")) {
 			txtTitle.requestFocus();
@@ -440,7 +440,7 @@ public class Dialog_add_Booklist extends JDialog {
 	 * 
 	 */
 	public void addBook() {
-		Mainframe.logger.trace("Book add: start saving");
+		Mainframe.logger.info("Book add: start saving");
 		if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
 			String autor = txtAuthor.getText();
 			String titel = txtTitle.getText();

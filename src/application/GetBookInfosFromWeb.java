@@ -111,8 +111,8 @@ public class GetBookInfosFromWeb {
 			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults="
 					+ maxResults + "&printType=books";
 
-			Mainframe.logger.trace("Search API: " + str);
-			Mainframe.logger.trace("Search API URL: " + apiUrl);
+			Mainframe.logger.info("Search API: " + str);
+			Mainframe.logger.info("Search API URL: " + apiUrl);
 
 			URL url = new URI(apiUrl).toURL();
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -120,7 +120,7 @@ public class GetBookInfosFromWeb {
 
 			// open connection and check response Code
 			int responseCode = connection.getResponseCode();
-			Mainframe.logger.trace("Search API response: " + responseCode);
+			Mainframe.logger.info("Search API response: " + responseCode);
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				// read InputStream and create String
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
@@ -172,10 +172,10 @@ public class GetBookInfosFromWeb {
 								savePic(link, entry);
 								cCover = 1;
 							} else {
-								Mainframe.logger.trace("WebInfo Download: 'smallThumbnail' not found!");
+								Mainframe.logger.info("WebInfo Download: 'smallThumbnail' not found!");
 							}
 						} else {
-							Mainframe.logger.trace("WebInfo Download: 'ImageLink' not found!");
+							Mainframe.logger.info("WebInfo Download: 'ImageLink' not found!");
 						}
 						if (volumeInfo.has("industryIdentifiers") && cIsbn == 0) {
 							var isbnidentifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
@@ -194,7 +194,7 @@ public class GetBookInfosFromWeb {
 							}
 
 						} else {
-							Mainframe.logger.trace("WebInfo Download: 'industryIdentifiers' not found!");
+							Mainframe.logger.info("WebInfo Download: 'industryIdentifiers' not found!");
 						}
 						if (volumeInfo.has("title")) {
 							String title = volumeInfo.get("title").getAsString();
@@ -213,16 +213,16 @@ public class GetBookInfosFromWeb {
 								entry.setDesc(description, true);
 							});
 						} else {
-							Mainframe.logger.trace("WebInfo Download: 'description' not found!");
+							Mainframe.logger.info("WebInfo Download: 'description' not found!");
 						}
 					} else {
-						Mainframe.logger.trace("WebInfo Download: 'VolumeInfo' not found!");
+						Mainframe.logger.info("WebInfo Download: 'VolumeInfo' not found!");
 					}
 				} else {
-					Mainframe.logger.trace("WebInfo Download: no elements found in 'items'!");
+					Mainframe.logger.info("WebInfo Download: no elements found in 'items'!");
 				}
 			} else {
-				Mainframe.logger.trace("WebInfo Download: 'items' not found!");
+				Mainframe.logger.info("WebInfo Download: 'items' not found!");
 			}
 			i++;
 		}
@@ -259,7 +259,7 @@ public class GetBookInfosFromWeb {
 							}
 
 						} else {
-							Mainframe.logger.trace("WebInfo Download: 'industryIdentifiers' not found!");
+							Mainframe.logger.info("WebInfo Download: 'industryIdentifiers' not found!");
 						}
 						if (volumeInfo.has("title")) {
 							returnArray[i][1] = volumeInfo.get("title").getAsString();
@@ -271,13 +271,13 @@ public class GetBookInfosFromWeb {
 //							cCompAuthor = compareString(author[i], entry.getAuthor());
 						}
 					} else {
-						Mainframe.logger.trace("WebInfo Download: 'VolumeInfo' not found!");
+						Mainframe.logger.info("WebInfo Download: 'VolumeInfo' not found!");
 					}
 				} else {
-					Mainframe.logger.trace("WebInfo Download: no elements found in 'items'!");
+					Mainframe.logger.info("WebInfo Download: no elements found in 'items'!");
 				}
 			} else {
-				Mainframe.logger.trace("WebInfo Download: 'items' not found!");
+				Mainframe.logger.info("WebInfo Download: 'items' not found!");
 			}
 			i++;
 		}
@@ -339,7 +339,7 @@ public class GetBookInfosFromWeb {
 			}
 		}
 		equalPercentage = hit * 100 / anzahl;
-		Mainframe.logger.trace("checkWebInfo " + str1 + "-" + str2 + ": " + equalPercentage);
+		Mainframe.logger.info("checkWebInfo " + str1 + "-" + str2 + ": " + equalPercentage);
 
 		return equalPercentage;
 	}
@@ -395,7 +395,7 @@ public class GetBookInfosFromWeb {
 
 			Mainframe.executor.submit(() -> {
 				try {
-					Database.updatePic(entry.getBid(), stream);
+					Database.updatePic(entry.getBid(), photoStream);
 					stream.close();
 					Path file = Paths.get(path);
 					Files.delete(file);

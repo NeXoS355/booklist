@@ -33,7 +33,7 @@ public class ButtonsFactory {
 					imageInActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe_inactive.png"));
 					button.setIcon(new ImageIcon(imageInActive));
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					Mainframe.logger.error(e1.getMessage());
 				}
 
 			}
@@ -68,7 +68,7 @@ public class ButtonsFactory {
 							Thread.sleep(200);
 							button.setBackground(new Color(220, 220, 220));
 						} catch (InterruptedException e1) {
-							e1.printStackTrace();
+							Mainframe.logger.error(e1.getMessage());
 						}
 
 					});
@@ -88,7 +88,7 @@ public class ButtonsFactory {
 					imageInActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe_inactive.png"));
 					button.setIcon(new ImageIcon(imageInActive));
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					Mainframe.logger.error(e1.getMessage());
 				}
 
 			}
@@ -124,7 +124,7 @@ public class ButtonsFactory {
 							Thread.sleep(200);
 							button.setBackground(new Color(75, 75, 75));
 						} catch (InterruptedException e1) {
-							e1.printStackTrace();
+							Mainframe.logger.error(e1.getMessage());
 						}
 
 					});
@@ -167,7 +167,7 @@ public class ButtonsFactory {
 							Thread.sleep(200);
 							button.setBackground(new Color(75, 75, 75));
 						} catch (InterruptedException e1) {
-							e1.printStackTrace();
+							Mainframe.logger.error(e1.getMessage());
 						}
 
 					});
@@ -197,7 +197,7 @@ public class ButtonsFactory {
 							Thread.sleep(200);
 							button.setBackground(new Color(220, 220, 220));
 						} catch (InterruptedException e1) {
-							e1.printStackTrace();
+							Mainframe.logger.error(e1.getMessage());
 						}
 
 					});
