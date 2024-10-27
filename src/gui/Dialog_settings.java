@@ -174,7 +174,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 0;
 		c.gridy = 8;
 		JLabel lblDebug = new JLabel("Debug");
-		lblDebug.setToolTipText("Ausführlichkeit der Logging Aktivit�t");
+		lblDebug.setToolTipText("Ausführlichkeit der Logging Aktivität");
 		pnlLeft.add(lblDebug, c);
 		c.gridx = 1;
 		c.gridy = 8;
@@ -186,7 +186,7 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 9;
 		JLabel lblBackup = new JLabel("Backupverhalten");
 		lblBackup.setToolTipText(
-				"0= Kein Backup beim schlie�en; 1=Abfrage beim schließen; 2=automatisches Backup beim schlie�en");
+				"0= Kein Backup beim schließen; 1=Abfrage beim schließen; 2=automatisches Backup beim schließen");
 		pnlLeft.add(lblBackup, c);
 		c.gridx = 1;
 		c.gridy = 9;
@@ -250,7 +250,7 @@ public class Dialog_settings extends JDialog {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.WEST;
 		JLabel lblApiUrl = new JLabel("Web API URL");
-		lblApiUrl.setToolTipText("URL der web API (https://...api.php)");
+		lblApiUrl.setToolTipText("URL der web API (https://example.org:4444)");
 		pnlRight.add(lblApiUrl, c);
 		JLabel lblApiUrlCon = new JLabel(conIcon);
 		if (Mainframe.isApiConnected())
