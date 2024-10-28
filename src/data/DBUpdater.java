@@ -24,11 +24,11 @@ public class DBUpdater {
 	 */
 	public static void checkUpdate(Connection con) {
 
-		String sql = "";
+		String sql;
 		PreparedStatement st;
 		String currentVersion = checkVersion(con);
-		String version_new = "";
-
+		String version_new;
+		int success = 0;
 		switch (currentVersion) {
 		case "2.2.0":
 			try {
@@ -60,14 +60,13 @@ public class DBUpdater {
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}
 		case "2.4.4":
-			int success = 0;
 			try {
 				sql = "ALTER TABLE bücher ADD bid numeric(6,0) NOT NULL DEFAULT 0";
 				st = con.prepareStatement(sql);
 				st.execute();
 				st.close();
 				int bid = 100000;
-				ResultSet rs = null;
+				ResultSet rs;
 				rs = Database.readDbBooklist();
 				while (rs.next()) {
 					String autor = rs.getString("autor").trim();
@@ -163,12 +162,12 @@ public class DBUpdater {
 			}
 
 			// Start Migration of E-Book Data
-			ResultSet rs = null;
+			ResultSet rs;
 			rs = Database.readDbBooklist();
 
 			try {
 				int counter = 0;
-				String bemerkung = "";
+				String bemerkung;
 				while (rs.next()) {
 					bemerkung = rs.getString("bemerkung").trim();
 					int bid = Integer.parseInt(rs.getString("bid"));
@@ -282,8 +281,8 @@ public class DBUpdater {
 	 * @param con - Connection to Database
 	 */
 	public static String checkVersion(Connection con) {
-		Statement st = null;
-		ResultSet rs = null;
+		Statement st;
+		ResultSet rs;
 		String version = "";
 		try {
 			st = con.createStatement();

@@ -30,10 +30,9 @@ public class Database {
 
 	/**
 	 * Create Connection to Derby Database
-	 * 
-	 * @return - Connection object to derby Database
+	 *
 	 */
-	public static Connection createConnection() {
+	public static void createConnection() {
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 		try {
 			if (con == null || con.isClosed()) {
@@ -49,8 +48,6 @@ public class Database {
 			System.err.println("Verbindung konnte nicht hergestellt werden. Class not found");
 			Mainframe.logger.error(e.getMessage());
 		}
-		return con;
-
 	}
 
 	/**
@@ -108,7 +105,8 @@ public class Database {
 				try {
 					createBooklist.close();
 					createWishlist.close();
-					createVersions.close();
+                    assert createVersions != null;
+                    createVersions.close();
 					Mainframe.logger.info("DB closed");
 				} catch (SQLException e) {
 					Mainframe.logger.error(e.getMessage());
@@ -307,27 +305,25 @@ public class Database {
 					"Serienteil", "E-Book", "ISBN", "Datum" };
 			writer.writeNext(header);
 			ArrayList<Book_Booklist> list = BookListModel.getBooks();
-			int size = list.size();
-			// bücher in die Tabelle einfügen
-			for (int i = 0; i < size; i++) {
-				if (list.get(i).getDate() == null) {
-					BookListModel.loadOnDemand(list.get(i));
-				}
-				String autor = list.get(i).getAuthor();
-				String titel = list.get(i).getTitle();
-				String ausgeliehen_an = list.get(i).getBorrowedTo();
-				String ausgeliehen_von = list.get(i).getBorrowedTo();
-				String bemerkung = list.get(i).getNote();
-				String datum = list.get(i).getDate().toString();
-				String serie = list.get(i).getSeries();
-				String seriePart = list.get(i).getSeriesVol();
-				String ebook = Boolean.toString(list.get(i).isEbook());
-				String isbn = list.get(i).getIsbn();
-				String[] data = { autor, titel, ausgeliehen_an, ausgeliehen_von, bemerkung, serie, seriePart, ebook,
-						isbn, datum };
-				writer.writeNext(data);
-			}
-			;
+            // bücher in die Tabelle einfügen
+            for (Book_Booklist bookBooklist : list) {
+                if (bookBooklist.getDate() == null) {
+                    BookListModel.loadOnDemand(bookBooklist);
+                }
+                String autor = bookBooklist.getAuthor();
+                String titel = bookBooklist.getTitle();
+                String ausgeliehen_an = bookBooklist.getBorrowedTo();
+                String ausgeliehen_von = bookBooklist.getBorrowedTo();
+                String bemerkung = bookBooklist.getNote();
+                String datum = bookBooklist.getDate().toString();
+                String serie = bookBooklist.getSeries();
+                String seriePart = bookBooklist.getSeriesVol();
+                String ebook = Boolean.toString(bookBooklist.isEbook());
+                String isbn = bookBooklist.getIsbn();
+                String[] data = {autor, titel, ausgeliehen_an, ausgeliehen_von, bemerkung, serie, seriePart, ebook,
+                        isbn, datum};
+                writer.writeNext(data);
+            }
 			success = true;
 
 		} catch (IOException e) {
@@ -342,7 +338,7 @@ public class Database {
 	 * @return - DB version String with last modified date
 	 */
 	public static String readCurrentLayoutVersion() {
-		ResultSet rs = null;
+		ResultSet rs;
 		String version = "";
 		String sql = "SELECT * FROM versions";
 		try {
@@ -364,8 +360,7 @@ public class Database {
 	 * @return - apache derby version String
 	 */
 	public static String readCurrentDBVersion() {
-		String version = sysinfo.getVersionString();
-		return version;
+        return sysinfo.getVersionString();
 	}
 
 	/**
@@ -380,8 +375,7 @@ public class Database {
 			st.setInt(1, bid);
 			st.executeUpdate();
 			st.close();
-			System.out.println("Booklist Datenbank Eintrag geloescht - " + bid);
-			Mainframe.logger.info("Booklist Datenbank Eintrag geloescht - " + bid);
+			Mainframe.logger.info("Booklist Datenbank Eintrag geloescht - {}", bid);
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim löschen des Buchs (Booklist)");
 		}
@@ -425,8 +419,7 @@ public class Database {
 		st.close();
 
 		Mainframe.logger
-				.info("Booklist Datenbank Eintrag erstellt: " + author + "," + title + "," + borrowed + "," + name + ","
-						+ note + "," + series + "," + seriesVol + "," + date + "," + int_ebook + "," + (highestBid));
+				.info("Booklist Datenbank Eintrag erstellt: {},{},{},{},{},{},{},{},{},{}", author, title, borrowed, name, note,series,seriesVol,date,int_ebook,(highestBid));
 		return highestBid;
 	}
 
@@ -447,32 +440,10 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
-			Mainframe.logger.info("Table updated - " + bid + " - " + colName + "=" + value);
+			Mainframe.logger.info("Table updated - {}-{]={}", bid, colName, value);
 		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim aktualisieren des Buchs: " + bid + " - " + colName + "=" + value);
+			Mainframe.logger.error("Fehler beim aktualisieren des Buchs: {}-{}={}",bid, colName, value);
 		}
-	}
-
-	/**
-	 * gets Information about all series of one specific author
-	 * 
-	 * @param author - name of author
-	 * 
-	 * @return ResultSet with series and volume info from one specific author
-	 * 
-	 */
-	public static ResultSet getSeriesInfo(String author) {
-		ResultSet rs = null;
-		String sql = "SELECT serie, seriePart FROM books WHERE autor=? and serie!= '' ORDER BY serie";
-		try {
-			PreparedStatement pst = con.prepareStatement(sql);
-			pst.setString(1, author);
-			rs = pst.executeQuery();
-			Mainframe.logger.info("Autor analysiert:" + author);
-		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim analysieren: " + author);
-		}
-		return rs;
 	}
 
 	/**
@@ -491,9 +462,9 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
-			Mainframe.logger.info("Cover gespeichert: " + bid);
+			Mainframe.logger.info("Cover gespeichert: {}", bid);
 		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim speichern des Covers: " + bid);
+			Mainframe.logger.error("Fehler beim speichern des Covers: {}", bid);
 		}
 
 	}
@@ -513,34 +484,13 @@ public class Database {
 			st.setInt(1, bid);
 			st.execute();
 			st.close();
-			Mainframe.logger.info("Cover geloescht: " + bid);
+			Mainframe.logger.info("Cover geloescht: {}", bid);
 			return true;
 		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim löschen des Covers: " + bid);
+			Mainframe.logger.error("Fehler beim löschen des Covers: {}", bid);
 			return false;
 		}
 
-	}
-
-	/**
-	 * gets the "pic" column of specific Book entry
-	 * 
-	 * @param bid - book id
-	 * 
-	 * @return ResultSet with pic value
-	 */
-	public static ResultSet getPic(int bid) {
-		ResultSet rs = null;
-		String sql = "SELECT pic FROM books WHERE bid=?";
-		try {
-			PreparedStatement pst = con.prepareStatement(sql);
-			pst.setInt(1, bid);
-			rs = pst.executeQuery();
-			Mainframe.logger.info("Cover ausgelesen: " + bid);
-		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim auslesen des Covers: " + bid);
-		}
-		return rs;
 	}
 
 	/**
@@ -559,9 +509,9 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
-			Mainframe.logger.info("Description gespeichert: " + bid);
+			Mainframe.logger.info("Description gespeichert: {}", bid);
 		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim speichern der Beschreibung: " + bid);
+			Mainframe.logger.error("Fehler beim speichern der Beschreibung: {}", bid);
 		}
 
 	}
@@ -581,10 +531,10 @@ public class Database {
 			st.setInt(1, bid);
 			st.execute();
 			st.close();
-			Mainframe.logger.info("Description geloescht: " + bid);
+			Mainframe.logger.info("Description geloescht: {}", bid);
 			return true;
 		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim löschen der Beschreibung: " + bid);
+			Mainframe.logger.error("Fehler beim löschen der Beschreibung: {}", bid);
 			return false;
 		}
 
@@ -606,33 +556,9 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
-			Mainframe.logger.info("ISBN gespeichert: " + bid);
+			Mainframe.logger.info("ISBN gespeichert: {}", bid);
 		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim speichern der ISBN: " + bid);
-		}
-
-	}
-
-	/**
-	 * empties the "isbn" column of specific Book
-	 * 
-	 * @param bid - book id
-	 * 
-	 * @return success value
-	 */
-	public static boolean delIsbn(int bid) {
-		String sql = "update books set isbn='' where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
-			st.setInt(1, bid);
-			st.execute();
-			st.close();
-			Mainframe.logger.info("ISBN geloescht: " + bid);
-			return true;
-		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim löschen der ISBN: " + bid);
-			return false;
+			Mainframe.logger.error("Fehler beim speichern der ISBN: {}", bid);
 		}
 
 	}
@@ -653,9 +579,9 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
-			Mainframe.logger.info("Rating gespeichert: " + bid);
+			Mainframe.logger.info("Rating gespeichert: {}", bid);
 		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim speichern des Ratings: " + bid);
+			Mainframe.logger.error("Fehler beim speichern des Ratings: {}", bid);
 		}
 
 	}
@@ -700,10 +626,9 @@ public class Database {
 			st.setString(6, date);
 			st.executeUpdate();
 			st.close();
-			Mainframe.logger.info("Wishlist Datenbank Eintrag erstellt: " + author + "," + title + "," + note + ","
-					+ series + "," + seriesVol + "," + date);
+			Mainframe.logger.info("Wishlist Datenbank Eintrag erstellt: {},{},{},{},{},{}", author ,title, note,series, seriesVol, date);
 		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim speichern des Buchs (Wunschliste): " + author + "-" + title);
+			Mainframe.logger.error("Fehler beim speichern des Buchs (Wunschliste): {}-{}",author,title);
 		}
 	}
 
@@ -721,11 +646,11 @@ public class Database {
 			st.setString(2, title);
 			st.executeUpdate();
 			st.close();
-			Mainframe.logger.info("Wishlist Datenbank Eintrag geloescht: " + author + "," + title);
+			Mainframe.logger.info("Wishlist Datenbank Eintrag geloescht: {},{}", author,title);
 		} catch (
 
 		SQLException e) {
-			Mainframe.logger.error("Fehler beim löschen des Buchs (Wunschliste): " + author + "-" + title);
+			Mainframe.logger.error("Fehler beim löschen des Buchs (Wunschliste): {}-{}", author, title);
 		}
 	}
 
