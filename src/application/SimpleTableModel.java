@@ -2,18 +2,17 @@ package application;
 
 import javax.swing.DefaultListModel;
 import javax.swing.table.DefaultTableModel;
+import java.io.Serial;
 
 public class SimpleTableModel extends DefaultTableModel {
 
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	//default column Names, not used if already set in config.conf
 	public static String[] columnNames = { "E-Book", "Autor", "Titel", "Serie", "Rating" };
-	private int cols = columnNames.length;
-	private String[] rowData = new String[cols];
+	private final int cols = columnNames.length;
+	private final String[] rowData = new String[cols];
 
 	
 	public SimpleTableModel(BookListModel books) {
@@ -32,16 +31,13 @@ public class SimpleTableModel extends DefaultTableModel {
 		int columnRating = 0;
 
 		for (int i = 0; i < columnNames.length; i++) {
-			if (columnNames[i].equals("E-Book"))
-				columnEbook = i;
-			else if (columnNames[i].equals("Autor"))
-				columnAuthor = i;
-			else if (columnNames[i].equals("Titel"))
-				columnTitle = i;
-			else if (columnNames[i].equals("Serie"))
-				columnSeries = i;
-			else if (columnNames[i].equals("Rating"))
-				columnRating = i;
+            switch (columnNames[i]) {
+                case "E-Book" -> columnEbook = i;
+                case "Autor" -> columnAuthor = i;
+                case "Titel" -> columnTitle = i;
+                case "Serie" -> columnSeries = i;
+                case "Rating" -> columnRating = i;
+            }
 		}
 
 		for (int i = 0; i < books.getSize(); i++) {
@@ -86,9 +82,9 @@ public class SimpleTableModel extends DefaultTableModel {
 				if (j == 0) {
 					boolean isEbook = books.getElementAt(i).isEbook();
 					if (isEbook) {
-						rowData[j] = "X";
+						rowData[j] = "●";
 					} else {
-						rowData[j] = "";
+						rowData[j] = "○";
 					}
 				} else if (j == 1) {
 					rowData[j] = books.getElementAt(i).getAuthor();
