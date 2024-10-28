@@ -8,10 +8,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 import javax.imageio.IIOImage;
@@ -43,25 +43,24 @@ public class GetBookInfosFromWeb {
 			if (retry) {
 				if (HandleConfig.searchParam.equals("t")) {
 					HandleConfig.searchParam = "at";
-					Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
 				} else if (HandleConfig.searchParam.equals("at")) {
 					HandleConfig.searchParam = "t";
-					Mainframe.logger.info("changed searchParam to " + HandleConfig.searchParam);
 				}
+				Mainframe.logger.info("changed searchParam to {}", HandleConfig.searchParam);
 			}
 
 			StringBuilder str = new StringBuilder();
 			if (HandleConfig.searchParam.equals("at")) {
-				str.append(sanitizeString(entry.getAuthor()) + "+");
+				str.append(sanitizeString(entry.getAuthor())).append("+");
 			}
 			str.append(sanitizeString(entry.getTitle()));
 
 			// URL of REST-API
-			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str.toString() + "&maxResults="
+			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults="
 					+ maxResults + "&printType=books";
 
-			Mainframe.logger.info("Search API: " + entry.toString().toString());
-			Mainframe.logger.info("Search API URL: " + apiUrl);
+			Mainframe.logger.info("Search API: {}", entry);
+			Mainframe.logger.info("Search API URL: {}", apiUrl);
 
 			URL url = new URI(apiUrl).toURL();
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -71,7 +70,7 @@ public class GetBookInfosFromWeb {
 			int responseCode = connection.getResponseCode();
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				// read InputStream and create String
-				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
 				StringBuilder response = new StringBuilder();
 				String line;
 				while ((line = reader.readLine()) != null) {
@@ -88,9 +87,9 @@ public class GetBookInfosFromWeb {
 		} catch (Exception e) {
 			Mainframe.logger.error(e.getMessage());
 		}
-		Mainframe.logger.info("checkWebInfo " + "Retry: " + retry);
+		Mainframe.logger.info("checkWebInfo Retry: {}", retry);
 		Mainframe.logger.info(
-				"checkWebInfo " + "Overall Score: " + entry.getAuthor() + "-" + entry.getTitle() + ":" + compareReturn);
+				"checkWebInfo Overall Score: {}-{}:{}", entry.getAuthor(), entry.getTitle(), compareReturn);
 		return compareReturn;
 
 	}
@@ -112,8 +111,8 @@ public class GetBookInfosFromWeb {
 			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults=" + maxResults
 					+ "&printType=books";
 
-			Mainframe.logger.info("Search API: " + str);
-			Mainframe.logger.info("Search API URL: " + apiUrl);
+			Mainframe.logger.info("Search API: {}",str);
+			Mainframe.logger.info("Search API URL: {}", apiUrl);
 
 			URL url = new URI(apiUrl).toURL();
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -121,10 +120,10 @@ public class GetBookInfosFromWeb {
 
 			// open connection and check response Code
 			int responseCode = connection.getResponseCode();
-			Mainframe.logger.info("Search API response: " + responseCode);
+			Mainframe.logger.info("Search API response: {}", responseCode);
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				// read InputStream and create String
-				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
 				StringBuilder response = new StringBuilder();
 				String line;
 				while ((line = reader.readLine()) != null) {
@@ -161,7 +160,7 @@ public class GetBookInfosFromWeb {
 		while (i < 2 && cCover + cDesc + cIsbn < 3) {
 			if (jsonObject.has("items")) {
 				var itemsArray = jsonObject.getAsJsonArray("items");
-				if (itemsArray.size() > 0) {
+				if (!itemsArray.isEmpty()) {
 					var firstItem = itemsArray.get(i).getAsJsonObject();
 					if (firstItem.has("volumeInfo")) {
 						var volumeInfo = firstItem.getAsJsonObject("volumeInfo");
@@ -187,9 +186,7 @@ public class GetBookInfosFromWeb {
 									if (type.equals("ISBN_13")) {
 										String isbn = isbnidentifiers13.get("identifier").getAsString();
 										cIsbn = 1;
-										Mainframe.executor.submit(() -> {
-											entry.setIsbn(isbn, true);
-										});
+										Mainframe.executor.submit(() -> entry.setIsbn(isbn, true));
 									}
 								}
 							}
@@ -210,9 +207,7 @@ public class GetBookInfosFromWeb {
 						if (volumeInfo.has("description") && cDesc == 0) {
 							String description = volumeInfo.get("description").getAsString();
 							cDesc = 1;
-							Mainframe.executor.submit(() -> {
-								entry.setDesc(description, true);
-							});
+							Mainframe.executor.submit(() -> entry.setDesc(description, true));
 						} else {
 							Mainframe.logger.info("WebInfo Download: 'description' not found!");
 						}
@@ -242,7 +237,7 @@ public class GetBookInfosFromWeb {
 		while (i < maxResults) {
 			if (jsonObject.has("items")) {
 				var itemsArray = jsonObject.getAsJsonArray("items");
-				if (itemsArray.size() > 0) {
+				if (!itemsArray.isEmpty()) {
 					var firstItem = itemsArray.get(i).getAsJsonObject();
 					if (firstItem.has("volumeInfo")) {
 						var volumeInfo = firstItem.getAsJsonObject("volumeInfo");
@@ -295,13 +290,13 @@ public class GetBookInfosFromWeb {
 	 * @return int - returns a percentage Number of the comparison
 	 */
 	public static int compareString(String str1, String str2) {
-		int equalPercentage = 0;
+		int equalPercentage;
 		int hit = 0;
 		int counterBig = 0;
 		int counterSmall = 0;
 		boolean newWord = true;
-		String small = "";
-		String big = "";
+		String small;
+		String big;
 
 		if (str1.length() > str2.length()) {
 			big = str1;
@@ -312,41 +307,40 @@ public class GetBookInfosFromWeb {
 		}
 
 		int anzahl = big.length();
-		for (; counterSmall < small.length();) {
-			char smallChar = small.charAt(counterSmall);
-			char bigChar = big.charAt(counterBig);
-			while (smallChar == ' ' && bigChar != ' ') {
-				counterBig++;
-				bigChar = big.charAt(counterBig);
-				newWord = true;
-			}
-			while (smallChar != ' ' && bigChar == ' ') {
-				counterBig++;
-				bigChar = big.charAt(counterBig);
-				newWord = true;
-			}
+        while (counterSmall < small.length()) {
+            char smallChar = small.charAt(counterSmall);
+            char bigChar = big.charAt(counterBig);
+            while (smallChar == ' ' && bigChar != ' ') {
+                counterBig++;
+                bigChar = big.charAt(counterBig);
+                newWord = true;
+            }
+            while (smallChar != ' ' && bigChar == ' ') {
+                counterBig++;
+                bigChar = big.charAt(counterBig);
+                newWord = true;
+            }
 
-			if (newWord && smallChar != bigChar) {
-				counterBig++;
-			} else if (smallChar == bigChar) {
-				counterBig++;
-				counterSmall++;
-				hit++;
-				newWord = false;
-			} else {
-				counterBig++;
-				counterSmall++;
-				newWord = false;
-			}
-		}
-		equalPercentage = hit * 100 / anzahl;
-		Mainframe.logger.info("checkWebInfo " + str1 + "-" + str2 + ": " + equalPercentage);
+            if (newWord && smallChar != bigChar) {
+                counterBig++;
+            } else if (smallChar == bigChar) {
+                counterBig++;
+                counterSmall++;
+                hit++;
+                newWord = false;
+            } else {
+                counterBig++;
+                counterSmall++;
+            }
+        }
+        equalPercentage = hit * 100 / anzahl;
+		Mainframe.logger.info("checkWebInfo {}-{}:{}", str1 ,str2 ,equalPercentage);
 
 		return equalPercentage;
 	}
 
 	/**
-	 * Delete a pic from an Book entry
+	 * Delete a pic from a Book entry
 	 * 
 	 * @param bid - Bookid
 	 * 
@@ -357,14 +351,12 @@ public class GetBookInfosFromWeb {
 	}
 
 	/**
-	 * Saves a pic from an Book entry
-	 * 
+	 * Saves a pic from a Book entry
+	 *
 	 * @param weblink - Link where to get the Bookcover
 	 * @param entry   - Bookentry to save the Cover
-	 * 
-	 * @return boolean - returns boolean as success
 	 */
-	public static boolean savePic(String weblink, Book_Booklist entry) {
+	public static void savePic(String weblink, Book_Booklist entry) {
 		try (BufferedInputStream in = new BufferedInputStream(new URI(weblink).toURL().openStream())) {
 
 			BufferedImage originalImage = ImageIO.read(in);
@@ -403,14 +395,9 @@ public class GetBookInfosFromWeb {
 				}
 			});
 
-		} catch (MalformedURLException e) {
-			Mainframe.logger.error(e.getMessage());
-		} catch (IOException e) {
-			Mainframe.logger.error(e.getMessage());
-		} catch (URISyntaxException e) {
+		} catch (URISyntaxException | IOException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
-		return true;
 	}
 
 	/**
@@ -421,12 +408,11 @@ public class GetBookInfosFromWeb {
 	 * @return String - sanitized input String
 	 */
 	private static String sanitizeString(String input) {
-		String newString = input.replace("\u00fc", "ue").replace("\u00f6", "oe").replace("\u00e4", "ae")
-				.replace("\u00df", "ss").replaceAll("\u00dc(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Ue")
-				.replaceAll("\u00d6(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Oe")
-				.replaceAll("\u00c4(?=[a-z\u00e4\u00f6\u00fc\u00df ])", "Ae").replace("\u00dc", "UE")
-				.replace("\u00d6", "OE").replace("\u00c4", "AE").replace(" ", "+");
-		return newString;
+        return input.replace("ü", "ue").replace("ö", "oe").replace("ä", "ae")
+                .replace("ß", "ss").replaceAll("Ü(?=[a-zäöüß ])", "Ue")
+                .replaceAll("Ö(?=[a-zäöüß ])", "Oe")
+                .replaceAll("Ä(?=[a-zäöüß ])", "Ae").replace("Ü", "UE")
+                .replace("Ö", "OE").replace("Ä", "AE").replace(" ", "+");
 	}
 
 }

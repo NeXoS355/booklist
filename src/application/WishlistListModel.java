@@ -1,5 +1,6 @@
 package application;
 
+import java.io.Serial;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -12,12 +13,9 @@ import gui.Mainframe;
 
 public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
-	private static ArrayList<Book_Wishlist> books = new ArrayList<Book_Wishlist>();
-	public static ArrayList<String> authors = new ArrayList<String>();
+	private static final ArrayList<Book_Wishlist> books = new ArrayList<>();
 
 	public WishlistListModel() {
 		books.clear();
@@ -40,6 +38,7 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 				}
 
 			}
+			rs.close();
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
@@ -49,12 +48,6 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 		books.add(book);
 		fireIntervalAdded(this, 0, books.size());
 		System.out.println("Wishlist Buch hinzugefuegt: " + book.getAuthor() + "," + book.getTitle());
-	}
-	
-	public static void clear() {
-		for (int i = 0;i < books.size();i++) {
-			books.remove(i);
-		}
 	}
 
 	public void delete(Book_Wishlist book) {

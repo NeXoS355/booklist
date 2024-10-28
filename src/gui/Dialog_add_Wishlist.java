@@ -14,9 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.Serial;
 import java.net.URL;
-import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Objects;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -356,40 +354,31 @@ public class Dialog_add_Wishlist extends JDialog {
 	}
 
 	public void addBuch() {
-		try {
-			Mainframe.logger.info("Wishlist Book add: start saving");
-			if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
-				String autor = txtAuthor.getText();
-				String titel = txtTitle.getText();
-				String bemerkung = txtNote.getText();
-				String serie = txtSeries.getText();
-				String seriePart = txtSeriesVol.getText();
-				Timestamp datum = new Timestamp(System.currentTimeMillis());
-				if (!Duplicant(autor, titel)) {
-					wishlist.wishlistEntries.add(new Book_Wishlist(autor, titel, bemerkung, serie, seriePart, datum, true));
-					dispose();
-				} else {
-					txtTitle.setText("Buch bereits vorhanden!");
-					txtTitle.setBackground(new Color(255, 105, 105));
-				}
-				Mainframe.logger.info("Book add: saved successfully");
-			} else {
-				if (txtAuthor.getText().isEmpty()) {
-					txtAuthor.setBackground(new Color(255, 105, 105));
-				}
-				if (txtTitle.getText().isEmpty()) {
-					txtTitle.setBackground(new Color(255, 105, 105));
-				}
-			}
-		} catch (SQLException e1) {
-			Mainframe.logger.error(e1.getMessage());
-			txtTitle.setForeground(Color.white);
-			txtTitle.setBackground(new Color(255, 105, 105));
-			if (Objects.equals(e1.getSQLState(), "23505")) {
-				txtTitle.setText("Buch bereits vorhanden!");
-			}
-		}
-		wishlist.updateModel();
+        Mainframe.logger.info("Wishlist Book add: start saving");
+        if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
+            String autor = txtAuthor.getText();
+            String titel = txtTitle.getText();
+            String bemerkung = txtNote.getText();
+            String serie = txtSeries.getText();
+            String seriePart = txtSeriesVol.getText();
+            Timestamp datum = new Timestamp(System.currentTimeMillis());
+            if (!Duplicant(autor, titel)) {
+                wishlist.wishlistEntries.add(new Book_Wishlist(autor, titel, bemerkung, serie, seriePart, datum, true));
+                dispose();
+            } else {
+                txtTitle.setText("Buch bereits vorhanden!");
+                txtTitle.setBackground(new Color(255, 105, 105));
+            }
+            Mainframe.logger.info("Book add: saved successfully");
+        } else {
+            if (txtAuthor.getText().isEmpty()) {
+                txtAuthor.setBackground(new Color(255, 105, 105));
+            }
+            if (txtTitle.getText().isEmpty()) {
+                txtTitle.setBackground(new Color(255, 105, 105));
+            }
+        }
+        wishlist.updateModel();
 	}
 
 	public boolean Duplicant(String autor, String titel) {

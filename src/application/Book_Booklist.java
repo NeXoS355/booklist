@@ -36,7 +36,7 @@ public class Book_Booklist {
 	 * @param borrowedFrom - Name of the Person the Book has been borrowed from
 	 * @param note         - free String variable as note
 	 * @param series       - series name of the Book
-	 * @param serieVol     - volume number of the Book in the series
+	 * @param seriesVol     - volume number of the Book in the series
 	 * @param ebook        - sets the book as ebook
 	 * @param rating       - Book User Rating
 	 * @param pic          - Book Cover
@@ -95,7 +95,7 @@ public class Book_Booklist {
 	 * @param title    - Book title
 	 * @param note     - free String variable as note
 	 * @param series   - series name of the Book
-	 * @param serieVol - volume number of the Book in the series
+	 * @param seriesVol - volume number of the Book in the series
 	 * @param ebook    - sets the book as ebook
 	 * @param rating   - Book User Rating
 	 * @param pic      - Book Cover
@@ -156,12 +156,9 @@ public class Book_Booklist {
 		} else if (!author.equals(other.author))
 			return false;
 		if (title == null) {
-			if (other.title != null)
-				return false;
-		} else if (!title.equals(other.title))
-			return false;
-		return true;
-	}
+            return other.title == null;
+		} else return title.equals(other.title);
+    }
 
 	public String getAuthor() {
 		return author;

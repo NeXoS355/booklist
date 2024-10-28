@@ -1,6 +1,5 @@
 package application;
 
-import java.sql.SQLException;
 import java.sql.Timestamp;
 
 import data.Database;
@@ -14,7 +13,7 @@ public class Book_Wishlist {
 	private String seriesVol;
 	private Timestamp date;
 
-	public Book_Wishlist(String author, String title, String note, String series,String seriesVol, Timestamp date, boolean db) throws SQLException {
+	public Book_Wishlist(String author, String title, String note, String series,String seriesVol, Timestamp date, boolean db) {
 		super();
 		this.author = author;
 		this.title = title;
@@ -56,12 +55,9 @@ public class Book_Wishlist {
 		} else if (!author.equals(other.author))
 			return false;
 		if (title == null) {
-			if (other.title != null)
-				return false;
-		} else if (!title.equals(other.title))
-			return false;
-		return true;
-	}
+            return other.title == null;
+		} else return title.equals(other.title);
+    }
 
 	public String getAuthor() {
 		return author;
