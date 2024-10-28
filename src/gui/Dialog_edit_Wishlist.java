@@ -2,20 +2,17 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.URI;
+import java.io.Serial;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -36,17 +33,15 @@ import data.Database;
 
 public class Dialog_edit_Wishlist extends JDialog {
 
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
-	private CustomTextField txtAuthor;
-	private CustomTextField txtTitle;
-	private CustomTextField txtNote;
-	private CustomTextField txtSeries;
-	private CustomTextField txtSeriesVol;
-	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
-	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
+	private final CustomTextField txtAuthor;
+	private final CustomTextField txtTitle;
+	private final CustomTextField txtNote;
+	private final CustomTextField txtSeries;
+	private final CustomTextField txtSeriesVol;
+	private final Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
+	private final Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
 	public Dialog_edit_Wishlist(Frame owner, WishlistListModel entries, int index) {
 		Mainframe.logger.info("Wishlist Book edit: start creating Frame");
@@ -59,7 +54,8 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
-		ImageIcon icon = new ImageIcon(iconURL);
+        assert iconURL != null;
+        ImageIcon icon = new ImageIcon(iconURL);
 		this.setIconImage(icon.getImage());
 
 		this.setLayout(new BorderLayout(10, 10));
@@ -363,23 +359,11 @@ public class Dialog_edit_Wishlist extends JDialog {
 		 */
 		JButton btnAdd = ButtonsFactory.createButton("Speichern");
 		btnAdd.setFont(Mainframe.defaultFont);
-		btnAdd.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				speichern(eintrag);
-			}
-		});
+		btnAdd.addActionListener(e -> speichern(eintrag));
 
 		JButton btnAbort = ButtonsFactory.createButton("Abbrechen");
 		btnAbort.setFont(Mainframe.defaultFont);
-		btnAbort.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		});
+		btnAbort.addActionListener(arg0 -> dispose());
 		
 		/*
 		 * add components into Panel South
@@ -410,7 +394,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 			String newSerie = txtSeries.getText().trim();
 			String newSeriePart = txtSeriesVol.getText();
 			Timestamp datum = new Timestamp(System.currentTimeMillis());
-			if (!Duplicant(newAutor, newTitel, wishlist.wishlistEntries.getIndexOf(newAutor, newTitel))) {
+			if (!Duplicant(newAutor, newTitel)) {
 				Database.deleteFromWishlist(oldAutor, oldTitel);
 				Database.addToWishlist(newAutor, newTitel, newBemerkung, newSerie, newSeriePart, datum.toString());
 				eintrag.setAuthor(newAutor);
@@ -436,7 +420,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		wishlist.updateModel();
 	}
 
-	public boolean Duplicant(String autor, String titel, int index) {
+	public boolean Duplicant(String autor, String titel) {
 		for (int i = 0; i < wishlist.wishlistEntries.getSize(); i++) {
 			Book_Wishlist eintrag = wishlist.wishlistEntries.getElementAt(i);
 			if (eintrag.getAuthor().equals(autor) && eintrag.getTitle().equals(titel)) {
@@ -447,19 +431,6 @@ public class Dialog_edit_Wishlist extends JDialog {
 			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
 			if (eintrag.getAuthor().equals(autor) && eintrag.getTitle().equals(titel)) {
 				return true;
-			}
-		}
-		return false;
-	}
-
-	public static boolean openWebpage(URI uri) {
-		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-		if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-			try {
-				desktop.browse(uri);
-				return true;
-			} catch (Exception e1) {
-				Mainframe.logger.error(e1.getMessage());
 			}
 		}
 		return false;

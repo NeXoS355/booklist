@@ -4,6 +4,7 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.Serial;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -12,9 +13,7 @@ import application.BookListModel;
 
 public class Dialog_info extends JDialog {
 
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**

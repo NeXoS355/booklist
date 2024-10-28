@@ -5,6 +5,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -29,8 +30,8 @@ public class ButtonsFactory {
 			if (text.equals("suchen")) {
 
 				try {
-					imageActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe.png"));
-					imageInActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe_inactive.png"));
+					imageActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe.png")));
+					imageInActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe_inactive.png")));
 					button.setIcon(new ImageIcon(imageInActive));
 				} catch (IOException e1) {
 					Mainframe.logger.error(e1.getMessage());
@@ -84,8 +85,8 @@ public class ButtonsFactory {
 			if (text.equals("suchen")) {
 
 				try {
-					imageActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe_inv.png"));
-					imageInActive = ImageIO.read(Mainframe.class.getResource("/resources/lupe_inactive.png"));
+					imageActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe_inv.png")));
+					imageInActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe_inactive.png")));
 					button.setIcon(new ImageIcon(imageInActive));
 				} catch (IOException e1) {
 					Mainframe.logger.error(e1.getMessage());

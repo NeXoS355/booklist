@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.Serial;
 import java.net.URL;
 import java.sql.Timestamp;
 
@@ -23,7 +24,6 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
-import javax.swing.tree.DefaultTreeModel;
 
 import application.Book_Booklist;
 import application.HandleConfig;
@@ -35,29 +35,26 @@ import application.BookListModel;
  */
 public class Dialog_add_Booklist extends JDialog {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
-	private CustomTextField txtAuthor;
-	private CustomTextField txtTitle;
-	private JCheckBox checkFrom;
-	private CustomTextField txtBorrowedFrom;
-	private JCheckBox checkTo;
-	private CustomTextField txtBorrowedTo;
-	private CustomTextField txtNote;
-	private CustomTextField txtSerie;
-	private CustomTextField txtSeriesVol;
-	private JCheckBox checkEbook;
-	private JButton btn_add;
-//	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
-//	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
+	private final CustomTextField txtAuthor;
+	private final CustomTextField txtTitle;
+	private final JCheckBox checkFrom;
+	private final CustomTextField txtBorrowedFrom;
+	private final JCheckBox checkTo;
+	private final CustomTextField txtBorrowedTo;
+	private final CustomTextField txtNote;
+	private final CustomTextField txtSerie;
+	private final CustomTextField txtSeriesVol;
+	private final JCheckBox checkEbook;
+	private final JButton btn_add;
 
 	/**
 	 * Dialog Add Constructor
 	 * 
 	 * @param owner     - set the owner of this Frame
-	 * @param bookModel - current entries of the Booktable
-	 * @param treeModel - current entries of the Authortree
 	 */
-	public Dialog_add_Booklist(Frame owner, BookListModel bookModel, DefaultTreeModel treeModel) {
+	public Dialog_add_Booklist(Frame owner) {
 		Mainframe.logger.info("Book add: start creating Frame");
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 420));
@@ -66,7 +63,8 @@ public class Dialog_add_Booklist extends JDialog {
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
-		ImageIcon icon = new ImageIcon(iconURL);
+        assert iconURL != null;
+        ImageIcon icon = new ImageIcon(iconURL);
 		this.setIconImage(icon.getImage());
 
 		this.setLayout(new BorderLayout(10, 10));
@@ -100,7 +98,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 					String typedString = txtAuthor.getText().substring(0, typed);
 
-					if (!txtAuthor.getText().equals("")) {
+					if (!txtAuthor.getText().isEmpty()) {
 						String[] autoren = autoCompletion(typedString, "autor");
 						for (int i = 0; i < autoren.length && autoren[i] != null; i++) {
 							int autorenLength = autoren[i].length();
@@ -196,7 +194,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 					String typedString = txtSerie.getText().substring(0, typed);
 
-					if (!txtSerie.getText().equals("")) {
+					if (!txtSerie.getText().isEmpty()) {
 						String[] serien = autoCompletion(typedString, "serie");
 						for (int i = 0; i < serien.length && serien[i] != null; i++) {
 							int autorenLength = serien[i].length();
@@ -389,23 +387,11 @@ public class Dialog_add_Booklist extends JDialog {
 
 		btn_add = ButtonsFactory.createButton("hinzufügen");
 		btn_add.setFont(Mainframe.defaultFont);
-		btn_add.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				addBook();
-			}
-		});
+		btn_add.addActionListener(e -> addBook());
 
 		JButton btn_abort = ButtonsFactory.createButton("abbrechen");
 		btn_abort.setFont(Mainframe.defaultFont);
-		btn_abort.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		});
+		btn_abort.addActionListener(arg0 -> dispose());
 
 		/*
 		 * add components to Panel South
@@ -429,7 +415,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 		Mainframe.logger.info("Book add: Frame successfully created");
 
-		if (!(Mainframe.getTreeSelection()).equals("")) {
+		if (!(Mainframe.getTreeSelection()).isEmpty()) {
 			txtTitle.requestFocus();
 		}
 
@@ -450,7 +436,7 @@ public class Dialog_add_Booklist extends JDialog {
 			boolean ebook = checkEbook.isSelected();
 			Timestamp datum = new Timestamp(System.currentTimeMillis());
 			if (checkInput(autor, titel)) {
-				Book_Booklist book = null;
+				Book_Booklist book;
 				if (checkTo.isSelected()) {
 					book = new Book_Booklist(autor, titel, true, txtBorrowedTo.getText(), "", bemerkung, serie,
 							seriePart, ebook, 0, null, null, null, datum, true);
@@ -472,7 +458,7 @@ public class Dialog_add_Booklist extends JDialog {
 				}
 				BookListModel.checkAuthors();
 				Mainframe.setLastSearch(txtAuthor.getText());
-				if (Mainframe.getTreeSelection().equals("")) {
+				if (Mainframe.getTreeSelection().isEmpty()) {
 					Mainframe.search(txtAuthor.getText());
 				} else {
 					Mainframe.search(Mainframe.getTreeSelection());
@@ -528,12 +514,12 @@ public class Dialog_add_Booklist extends JDialog {
 			int j = 0;
 			String[] serien = BookListModel.getSeriesFromAuthor(txtAuthor.getText());
 			String[] result = new String[serien.length];
-			for (int i = 0; i < serien.length; i++) {
-				if (serien[i].startsWith(search)) {
-					result[j] = serien[i];
-					j++;
-				}
-			}
+            for (String s : serien) {
+                if (s.startsWith(search)) {
+                    result[j] = s;
+                    j++;
+                }
+            }
 			returnArray = new String[j];
 			for (int i = 0; i < j; i++) {
 				if (result[i] != null) {

@@ -3,31 +3,23 @@ package gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.io.Serial;
 
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreePath;
 
 import application.HandleConfig;
 
 public class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
 
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	int hoveredRow = -1;
-	TreePath hoveredPath = null;
 
 	public void setHoveredRow(int row) {
 		this.hoveredRow = row;
 		
-	}
-	
-	public void setHoveredPath(TreePath path) {
-		this.hoveredPath = path;
 	}
 
 
@@ -73,14 +65,5 @@ public class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
 		return component;
 	}
 
-
-	protected ImageIcon createImageIcon(String path) {
-		java.net.URL imgURL = getClass().getClassLoader().getResource(path);
-		if (imgURL != null) {
-			return new ImageIcon(imgURL);
-		}
-		Mainframe.logger.error("JTree: " + path + "not found");
-		return null;
-	}
 
 }

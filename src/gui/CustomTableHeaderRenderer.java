@@ -6,21 +6,17 @@ import javax.swing.table.DefaultTableCellRenderer;
 import application.HandleConfig;
 
 import java.awt.*;
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	private final Map<Integer, Icon> columnIcons = new HashMap<>();
 
-	private String parent = "";
-
-	public CustomTableHeaderRenderer(String parent) {
-		this.parent = parent;
-	}
+    public CustomTableHeaderRenderer() {
+    }
 
 	// Methode zum Setzen eines Icons für eine bestimmte Spalte
 	public void setColumnIcon(int column, Icon icon) {

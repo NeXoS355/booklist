@@ -49,7 +49,7 @@ public class Mainframe extends JFrame {
      *
      * });
      */
-    public static ExecutorService executor = Executors.newFixedThreadPool(10);
+    public static final ExecutorService executor = Executors.newFixedThreadPool(10);
 
     public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
     public static Font descFont = new Font("Roboto", Font.PLAIN, 16);
@@ -59,7 +59,7 @@ public class Mainframe extends JFrame {
     public static int prozTitle = 0;
     public static int prozSeries = 0;
     public static int prozRating = 0;
-    static JTable table = new JTable();
+    static final JTable table = new JTable();
     private static DefaultListModel<Book_Booklist> filter;
     private static SimpleTableModel tableDisplay;
     private static int lastTableHoverRow = -1;
@@ -251,7 +251,7 @@ public class Mainframe extends JFrame {
         JButton btn_add = ButtonsFactory.createButton("+");
         btn_add.setFont(btn_add.getFont().deriveFont(Font.BOLD, 20));
         btn_add.addActionListener(e -> {
-            new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel);
+            new Dialog_add_Booklist(Mainframe.getInstance());
             txt_search.setText("Suche ... (" + entries.getSize() + ")");
         });
 
@@ -409,7 +409,7 @@ public class Mainframe extends JFrame {
         );
         CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer(this.getTitle());
         table.setDefaultRenderer(Object.class, tableRenderer);
-        CustomTableHeaderRenderer tableHeaderRenderer = new CustomTableHeaderRenderer(this.getTitle());
+        CustomTableHeaderRenderer tableHeaderRenderer = new CustomTableHeaderRenderer();
         tableHeaderRenderer.setColumnIcon(0, scaledEbookIcon);
         tableHeaderRenderer.setColumnIcon(4, scaledStarIcon);
         JTableHeader header = table.getTableHeader();
@@ -474,7 +474,7 @@ public class Mainframe extends JFrame {
                 menu.show(table, e.getX(), e.getY());
                 itemAddBook.addActionListener(e2 -> {
                     if (Objects.equals(e2.getActionCommand(), "Buch hinzufügen")) {
-                        new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel);
+                        new Dialog_add_Booklist(Mainframe.getInstance());
                     }
                 });
                 itemDelBook.addActionListener(e3 -> {
@@ -590,7 +590,7 @@ public class Mainframe extends JFrame {
                 menu.show(tree, e.getX(), e.getY());
                 itemAddBuch.addActionListener(e6 -> {
                     if (e6.getActionCommand().equals("Buch hinzufügen")) {
-                        new Dialog_add_Booklist(Mainframe.getInstance(), entries, treeModel);
+                        new Dialog_add_Booklist(Mainframe.getInstance());
                     }
                 });
             }
@@ -1197,7 +1197,6 @@ public class Mainframe extends JFrame {
      */
     private void uploadToApi() {
         try {
-            // URL des Endpunkts
             URL deleteUrl = new URI(HandleConfig.apiURL + "/api/deleteSynced.php").toURL();
             deleteUrl.openConnection();
             HttpURLConnection con = (HttpURLConnection) deleteUrl.openConnection();
@@ -1225,42 +1224,12 @@ public class Mainframe extends JFrame {
             // URL des API-Endpunkts
             logger.info("Web API request: {}/api/upload.php?token={}", HandleConfig.apiURL, HandleConfig.apiToken);
 
-            URL postUrl = new URI(HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken).toURL();
-
-            // Verbindung aufbauen
-            HttpURLConnection con = (HttpURLConnection) postUrl.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json; utf-8");
-            con.setRequestProperty("Accept", "application/json");
-            con.setDoOutput(true);
-            con.setConnectTimeout(5000);
-
-            // GSON-Instanz erstellen
-            Gson gson = new Gson();
-            JsonArray jsonArray = new JsonArray();
-            // Nur die relevanten Felder in ein JSON-Array umwandeln
-
-            for (Book_Booklist book : BookListModel.getBooks()) {
-                JsonObject jsonBook = new JsonObject();
-                jsonBook.addProperty("bid", book.getBid());
-                jsonBook.addProperty("author", book.getAuthor());
-                jsonBook.addProperty("title", book.getTitle());
-                jsonArray.add(jsonBook);
-
-            }
-
-            // JSON-Daten senden
-            String jsonInputString = gson.toJson(jsonArray);
-
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            }
+            HttpURLConnection con = getHttpURLConnection();
 
             // Antwort vom Server lesen
             int responseCode = con.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                logger.info("bücher erfolgreich hochgeladen!");
+                logger.info("Bücher erfolgreich hochgeladen!");
                 JOptionPane.showMessageDialog(this, "bücher erfolgreich hochgeladen!");
             } else {
                 logger.error("Fehler beim Hochladen der bücher: {}", responseCode);
@@ -1274,6 +1243,41 @@ public class Mainframe extends JFrame {
             JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Upload.");
         }
 
+    }
+
+    private static HttpURLConnection getHttpURLConnection() throws URISyntaxException, IOException {
+        URL postUrl = new URI(HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken).toURL();
+
+        // Verbindung aufbauen
+        HttpURLConnection con = (HttpURLConnection) postUrl.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json; utf-8");
+        con.setRequestProperty("Accept", "application/json");
+        con.setDoOutput(true);
+        con.setConnectTimeout(5000);
+
+        // GSON-Instanz erstellen
+        Gson gson = new Gson();
+        JsonArray jsonArray = new JsonArray();
+        // Nur die relevanten Felder in ein JSON-Array umwandeln
+
+        for (Book_Booklist book : BookListModel.getBooks()) {
+            JsonObject jsonBook = new JsonObject();
+            jsonBook.addProperty("bid", book.getBid());
+            jsonBook.addProperty("author", book.getAuthor());
+            jsonBook.addProperty("title", book.getTitle());
+            jsonArray.add(jsonBook);
+
+        }
+
+        // JSON-Daten senden
+        String jsonInputString = gson.toJson(jsonArray);
+
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        }
+        return con;
     }
 
     /**

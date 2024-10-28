@@ -8,15 +8,15 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.Serial;
 import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -29,23 +29,20 @@ import javax.swing.border.Border;
 
 import application.Book_Booklist;
 import application.Book_Wishlist;
-import application.WishlistListModel;
 
 public class Dialog_add_Wishlist extends JDialog {
 
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
-	private CustomTextField txtAuthor;
-	private CustomTextField txtTitle;
-	private CustomTextField txtNote;
-	private CustomTextField txtSeries;
-	private CustomTextField txtSeriesVol;
-	private Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
-	private Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
+	private final CustomTextField txtAuthor;
+	private final CustomTextField txtTitle;
+	private final CustomTextField txtNote;
+	private final CustomTextField txtSeries;
+	private final CustomTextField txtSeriesVol;
+	private final Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
+	private final Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-	public Dialog_add_Wishlist(Frame owner, WishlistListModel entries) {
+	public Dialog_add_Wishlist(Frame owner) {
 		Mainframe.logger.info("Wishlist Book add: start creating Frame");
 		this.setTitle("Buch hinzufügen");
 		this.setSize(new Dimension(500, 320));
@@ -54,7 +51,8 @@ public class Dialog_add_Wishlist extends JDialog {
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
 		// iconURL is null when not found
-		ImageIcon icon = new ImageIcon(iconURL);
+        assert iconURL != null;
+        ImageIcon icon = new ImageIcon(iconURL);
 		this.setIconImage(icon.getImage());
 
 		this.setLayout(new BorderLayout(10, 10));
@@ -331,23 +329,11 @@ public class Dialog_add_Wishlist extends JDialog {
 
 		JButton btn_add = ButtonsFactory.createButton("hinzufügen");
 		btn_add.setFont(Mainframe.defaultFont);
-		btn_add.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				addBuch();
-			}
-		});
+		btn_add.addActionListener(e -> addBuch());
 
 		JButton btn_abort = ButtonsFactory.createButton("abbrechen");
 		btn_abort.setFont(Mainframe.defaultFont);
-		btn_abort.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		});
+		btn_abort.addActionListener(arg0 -> dispose());
 		
 		/*
 		 * add components to Panel South
@@ -399,7 +385,7 @@ public class Dialog_add_Wishlist extends JDialog {
 			Mainframe.logger.error(e1.getMessage());
 			txtTitle.setForeground(Color.white);
 			txtTitle.setBackground(new Color(255, 105, 105));
-			if (e1.getSQLState() == "23505") {
+			if (Objects.equals(e1.getSQLState(), "23505")) {
 				txtTitle.setText("Buch bereits vorhanden!");
 			}
 		}

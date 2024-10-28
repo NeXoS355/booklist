@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.io.Serial;
 
 import javax.swing.JButton;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -25,10 +26,8 @@ public class CustomScrollBar extends BasicScrollBarUI {
     protected JButton createDecreaseButton(int orientation) {
         // Gibt einen Button mit Groesse (0, 0) zurueck, um den Pfeil zu0 verstecken
         return new JButton() {
-            /**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
+			@Serial
+            private static final long serialVersionUID = 1L;
 
 			@Override
             public Dimension getPreferredSize() {
@@ -41,10 +40,8 @@ public class CustomScrollBar extends BasicScrollBarUI {
     protected JButton createIncreaseButton(int orientation) {
         // Gibt einen Button mit Groesse (0, 0) zurueck, um den Pfeil zu verstecken
         return new JButton() {
-            /**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
+			@Serial
+            private static final long serialVersionUID = 1L;
 
 			@Override
             public Dimension getPreferredSize() {

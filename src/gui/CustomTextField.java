@@ -3,8 +3,7 @@ package gui;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.io.Serial;
 import java.io.Serializable;
 
 import javax.swing.BorderFactory;
@@ -19,16 +18,12 @@ import javax.swing.text.Document;
 
 public class CustomTextField extends JTextField {
 
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private BoundedRangeModel visibility;
-
-	private Border standardBorder = BorderFactory.createLineBorder(new Color(160, 160, 160, 125), 2);
-	private Border activeBorder = BorderFactory.createLineBorder(new Color(160, 160, 160, 200), 4);
-	private Border errorBorder = BorderFactory.createLineBorder(new Color(255, 105, 105), 4);
+    private final Border standardBorder = BorderFactory.createLineBorder(new Color(160, 160, 160, 125), 2);
+	private final Border activeBorder = BorderFactory.createLineBorder(new Color(160, 160, 160, 200), 4);
+	private final Border errorBorder = BorderFactory.createLineBorder(new Color(255, 105, 105), 4);
 
 	/**
 	 * Constructs a new <code>TextField</code>. A default model is created, the
@@ -39,19 +34,15 @@ public class CustomTextField extends JTextField {
 		setOpaque(false);
 		setFont(Mainframe.defaultFont);
 
-		addPropertyChangeListener(new PropertyChangeListener() {
-			
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if(evt.getPropertyName().equals("editable")) {
-					if(evt.getNewValue().equals("true")) {
-						setBorder(standardBorder);
-					} else {
-						setBorder(errorBorder);
-					}
-				}
-			}
-		});
+		addPropertyChangeListener(evt -> {
+            if(evt.getPropertyName().equals("editable")) {
+                if(evt.getNewValue().equals("true")) {
+                    setBorder(standardBorder);
+                } else {
+                    setBorder(errorBorder);
+                }
+            }
+        });
 		
 		addMouseListener(new MouseAdapter() {
 
@@ -93,19 +84,15 @@ public class CustomTextField extends JTextField {
 		setOpaque(false);
 		setFont(Mainframe.defaultFont);
 		
-		addPropertyChangeListener(new PropertyChangeListener() {
-			
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if(evt.getPropertyName().equals("editable")) {
-					if(evt.getNewValue().equals("true")) {
-						setBorder(standardBorder);
-					} else {
-						setBorder(errorBorder);
-					}
-				}
-			}
-		});
+		addPropertyChangeListener(evt -> {
+            if(evt.getPropertyName().equals("editable")) {
+                if(evt.getNewValue().equals("true")) {
+                    setBorder(standardBorder);
+                } else {
+                    setBorder(errorBorder);
+                }
+            }
+        });
 		
 		addMouseListener(new MouseAdapter() {
 
@@ -155,7 +142,7 @@ public class CustomTextField extends JTextField {
 		if (columns < 0) {
 			throw new IllegalArgumentException("columns less than zero.");
 		}
-		visibility = new DefaultBoundedRangeModel();
+        BoundedRangeModel visibility = new DefaultBoundedRangeModel();
 		visibility.addChangeListener(new ScrollRepainter());
 		if (doc == null) {
 			doc = createDefaultModel();
@@ -167,10 +154,7 @@ public class CustomTextField extends JTextField {
 	}
 
 	class ScrollRepainter implements ChangeListener, Serializable {
-
-		/**
-		 * 
-		 */
+		@Serial
 		private static final long serialVersionUID = 1L;
 
 		public void stateChanged(ChangeEvent e) {

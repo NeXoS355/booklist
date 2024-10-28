@@ -8,13 +8,12 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.Serial;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,9 +39,7 @@ import application.HandleConfig;
 
 public class Dialog_settings extends JDialog {
 
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	private static JComboBox<Integer> cmbFont;
 	private static JComboBox<Integer> cmbFontDesc;
@@ -57,27 +54,28 @@ public class Dialog_settings extends JDialog {
 	private static JTextField txtApiToken;
 	private static JLabel lblQrCode;
 
-	private URL connectionUrl;
-	private URL copyUrl;
-
-	public Dialog_settings(Frame owner, boolean modal) {
+    public Dialog_settings(Frame owner, boolean modal) {
 		this.setTitle("Einstellungen");
 		this.setModal(modal);
 		this.setLayout(new BorderLayout());
 		this.setSize(670, 475);
 		this.setLocationRelativeTo(owner);
 
-		if (Mainframe.isApiConnected())
+        URL connectionUrl;
+        if (Mainframe.isApiConnected())
 			connectionUrl = getClass().getResource("/resources/connection_good.png");
 		else
 			connectionUrl = getClass().getResource("/resources/connection_bad.png");
-		ImageIcon conIcon = new ImageIcon(connectionUrl);
+        assert connectionUrl != null;
+        ImageIcon conIcon = new ImageIcon(connectionUrl);
 
-		if (HandleConfig.darkmode == 1)
+        URL copyUrl;
+        if (HandleConfig.darkmode == 1)
 			copyUrl = getClass().getResource("/resources/copy_inv.png");
 		else
 			copyUrl = getClass().getResource("/resources/copy.png");
-		ImageIcon copyIcon = new ImageIcon(copyUrl);
+        assert copyUrl != null;
+        ImageIcon copyIcon = new ImageIcon(copyUrl);
 
 		JPanel pnlLeft = new JPanel();
 		pnlLeft.setLayout(new GridBagLayout());
@@ -103,7 +101,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 1;
 		Integer[] font = { 12, 14, 16, 18, 20 };
-		cmbFont = new JComboBox<Integer>(font);
+		cmbFont = new JComboBox<>(font);
 		cmbFont.setSelectedItem(Mainframe.defaultFont.getSize());
 		pnlLeft.add(cmbFont, c);
 		c.gridx = 0;
@@ -113,7 +111,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 2;
 		Integer[] fontDesc = { 12, 14, 16, 18, 20 };
-		cmbFontDesc = new JComboBox<Integer>(fontDesc);
+		cmbFontDesc = new JComboBox<>(fontDesc);
 		cmbFontDesc.setSelectedItem(Mainframe.descFont.getSize());
 		pnlLeft.add(cmbFontDesc, c);
 		c.gridx = 0;
@@ -135,7 +133,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 4;
 		Integer[] arrayAutoDownload = { 0, 1 };
-		cmbAutoDownload = new JComboBox<Integer>(arrayAutoDownload);
+		cmbAutoDownload = new JComboBox<>(arrayAutoDownload);
 		cmbAutoDownload.setSelectedItem(HandleConfig.autoDownload);
 		pnlLeft.add(cmbAutoDownload, c);
 		c.gridx = 0;
@@ -146,7 +144,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 5;
 		Integer[] arrayOnDemand = { 0, 1 };
-		cmbOnDemand = new JComboBox<Integer>(arrayOnDemand);
+		cmbOnDemand = new JComboBox<>(arrayOnDemand);
 		cmbOnDemand.setSelectedItem(HandleConfig.loadOnDemand);
 		pnlLeft.add(cmbOnDemand, c);
 		c.gridx = 0;
@@ -157,7 +155,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 6;
 		Boolean[] arrayUseDB = { false, true };
-		cmbUseDB = new JComboBox<Boolean>(arrayUseDB);
+		cmbUseDB = new JComboBox<>(arrayUseDB);
 		cmbUseDB.setSelectedItem(BookListModel.useDB);
 		pnlLeft.add(cmbUseDB, c);
 		c.gridx = 0;
@@ -168,7 +166,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 7;
 		String[] arraySearchParam = { "t", "at" };
-		cmbSearchParam = new JComboBox<String>(arraySearchParam);
+		cmbSearchParam = new JComboBox<>(arraySearchParam);
 		cmbSearchParam.setSelectedItem(HandleConfig.searchParam);
 		pnlLeft.add(cmbSearchParam, c);
 		c.gridx = 0;
@@ -179,7 +177,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 8;
 		String[] arrayDebug = { "WARN", "INFO" };
-		cmbDebug = new JComboBox<String>(arrayDebug);
+		cmbDebug = new JComboBox<>(arrayDebug);
 		cmbDebug.setSelectedItem(HandleConfig.debug);
 		pnlLeft.add(cmbDebug, c);
 		c.gridx = 0;
@@ -191,7 +189,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 9;
 		Integer[] arrayBackup = { 0, 1, 2 };
-		cmbBackup = new JComboBox<Integer>(arrayBackup);
+		cmbBackup = new JComboBox<>(arrayBackup);
 		cmbBackup.setSelectedItem(HandleConfig.backup);
 		pnlLeft.add(cmbBackup, c);
 		c.gridx = 0;
@@ -202,19 +200,15 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 10;
 		Integer[] arrayDark = { 0, 1 };
-		cmbDark = new JComboBox<Integer>(arrayDark);
+		cmbDark = new JComboBox<>(arrayDark);
 		cmbDark.setSelectedItem(HandleConfig.darkmode);
 		pnlLeft.add(cmbDark, c);
 		JButton btnSave = ButtonsFactory.createButton("Speichern");
 		btnSave.setFont(Mainframe.defaultFont);
-		btnSave.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveSettings();
-				dispose();
-			}
-		});
+		btnSave.addActionListener(e -> {
+            saveSettings();
+            dispose();
+        });
 		c.gridx = 0;
 		c.gridy = 99;
 		c.gridwidth = 1;
@@ -223,13 +217,7 @@ public class Dialog_settings extends JDialog {
 
 		JButton btnAbort = ButtonsFactory.createButton("Abbrechen");
 		btnAbort.setFont(Mainframe.defaultFont);
-		btnAbort.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				dispose();
-			}
-		});
+		btnAbort.addActionListener(arg0 -> dispose());
 		c.gridx = 1;
 		c.gridy = 99;
 		c.anchor = GridBagConstraints.EAST;
@@ -299,21 +287,17 @@ public class Dialog_settings extends JDialog {
 
 		JButton btnGenToken = ButtonsFactory.createButton("generiere");
 		btnGenToken.setFont(Mainframe.defaultFont);
-		btnGenToken.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				int antwort = JOptionPane.showConfirmDialog(null,
-						"Wirklich neuen Token genrieren?\nDie ausstehenden bücher mit dem alten Token können dann nicht mehr abgerufen werden.",
-						"generieren", JOptionPane.YES_NO_OPTION);
-				if (antwort == JOptionPane.YES_OPTION) {
-					String token = HandleConfig.generateRandomToken(64);
-					txtApiToken.setText(token);
-					HandleConfig.apiToken = token;
-					generateQRCode(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
-				}
-			}
-		});
+		btnGenToken.addActionListener(e -> {
+            int antwort = JOptionPane.showConfirmDialog(null,
+                    "Wirklich neuen Token genrieren?\nDie ausstehenden bücher mit dem alten Token können dann nicht mehr abgerufen werden.",
+                    "generieren", JOptionPane.YES_NO_OPTION);
+            if (antwort == JOptionPane.YES_OPTION) {
+                String token = HandleConfig.generateRandomToken(64);
+                txtApiToken.setText(token);
+                HandleConfig.apiToken = token;
+                generateQRCode(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
+            }
+        });
 		c.insets = new Insets(10, 10, 0, 10);
 		c.gridx = 1;
 		c.gridy = 2;
@@ -338,72 +322,77 @@ public class Dialog_settings extends JDialog {
 	}
 
 	public static void saveSettings() {
-		Mainframe.executor.submit(() -> {
-			Mainframe.logger.info("Save Settings");
-			// set Parameters which can be changed on the fly
+		Mainframe.executor.submit(Dialog_settings::run);
+	}
+
+	@SuppressWarnings("DataFlowIssue")
+    private static void run() {
+		Mainframe.logger.info("Save Settings");
+		// set Parameters which can be changed on the fly
+		try {
 			HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
 			HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
 			HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
 			HandleConfig.debug = (String) cmbDebug.getSelectedItem();
-			HandleConfig.backup = (int) cmbBackup.getSelectedItem();
+            HandleConfig.backup = (int) cmbBackup.getSelectedItem();
 			HandleConfig.apiToken = txtApiToken.getText();
 			HandleConfig.apiURL = txtApiUrl.getText();
-			if (HandleConfig.apiURL.length() > 0) {
-				if (HandleConfig.apiURL.substring(HandleConfig.apiURL.length() - 1).equals("/")) {
-					HandleConfig.apiURL = HandleConfig.apiURL.substring(0, HandleConfig.apiURL.length() - 1);
-					System.out.println(HandleConfig.apiURL);
-				}
+		} catch (NullPointerException e) {
+			Mainframe.logger.error(e.getMessage());
+		}
+		if (!HandleConfig.apiURL.isEmpty()) {
+			if (HandleConfig.apiURL.endsWith("/")) {
+				HandleConfig.apiURL = HandleConfig.apiURL.substring(0, HandleConfig.apiURL.length() - 1);
+				System.out.println(HandleConfig.apiURL);
 			}
-			Mainframe.checkApiConnection();
+		}
+		Mainframe.checkApiConnection();
 
-			try (PrintWriter out = new PrintWriter("config.conf")) {
-				out.println("fontSize=" + cmbFont.getSelectedItem());
-				out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
-				out.println("autoDownload=" + cmbAutoDownload.getSelectedItem());
-				out.println("loadOnDemand=" + cmbOnDemand.getSelectedItem());
-				out.println("useDB=" + cmbUseDB.getSelectedItem());
-				out.println("searchParam=" + cmbSearchParam.getSelectedItem());
-				out.println("debug=" + cmbDebug.getSelectedItem());
-				out.println("backup=" + cmbBackup.getSelectedItem());
-				out.println("apiToken=" + txtApiToken.getText());
-				out.println("apiURL=" + txtApiUrl.getText());
-				out.println("darkmode=" + cmbDark.getSelectedItem());
+		try (PrintWriter out = new PrintWriter("config.conf")) {
+			out.println("fontSize=" + cmbFont.getSelectedItem());
+			out.println("descFontSize=" + cmbFontDesc.getSelectedItem());
+			out.println("autoDownload=" + cmbAutoDownload.getSelectedItem());
+			out.println("loadOnDemand=" + cmbOnDemand.getSelectedItem());
+			out.println("useDB=" + cmbUseDB.getSelectedItem());
+			out.println("searchParam=" + cmbSearchParam.getSelectedItem());
+			out.println("debug=" + cmbDebug.getSelectedItem());
+			out.println("backup=" + cmbBackup.getSelectedItem());
+			out.println("apiToken=" + txtApiToken.getText());
+			out.println("apiURL=" + txtApiUrl.getText());
+			out.println("darkmode=" + cmbDark.getSelectedItem());
 
-				TableColumnModel columnModel = Mainframe.table.getColumnModel();
+			TableColumnModel columnModel = Mainframe.table.getColumnModel();
 
-				StringBuilder strWidth = new StringBuilder();
-				strWidth.append("layoutWidth=");
-				strWidth.append(columnModel.getColumn(0).getWidth());
-				strWidth.append(",");
-				strWidth.append(columnModel.getColumn(1).getWidth());
-				strWidth.append(",");
-				strWidth.append(columnModel.getColumn(2).getWidth());
-				strWidth.append(",");
-				strWidth.append(columnModel.getColumn(3).getWidth());
-				strWidth.append(",");
-				strWidth.append(columnModel.getColumn(4).getWidth());
+			String strWidth = "layoutWidth=" +
+					columnModel.getColumn(0).getWidth() +
+					"," +
+					columnModel.getColumn(1).getWidth() +
+					"," +
+					columnModel.getColumn(2).getWidth() +
+					"," +
+					columnModel.getColumn(3).getWidth() +
+					"," +
+					columnModel.getColumn(4).getWidth();
 
-				out.println(strWidth);
+			out.println(strWidth);
 
-				StringBuilder strColumnTitle = new StringBuilder();
-				strColumnTitle.append("layoutSort=");
-				strColumnTitle.append(columnModel.getColumn(0).getHeaderValue());
-				strColumnTitle.append(",");
-				strColumnTitle.append(columnModel.getColumn(1).getHeaderValue());
-				strColumnTitle.append(",");
-				strColumnTitle.append(columnModel.getColumn(2).getHeaderValue());
-				strColumnTitle.append(",");
-				strColumnTitle.append(columnModel.getColumn(3).getHeaderValue());
-				strColumnTitle.append(",");
-				strColumnTitle.append(columnModel.getColumn(4).getHeaderValue());
+			String strColumnTitle = "layoutSort=" +
+					columnModel.getColumn(0).getHeaderValue() +
+					"," +
+					columnModel.getColumn(1).getHeaderValue() +
+					"," +
+					columnModel.getColumn(2).getHeaderValue() +
+					"," +
+					columnModel.getColumn(3).getHeaderValue() +
+					"," +
+					columnModel.getColumn(4).getHeaderValue();
 
-				out.println(strColumnTitle);
+			out.println(strColumnTitle);
 
-			} catch (FileNotFoundException e1) {
-				Mainframe.logger.error("Fehler beim speichern der Einstellungen");
-				Mainframe.logger.error(e1.getMessage());
-			}
-		});
+		} catch (FileNotFoundException e1) {
+			Mainframe.logger.error("Fehler beim speichern der Einstellungen");
+			Mainframe.logger.error(e1.getMessage());
+		}
 	}
 
 	// Method to generate and display a QR code

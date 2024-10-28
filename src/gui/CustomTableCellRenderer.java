@@ -6,15 +6,14 @@ import javax.swing.table.DefaultTableCellRenderer;
 import application.HandleConfig;
 
 import java.awt.*;
+import java.io.Serial;
 
 public class CustomTableCellRenderer extends DefaultTableCellRenderer {
-	/**
-	 * 
-	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	private int hoveredRow = -2;
 	
-	private String parent = "";
+	private final String parent;
 
 	public CustomTableCellRenderer(String parent) {
 		this.parent = parent;
