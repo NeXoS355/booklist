@@ -1,31 +1,27 @@
 package gui;
 
-import java.awt.BorderLayout;
+import application.BookListModel;
+import application.Book_Booklist;
+import application.HandleConfig;
+import application.SimpleTableModel;
+import com.google.gson.*;
+import data.Database;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.HeadlessException;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import javax.swing.*;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,53 +34,6 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JTree;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumnModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import application.BookListModel;
-import application.Book_Booklist;
-import application.HandleConfig;
-import application.SimpleTableModel;
-import data.Database;
 
 /**
  * Main Window to show Table of Entries and Tree of authors
@@ -104,8 +53,13 @@ public class Mainframe extends JFrame {
 
     public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
     public static Font descFont = new Font("Roboto", Font.PLAIN, 16);
-    static JTable table = new JTable();
     public static BookListModel entries;
+    public static int prozEbook = 0;
+    public static int prozAuthor = 0;
+    public static int prozTitle = 0;
+    public static int prozSeries = 0;
+    public static int prozRating = 0;
+    static JTable table = new JTable();
     private static DefaultListModel<Book_Booklist> filter;
     private static SimpleTableModel tableDisplay;
     private static int lastTableHoverRow = -1;
@@ -113,26 +67,18 @@ public class Mainframe extends JFrame {
     private static DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("rootNode");
     private static DefaultTreeModel treeModel;
     private static final JTree tree = new JTree(treeModel);
-    private final JTextField txt_search;
     private static Mainframe instance;
     private static String treeSelection;
     private static String lastSearch = "";
     private static boolean apiConnected = false;
     private static wishlist wishlist_instance;
-
     private static JMenuItem openWebApi;
     private static JMenuItem apiDownload;
     private static JMenuItem apiUpload;
-
-    public static int prozEbook = 0;
-    public static int prozAuthor = 0;
-    public static int prozTitle = 0;
-    public static int prozSeries = 0;
-    public static int prozRating = 0;
-
     private static String version;
+    private final JTextField txt_search;
 
-    private Mainframe() throws HeadlessException {
+    private Mainframe(boolean visible) throws HeadlessException {
         super("Booklist");
 
         this.setLayout(new BorderLayout(10, 10));
@@ -172,7 +118,7 @@ public class Mainframe extends JFrame {
                     Path path = Paths.get("latest.jar");
                     boolean deleted = Files.deleteIfExists(path);
                     if (deleted)
-                        logger.info("File detected and deleted: {}",path);
+                        logger.info("File detected and deleted: {}", path);
                     else
                         logger.warn("File detected but could not be deleted: {}", path);
                 }
@@ -684,7 +630,7 @@ public class Mainframe extends JFrame {
 
         updateModel();
 
-        this.setVisible(true);
+        this.setVisible(visible);
         addWindowListener(new WindowAdapter() {
 
             @Override
@@ -744,7 +690,7 @@ public class Mainframe extends JFrame {
                 entries.delete(index);
             }
             BookListModel.checkAuthors();
-            logger.info("Book deleted: {};{}",searchAuthor, searchTitle);
+            logger.info("Book deleted: {};{}", searchAuthor, searchTitle);
         }
         if (!treeSelection.isEmpty())
             search(treeSelection);
@@ -962,11 +908,183 @@ public class Mainframe extends JFrame {
     }
 
     /**
+     * get current Tree Selection for other Classes
+     *
+     * @return current Tree Selection
+     */
+    public static String getTreeSelection() {
+        return treeSelection;
+    }
+
+    /**
+     * get last searched text for other classes
+     *
+     * @return last searched text
+     */
+    public static String getLastSearch() {
+        return lastSearch;
+    }
+
+    /**
+     * sets global Variable to the last searched String
+     *
+     * @param lastSearch - String of last searched text
+     */
+    public static void setLastSearch(String lastSearch) {
+        Mainframe.lastSearch = lastSearch;
+    }
+
+    /**
+     * update the jar file with the already downloaded latest.jar
+     */
+    public static void update() {
+        String fileName = new java.io.File(
+                Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
+        try (PrintWriter out = new PrintWriter("update.log")) {
+            Thread.sleep(2000);
+            File source = new File("latest.jar");
+            File dest = new File(fileName);
+            InputStream is = null;
+            OutputStream os = null;
+            out.println("UPDATER: initialize");
+            out.println("UPDATER: detected fileName: " + fileName);
+            try {
+                is = new FileInputStream(source);
+                os = new FileOutputStream(dest);
+                byte[] buffer = new byte[1024];
+                int length;
+                out.println("UPDATER: overwriting file");
+                while ((length = is.read(buffer)) > 0) {
+                    os.write(buffer, 0, length);
+                }
+                out.println("UPDATER: writing complete");
+                out.println("UPDATER: build process");
+                ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName);
+                out.println("UPDATER: " + pb.command());
+                pb.start();
+                out.println("UPDATER: process started");
+                out.println("UPDATER: SUCCESS");
+            } catch (IOException e) {
+                out.println(e.getMessage());
+            } finally {
+                try {
+                    assert is != null;
+                    is.close();
+                    assert os != null;
+                    os.close();
+                } catch (IOException e) {
+                    Mainframe.logger.error(e.getMessage());
+                }
+
+            }
+            out.println("UPDATER: update finished");
+        } catch (FileNotFoundException | InterruptedException e1) {
+            Mainframe.logger.error(e1.getMessage());
+        }
+
+    }
+
+    /**
+     * checks the Connection to the supplied WebAPI URL with a short GET Request
+     */
+    public static void checkApiConnection() {
+        if (!HandleConfig.apiURL.isEmpty()) {
+            try {
+                Mainframe.logger.info("Web API request: {}/api/get.php", HandleConfig.apiURL);
+                URL getUrl;
+                getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
+                HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
+                con.setConnectTimeout(2000);
+                con.setRequestMethod("GET");
+                long startTime = System.currentTimeMillis();
+                int responseCode = con.getResponseCode();
+                long responseTime = System.currentTimeMillis() - startTime;
+                Mainframe.logger.info("Web API request: responseCode: {}", responseCode);
+                Mainframe.logger.info("Web API request: responseTime: {}", responseTime + "ms");
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    apiConnected = true;
+                    openWebApi.setEnabled(true);
+                    apiDownload.setEnabled(true);
+                    apiUpload.setEnabled(true);
+                }
+            } catch (MalformedURLException e) {
+                Mainframe.logger.error("MalformedURLException");
+                Mainframe.logger.error(e.getMessage());
+            } catch (URISyntaxException e) {
+                Mainframe.logger.error("URISyntaxException");
+                Mainframe.logger.error(e.getMessage());
+            } catch (ProtocolException e) {
+                Mainframe.logger.error("ProtocolException");
+                Mainframe.logger.error(e.getMessage());
+            } catch (IOException e) {
+                Mainframe.logger.error("Verbindung zur API fehlgeschlagen");
+                apiConnected = false;
+                openWebApi.setEnabled(false);
+                apiDownload.setEnabled(false);
+                apiUpload.setEnabled(false);
+                Mainframe.logger.error(e.getMessage());
+            }
+
+        }
+    }
+
+    public static boolean isApiConnected() {
+        return apiConnected;
+    }
+
+    /**
+     * start Instance of Mainframe
+     *
+     * @param args - Arguments to trigger different functions
+     */
+    public static void main(String[] args) {
+        if (args.length > 0) {
+            for (String s : args) {
+                switch (s) {
+                    case "version":
+                        createInstance(false);
+                        System.out.println(version);
+                        System.exit(0);
+                        break;
+                    case "update":
+                        System.out.println("update");
+                        update();
+                        System.exit(0);
+                    default:
+                        System.out.println("no argument recognized. Exiting.");
+                        System.exit(0);
+                }
+            }
+        } else {
+            createInstance(true);
+        }
+    }
+
+    /**
+     * start Mainframe for instance
+     */
+    public static void createInstance(boolean visible) {
+        if (instance == null) {
+            System.out.println("creating Instance with visible=" + visible);
+            instance = new Mainframe(visible);
+        }
+    }
+
+    /**
+     * get Mainframe  instance
+     *
+     * @return Mainframe Object
+     */
+    public static Mainframe getInstance() {
+        return instance;
+    }
+
+    /**
      * download the saved books via API from the webApp
      */
     private void downloadFromApi() {
         try {
-            logger.info("Web API request: {}/api/get.php?token={}",HandleConfig.apiURL ,HandleConfig.apiToken);
+            logger.info("Web API request: {}/api/get.php?token={}", HandleConfig.apiURL, HandleConfig.apiToken);
             URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
             HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
             con.setRequestMethod("GET");
@@ -1105,7 +1223,7 @@ public class Mainframe extends JFrame {
 
         try {
             // URL des API-Endpunkts
-            logger.info("Web API request: {}/api/upload.php?token={}" ,HandleConfig.apiURL,HandleConfig.apiToken);
+            logger.info("Web API request: {}/api/upload.php?token={}", HandleConfig.apiURL, HandleConfig.apiToken);
 
             URL postUrl = new URI(HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken).toURL();
 
@@ -1156,33 +1274,6 @@ public class Mainframe extends JFrame {
             JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Upload.");
         }
 
-    }
-
-    /**
-     * get current Tree Selection for other Classes
-     *
-     * @return current Tree Selection
-     */
-    public static String getTreeSelection() {
-        return treeSelection;
-    }
-
-    /**
-     * get last searched text for other classes
-     *
-     * @return last searched text
-     */
-    public static String getLastSearch() {
-        return lastSearch;
-    }
-
-    /**
-     * sets global Variable to the last searched String
-     *
-     * @param lastSearch - String of last searched text
-     */
-    public static void setLastSearch(String lastSearch) {
-        Mainframe.lastSearch = lastSearch;
     }
 
     /**
@@ -1309,145 +1400,6 @@ public class Mainframe extends JFrame {
             logger.error(e1.getMessage());
         }
 
-    }
-
-    /**
-     * update the jar file with the already downloaded latest.jar
-     */
-    public static void update() {
-        String fileName = new java.io.File(
-                Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
-        try (PrintWriter out = new PrintWriter("update.log")) {
-            Thread.sleep(2000);
-            File source = new File("latest.jar");
-            File dest = new File(fileName);
-            InputStream is = null;
-            OutputStream os = null;
-            out.println("UPDATER: initialize");
-            out.println("UPDATER: detected fileName: " + fileName);
-            try {
-                is = new FileInputStream(source);
-                os = new FileOutputStream(dest);
-                byte[] buffer = new byte[1024];
-                int length;
-                out.println("UPDATER: overwriting file");
-                while ((length = is.read(buffer)) > 0) {
-                    os.write(buffer, 0, length);
-                }
-                out.println("UPDATER: writing complete");
-                out.println("UPDATER: build process");
-                ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName);
-                out.println("UPDATER: " + pb.command());
-                pb.start();
-                out.println("UPDATER: process started");
-                out.println("UPDATER: SUCCESS");
-            } catch (IOException e) {
-                out.println(e.getMessage());
-            } finally {
-                try {
-                    assert is != null;
-                    is.close();
-                    assert os != null;
-                    os.close();
-                } catch (IOException e) {
-                    Mainframe.logger.error(e.getMessage());
-                }
-
-            }
-            out.println("UPDATER: update finished");
-        } catch (FileNotFoundException | InterruptedException e1) {
-            Mainframe.logger.error(e1.getMessage());
-        }
-
-    }
-
-    /**
-     * checks the Connection to the supplied WebAPI URL with a short GET Request
-     */
-    public static void checkApiConnection() {
-        if (!HandleConfig.apiURL.isEmpty()) {
-            try {
-                Mainframe.logger.info("Web API request: {}/api/get.php", HandleConfig.apiURL);
-                URL getUrl;
-                getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
-                HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
-                con.setConnectTimeout(2000);
-                con.setRequestMethod("GET");
-                long startTime = System.currentTimeMillis();
-                int responseCode = con.getResponseCode();
-                long responseTime = System.currentTimeMillis() - startTime;
-                Mainframe.logger.info("Web API request: responseCode: {}", responseCode);
-                Mainframe.logger.info("Web API request: responseTime: {}", responseTime + "ms");
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    apiConnected = true;
-                    openWebApi.setEnabled(true);
-                    apiDownload.setEnabled(true);
-                    apiUpload.setEnabled(true);
-                }
-            } catch (MalformedURLException e) {
-                Mainframe.logger.error("MalformedURLException");
-                Mainframe.logger.error(e.getMessage());
-            } catch (URISyntaxException e) {
-                Mainframe.logger.error("URISyntaxException");
-                Mainframe.logger.error(e.getMessage());
-            } catch (ProtocolException e) {
-                Mainframe.logger.error("ProtocolException");
-                Mainframe.logger.error(e.getMessage());
-            } catch (IOException e) {
-                Mainframe.logger.error("Verbindung zur API fehlgeschlagen");
-                apiConnected = false;
-                openWebApi.setEnabled(false);
-                apiDownload.setEnabled(false);
-                apiUpload.setEnabled(false);
-                Mainframe.logger.error(e.getMessage());
-            }
-
-        }
-    }
-
-    public static boolean isApiConnected() {
-        return apiConnected;
-    }
-
-    /**
-     * start Instance of Mainframe
-     *
-     * @param args - Arguments to trigger different functions
-     */
-    public static void main(String[] args) {
-        if (args.length > 0) {
-            for (String s : args) {
-                switch (s) {
-                    case "version":
-                        System.out.println(version);
-                        System.exit(0);
-                        break;
-                    case "update":
-                        System.out.println("update");
-                        update();
-                        System.exit(0);
-                    default:
-                        System.out.println("no argument recognized. Exiting.");
-                        System.exit(0);
-                }
-            }
-        } else {
-            getInstance();
-        }
-    }
-
-    /**
-     * start Mainframe for instance
-     *
-     * @return Mainframe Object
-     */
-    public static Mainframe getInstance() {
-        if (instance == null) {
-            System.out.println("create new Instance");
-            instance = new Mainframe();
-        }
-
-        return instance;
     }
 
 }
