@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.security.SecureRandom;
 
 import javax.swing.JOptionPane;
+import javax.swing.table.TableColumnModel;
 
 import gui.Mainframe;
 
@@ -215,6 +216,55 @@ public class HandleConfig {
 		}
 
 	}
+
+    public static void writeSettings() {
+        Mainframe.logger.info("Save Settings to File");
+
+        try (PrintWriter out = new PrintWriter("config.conf")) {
+            out.println("fontSize=" + Mainframe.defaultFont.getSize());
+            out.println("descFontSize=" + Mainframe.descFont.getSize());
+            out.println("autoDownload=" + autoDownload);
+            out.println("loadOnDemand=" + loadOnDemand);
+            out.println("searchParam=" + searchParam);
+            out.println("debug=" + debug);
+            out.println("backup=" + backup);
+            out.println("apiToken=" + apiToken);
+            out.println("apiURL=" + apiURL);
+            out.println("darkmode=" + darkmode);
+
+            TableColumnModel columnModel = Mainframe.table.getColumnModel();
+
+            String strWidth = "layoutWidth=" +
+                    columnModel.getColumn(0).getWidth() +
+                    "," +
+                    columnModel.getColumn(1).getWidth() +
+                    "," +
+                    columnModel.getColumn(2).getWidth() +
+                    "," +
+                    columnModel.getColumn(3).getWidth() +
+                    "," +
+                    columnModel.getColumn(4).getWidth();
+
+            out.println(strWidth);
+
+            String strColumnTitle = "layoutSort=" +
+                    columnModel.getColumn(0).getHeaderValue() +
+                    "," +
+                    columnModel.getColumn(1).getHeaderValue() +
+                    "," +
+                    columnModel.getColumn(2).getHeaderValue() +
+                    "," +
+                    columnModel.getColumn(3).getHeaderValue() +
+                    "," +
+                    columnModel.getColumn(4).getHeaderValue();
+
+            out.println(strColumnTitle);
+
+        } catch (FileNotFoundException e1) {
+            Mainframe.logger.error("Fehler beim speichern der Einstellungen");
+            Mainframe.logger.error(e1.getMessage());
+        }
+    }
 
 	/**
 	 * Method to generate a random token with 64 characters

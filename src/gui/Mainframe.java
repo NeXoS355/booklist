@@ -60,7 +60,7 @@ public class Mainframe extends JFrame {
     public static int prozTitle = 0;
     public static int prozSeries = 0;
     public static int prozRating = 0;
-    static final JTable table = new JTable();
+    public static final JTable table = new JTable();
     private static SimpleTableModel tableDisplay;
     private static int lastTableHoverRow = -1;
     private static TreePath lastPath = null;
