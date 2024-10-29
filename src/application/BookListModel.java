@@ -508,19 +508,19 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		ArrayList<Integer> ownedBooksOfSeries = new ArrayList<>();
 		int maxVol = 0;
 		// get the last owned Book of the Series and store the number in maxVol
-        for (Book_Booklist bookBooklist : books) {
-            if (bookBooklist.getSeries().equals(series)) {
-                ownedBooksOfSeries.add(Integer.parseInt(bookBooklist.getSeriesVol()));
-                if (maxVol < Integer.parseInt(bookBooklist.getSeriesVol()))
-                    maxVol = Integer.parseInt(bookBooklist.getSeriesVol());
+        for (Book_Booklist book : books) {
+            if (book.getSeries().equals(series)) {
+                ownedBooksOfSeries.add(Integer.parseInt(book.getSeriesVol()));
+                if (maxVol < Integer.parseInt(book.getSeriesVol()))
+                    maxVol = Integer.parseInt(book.getSeriesVol());
             }
         }
 		// create a list with the missing parts in the series up to maxVol
 		ArrayList<Integer> missingBooksOfSeries = new ArrayList<>();
 		boolean missing = true;
 		for (int i = 1; i < maxVol; i++) {
-            for (Integer ownedBooksOfSery : ownedBooksOfSeries) {
-                if (ownedBooksOfSery == i) {
+            for (Integer ownedBookOfSeries : ownedBooksOfSeries) {
+                if (ownedBookOfSeries == i) {
                     missing = false;
                     break;
                 }
@@ -536,10 +536,10 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		// create a list with new Books which are not in the current list
 		ArrayList<String[]> newBooksList = new ArrayList<>();
 		// query the Google Book API for every missing Volume
-        for (Integer missingBooksOfSery : missingBooksOfSeries) {
+        for (Integer missingBookOfSeries : missingBooksOfSeries) {
             String[][] returnArray = GetBookInfosFromWeb
-                    .getSeriesInfoFromGoogleApiWebRequest(series + "+" + missingBooksOfSery, returnCount);
-            int versuch = 0;
+                    .getSeriesInfoFromGoogleApiWebRequest(series + "+" + missingBookOfSeries, returnCount);
+            int tryCounter = 0;
             // go through all returned Books to analyze them
             for (int j = 0; j < returnCount; j++) {
                 String foundAuthor = returnArray[j][0];
@@ -582,20 +582,20 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
                             // add the Book to the list and create wishlist Entry
                             if (!added) {
                                 newBooksList.add(returnArray[j]);
-                                Mainframe.logger.info("AnalyseSeries: Versuch: {}", versuch);
-                                Mainframe.logger.info("AnalyseSeries: Band: {}", missingBooksOfSery);
+                                Mainframe.logger.info("AnalyseSeries: Versuch: {}", tryCounter);
+                                Mainframe.logger.info("AnalyseSeries: Band: {}", missingBookOfSeries);
                                 Mainframe.logger.info("AnalyseSeries: Autor: {}", foundAuthor);
                                 Mainframe.logger.info("AnalyseSeries: Titel: {}", foundTitle);
                                 Mainframe.logger.info("AnalyseSeries: ISBN: {}", foundIsbn);
                                 wishlist.wishlistEntries
                                         .add(new Book_Wishlist(foundAuthor, foundTitle, "Automatisch hinzugefuegt",
-                                                series, Integer.toString(missingBooksOfSery),
+                                                series, Integer.toString(missingBookOfSeries),
                                                 new Timestamp(System.currentTimeMillis()), true));
                             }
                         }
                     }
                 }
-                versuch++;
+                tryCounter++;
             }
         }
         return !newBooksList.isEmpty();

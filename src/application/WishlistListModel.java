@@ -85,8 +85,8 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 		return books.size();
 	}
 
-	public int indexOf(Book_Wishlist buch) {
-		return books.indexOf(buch);
+	public int indexOf(Book_Wishlist book) {
+		return books.indexOf(book);
 	}
 
 }
