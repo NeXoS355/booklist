@@ -384,34 +384,9 @@ public class Mainframe extends JFrame {
 
         table.setModel(tableDisplay);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
-        ImageIcon scaledEbookIcon;
-        if (HandleConfig.darkmode == 1) {
-            URL ebookIconURL = getClass().getResource("/resources/ebook_inv.png");
-            assert ebookIconURL != null;
-            ImageIcon ebookIcon = new ImageIcon(ebookIconURL);
-            scaledEbookIcon = new ImageIcon(
-                    ebookIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
-            );
-        } else {
-            URL ebookIconURL = getClass().getResource("/resources/ebook.png");
-            assert ebookIconURL != null;
-            ImageIcon ebookIcon = new ImageIcon(ebookIconURL);
-            scaledEbookIcon = new ImageIcon(
-                    ebookIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
-            );
-        }
-
-        URL starIconURL = getClass().getResource("/resources/star.png");
-        assert starIconURL != null;
-        ImageIcon starIcon = new ImageIcon(starIconURL);
-        ImageIcon scaledStarIcon = new ImageIcon(
-                starIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
-        );
         CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer(this.getTitle());
         table.setDefaultRenderer(Object.class, tableRenderer);
         CustomTableHeaderRenderer tableHeaderRenderer = new CustomTableHeaderRenderer();
-        tableHeaderRenderer.setColumnIcon(0, scaledEbookIcon);
-        tableHeaderRenderer.setColumnIcon(4, scaledStarIcon);
         JTableHeader header = table.getTableHeader();
         header.setDefaultRenderer(tableHeaderRenderer);
         table.setFont(defaultFont);

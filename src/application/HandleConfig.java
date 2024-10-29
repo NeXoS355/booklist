@@ -183,13 +183,7 @@ public class HandleConfig {
                         }
                         case "layoutSort" -> {
                             String[] values = value.trim().split(",");
-                            for (int j = 0; j < values.length; j++) {
-                                SimpleTableModel.columnNames[0] = (values[0]);
-                                SimpleTableModel.columnNames[1] = (values[1]);
-                                SimpleTableModel.columnNames[2] = (values[2]);
-                                SimpleTableModel.columnNames[3] = (values[3]);
-                                SimpleTableModel.columnNames[4] = (values[4]);
-                            }
+                            System.arraycopy(values, 0, SimpleTableModel.columnNames, 0, values.length);
                         }
                     }
 
