@@ -103,6 +103,16 @@ public class Mainframe extends JFrame {
             logger.error(e.getMessage());
         }
 
+        // Hinzufügen des WindowListeners
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                HandleConfig.writeSettings();
+                dispose(); // Schließt das Fenster
+                System.exit(0); // Beendet das Programm
+            }
+        });
+
 
         HandleConfig.readConfig();
         if (HandleConfig.debug.equals("WARN")) {
