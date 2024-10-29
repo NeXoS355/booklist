@@ -388,8 +388,8 @@ public class Dialog_add_Wishlist extends JDialog {
 				return true;
 			}
 		}
-		for (int i = 0; i < Mainframe.entries.getSize(); i++) {
-			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
+		for (int i = 0; i < Mainframe.allEntries.getSize(); i++) {
+			Book_Booklist eintrag = Mainframe.allEntries.getElementAt(i);
 			if (eintrag.getAuthor().equals(autor) && eintrag.getTitle().equals(titel)) {
 				return true;
 			}

@@ -178,7 +178,7 @@ public class wishlist extends JFrame {
                         String borrowedTo = "";
                         String borrowedFrom = "";
                         boolean boolBorrowed = false;
-                        Mainframe.entries.add(new Book_Booklist(author, title, boolBorrowed, borrowedTo,
+                        Mainframe.allEntries.add(new Book_Booklist(author, title, boolBorrowed, borrowedTo,
                                 borrowedFrom, note, series, vol, ebook, 0, null, desc, isbn, date, true));
                         wishlistEntries.delete(index);
                         updateModel();

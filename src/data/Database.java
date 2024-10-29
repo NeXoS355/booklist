@@ -304,7 +304,7 @@ public class Database {
 			String[] header = { "Autor", "Titel", "ausgeliehen an", "ausgeliehen von", "Bemerkung", "Serie",
 					"Serienteil", "E-Book", "ISBN", "Datum" };
 			writer.writeNext(header);
-			ArrayList<Book_Booklist> list = BookListModel.getBooks();
+			ArrayList<Book_Booklist> list = Mainframe.allEntries.getBooks();
             // bücher in die Tabelle einfügen
             for (Book_Booklist bookBooklist : list) {
                 if (bookBooklist.getDate() == null) {

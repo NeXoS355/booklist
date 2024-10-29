@@ -28,7 +28,8 @@ import javax.swing.UIManager;
 import application.Book_Booklist;
 import application.HandleConfig;
 import application.GetBookInfosFromWeb;
-import application.BookListModel;
+
+import static gui.Mainframe.allEntries;
 
 /**
  * Dialog to add new Book to Booklist Table and DB
@@ -440,23 +441,23 @@ public class Dialog_add_Booklist extends JDialog {
 				if (checkTo.isSelected()) {
 					book = new Book_Booklist(autor, titel, true, txtBorrowedTo.getText(), "", bemerkung, serie,
 							seriePart, ebook, 0, null, null, null, datum, true);
-					Mainframe.entries.add(book);
+					allEntries.add(book);
 				} else if (checkFrom.isSelected()) {
 					book = new Book_Booklist(autor, titel, true, "", txtBorrowedFrom.getText(), bemerkung, serie,
 							seriePart, ebook, 0, null, null, null, datum, true);
-					Mainframe.entries.add(book);
+					allEntries.add(book);
 				} else {
 					book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, ebook, 0, null, null, null,
 							datum, true);
-					Mainframe.entries.add(book);
+					allEntries.add(book);
 				}
 				if (HandleConfig.autoDownload == 1) {
 					Mainframe.executor.submit(() -> {
-						Book_Booklist downloadBook = Mainframe.entries.getElementAt(Mainframe.entries.getIndexOf(autor, titel));
+						Book_Booklist downloadBook = allEntries.getElementAt(allEntries.getIndexOf(autor, titel));
 						GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(downloadBook, 2, false);
 					});
 				}
-				BookListModel.checkAuthors();
+				allEntries.checkAuthors();
 				Mainframe.setLastSearch(txtAuthor.getText());
 				if (Mainframe.getTreeSelection().isEmpty()) {
 					Mainframe.search(txtAuthor.getText());
@@ -495,11 +496,11 @@ public class Dialog_add_Booklist extends JDialog {
 		String[] returnArray = null;
 		if (field.equals("autor")) {
 			int j = 0;
-			int anz_autoren = BookListModel.authors.size();
+			int anz_autoren = allEntries.authors.size();
 			String[] result = new String[anz_autoren];
 			for (int i = 0; i < anz_autoren; i++) {
-				if (BookListModel.authors.get(i).startsWith(search)) {
-					result[j] = BookListModel.authors.get(i);
+				if (allEntries.authors.get(i).startsWith(search)) {
+					result[j] = allEntries.authors.get(i);
 					j++;
 				}
 			}
@@ -512,7 +513,7 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 		} else if (field.equals("serie")) {
 			int j = 0;
-			String[] serien = BookListModel.getSeriesFromAuthor(txtAuthor.getText());
+			String[] serien = allEntries.getSeriesFromAuthor(txtAuthor.getText());
 			String[] result = new String[serien.length];
             for (String s : serien) {
                 if (s.startsWith(search)) {
@@ -541,8 +542,8 @@ public class Dialog_add_Booklist extends JDialog {
 	 * 
 	 */
 	public boolean checkInput(String author, String title) {
-		for (int i = 0; i < Mainframe.entries.getSize(); i++) {
-			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
+		for (int i = 0; i < allEntries.getSize(); i++) {
+			Book_Booklist eintrag = allEntries.getElementAt(i);
 			if (eintrag.getAuthor().equals(author) && eintrag.getTitle().equals(title)) {
 				return false;
 			}

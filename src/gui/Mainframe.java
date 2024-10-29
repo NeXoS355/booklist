@@ -53,14 +53,14 @@ public class Mainframe extends JFrame {
 
     public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
     public static Font descFont = new Font("Roboto", Font.PLAIN, 16);
-    public static BookListModel entries;
+    public static BookListModel allEntries;
+    private static BookListModel filteredEntries;
     public static int prozEbook = 0;
     public static int prozAuthor = 0;
     public static int prozTitle = 0;
     public static int prozSeries = 0;
     public static int prozRating = 0;
     static final JTable table = new JTable();
-    private static DefaultListModel<Book_Booklist> filter;
     private static SimpleTableModel tableDisplay;
     private static int lastTableHoverRow = -1;
     private static TreePath lastPath = null;
@@ -194,9 +194,9 @@ public class Mainframe extends JFrame {
         }
 
         logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
-        entries = new BookListModel();
-        filter = new DefaultListModel<>();
-        tableDisplay = new SimpleTableModel(entries);
+        allEntries = new BookListModel(true);
+        filteredEntries = new BookListModel(false);
+        tableDisplay = new SimpleTableModel(allEntries);
 
         logger.info("Finished creating List & DB. Start creating GUI Components");
 
@@ -205,7 +205,7 @@ public class Mainframe extends JFrame {
 
         txt_search = new CustomTextField();
         txt_search.setToolTipText("Suchtext");
-        txt_search.setText("Suche ... (" + entries.getSize() + ")");
+        txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
         setSearchTextColorActive(false);
         txt_search.setMargin(new Insets(0, 10, 0, 0));
         txt_search.addMouseListener(new MouseAdapter() {
@@ -252,7 +252,7 @@ public class Mainframe extends JFrame {
         btn_add.setFont(btn_add.getFont().deriveFont(Font.BOLD, 20));
         btn_add.addActionListener(e -> {
             new Dialog_add_Booklist(Mainframe.getInstance());
-            txt_search.setText("Suche ... (" + entries.getSize() + ")");
+            txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
         });
 
         panel.add(btn_add, BorderLayout.WEST);
@@ -264,7 +264,7 @@ public class Mainframe extends JFrame {
             setSearchTextColorActive(false);
             tree.clearSelection();
             setLastSearch(txt_search.getText());
-            if (entries.getSize() == 0) {
+            if (allEntries.getSize() == 0) {
                 updateModel();
                 JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine übereinstimmung gefunden");
             }
@@ -441,10 +441,10 @@ public class Mainframe extends JFrame {
                 if (e.getClickCount() >= 2 && SwingUtilities.isLeftMouseButton(e)) {
                     String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
                     String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
-                    int index = entries.getIndexOf(searchAutor, searchTitel);
-                    new Dialog_edit_Booklist(Mainframe.getInstance(), entries, index, treeModel);
+                    int index = allEntries.getIndexOf(searchAutor, searchTitel);
+                    new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
                 }
-                txt_search.setText("Suche ... (" + entries.getSize() + ")");
+                txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
                 if (SwingUtilities.isRightMouseButton(e)) {
                     JTable table2 = (JTable) e.getSource();
                     int row = table2.rowAtPoint(e.getPoint());
@@ -486,8 +486,8 @@ public class Mainframe extends JFrame {
                     if (Objects.equals(e4.getActionCommand(), "Buch bearbeiten")) {
                         String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
                         String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
-                        int index = entries.getIndexOf(searchAutor, searchTitel);
-                        new Dialog_edit_Booklist(Mainframe.getInstance(), entries, index, treeModel);
+                        int index = allEntries.getIndexOf(searchAutor, searchTitel);
+                        new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
                     }
                 });
                 itemAnalyzeAuthor.addActionListener(e5 -> {
@@ -496,7 +496,7 @@ public class Mainframe extends JFrame {
                         seriesName = seriesName.split(" - [0-9]")[0];
                         if (wishlist_instance == null)
                             wishlist_instance = new wishlist(Mainframe.getInstance(), false);
-                        boolean success = BookListModel.analyzeSeries(seriesName,
+                        boolean success = allEntries.analyzeSeries(seriesName,
                                 (String) table.getValueAt(table.getSelectedRow(), 1));
                         gui.wishlist.updateModel();
                         if (!success) {
@@ -518,8 +518,8 @@ public class Mainframe extends JFrame {
                 if (e.getKeyCode() == KeyEvent.VK_DELETE) {
                     deleteBook();
                 }
-                BookListModel.checkAuthors();
-                txt_search.setText("Suche ... (" + entries.getSize() + ")");
+                allEntries.checkAuthors();
+                txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
             }
         });
 
@@ -536,7 +536,7 @@ public class Mainframe extends JFrame {
         pnl_mid.add(listScrollPane, BorderLayout.CENTER);
 
         rootNode.removeAllChildren();
-        BookListModel.checkAuthors();
+        allEntries.checkAuthors();
         tree.setEditable(false);
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         tree.setShowsRootHandles(false);
@@ -574,7 +574,7 @@ public class Mainframe extends JFrame {
                     else
                         setLastSearch(text);
                     table.clearSelection();
-                    txt_search.setText("Suche ... (" + entries.getSize() + ")");
+                    txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
                 }
             }
 
@@ -682,14 +682,14 @@ public class Mainframe extends JFrame {
         for (int j : selected) {
             String searchAuthor = (String) table.getValueAt(j, 1);
             String searchTitle = (String) table.getValueAt(j, 2);
-            int index = entries.getIndexOf(searchAuthor, searchTitle);
+            int index = allEntries.getIndexOf(searchAuthor, searchTitle);
             int answer = JOptionPane.showConfirmDialog(null,
                     "Wirklich '" + searchAuthor + " - " + searchTitle + "' löschen?", "löschen",
                     JOptionPane.YES_NO_OPTION);
             if (answer == JOptionPane.YES_OPTION) {
-                entries.delete(index);
+                allEntries.delete(index);
             }
-            BookListModel.checkAuthors();
+            allEntries.checkAuthors();
             logger.info("Book deleted: {};{}", searchAuthor, searchTitle);
         }
         if (!treeSelection.isEmpty())
@@ -702,15 +702,15 @@ public class Mainframe extends JFrame {
      * updates the JTree
      */
     public static void updateNode() {
-        rootNode = new DefaultMutableTreeNode("Autoren (" + BookListModel.authors.size() + ")");
+        rootNode = new DefaultMutableTreeNode("Autoren (" + allEntries.authors.size() + ")");
         treeModel = new DefaultTreeModel(rootNode);
-        for (int i = 0; i < BookListModel.authors.size(); i++) {
-            String autor = BookListModel.authors.get(i);
+        for (int i = 0; i < allEntries.authors.size(); i++) {
+            String autor = allEntries.authors.get(i);
             DefaultMutableTreeNode autorNode = new DefaultMutableTreeNode(autor);
             treeModel.insertNodeInto(autorNode, rootNode, i);
             if (BookListModel.authorHasSeries(autor)) {
                 try {
-                    String[] serien = BookListModel.getSeriesFromAuthor(autor);
+                    String[] serien = allEntries.getSeriesFromAuthor(autor);
                     for (int j = 0; j < serien.length; j++) {
                         DefaultMutableTreeNode serieNode = new DefaultMutableTreeNode(serien[j]);
                         treeModel.insertNodeInto(serieNode, autorNode, j);
@@ -735,7 +735,7 @@ public class Mainframe extends JFrame {
      * updates the table with current model
      */
     public static void updateModel() {
-        tableDisplay = new SimpleTableModel(entries);
+        tableDisplay = new SimpleTableModel(allEntries);
         table.setModel(tableDisplay);
         treeSelection = "";
         setTableLayout();
@@ -838,10 +838,10 @@ public class Mainframe extends JFrame {
      * @param text - search String
      */
     public static void search(String text) {
-        filter.clear();
+        filteredEntries = new BookListModel(false);
         text = text.toUpperCase();
-        for (int i = 0; i < entries.getSize(); i++) {
-            Book_Booklist eintrag = entries.getElementAt(i);
+        for (int i = 0; i < allEntries.getSize(); i++) {
+            Book_Booklist eintrag = allEntries.getElementAt(i);
             String autor = eintrag.getAuthor().toUpperCase();
             String titel = eintrag.getTitle().toUpperCase();
             String bemerkung = eintrag.getNote().toUpperCase();
@@ -849,21 +849,21 @@ public class Mainframe extends JFrame {
             String leihAn = eintrag.getBorrowedTo().toUpperCase();
             String serie = eintrag.getSeries().toUpperCase();
             if (autor.contains(text)) {
-                filter.addElement(entries.getElementAt(i));
+                filteredEntries.addElement(allEntries.getElementAt(i));
             } else if (titel.contains(text)) {
-                filter.addElement(entries.getElementAt(i));
+                filteredEntries.addElement(allEntries.getElementAt(i));
             } else if (bemerkung.contains(text)) {
-                filter.addElement(entries.getElementAt(i));
+                filteredEntries.addElement(allEntries.getElementAt(i));
             } else if (leihVon.contains(text)) {
-                filter.addElement(entries.getElementAt(i));
+                filteredEntries.addElement(allEntries.getElementAt(i));
             } else if (leihAn.contains(text)) {
-                filter.addElement(entries.getElementAt(i));
+                filteredEntries.addElement(allEntries.getElementAt(i));
             } else if (serie.contains(text)) {
-                filter.addElement(entries.getElementAt(i));
+                filteredEntries.addElement(allEntries.getElementAt(i));
             }
         }
-        if (filter.getSize() > 0) {
-            tableDisplay = new SimpleTableModel(filter);
+        if (filteredEntries.getSize() > 0) {
+            tableDisplay = new SimpleTableModel(filteredEntries);
             table.setModel(tableDisplay);
             setTableLayout();
         } else {
@@ -1125,9 +1125,9 @@ public class Mainframe extends JFrame {
                             seriesPart = "";
 
                         boolean duplicate = false;
-                        for (int i = 0; i < entries.getSize(); i++) {
-                            if (entries.getElementAt(i).getAuthor().equals(author)
-                                    && entries.getElementAt(i).getTitle().equals(title) && !duplicate) {
+                        for (int i = 0; i < allEntries.getSize(); i++) {
+                            if (allEntries.getElementAt(i).getAuthor().equals(author)
+                                    && allEntries.getElementAt(i).getTitle().equals(title) && !duplicate) {
                                 duplicate = true;
                                 rejectedBooks.append("\n").append(author).append(" - ").append(title);
                                 rejected += 1;
@@ -1138,8 +1138,8 @@ public class Mainframe extends JFrame {
                                     null, "", "", new Timestamp(System.currentTimeMillis()), true);
                             importedBooks.append("\n").append(author).append(" - ").append(title);
                             imported += 1;
-                            Mainframe.entries.add(imp);
-                            BookListModel.checkAuthors();
+                            Mainframe.allEntries.add(imp);
+                            allEntries.checkAuthors();
                         }
 
                     }
@@ -1261,7 +1261,7 @@ public class Mainframe extends JFrame {
         JsonArray jsonArray = new JsonArray();
         // Nur die relevanten Felder in ein JSON-Array umwandeln
 
-        for (Book_Booklist book : BookListModel.getBooks()) {
+        for (Book_Booklist book : allEntries.getBooks()) {
             JsonObject jsonBook = new JsonObject();
             jsonBook.addProperty("bid", book.getBid());
             jsonBook.addProperty("author", book.getAuthor());

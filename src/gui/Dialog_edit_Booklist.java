@@ -793,11 +793,11 @@ public class Dialog_edit_Booklist extends JDialog {
 		String[] returnArray = null;
 		if (field.equals("autor")) {
 			int j = 0;
-			int authorCount = BookListModel.authors.size();
+			int authorCount = Mainframe.allEntries.authors.size();
 			String[] result = new String[authorCount];
 			for (int i = 0; i < authorCount; i++) {
-				if (BookListModel.authors.get(i).startsWith(search)) {
-					result[j] = BookListModel.authors.get(i);
+				if (Mainframe.allEntries.authors.get(i).startsWith(search)) {
+					result[j] = Mainframe.allEntries.authors.get(i);
 					j++;
 				}
 			}
@@ -810,7 +810,7 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		} else if (field.equals("serie")) {
 			int j = 0;
-			String[] series = BookListModel.getSeriesFromAuthor(txtAuthor.getText());
+			String[] series = Mainframe.allEntries.getSeriesFromAuthor(txtAuthor.getText());
 			String[] result = new String[series.length];
             for (String s : series) {
                 if (s.startsWith(search)) {
@@ -857,7 +857,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		boolean newBorrwoedFrom = checkFrom.isSelected();
 
 		if (!txtAuthor.getText().isEmpty() && !txtTitle.getText().isEmpty()) {
-			if (checkInput(newAuthor, newTitle, Mainframe.entries.getIndexOf(oldAutor, oldTitel))) {
+			if (checkInput(newAuthor, newTitle, Mainframe.allEntries.getIndexOf(oldAutor, oldTitel))) {
 				if (!oldAutor.equals(newAuthor)) {
 					entry.setAuthor(newAuthor);
 					Database.updateBooklistEntry(bid, "autor", newAuthor);
@@ -935,7 +935,7 @@ public class Dialog_edit_Booklist extends JDialog {
 				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 		}
-		BookListModel.checkAuthors();
+		Mainframe.allEntries.checkAuthors();
 		Mainframe.updateModel();
 		Mainframe.logger.info("Book edit: saved");
 	}
@@ -950,8 +950,8 @@ public class Dialog_edit_Booklist extends JDialog {
 	 * @return "false" if already exists else "true"
 	 */
 	public boolean checkInput(String newAuthor, String newTitle, int index) {
-		for (int i = 0; i < Mainframe.entries.getSize(); i++) {
-			Book_Booklist eintrag = Mainframe.entries.getElementAt(i);
+		for (int i = 0; i < Mainframe.allEntries.getSize(); i++) {
+			Book_Booklist eintrag = Mainframe.allEntries.getElementAt(i);
 			if (eintrag.getAuthor().equals(newAuthor) && eintrag.getTitle().equals(newTitle)) {
 				if (i != index) {
 					Mainframe.logger.info("Book edit: Autor & Titel bereits vorhanden");

@@ -26,15 +26,22 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-	private static final ArrayList<Book_Booklist> books = new ArrayList<>();
-	public static final ArrayList<String> authors = new ArrayList<>();
+	private final ArrayList<Book_Booklist> books = new ArrayList<>();
+	public final ArrayList<String> authors = new ArrayList<>();
 	public static boolean useDB = false;
 
 	/**
 	 * Constructor 
 	 * Manages the Booklist and Authorlist
 	 */
-	public BookListModel() {
+	public BookListModel(boolean fill) {
+		if(fill){
+			readDbAndFill();
+		}
+
+	}
+
+	private void readDbAndFill() {
 		Database.createConnection();
 		ResultSet rs;
 		if (HandleConfig.loadOnDemand == 1) {
@@ -55,7 +62,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					String seriesVolume = rs.getString("seriePart");
 					int int_ebook = rs.getInt("ebook");
 					boolean ebook = int_ebook == 1;
-                    int rating = rs.getInt("rating");
+					int rating = rs.getInt("rating");
 					int bid = Integer.parseInt(rs.getString("bid"));
 
 					// Empty Variables for LoadOnDemand
@@ -76,7 +83,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						date = rs.getTimestamp("date");
 						isbn = rs.getString("isbn");
 						borrowed = rs.getString("ausgeliehen");
-                        if (borrowed.equals("an")) {
+						if (borrowed.equals("an")) {
 							boolBorrowed = true;
 							borrowedTo = rs.getString("name").trim();
 						} else if (borrowed.equals("von")) {
@@ -160,7 +167,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 * updates the author list and updates the displayed Tree
 	 * 
 	 */
-	public static void checkAuthors() {
+	public void checkAuthors() {
 		authors.clear();
 
 		if (useDB) {
@@ -227,7 +234,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 * 
 	 * @return String Array with all distinct series of the specified author
 	 */
-	public static String[] getSeriesFromAuthor(String author) {
+	public String[] getSeriesFromAuthor(String author) {
 		ArrayList<String> seriesList = new ArrayList<>();
 
 		if (useDB) {
@@ -292,8 +299,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				Mainframe.logger.error(e.getMessage());
 			}
 		} else {
-			for (int i = 0; i < getBooks().size(); i++) {
-				Book_Booklist book = getBooks().get(i);
+			for (int i = 0; i < Mainframe.allEntries.getBooks().size(); i++) {
+				Book_Booklist book = Mainframe.allEntries.getBooks().get(i);
 				if (book.getAuthor().contains(author)) {
 					if (!book.getSeries().trim().isEmpty()) {
 						return true;
@@ -492,7 +499,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 * 
 	 * @return ArrayList with all Books
 	 */
-	public static ArrayList<Book_Booklist> getBooks() {
+	public ArrayList<Book_Booklist> getBooks() {
 		return books;
 	}
 
@@ -504,7 +511,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 * 
 	 * @return true if Book was found else false
 	 */
-	public static boolean analyzeSeries(String series, String author) {
+	public boolean analyzeSeries(String series, String author) {
 		ArrayList<Integer> ownedBooksOfSeries = new ArrayList<>();
 		int maxVol = 0;
 		// get the last owned Book of the Series and store the number in maxVol
@@ -601,4 +608,11 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
         return !newBooksList.isEmpty();
 	}
 
+	public void clear() {
+		books.clear();
+	}
+
+	public void addElement(Book_Booklist book) {
+		books.add(book);
+	}
 }
