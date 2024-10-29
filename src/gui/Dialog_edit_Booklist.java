@@ -1,17 +1,6 @@
 package gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -122,7 +111,7 @@ public class Dialog_edit_Booklist extends JDialog {
 		this.setLayout(new BorderLayout(10, 10));
 
 		JPanel panelNorth = new JPanel();
-		panelNorth.setLayout(new GridLayout(1, 2));
+		panelNorth.setLayout(new BorderLayout());
 
 		JPanel panelWest = new JPanel();
 		panelWest.setLayout(new GridLayout(4, 1, 10, 20));
@@ -145,9 +134,57 @@ public class Dialog_edit_Booklist extends JDialog {
 		/*
 		 * create and add components to Panel North
 		 */
+		Font changeFont = new Font(Mainframe.defaultFont.getName(),Mainframe.defaultFont.getStyle(),12);
+		JPanel pnlNorthWest = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+		JButton btnDate = ButtonsFactory.createButton("-");
+		pnlNorthWest.add(btnDate);
 		JLabel lblDate = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
+		CustomTextField txtDate = new CustomTextField(entry.getDate().toString());
+		txtDate.setFont(changeFont);
+		pnlNorthWest.add(lblDate);
 
+		JPanel pnlNorthEast = new JPanel(new FlowLayout(FlowLayout.RIGHT,5, 0));
+		JButton btnIsbn = ButtonsFactory.createButton("-");
+		pnlNorthEast.add(btnIsbn);
 		JLabel lblIsbn = new JLabel("ISBN: " + entry.getIsbn(), SwingConstants.RIGHT);
+		CustomTextField txtIsbn = new CustomTextField(entry.getIsbn());
+		txtIsbn.setFont(changeFont);
+		pnlNorthEast.add(lblIsbn);
+
+		btnDate.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				for (Component component : pnlNorthWest.getComponents()) {
+					if (component instanceof JLabel) {
+						pnlNorthWest.remove(lblDate);
+						pnlNorthWest.add(txtDate);
+					} else if (component instanceof CustomTextField) {
+						pnlNorthWest.remove(txtDate);
+						pnlNorthWest.add(lblDate);
+					}
+				}
+
+				pnlNorthWest.revalidate();  // Löst die Neulayoutierung aus
+				pnlNorthWest.repaint();     // Aktualisiert die Anzeige
+			}
+		});
+		btnIsbn.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				for (Component component : pnlNorthEast.getComponents()) {
+					if (component instanceof JLabel) {
+						pnlNorthEast.remove(lblIsbn);
+						pnlNorthEast.add(txtIsbn);
+					} else if (component instanceof CustomTextField) {
+						pnlNorthEast.remove(txtIsbn);
+						pnlNorthEast.add(lblIsbn);
+					}
+				}
+
+				pnlNorthEast.revalidate();  // Löst die Neulayoutierung aus
+				pnlNorthEast.repaint();     // Aktualisiert die Anzeige
+			}
+		});
 		lblIsbn.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -177,8 +214,8 @@ public class Dialog_edit_Booklist extends JDialog {
 			}
 		});
 
-		panelNorth.add(lblDate);
-		panelNorth.add(lblIsbn);
+		panelNorth.add(pnlNorthWest, BorderLayout.WEST);
+		panelNorth.add(pnlNorthEast, BorderLayout.EAST);
 		panelNorth.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
 		/*
