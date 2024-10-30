@@ -141,7 +141,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					book.setPic(buf_pic);
 					book.setDesc(desc, false);
 					book.setNote(note);
-					book.setDate(datum);
+					book.setDate(datum, false);
 					book.setIsbn(isbn, false);
 					book.setRating(rating, false);
 
@@ -201,18 +201,6 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		books.add(book);
 		fireIntervalAdded(this, 0, books.size());
 		Mainframe.logger.info("Booklist Buch hinzugefuegt: {},{}", book.getAuthor(), book.getTitle());
-	}
-
-	/**
-	 * Deletes book from Booklist
-	 * 
-	 * @param book - Book Object
-	 * 
-	 */
-	public void delete(Book_Booklist book) {
-		getBooks().remove(book);
-		fireIntervalRemoved(this, 0, getBooks().size());
-		Mainframe.logger.info("Booklist Buch geloescht: {}", book.getAuthor(), book.getTitle());
 	}
 
 	/**
@@ -486,15 +474,6 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	}
 
 	/**
-	 * get index of specific Book
-	 * 
-	 * @return index of Book in list
-	 */
-	public int indexOf(Book_Booklist book) {
-		return getBooks().indexOf(book);
-	}
-
-	/**
 	 * get whole Booklist
 	 * 
 	 * @return ArrayList with all Books
@@ -606,10 +585,6 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
             }
         }
         return !newBooksList.isEmpty();
-	}
-
-	public void clear() {
-		books.clear();
 	}
 
 	public void addElement(Book_Booklist book) {

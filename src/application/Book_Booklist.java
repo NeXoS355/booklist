@@ -228,8 +228,10 @@ public class Book_Booklist {
 		return date;
 	}
 
-	public void setDate(Timestamp date) {
+	public void setDate(Timestamp date, boolean db) {
 		this.date = date;
+		if (db)
+			Database.updateDate(this.bid, date.toString());
 	}
 
 	public String getSeriesVol() {
@@ -268,11 +270,16 @@ public class Book_Booklist {
 	 * @param db   - boolean value if value should be written to db
 	 *
 	 */
-	public void setIsbn(String isbn, boolean db) {
-		this.isbn = isbn;
-		if (db)
-			Database.updateIsbn(this.getBid(), isbn);
-	}
+	public boolean setIsbn(String isbn, boolean db) {
+		if (isbn.matches("[0-9]{13}")) {
+			this.isbn = isbn;
+			if (db)
+				Database.updateIsbn(this.getBid(), isbn);
+		} else
+			return false;
+
+        return true;
+    }
 
 	public int getBid() {
 		return bid;

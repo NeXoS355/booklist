@@ -564,6 +564,29 @@ public class Database {
 	}
 
 	/**
+	 * updates the "date" column of specific Book entry
+	 *
+	 * @param bid  - book id
+	 * @param date - new Date as String
+	 *
+	 */
+	public static void updateDate(int bid, String date) {
+		String sql = "update books set date=? where bid=?";
+		PreparedStatement st;
+		try {
+			st = con.prepareStatement(sql);
+			st.setString(1, date);
+			st.setInt(2, bid);
+			st.execute();
+			st.close();
+			Mainframe.logger.info("Neues Datum gespeichert: {}", bid);
+		} catch (SQLException e) {
+			Mainframe.logger.error("Fehler beim speichern des neuen Datums: {}", bid);
+		}
+
+	}
+
+	/**
 	 * updates the "rating" column of specific Book entry
 	 * 
 	 * @param bid    - book id
