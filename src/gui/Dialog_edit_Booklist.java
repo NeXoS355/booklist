@@ -216,7 +216,7 @@ public class Dialog_edit_Booklist extends JDialog {
                     pnlNorthWest.repaint();     // Aktualisiert die Anzeige
                 });
                 itemDel.addActionListener(e4 -> {
-                    entry.setIsbn(null, true);
+                    entry.setIsbn("", true);
                     dispose();
                     new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
                 });
@@ -258,7 +258,7 @@ public class Dialog_edit_Booklist extends JDialog {
                     pnlNorthEast.repaint();     // Aktualisiert die Anzeige
                 });
                 itemDel.addActionListener(e4 -> {
-                    entry.setIsbn(null, true);
+                    entry.setIsbn("", true);
                     dispose();
                     new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
                 });

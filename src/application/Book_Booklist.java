@@ -271,7 +271,7 @@ public class Book_Booklist {
 	 *
 	 */
 	public boolean setIsbn(String isbn, boolean db) {
-		if (isbn.matches("[0-9]{13}")) {
+		if (isbn.matches("[0-9]{13}") || isbn.isBlank()) {
 			this.isbn = isbn;
 			if (db)
 				Database.updateIsbn(this.getBid(), isbn);
