@@ -440,7 +440,7 @@ public class Database {
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
-			Mainframe.logger.info("Table updated - {}-{]={}", bid, colName, value);
+			Mainframe.logger.info("Table updated - {}-{}={}", bid, colName, value);
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim aktualisieren des Buchs: {}-{}={}",bid, colName, value);
 		}

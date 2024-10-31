@@ -342,10 +342,10 @@ public class Mainframe extends JFrame {
         JMenuItem info = new JMenuItem("Info");
         info.addActionListener(e -> new Dialog_info(Mainframe.getInstance()));
         apiDownload = new JMenuItem("Web API Abruf");
-        apiDownload.addActionListener(e -> Mainframe.executor.submit(this::downloadFromApi));
+        apiDownload.addActionListener(e -> Mainframe.executor.submit(() -> downloadFromApi(true)));
 
         apiUpload = new JMenuItem("Web API Upload");
-        apiUpload.addActionListener(e -> Mainframe.executor.submit(this::uploadToApi));
+        apiUpload.addActionListener(e -> Mainframe.executor.submit(() -> uploadToApi(true)));
         openWebApi = new JMenuItem("Webapp öffnen");
         openWebApi.addActionListener(e -> {
             logger.info("open Web API Website");
@@ -507,8 +507,7 @@ public class Mainframe extends JFrame {
                 txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
             }
         });
-
-        logger.info("end creating Table content. Start creating Tree Contents + ScrollPane");
+        logger.info("Start creating Tree Contents + ScrollPane");
 
         JPanel pnl_mid = new JPanel(new BorderLayout());
         JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -608,6 +607,7 @@ public class Mainframe extends JFrame {
         treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, listScrollPane);
+
         this.add(splitPane, BorderLayout.CENTER);
         this.add(panel, BorderLayout.NORTH);
 
@@ -616,6 +616,11 @@ public class Mainframe extends JFrame {
         updateModel();
 
         this.setVisible(visible);
+
+        if (apiConnected) {
+            Mainframe.executor.submit(() -> downloadFromApi(false));
+        }
+
         addWindowListener(new WindowAdapter() {
 
             @Override
@@ -1067,9 +1072,9 @@ public class Mainframe extends JFrame {
     /**
      * download the saved books via API from the webApp
      */
-    private void downloadFromApi() {
+    private void downloadFromApi(boolean showUi) {
         try {
-            logger.info("Web API request: {}/api/get.php?token={}", HandleConfig.apiURL, HandleConfig.apiToken);
+            logger.info("Web API Download request: {}/api/get.php?token={}", HandleConfig.apiURL, HandleConfig.apiToken);
             URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
             HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
             con.setRequestMethod("GET");
@@ -1132,13 +1137,13 @@ public class Mainframe extends JFrame {
                 in.close();
                 String importString;
                 if (rejected > 0)
-                    importString = "Anzahl bücher importiert: " + imported + importedBooks + "\nDupletten erkannt:"
+                    importString = "Anzahl Bücher importiert: " + imported + importedBooks + "\nDupletten erkannt:"
                             + rejectedBooks;
                 else
-                    importString = "Anzahl bücher importiert: " + imported + "\n" + importedBooks;
+                    importString = "Anzahl Bücher importiert: " + imported + "\n" + importedBooks;
                 if (imported >= 1 || rejected > 0) {
-
-                    JOptionPane.showMessageDialog(Mainframe.getInstance(), importString);
+                    if (showUi)
+                        JOptionPane.showMessageDialog(Mainframe.getInstance(), importString);
 
                     try {
                         // URL des Endpunkts
@@ -1161,26 +1166,33 @@ public class Mainframe extends JFrame {
                         // Antwortcode überprüfen
                         responseCode = con.getResponseCode();
                         logger.info("Web API DELETE books responseCode: {}", responseCode);
+
+                        if (imported >= 1) {
+                            uploadToApi(showUi);
+                        }
                     } catch (Exception e) {
                         logger.error(e.getMessage());
                     }
                 } else {
-                    JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine bücher zum abrufen gefunden.");
+                    if (showUi)
+                        JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Bücher zum abrufen gefunden.");
                 }
                 con.disconnect();
             } else {
-                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Get request failed.");
+                if (showUi)
+                    JOptionPane.showMessageDialog(Mainframe.getInstance(), "Get request failed.");
             }
         } catch (URISyntaxException | IOException e) {
             logger.error(e.getMessage());
-            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Abruf.");
+            if (showUi)
+                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Abruf.");
         }
     }
 
     /**
      * upload all current Books to the webApp with the corresponding Token
      */
-    private void uploadToApi() {
+    private void uploadToApi(boolean showUi) {
         try {
             URL deleteUrl = new URI(HandleConfig.apiURL + "/api/deleteSynced.php").toURL();
             deleteUrl.openConnection();
@@ -1215,17 +1227,20 @@ public class Mainframe extends JFrame {
             int responseCode = con.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 logger.info("Bücher erfolgreich hochgeladen!");
-                JOptionPane.showMessageDialog(this, "bücher erfolgreich hochgeladen!");
+                if (showUi)
+                    JOptionPane.showMessageDialog(this, "Bücher erfolgreich hochgeladen!");
             } else {
-                logger.error("Fehler beim Hochladen der bücher: {}", responseCode);
-                JOptionPane.showMessageDialog(this, "Fehler beim Hochladen der bücher: " + responseCode);
+                logger.error("Fehler beim Hochladen der Bücher: {}", responseCode);
+                if (showUi)
+                    JOptionPane.showMessageDialog(this, "Fehler beim Hochladen der Bücher: " + responseCode);
             }
 
             // Verbindung schließen
             con.disconnect();
         } catch (URISyntaxException | IOException e) {
             logger.error(e.getMessage());
-            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Upload.");
+            if (showUi)
+                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Upload.");
         }
 
     }
