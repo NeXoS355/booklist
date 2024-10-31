@@ -180,7 +180,6 @@ public class Dialog_edit_Booklist extends JDialog {
                 if (!date.equals(newDate)) {
                     bookModel.getElementAt(index).setDate(Timestamp.valueOf(newDate.atStartOfDay()), true);
                     lblDate.setText("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
-
                 }
                 pnlNorthWest.remove(txtDate);
                 pnlNorthWest.remove(btnOkWest);

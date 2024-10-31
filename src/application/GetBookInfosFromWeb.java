@@ -50,11 +50,14 @@ public class GetBookInfosFromWeb {
 			}
 
 			StringBuilder str = new StringBuilder();
-			if (HandleConfig.searchParam.equals("at")) {
-				str.append(sanitizeString(entry.getAuthor())).append("+");
+			if (entry.getIsbn().isEmpty()) {
+				if (HandleConfig.searchParam.equals("at")) {
+					str.append(sanitizeString(entry.getAuthor())).append("+");
+				}
+				str.append(sanitizeString(entry.getTitle()));
+			} else {
+				str.append(sanitizeString(entry.getIsbn()));
 			}
-			str.append(sanitizeString(entry.getTitle()));
-
 			// URL of REST-API
 			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults="
 					+ maxResults + "&printType=books";
