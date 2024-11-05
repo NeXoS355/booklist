@@ -155,7 +155,7 @@ public class Database {
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery(
-					"SELECT autor,titel,ebook,serie,seriePart,rating,bid FROM books ORDER BY autor, serie, seriePart");
+					"SELECT autor,titel,ebook,serie,seriePart,rating,bid,date FROM books ORDER BY autor, serie, seriePart");
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}

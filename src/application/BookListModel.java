@@ -64,13 +64,13 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					boolean ebook = int_ebook == 1;
 					int rating = rs.getInt("rating");
 					int bid = Integer.parseInt(rs.getString("bid"));
+					Timestamp date = rs.getTimestamp("date");
 
 					// Empty Variables for LoadOnDemand
 					String note = "";
 					Blob picture = null;
 					String desc = "";
 					String isbn = "";
-					Timestamp date = null;
 					String borrowed;
 					String borrowedTo = "";
 					String borrowedFrom = "";
@@ -80,7 +80,6 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						note = rs.getString("bemerkung");
 						picture = rs.getBlob("pic");
 						desc = rs.getString("description");
-						date = rs.getTimestamp("date");
 						isbn = rs.getString("isbn");
 						borrowed = rs.getString("ausgeliehen");
 						if (borrowed.equals("an")) {
