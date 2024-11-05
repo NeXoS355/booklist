@@ -528,25 +528,18 @@ public class Mainframe extends JFrame {
         notificationPanel = new JPanel(new BorderLayout());
         notificationPanel.setBackground(Color.GRAY); // Heller Hintergrund
         notificationPanel.setOpaque(true); // Sicherstellen, dass der Hintergrund sichtbar ist
+        // Beispiel-Label für die Benachrichtigung
         // Größe der Benachrichtigungsleiste festlegen
         Dimension notificationSize = new Dimension(500, 30); // Breite anpassen, Höhe auf 30px setzen
-        notificationPanel.setPreferredSize(notificationSize);
         notificationPanel.setMaximumSize(notificationSize);
+        notificationPanel.setPreferredSize(notificationSize);
         notificationPanel.setMinimumSize(notificationSize);
-
-        // Beispiel-Label für die Benachrichtigung
         notificationLabel.setForeground(Color.WHITE); // Schriftfarbe
         notificationPanel.add(notificationLabel, BorderLayout.CENTER);
         notificationPanel.setVisible(false);
 
         JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setLayout(new OverlayLayout(layeredPane));
-        // Größe und Ausrichtung der Komponenten im OverlayLayout anpassen
-//        listScrollPane.setAlignmentX(1f);
-//        listScrollPane.setAlignmentY(1f);
-//        notificationPanel.setAlignmentX(1f);
-//        notificationPanel.setAlignmentY(1f); // Oben anordnen
-        // Elemente zum Layered Pane hinzufügen
         layeredPane.add(listScrollPane, Integer.valueOf(1));       // Die Tabelle im unteren Layer
         layeredPane.add(notificationPanel, Integer.valueOf(2));    // Die Benachrichtigungsleiste darüber
 
@@ -651,6 +644,7 @@ public class Mainframe extends JFrame {
 
         if (apiConnected) {
             Mainframe.executor.submit(() -> downloadFromApi(false));
+            showLastBookWithoutRating();
         }
 
         addWindowListener(new WindowAdapter() {
@@ -854,6 +848,12 @@ public class Mainframe extends JFrame {
 
     }
 
+    /**
+     * sets notificationLabel and animates the panel
+     *
+     * @param message - Message to show on Notification
+     * @param timeout - how long should the Notification be shown
+     */
     public static void showNotification(String message, int timeout) {
         if (notificationFuture != null) {
             notificationFuture.cancel(true);
@@ -881,13 +881,17 @@ public class Mainframe extends JFrame {
         }
     }
 
+    /**
+     * Animation for Notification Panel
+     *
+     * @param show - appear or disapper anmiation
+     */
     private static void animate(boolean show) {
         // Animation erstellen
         int startYPosition;
         int targetYPosition;
 
-        int xPosition = splitPane.getWidth() - notificationPanel.getWidth() - 120;
-
+        int xPosition = 0;
         if (show) {
             startYPosition = splitPane.getHeight();
             targetYPosition = splitPane.getHeight() - notificationPanel.getHeight();
@@ -920,6 +924,18 @@ public class Mainframe extends JFrame {
         });
         Timer finalAnimationTimer = animationTimer;
         SwingUtilities.invokeLater(finalAnimationTimer::start);
+    }
+
+    private static void showLastBookWithoutRating() {
+        Book_Booklist newestBook = null;
+        for (int i = 0; i < allEntries.getSize(); i++) {
+            Book_Booklist entry = allEntries.getElementAt(i);
+            if (newestBook == null || (newestBook.getDate().before(entry.getDate()) && entry.getRating()==0)) {
+                newestBook = entry;
+            }
+        }
+        assert newestBook != null;
+        showNotification("Das Buch " + newestBook.getTitle() +" von " + newestBook.getAuthor() + " hat noch keine Bewertung", 10000);
     }
 
     /**

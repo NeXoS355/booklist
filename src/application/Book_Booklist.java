@@ -271,15 +271,19 @@ public class Book_Booklist {
 	 *
 	 */
 	public boolean setIsbn(String isbn, boolean db) {
-		isbn = isbn.replace("-","");
-		if (isbn.matches("[0-9]{10}|[0-9]{13}") || isbn.isBlank()) {
-			this.isbn = isbn;
-			if (db)
-				Database.updateIsbn(this.getBid(), isbn);
-		} else
+		if (isbn != null) {
+			isbn = isbn.replace("-","");
+			if (isbn.matches("[0-9]{10}|[0-9]{13}") || isbn.isBlank()) {
+				this.isbn = isbn;
+				if (db)
+					Database.updateIsbn(this.getBid(), isbn);
+			} else {
+				return false;
+			}
+			return true;
+		} else {
 			return false;
-
-        return true;
+		}
     }
 
 	public int getBid() {
