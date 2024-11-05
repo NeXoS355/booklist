@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 /**
@@ -67,6 +68,11 @@ public class Mainframe extends JFrame {
     private static DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("rootNode");
     private static DefaultTreeModel treeModel;
     private static final JTree tree = new JTree(treeModel);
+    private static final JLabel notificationLabel = new JLabel();
+    private static JPanel notificationPanel = new JPanel(new BorderLayout());
+    static Future<?> notificationFuture;
+    private static JSplitPane splitPane;
+    private static Timer animationTimer;
     private static Mainframe instance;
     private static String treeSelection;
     private static String lastSearch = "";
@@ -510,6 +516,7 @@ public class Mainframe extends JFrame {
         logger.info("Start creating Tree Contents + ScrollPane");
 
         JPanel pnl_mid = new JPanel(new BorderLayout());
+
         JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         if (HandleConfig.darkmode == 1)
@@ -517,7 +524,33 @@ public class Mainframe extends JFrame {
         JScrollBar tableVerticalScrollBar = listScrollPane.getVerticalScrollBar();
         tableVerticalScrollBar.setUI(new CustomScrollBar());
 
-        pnl_mid.add(listScrollPane, BorderLayout.CENTER);
+        // Benachrichtigungsleiste erstellen
+        notificationPanel = new JPanel(new BorderLayout());
+        notificationPanel.setBackground(Color.GRAY); // Heller Hintergrund
+        notificationPanel.setOpaque(true); // Sicherstellen, dass der Hintergrund sichtbar ist
+        // Größe der Benachrichtigungsleiste festlegen
+        Dimension notificationSize = new Dimension(500, 30); // Breite anpassen, Höhe auf 30px setzen
+        notificationPanel.setPreferredSize(notificationSize);
+        notificationPanel.setMaximumSize(notificationSize);
+        notificationPanel.setMinimumSize(notificationSize);
+
+        // Beispiel-Label für die Benachrichtigung
+        notificationLabel.setForeground(Color.WHITE); // Schriftfarbe
+        notificationPanel.add(notificationLabel, BorderLayout.CENTER);
+        notificationPanel.setVisible(false);
+
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setLayout(new OverlayLayout(layeredPane));
+        // Größe und Ausrichtung der Komponenten im OverlayLayout anpassen
+//        listScrollPane.setAlignmentX(1f);
+//        listScrollPane.setAlignmentY(1f);
+//        notificationPanel.setAlignmentX(1f);
+//        notificationPanel.setAlignmentY(1f); // Oben anordnen
+        // Elemente zum Layered Pane hinzufügen
+        layeredPane.add(listScrollPane, Integer.valueOf(1));       // Die Tabelle im unteren Layer
+        layeredPane.add(notificationPanel, Integer.valueOf(2));    // Die Benachrichtigungsleiste darüber
+
+        pnl_mid.add(layeredPane, BorderLayout.CENTER);
 
         rootNode.removeAllChildren();
         allEntries.checkAuthors();
@@ -606,8 +639,7 @@ public class Mainframe extends JFrame {
         treeVerticalScrollBar.setUI(new CustomScrollBar());
         treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, listScrollPane);
-
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, layeredPane);
         this.add(splitPane, BorderLayout.CENTER);
         this.add(panel, BorderLayout.NORTH);
 
@@ -643,7 +675,7 @@ public class Mainframe extends JFrame {
                 logger.info("Window closing");
             }
 
-            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+            public void windowClosed(WindowEvent windowEvent) {
                 if (HandleConfig.backup == 2) {
                     createBackup();
                 } else if (HandleConfig.backup == 1) {
@@ -822,6 +854,74 @@ public class Mainframe extends JFrame {
 
     }
 
+    public static void showNotification(String message, int timeout) {
+        if (notificationFuture != null) {
+            notificationFuture.cancel(true);
+            notificationFuture = null;
+            animationTimer.stop();
+            notificationPanel.setVisible(false);
+            showNotification(message, timeout);
+        } else {
+            notificationFuture = Mainframe.executor.submit(() -> {
+                try {
+                    notificationLabel.setText(message);
+                    notificationPanel.setVisible(true);
+                    animate(true);
+                    Thread.sleep(timeout);
+                    animate(false);
+                    Thread.sleep(1000);
+                    notificationPanel.setVisible(false);
+                    notificationFuture.cancel(true);
+                } catch (InterruptedException e) {
+                    notificationFuture.cancel(true);
+                    throw new RuntimeException(e);
+                }
+
+            });
+        }
+    }
+
+    private static void animate(boolean show) {
+        // Animation erstellen
+        int startYPosition;
+        int targetYPosition;
+
+        int xPosition = splitPane.getWidth() - notificationPanel.getWidth() - 120;
+
+        if (show) {
+            startYPosition = splitPane.getHeight();
+            targetYPosition = splitPane.getHeight() - notificationPanel.getHeight();
+        } else {
+            startYPosition = splitPane.getHeight() - notificationPanel.getHeight();
+            targetYPosition = splitPane.getHeight();
+        }
+
+        animationTimer = new Timer(5, new ActionListener() {
+            int currentYPosition = startYPosition; // Anfangsposition der Benachrichtigung
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (show) {
+                    if (currentYPosition > targetYPosition) {
+                        currentYPosition -= 2; // Schrittweise Verschiebung nach unten
+                        notificationPanel.setLocation(xPosition, currentYPosition);
+                    } else {
+                        animationTimer.stop(); // Animation beenden, wenn Ziel erreicht
+                    }
+                } else {
+                    if (currentYPosition < targetYPosition) {
+                        currentYPosition += 2; // Schrittweise Verschiebung nach unten
+                        notificationPanel.setLocation(xPosition, currentYPosition);
+                    } else {
+                        animationTimer.stop(); // Animation beenden, wenn Ziel erreicht
+                    }
+                }
+            }
+        });
+        Timer finalAnimationTimer = animationTimer;
+        SwingUtilities.invokeLater(finalAnimationTimer::start);
+    }
+
     /**
      * search table entries with specified String
      *
@@ -857,7 +957,8 @@ public class Mainframe extends JFrame {
             table.setModel(tableDisplay);
             setTableLayout();
         } else {
-            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es gab leider keine Treffer!");
+//            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es gab leider keine Treffer!");
+            showNotification("Es gab leider kein Treffer", 5000);
             updateModel();
         }
     }
@@ -928,7 +1029,7 @@ public class Mainframe extends JFrame {
      * update the jar file with the already downloaded latest.jar
      */
     public static void update() {
-        String fileName = new java.io.File(
+        String fileName = new File(
                 Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
         try (PrintWriter out = new PrintWriter("update.log")) {
             Thread.sleep(2000);
@@ -1377,7 +1478,7 @@ public class Mainframe extends JFrame {
                             if (antwort == JOptionPane.YES_OPTION) {
                                 boolean ret = createBackup();
                                 if (ret) {
-                                    String fileName = new java.io.File(Mainframe.class.getProtectionDomain()
+                                    String fileName = new File(Mainframe.class.getProtectionDomain()
                                             .getCodeSource().getLocation().getPath()).getName();
                                     pb = new ProcessBuilder("java", "-jar", fileName, "update");
                                     logger.info("Update - Command: {}", pb.command());
