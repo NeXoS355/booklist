@@ -1,6 +1,5 @@
 package application;
 
-import javax.swing.DefaultListModel;
 import javax.swing.table.DefaultTableModel;
 import java.io.Serial;
 

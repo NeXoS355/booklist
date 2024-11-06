@@ -71,6 +71,7 @@ public class Mainframe extends JFrame {
     private static final JLabel notificationLabel = new JLabel();
     private static JPanel notificationPanel = new JPanel(new BorderLayout());
     static Future<?> notificationFuture;
+    static MouseAdapter notificationMouseListener;
     private static JSplitPane splitPane;
     private static Timer animationTimer;
     private static Mainframe instance;
@@ -526,15 +527,16 @@ public class Mainframe extends JFrame {
 
         // Benachrichtigungsleiste erstellen
         notificationPanel = new JPanel(new BorderLayout());
-        notificationPanel.setBackground(Color.GRAY); // Heller Hintergrund
+        notificationPanel.setBackground(Color.DARK_GRAY);
         notificationPanel.setOpaque(true); // Sicherstellen, dass der Hintergrund sichtbar ist
         // Beispiel-Label für die Benachrichtigung
         // Größe der Benachrichtigungsleiste festlegen
-        Dimension notificationSize = new Dimension(500, 30); // Breite anpassen, Höhe auf 30px setzen
+        Dimension notificationSize = new Dimension(600, 30); // Breite anpassen, Höhe auf 30px setzen
         notificationPanel.setMaximumSize(notificationSize);
         notificationPanel.setPreferredSize(notificationSize);
         notificationPanel.setMinimumSize(notificationSize);
         notificationLabel.setForeground(Color.WHITE); // Schriftfarbe
+        notificationLabel.setFont(defaultFont);
         notificationPanel.add(notificationLabel, BorderLayout.CENTER);
         notificationPanel.setVisible(false);
 
@@ -872,13 +874,16 @@ public class Mainframe extends JFrame {
                     Thread.sleep(1000);
                     notificationPanel.setVisible(false);
                     notificationFuture.cancel(true);
+                    notificationLabel.removeMouseListener(notificationMouseListener);
                 } catch (InterruptedException e) {
                     notificationFuture.cancel(true);
+                    notificationLabel.removeMouseListener(notificationMouseListener);
                     throw new RuntimeException(e);
                 }
 
             });
         }
+
     }
 
     /**
@@ -926,16 +931,45 @@ public class Mainframe extends JFrame {
         SwingUtilities.invokeLater(finalAnimationTimer::start);
     }
 
+    /**
+     * zeigt eine Benachrichtigung mit dem zuletzt hinzugefügten Buch ohne Rating
+     *
+     */
     private static void showLastBookWithoutRating() {
         Book_Booklist newestBook = null;
         for (int i = 0; i < allEntries.getSize(); i++) {
             Book_Booklist entry = allEntries.getElementAt(i);
-            if (newestBook == null || (newestBook.getDate().before(entry.getDate()) && entry.getRating()==0)) {
-                newestBook = entry;
+                if (newestBook == null) {
+                    newestBook = entry;
+                } else if ((newestBook.getDate().before(entry.getDate()) && entry.getRating() == 0 && entry.getDate().after(new Timestamp(System.currentTimeMillis())))) {
+                    newestBook = entry;
+                }
             }
-        }
+
         assert newestBook != null;
-        showNotification("Das Buch " + newestBook.getTitle() +" von " + newestBook.getAuthor() + " hat noch keine Bewertung", 10000);
+        int index = allEntries.getIndexOf(newestBook.getAuthor(),newestBook.getTitle());
+        // MouseListener hinzufügen, um den "Link" anklickbar zu machen
+        notificationMouseListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 1) {
+                    // Link wurde angeklickt → neuen Dialog öffnen
+                    new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                notificationLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                notificationLabel.setCursor(Cursor.getDefaultCursor());
+            }
+        };
+        notificationLabel.addMouseListener(notificationMouseListener);
+        showNotification("<html>Bewerte jetzt: <u>" + newestBook.getTitle() + " von " + newestBook.getAuthor() + "</u></html>" , 15000);
     }
 
     /**

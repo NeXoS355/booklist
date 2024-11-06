@@ -139,17 +139,6 @@ public class Dialog_settings extends JDialog {
 		cmbOnDemand = new JComboBox<>(arrayOnDemand);
 		cmbOnDemand.setSelectedItem(HandleConfig.loadOnDemand);
 		pnlLeft.add(cmbOnDemand, c);
-//		c.gridx = 0;
-//		c.gridy = 6;
-//		JLabel lblUseDB = new JLabel("Nutze Datenbank");
-//		lblUseDB.setToolTipText("Benutzt die Datenbank für Suchanfragen, Vergleiche und andere Abfragen");
-//		pnlLeft.add(lblUseDB, c);
-//		c.gridx = 1;
-//		c.gridy = 6;
-//		Boolean[] arrayUseDB = { false, true };
-//		cmbUseDB = new JComboBox<>(arrayUseDB);
-//		cmbUseDB.setSelectedItem(BookListModel.useDB);
-//		pnlLeft.add(cmbUseDB, c);
 		c.gridx = 0;
 		c.gridy = 7;
 		JLabel lblSearchParam = new JLabel("Suchparameter");
