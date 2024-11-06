@@ -646,9 +646,8 @@ public class Mainframe extends JFrame {
 
         if (apiConnected) {
             Mainframe.executor.submit(() -> downloadFromApi(false));
-            showLastBookWithoutRating();
         }
-
+        Mainframe.executor.submit(Mainframe::showLastBookWithoutRating);
         addWindowListener(new WindowAdapter() {
 
             @Override
@@ -937,11 +936,13 @@ public class Mainframe extends JFrame {
      */
     private static void showLastBookWithoutRating() {
         Book_Booklist newestBook = null;
+        Timestamp timespan = new Timestamp(System.currentTimeMillis()-1209600033);
+        System.out.println(timespan);
         for (int i = 0; i < allEntries.getSize(); i++) {
             Book_Booklist entry = allEntries.getElementAt(i);
                 if (newestBook == null) {
                     newestBook = entry;
-                } else if ((newestBook.getDate().before(entry.getDate()) && entry.getRating() == 0 && entry.getDate().after(new Timestamp(System.currentTimeMillis())))) {
+                } else if ((newestBook.getDate().before(entry.getDate()) && entry.getRating() == 0 && entry.getDate().after(timespan))) {
                     newestBook = entry;
                 }
             }
