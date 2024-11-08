@@ -14,6 +14,8 @@ import javax.swing.table.TableColumnModel;
 
 import gui.Mainframe;
 
+import static gui.Mainframe.logger;
+
 public class HandleConfig {
 
 	public static int autoDownload = 0;
@@ -48,149 +50,185 @@ public class HandleConfig {
 				int size;
 
                 for (String s : settings) {
-                    setting = s.split("=")[0];
-                    value = s.split("=")[1];
-
-                    switch (setting) {
-                        case "fontSize" -> {
-                            try {
-                                size = Integer.parseInt(value.trim());
-                                Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, size);
-                                Mainframe.logger.info("fontSize: {}", size);
-                            } catch (NumberFormatException e) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Fehler in der config (fontSize): Falsches Format - erwartet integer");
-                            }
-                        }
-                        case "descFontSize" -> {
-                            try {
-                                size = Integer.parseInt(value.trim());
-                                Mainframe.descFont = new Font("Roboto", Font.PLAIN, size);
-                                Mainframe.logger.info("descFontSize: {}", size);
-                            } catch (NumberFormatException e) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Fehler in der config (descFontSize): Falsches Format - erwartet integer");
-                            }
-                        }
-                        case "autoDownload" -> {
-                            try {
-                                int tmp = Integer.parseInt(value.trim());
-                                if (tmp >= 0 && tmp < 2) {
-                                    autoDownload = tmp;
-                                    Mainframe.logger.info("autoDownload: {}", autoDownload);
-                                } else
+                    String[] row = s.split("=");
+                    setting = row[0];
+                    value = row[1];
+                    if (row.length == 2) {
+                        switch (setting) {
+                            case "fontSize" -> {
+                                try {
+                                    size = Integer.parseInt(value.trim());
+                                    Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, size);
+                                    logger.info("fontSize: {}", size);
+                                } catch (NumberFormatException e) {
                                     JOptionPane.showMessageDialog(null,
-                                            "Fehler in der config (autoDownload): Falscher Wert - erwartet 1 oder 0");
-
-                            } catch (NumberFormatException e) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Fehler in der config (autoDownload): Falsches Format - erwartet integer");
+                                            "Fehler in der config (fontSize): Falsches Format - erwartet integer");
+                                }
                             }
-                        }
-                        case "loadOnDemand" -> {
-                            try {
-                                int tmp = Integer.parseInt(value.trim());
-                                if (tmp >= 0 && tmp < 2) {
-                                    loadOnDemand = tmp;
-                                    Mainframe.logger.info("loadOnDemand: {}", loadOnDemand);
-                                } else
+                            case "descFontSize" -> {
+                                try {
+                                    size = Integer.parseInt(value.trim());
+                                    Mainframe.descFont = new Font("Roboto", Font.PLAIN, size);
+                                    logger.info("descFontSize: {}", size);
+                                } catch (NumberFormatException e) {
                                     JOptionPane.showMessageDialog(null,
-                                            "Fehler in der config (loadOnDemand): Falscher Wert - erwartet 0 oder 1");
-
-                            } catch (NumberFormatException e) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Fehler in der config (loadOnDemand): Falsches Format - erwartet integer");
+                                            "Fehler in der config (descFontSize): Falsches Format - erwartet integer");
+                                }
                             }
-                        }
-                        case "useDB" -> {
-                            boolean tmp = true;
-                            if (value.trim().equalsIgnoreCase("false"))
-                                tmp = false;
-                            else
-                                JOptionPane.showMessageDialog(null,
-                                        "Fehler in der config (useDB): Falscher Wert - erwartet true oder false");
-                            BookListModel.useDB = tmp;
-                            Mainframe.logger.info("useDB: {}", BookListModel.useDB);
+                            case "autoDownload" -> {
+                                try {
+                                    int tmp = Integer.parseInt(value.trim());
+                                    if (tmp >= 0 && tmp < 2) {
+                                        autoDownload = tmp;
+                                        logger.info("autoDownload: {}", autoDownload);
+                                    } else
+                                        JOptionPane.showMessageDialog(null,
+                                                "Fehler in der config (autoDownload): Falscher Wert - erwartet 1 oder 0");
 
-                        }
-                        case "searchParam" -> {
-                            String tmp = value.trim();
-                            if (tmp.equals("a") || tmp.equals("at")) {
-                                searchParam = tmp;
-                                Mainframe.logger.info("searchParam: {}", searchParam);
-                            } else
-                                JOptionPane.showMessageDialog(null,
-                                        "Fehler in der config (searchParam): Falscher Wert - erwartet 't' oder 'at'");
+                                } catch (NumberFormatException e) {
+                                    JOptionPane.showMessageDialog(null,
+                                            "Fehler in der config (autoDownload): Falsches Format - erwartet integer");
+                                }
+                            }
+                            case "loadOnDemand" -> {
+                                try {
+                                    int tmp = Integer.parseInt(value.trim());
+                                    if (tmp >= 0 && tmp < 2) {
+                                        loadOnDemand = tmp;
+                                        logger.info("loadOnDemand: {}", loadOnDemand);
+                                    } else
+                                        JOptionPane.showMessageDialog(null,
+                                                "Fehler in der config (loadOnDemand): Falscher Wert - erwartet 0 oder 1");
 
-                        }
-                        case "debug" -> {
-                            String tmp = value.trim();
-                            if (tmp.equals("WARN") || tmp.equals("INFO") || tmp.equals("info")) {
-                                debug = tmp;
-                                Mainframe.logger.info("debug: {}", debug);
-                            } else
-                                JOptionPane.showMessageDialog(null,
-                                        "Fehler in der config (debug): Falscher Wert - erwartet WARN, INFO oder info");
-                        }
-                        case "backup" -> {
-                            try {
-                                int tmp = Integer.parseInt(value.trim());
-                                if (tmp >= 0 && tmp <= 2)
-                                    backup = tmp;
+                                } catch (NumberFormatException e) {
+                                    JOptionPane.showMessageDialog(null,
+                                            "Fehler in der config (loadOnDemand): Falsches Format - erwartet integer");
+                                }
+                            }
+                            case "useDB" -> {
+                                boolean tmp = true;
+                                if (value.trim().equalsIgnoreCase("false"))
+                                    tmp = false;
                                 else
                                     JOptionPane.showMessageDialog(null,
-                                            "Fehler in der config (backup): Falscher Wert - erwartet 0,1 oder 2");
-                                Mainframe.logger.info("backup: {}", backup);
-                            } catch (NumberFormatException e) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Fehler in der config (backup): Falscher Wert - Integer erwartet");
-                                Mainframe.logger.info("ERROR backup NumberFormatException");
+                                            "Fehler in der config (useDB): Falscher Wert - erwartet true oder false");
+                                BookListModel.useDB = tmp;
+                                logger.info("useDB: {}", BookListModel.useDB);
+
                             }
-                        }
-                        case "apiToken" -> {
-                            if (value.length() > 60)
-                                apiToken = value.trim();
-                            else
-                                apiToken = generateRandomToken(64);
-                        }
-                        case "apiURL" -> {
-                            if (value.length() > 10)
-                                apiURL = value.trim();
-                        }
-                        case "darkmode" -> {
-                            try {
-                                int tmp = Integer.parseInt(value.trim());
-                                if (tmp >= 0 && tmp < 2) {
-                                    darkmode = tmp;
-                                    Mainframe.logger.info("darkmode: {}", darkmode);
+                            case "searchParam" -> {
+                                String tmp = value.trim();
+                                if (tmp.equals("a") || tmp.equals("at")) {
+                                    searchParam = tmp;
+                                    logger.info("searchParam: {}", searchParam);
                                 } else
                                     JOptionPane.showMessageDialog(null,
-                                            "Fehler in der config (darkmode): Falscher Wert - erwartet 1 oder 0");
+                                            "Fehler in der config (searchParam): Falscher Wert - erwartet 't' oder 'at'");
 
-                            } catch (NumberFormatException e) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Fehler in der config (darkmode): Falsches Format - erwartet integer");
+                            }
+                            case "debug" -> {
+                                String tmp = value.trim();
+                                if (tmp.equals("WARN") || tmp.equals("INFO") || tmp.equals("info")) {
+                                    debug = tmp;
+                                    logger.info("debug: {}", debug);
+                                } else
+                                    JOptionPane.showMessageDialog(null,
+                                            "Fehler in der config (debug): Falscher Wert - erwartet WARN, INFO oder info");
+                            }
+                            case "backup" -> {
+                                try {
+                                    int tmp = Integer.parseInt(value.trim());
+                                    if (tmp >= 0 && tmp <= 2)
+                                        backup = tmp;
+                                    else
+                                        JOptionPane.showMessageDialog(null,
+                                                "Fehler in der config (backup): Falscher Wert - erwartet 0,1 oder 2");
+                                    logger.info("backup: {}", backup);
+                                } catch (NumberFormatException e) {
+                                    JOptionPane.showMessageDialog(null,
+                                            "Fehler in der config (backup): Falscher Wert - Integer erwartet");
+                                    logger.info("ERROR backup NumberFormatException");
+                                }
+                            }
+                            case "apiToken" -> {
+                                if (value.length() > 60)
+                                    apiToken = value.trim();
+                                else
+                                    apiToken = generateRandomToken(64);
+                            }
+                            case "apiURL" -> {
+                                if (value.length() > 10)
+                                    apiURL = value.trim();
+                            }
+                            case "darkmode" -> {
+                                try {
+                                    int tmp = Integer.parseInt(value.trim());
+                                    if (tmp >= 0 && tmp < 2) {
+                                        darkmode = tmp;
+                                        logger.info("darkmode: {}", darkmode);
+                                    } else
+                                        JOptionPane.showMessageDialog(null,
+                                                "Fehler in der config (darkmode): Falscher Wert - erwartet 1 oder 0");
+
+                                } catch (NumberFormatException e) {
+                                    JOptionPane.showMessageDialog(null,
+                                            "Fehler in der config (darkmode): Falsches Format - erwartet integer");
+                                }
+                            }
+                            case "layoutWidth" -> {
+                                String[] values = value.trim().split(",");
+                                for (int j = 0; j < values.length; j++) {
+                                    Mainframe.prozEbook = Integer.parseInt(values[0]);
+                                    Mainframe.prozAuthor = Integer.parseInt(values[1]);
+                                    Mainframe.prozTitle = Integer.parseInt(values[2]);
+                                    Mainframe.prozSeries = Integer.parseInt(values[3]);
+                                    Mainframe.prozRating = Integer.parseInt(values[4]);
+                                }
+                            }
+                            case "layoutSort" -> {
+                                String[] values = value.trim().split(",");
+                                System.arraycopy(values, 0, SimpleTableModel.columnNames, 0, values.length);
+                            }
+                            case "MainframeX" -> {
+                                try {
+                                    Mainframe.startX = Integer.parseInt(value.trim());
+                                } catch (NumberFormatException e) {
+                                    JOptionPane.showMessageDialog(null,
+                                            "Fehler in der config (MainframeX): Falsches Format - erwartet integer");
+                                }
+                            }
+                            case "MainframeY" -> {
+                                try {
+                                    Mainframe.startY = Integer.parseInt(value.trim());
+                                } catch (NumberFormatException e) {
+                                    JOptionPane.showMessageDialog(null,
+                                            "Fehler in der config (MainframeY): Falsches Format - erwartet integer");
+                                }
+                            }
+                            case "MainframeWidth" -> {
+                                try {
+                                    Mainframe.defaultFrameWidth = Integer.parseInt(value.trim());
+                                } catch (NumberFormatException e) {
+                                    JOptionPane.showMessageDialog(null,
+                                            "Fehler in der config (MainframeWidth): Falsches Format - erwartet integer");
+                                }
+                            }
+                            case "MainframeHeight" -> {
+                                try {
+                                    Mainframe.defaultFrameHeight = Integer.parseInt(value.trim());
+                                } catch (NumberFormatException e) {
+                                    JOptionPane.showMessageDialog(null,
+                                            "Fehler in der config (MainframeHeight): Falsches Format - erwartet integer");
+                                }
                             }
                         }
-                        case "layoutWidth" -> {
-                            String[] values = value.trim().split(",");
-                            for (int j = 0; j < values.length; j++) {
-                                Mainframe.prozEbook = Integer.parseInt(values[0]);
-                                Mainframe.prozAuthor = Integer.parseInt(values[1]);
-                                Mainframe.prozTitle = Integer.parseInt(values[2]);
-                                Mainframe.prozSeries = Integer.parseInt(values[3]);
-                                Mainframe.prozRating = Integer.parseInt(values[4]);
-                            }
-                        }
-                        case "layoutSort" -> {
-                            String[] values = value.trim().split(",");
-                            System.arraycopy(values, 0, SimpleTableModel.columnNames, 0, values.length);
-                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                                "Fehler in der config - Falsches Format. ");
                     }
-
                 }
 			} catch (IOException e) {
-				Mainframe.logger.error(e.getMessage());
+				logger.error(e.getMessage());
 			}
 		} else {
 			Mainframe.executor.submit(() -> {
@@ -210,7 +248,7 @@ public class HandleConfig {
 					out.println("darkmode=" + darkmode);
 
 				} catch (FileNotFoundException e) {
-					Mainframe.logger.error(e.getMessage());
+					logger.error(e.getMessage());
 				}
 			});
 		}
@@ -218,7 +256,7 @@ public class HandleConfig {
 	}
 
     public static void writeSettings() {
-        Mainframe.logger.info("Save Settings to File");
+        logger.info("Save Settings to File");
 
         try (PrintWriter out = new PrintWriter("config.conf")) {
             out.println("fontSize=" + Mainframe.defaultFont.getSize());
@@ -257,12 +295,16 @@ public class HandleConfig {
                     columnModel.getColumn(3).getHeaderValue() +
                     "," +
                     columnModel.getColumn(4).getHeaderValue();
-
             out.println(strColumnTitle);
 
+            out.println("MainframeX=" + Mainframe.getInstance().getX());
+            out.println("MainframeY=" + Mainframe.getInstance().getY());
+            out.println("MainframeWidth=" + Mainframe.getInstance().getWidth());
+            out.println("MainframeHeigth=" + Mainframe.getInstance().getHeight());
+
         } catch (FileNotFoundException e1) {
-            Mainframe.logger.error("Fehler beim speichern der Einstellungen");
-            Mainframe.logger.error(e1.getMessage());
+            logger.error("Fehler beim speichern der Einstellungen");
+            logger.error(e1.getMessage());
         }
     }
 

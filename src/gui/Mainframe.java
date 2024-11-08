@@ -84,13 +84,16 @@ public class Mainframe extends JFrame {
     private static JMenuItem apiUpload;
     private static String version;
     private final JTextField txt_search;
+    public static int defaultFrameWidth = 1300;
+    public static int defaultFrameHeight = 800;
+    public static int startX = 150;
+    public static int startY = 150;
 
     private Mainframe(boolean visible) throws HeadlessException {
         super("Booklist");
 
         this.setLayout(new BorderLayout(10, 10));
         this.setLocationByPlatform(true);
-        this.setSize(1300, 800);
         this.setResizable(true);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -109,17 +112,6 @@ public class Mainframe extends JFrame {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
-
-        // Hinzufügen des WindowListeners
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                HandleConfig.writeSettings();
-                dispose(); // Schließt das Fenster
-                System.exit(0); // Beendet das Programm
-            }
-        });
-
 
         HandleConfig.readConfig();
         if (HandleConfig.debug.equals("WARN")) {
@@ -640,53 +632,61 @@ public class Mainframe extends JFrame {
 
         logger.info("Finished creating Tree Contents + ScrollPane. Start Update Model & show GUI");
 
-        updateModel();
-
-        this.setVisible(visible);
-
-        if (apiConnected) {
-            Mainframe.executor.submit(() -> downloadFromApi(false));
-        }
-        Mainframe.executor.submit(Mainframe::showLastBookWithoutRating);
+        // Hinzufügen des WindowListeners
         addWindowListener(new WindowAdapter() {
-
             @Override
-            public void windowClosing(WindowEvent et) {
+            public void windowClosing(WindowEvent e) {
+                HandleConfig.writeSettings();
                 logger.info("Close Database");
                 Database.closeConnection();
                 if (HandleConfig.backup == 2) {
+                    logger.info("Frame Closing: Do Backup");
                     createBackup();
                 } else if (HandleConfig.backup == 1) {
+                    logger.info("Frame Closing: ask do Backup?");
                     if (JOptionPane.showConfirmDialog(null, "Backup erstellen?", "Backup?", JOptionPane.YES_NO_OPTION,
                             JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+
                         boolean ret = createBackup();
-                        if (ret)
+                        if (ret) {
                             JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
-                        else
+                            logger.info("Frame Closing: Backup success");
+                        } else {
                             JOptionPane.showMessageDialog(Mainframe.getInstance(),
                                     "Backup fehlgeschlagen oder nicht vollständig.");
-                    }
+                            logger.info("Frame Closing: Backup failed");
+                        }}
                 }
                 logger.info("Window closing");
             }
+        });
 
-            public void windowClosed(WindowEvent windowEvent) {
-                if (HandleConfig.backup == 2) {
-                    createBackup();
-                } else if (HandleConfig.backup == 1) {
-                    if (JOptionPane.showConfirmDialog(null, "Backup erstellen?", "Backup?", JOptionPane.YES_NO_OPTION,
-                            JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
-                        boolean ret = createBackup();
-                        if (ret)
-                            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
-                        else
-                            JOptionPane.showMessageDialog(Mainframe.getInstance(),
-                                    "Backup fehlgeschlagen oder nicht vollständig.");
-                    }
+        updateModel();
+        this.setSize(defaultFrameWidth, defaultFrameHeight);
+        this.setLocation(startX,startY);
+        this.setVisible(visible);
+
+        Mainframe.executor.submit(() -> {
+            try {
+            if (apiConnected) {
+                showNotification("API verbunden ...", 5000);
+                boolean downloaded = downloadFromApi(false);
+                if (downloaded) {
+                    notificationLabel.setText("API verbunden - Es wurden Bücher gefunden");
+                } else {
+                    notificationLabel.setText("API verbunden - Keine Bücher gefunden");
                 }
-                logger.info("Window closed");
-                System.exit(1);
+            } else {
+                showNotification("Keine API verbunden", 5000);
             }
+
+            Thread.sleep(5000);
+            showLastBookWithoutRating();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+
         });
         logger.info("Init completed");
     }
@@ -713,6 +713,21 @@ public class Mainframe extends JFrame {
             search(treeSelection);
         else
             search(getLastSearch());
+    }
+
+    public static void saveFrameBounds() {
+        logger.info("save Frame size and Position to file");
+        Properties props = new Properties();
+        props.setProperty("x", String.valueOf(Mainframe.getInstance().getX()));
+        props.setProperty("y", String.valueOf(Mainframe.getInstance().getY()));
+        props.setProperty("width", String.valueOf(Mainframe.getInstance().getWidth()));
+        props.setProperty("height", String.valueOf(Mainframe.getInstance().getHeight()));
+
+        try (PrintWriter out = new PrintWriter("config.conf")) {
+            props.store(out, "");
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
     }
 
     /**
@@ -1224,7 +1239,8 @@ public class Mainframe extends JFrame {
     /**
      * download the saved books via API from the webApp
      */
-    private void downloadFromApi(boolean showUi) {
+    private boolean downloadFromApi(boolean showUi) {
+        boolean downloaded = false;
         try {
             logger.info("Web API Download request: {}/api/get.php?token={}", HandleConfig.apiURL, HandleConfig.apiToken);
             URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
@@ -1321,6 +1337,7 @@ public class Mainframe extends JFrame {
 
                         if (imported >= 1) {
                             uploadToApi(showUi);
+                            downloaded = true;
                         }
                     } catch (Exception e) {
                         logger.error(e.getMessage());
@@ -1339,6 +1356,7 @@ public class Mainframe extends JFrame {
             if (showUi)
                 JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Abruf.");
         }
+        return downloaded;
     }
 
     /**
