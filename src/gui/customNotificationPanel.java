@@ -42,8 +42,6 @@ public class customNotificationPanel extends JPanel {
         // Panel zur LayeredPane hinzufügen
         Mainframe.layeredPane.add(this, Integer.valueOf(2));
         activeNotifications.add(this);
-        System.out.println(message);
-        System.out.println(activeNotifications.size());
         setLocation(location);
 
         setVisible(true);

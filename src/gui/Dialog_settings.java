@@ -42,6 +42,7 @@ public class Dialog_settings extends JDialog {
 	private static JComboBox<String> cmbSearchParam;
 	private static JComboBox<String> cmbDebug;
 	private static JComboBox<Integer> cmbBackup;
+	private static JComboBox<Integer> cmbDark;
     private static JTextField txtApiUrl;
 	private static JTextField txtApiToken;
 	private static JLabel lblQrCode;
@@ -181,7 +182,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 10;
 		Integer[] arrayDark = { 0, 1 };
-        JComboBox<Integer> cmbDark = new JComboBox<>(arrayDark);
+        cmbDark = new JComboBox<>(arrayDark);
 		cmbDark.setSelectedItem(HandleConfig.darkmode);
 		pnlLeft.add(cmbDark, c);
 		JButton btnSave = ButtonsFactory.createButton("Speichern");
@@ -312,6 +313,7 @@ public class Dialog_settings extends JDialog {
 				HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
 				HandleConfig.debug = (String) cmbDebug.getSelectedItem();
 				HandleConfig.backup = (int) cmbBackup.getSelectedItem();
+				HandleConfig.darkmode = (int) cmbDark.getSelectedItem();
 				HandleConfig.apiToken = txtApiToken.getText();
 				HandleConfig.apiURL = txtApiUrl.getText();
 			} catch (NullPointerException e) {
