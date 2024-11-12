@@ -35,7 +35,8 @@ public class customNotificationPanel extends JPanel {
         notificationLabel.setFont(Mainframe.defaultFont);
         add(notificationLabel); // Label zum Panel hinzufügen
 
-        int yPos = splitPane.getHeight() - (activeNotifications.size() * 30 + activeNotifications.size() * 5);
+        int notificationIndex = activeNotifications.size()+1;
+        int yPos = splitPane.getHeight() - ((notificationIndex * 30) + (notificationIndex * 5));
 
         setBounds(0, yPos, (int) notificationSize.getWidth(), (int) notificationSize.getHeight());
 
