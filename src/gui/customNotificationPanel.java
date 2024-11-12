@@ -11,13 +11,13 @@ import static gui.Mainframe.*;
 
 public class customNotificationPanel extends JPanel {
 
-    static final JLabel  notificationLabel = new JLabel();
-    static final Map<JPanel, Float> panelAlphaMap = new HashMap<>();
+    JLabel  notificationLabel;
+    static Map<JPanel, Float> panelAlphaMap = new HashMap<>();
     static final Dimension notificationSize = new Dimension(600, 30); // Breite und Höhe festlegen
     static Point location = new Point(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5);
 
     public customNotificationPanel(String message) {
-
+        notificationLabel = new JLabel(message);
         setLayout(new FlowLayout(FlowLayout.LEFT));
 
 //        AtomicReference<Float> alpha = new AtomicReference<>(0.0f);
@@ -31,7 +31,6 @@ public class customNotificationPanel extends JPanel {
         setBackground(Color.DARK_GRAY);
         setOpaque(true); // Hintergrundfarbe sichtbar machen
 
-        notificationLabel.setText(message);
         notificationLabel.setForeground(Color.WHITE); // Schriftfarbe
         notificationLabel.setFont(Mainframe.defaultFont);
         add(notificationLabel); // Label zum Panel hinzufügen
@@ -43,6 +42,8 @@ public class customNotificationPanel extends JPanel {
         // Panel zur LayeredPane hinzufügen
         Mainframe.layeredPane.add(this, Integer.valueOf(2));
         activeNotifications.add(this);
+        System.out.println(message);
+        System.out.println(activeNotifications.size());
         setLocation(location);
 
         setVisible(true);

@@ -683,14 +683,13 @@ public class Mainframe extends JFrame {
         for (JPanel notification : activeNotifications) {
             int index = activeNotifications.indexOf(notification);
             notification.setLocation(0, splitPane.getHeight() - index*30 - index*5);
-            listScrollPane.setBounds(0,0, layeredPane.getWidth(), layeredPane.getHeight());
-            // Revalidate und Repaint sofort aufrufen
-            SwingUtilities.invokeLater(() -> {
-                table.revalidate();
-                table.repaint();
-            });
         }
-
+        listScrollPane.setBounds(0,0, layeredPane.getWidth(), layeredPane.getHeight());
+        // Revalidate und Repaint sofort aufrufen
+        SwingUtilities.invokeLater(() -> {
+            table.revalidate();
+            table.repaint();
+        });
     }
 
     /**
@@ -859,26 +858,28 @@ public class Mainframe extends JFrame {
      * @param index - Bookindex to reference in MouseListener
      */
     public static void showNotification(String message, int timeout, int index) {
-            Mainframe.executor.submit(() -> {
-                // Benachrichtigungsleiste erstellen
-                customNotificationPanel notificationPanel = new customNotificationPanel(message);
-                notificationPanel.setLocation(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5);
+        Mainframe.executor.submit(() -> {
+
+            // Benachrichtigungsleiste erstellen
+            customNotificationPanel notificationPanel = new customNotificationPanel(message);
+            try {
+                notificationPanel.setLocation(0, splitPane.getHeight() - activeNotifications.size() * 30 - activeNotifications.size() * 5);
                 if (index >= 0)
                     notificationPanel.addBookReference(index);
                 notificationPanel.repaint();
-                try {
+
 //                    animate(true);
-                    Thread.sleep(timeout);
+                Thread.sleep(timeout);
 //                    animate(false);
-                    Thread.sleep(1000);
-                    notificationPanel.setVisible(false);
-                    activeNotifications.remove(notificationPanel);
-                    revalidateActiveNotifications();
-                } catch (InterruptedException e) {
-                    activeNotifications.remove(notificationPanel);
-                    throw new RuntimeException(e);
-                }
-            });
+                notificationPanel.setVisible(false);
+                revalidateActiveNotifications();
+                activeNotifications.remove(notificationPanel);
+            } catch (InterruptedException e) {
+                revalidateActiveNotifications();
+                activeNotifications.remove(notificationPanel);
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private static void revalidateActiveNotifications() {
@@ -886,8 +887,8 @@ public class Mainframe extends JFrame {
             notification.setLocation(new Point(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5));
             notification.revalidate();
             notification.repaint();
-            updateLocationAndBounds();
         }
+        updateLocationAndBounds();
     }
 
 //    /**
