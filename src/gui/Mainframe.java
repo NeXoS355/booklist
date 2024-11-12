@@ -28,12 +28,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 /**
@@ -66,14 +66,14 @@ public class Mainframe extends JFrame {
     private static int lastTableHoverRow = -1;
     private static TreePath lastPath = null;
     private static DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("rootNode");
-    private static DefaultTreeModel treeModel;
+    static DefaultTreeModel treeModel;
     private static final JTree tree = new JTree(treeModel);
-    private static final JLabel notificationLabel = new JLabel();
-    private static JPanel notificationPanel = new JPanel(new BorderLayout());
-    static Future<?> notificationFuture;
-    static MouseAdapter notificationMouseListener;
-    private static JSplitPane splitPane;
-    private static Timer animationTimer;
+    static final JLayeredPane layeredPane = new JLayeredPane();
+    static final ArrayList<JPanel> activeNotifications = new ArrayList<>();
+    public static JSplitPane splitPane;
+    private static final JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+//    private static Timer animationTimer;
     private static Mainframe instance;
     private static String treeSelection;
     private static String lastSearch = "";
@@ -510,32 +510,12 @@ public class Mainframe extends JFrame {
 
         JPanel pnl_mid = new JPanel(new BorderLayout());
 
-        JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         if (HandleConfig.darkmode == 1)
             listScrollPane.getViewport().setBackground(new Color(75, 75, 75));
         JScrollBar tableVerticalScrollBar = listScrollPane.getVerticalScrollBar();
         tableVerticalScrollBar.setUI(new CustomScrollBar());
-
-        // Benachrichtigungsleiste erstellen
-        notificationPanel = new JPanel(new BorderLayout());
-        notificationPanel.setBackground(Color.DARK_GRAY);
-        notificationPanel.setOpaque(true); // Sicherstellen, dass der Hintergrund sichtbar ist
-        // Beispiel-Label für die Benachrichtigung
-        // Größe der Benachrichtigungsleiste festlegen
-        Dimension notificationSize = new Dimension(600, 30); // Breite anpassen, Höhe auf 30px setzen
-        notificationPanel.setMaximumSize(notificationSize);
-        notificationPanel.setPreferredSize(notificationSize);
-        notificationPanel.setMinimumSize(notificationSize);
-        notificationLabel.setForeground(Color.WHITE); // Schriftfarbe
-        notificationLabel.setFont(defaultFont);
-        notificationPanel.add(notificationLabel, BorderLayout.CENTER);
-        notificationPanel.setVisible(false);
-
-        JLayeredPane layeredPane = new JLayeredPane();
-        layeredPane.setLayout(new OverlayLayout(layeredPane));
+        layeredPane.setLayout(null);
         layeredPane.add(listScrollPane, Integer.valueOf(1));       // Die Tabelle im unteren Layer
-        layeredPane.add(notificationPanel, Integer.valueOf(2));    // Die Benachrichtigungsleiste darüber
 
         pnl_mid.add(layeredPane, BorderLayout.CENTER);
 
@@ -661,34 +641,56 @@ public class Mainframe extends JFrame {
             }
         });
 
+        // ComponentListener hinzufügen, um auf Größenänderungen zu reagieren
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                updateLocationAndBounds();
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                updateLocationAndBounds();
+            }
+        });
+
         updateModel();
         this.setSize(defaultFrameWidth, defaultFrameHeight);
         this.setLocation(startX,startY);
         this.setVisible(visible);
 
         Mainframe.executor.submit(() -> {
-            try {
             if (apiConnected) {
-                showNotification("API verbunden ...", 5000);
                 boolean downloaded = downloadFromApi(false);
                 if (downloaded) {
-                    notificationLabel.setText("API verbunden - Es wurden Bücher gefunden");
+                    showNotification("API verbunden - Es wurden Bücher gefunden",5000, -1);
                 } else {
-                    notificationLabel.setText("API verbunden - Keine Bücher gefunden");
+                    showNotification("API verbunden - Keine Bücher gefunden",5000, -1);
                 }
             } else {
-                showNotification("Keine API verbunden", 5000);
+                showNotification("Keine API verbunden", 5000, -1);
             }
 
-            Thread.sleep(5000);
             showLastBookWithoutRating();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
 
 
         });
+        listScrollPane.setBounds(0,0, layeredPane.getWidth(), layeredPane.getHeight());
         logger.info("Init completed");
+    }
+
+    private static void updateLocationAndBounds() {
+        for (JPanel notification : activeNotifications) {
+            int index = activeNotifications.indexOf(notification);
+            notification.setLocation(0, splitPane.getHeight() - index*30 - index*5);
+            listScrollPane.setBounds(0,0, layeredPane.getWidth(), layeredPane.getHeight());
+            // Revalidate und Repaint sofort aufrufen
+            SwingUtilities.invokeLater(() -> {
+                table.revalidate();
+                table.repaint();
+            });
+        }
+
     }
 
     /**
@@ -713,21 +715,6 @@ public class Mainframe extends JFrame {
             search(treeSelection);
         else
             search(getLastSearch());
-    }
-
-    public static void saveFrameBounds() {
-        logger.info("save Frame size and Position to file");
-        Properties props = new Properties();
-        props.setProperty("x", String.valueOf(Mainframe.getInstance().getX()));
-        props.setProperty("y", String.valueOf(Mainframe.getInstance().getY()));
-        props.setProperty("width", String.valueOf(Mainframe.getInstance().getWidth()));
-        props.setProperty("height", String.valueOf(Mainframe.getInstance().getHeight()));
-
-        try (PrintWriter out = new PrintWriter("config.conf")) {
-            props.store(out, "");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
     }
 
     /**
@@ -869,81 +856,84 @@ public class Mainframe extends JFrame {
      *
      * @param message - Message to show on Notification
      * @param timeout - how long should the Notification be shown
+     * @param index - Bookindex to reference in MouseListener
      */
-    public static void showNotification(String message, int timeout) {
-        if (notificationFuture != null) {
-            notificationFuture.cancel(true);
-            notificationFuture = null;
-            animationTimer.stop();
-            notificationPanel.setVisible(false);
-            showNotification(message, timeout);
-        } else {
-            notificationFuture = Mainframe.executor.submit(() -> {
+    public static void showNotification(String message, int timeout, int index) {
+            Mainframe.executor.submit(() -> {
+                // Benachrichtigungsleiste erstellen
+                customNotificationPanel notificationPanel = new customNotificationPanel(message);
+                notificationPanel.setLocation(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5);
+                if (index >= 0)
+                    notificationPanel.addBookReference(index);
+                notificationPanel.repaint();
                 try {
-                    notificationLabel.setText(message);
-                    notificationPanel.setVisible(true);
-                    animate(true);
+//                    animate(true);
                     Thread.sleep(timeout);
-                    animate(false);
+//                    animate(false);
                     Thread.sleep(1000);
                     notificationPanel.setVisible(false);
-                    notificationFuture.cancel(true);
-                    notificationLabel.removeMouseListener(notificationMouseListener);
+                    activeNotifications.remove(notificationPanel);
+                    revalidateActiveNotifications();
                 } catch (InterruptedException e) {
-                    notificationFuture.cancel(true);
-                    notificationLabel.removeMouseListener(notificationMouseListener);
+                    activeNotifications.remove(notificationPanel);
                     throw new RuntimeException(e);
                 }
-
             });
-        }
-
     }
 
-    /**
-     * Animation for Notification Panel
-     *
-     * @param show - appear or disapper anmiation
-     */
-    private static void animate(boolean show) {
-        // Animation erstellen
-        int startYPosition;
-        int targetYPosition;
-
-        int xPosition = 0;
-        if (show) {
-            startYPosition = splitPane.getHeight();
-            targetYPosition = splitPane.getHeight() - notificationPanel.getHeight();
-        } else {
-            startYPosition = splitPane.getHeight() - notificationPanel.getHeight();
-            targetYPosition = splitPane.getHeight();
+    private static void revalidateActiveNotifications() {
+        for (JPanel notification : activeNotifications) {
+            notification.setLocation(new Point(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5));
+            notification.revalidate();
+            notification.repaint();
+            updateLocationAndBounds();
         }
-
-        animationTimer = new Timer(5, new ActionListener() {
-            int currentYPosition = startYPosition; // Anfangsposition der Benachrichtigung
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (show) {
-                    if (currentYPosition > targetYPosition) {
-                        currentYPosition -= 2; // Schrittweise Verschiebung nach unten
-                        notificationPanel.setLocation(xPosition, currentYPosition);
-                    } else {
-                        animationTimer.stop(); // Animation beenden, wenn Ziel erreicht
-                    }
-                } else {
-                    if (currentYPosition < targetYPosition) {
-                        currentYPosition += 2; // Schrittweise Verschiebung nach unten
-                        notificationPanel.setLocation(xPosition, currentYPosition);
-                    } else {
-                        animationTimer.stop(); // Animation beenden, wenn Ziel erreicht
-                    }
-                }
-            }
-        });
-        Timer finalAnimationTimer = animationTimer;
-        SwingUtilities.invokeLater(finalAnimationTimer::start);
     }
+
+//    /**
+//     * Animation for Notification Panel
+//     *
+//     * @param show - appear or disapper anmiation
+//     */
+//    private static void animate(boolean show) {
+//        // Animation erstellen
+//        int startYPosition;
+//        int targetYPosition;
+//
+//        int xPosition = 0;
+//        if (show) {
+//            startYPosition = splitPane.getHeight();
+//            targetYPosition = splitPane.getHeight() - notificationPanel.getHeight();
+//        } else {
+//            startYPosition = splitPane.getHeight() - notificationPanel.getHeight();
+//            targetYPosition = splitPane.getHeight();
+//        }
+//
+//        animationTimer = new Timer(5, new ActionListener() {
+//            int currentYPosition = startYPosition; // Anfangsposition der Benachrichtigung
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                if (show) {
+//                    if (currentYPosition > targetYPosition) {
+//                        currentYPosition -= 2; // Schrittweise Verschiebung nach unten
+//                        notificationPanel.setLocation(xPosition, currentYPosition);
+//                    } else {
+//                        animationTimer.stop(); // Animation beenden, wenn Ziel erreicht
+//                    }
+//                } else {
+//                    if (currentYPosition < targetYPosition) {
+//                        currentYPosition += 2; // Schrittweise Verschiebung nach unten
+//                        notificationPanel.setLocation(xPosition, currentYPosition);
+//                    } else {
+//                        animationTimer.stop(); // Animation beenden, wenn Ziel erreicht
+//                    }
+//                }
+//            }
+//        });
+//        Timer finalAnimationTimer = animationTimer;
+//        SwingUtilities.invokeLater(finalAnimationTimer::start);
+//    }
 
     /**
      * zeigt eine Benachrichtigung mit dem zuletzt hinzugefügten Buch ohne Rating
@@ -952,7 +942,6 @@ public class Mainframe extends JFrame {
     private static void showLastBookWithoutRating() {
         Book_Booklist newestBook = null;
         Timestamp timespan = new Timestamp(System.currentTimeMillis()-1209600033);
-        System.out.println(timespan);
         for (int i = 0; i < allEntries.getSize(); i++) {
             Book_Booklist entry = allEntries.getElementAt(i);
                 if (newestBook == null) {
@@ -964,28 +953,8 @@ public class Mainframe extends JFrame {
 
         assert newestBook != null;
         int index = allEntries.getIndexOf(newestBook.getAuthor(),newestBook.getTitle());
-        // MouseListener hinzufügen, um den "Link" anklickbar zu machen
-        notificationMouseListener = new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 1) {
-                    // Link wurde angeklickt → neuen Dialog öffnen
-                    new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
-                }
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                notificationLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                notificationLabel.setCursor(Cursor.getDefaultCursor());
-            }
-        };
-        notificationLabel.addMouseListener(notificationMouseListener);
-        showNotification("<html>Bewerte jetzt: <u>" + newestBook.getTitle() + " von " + newestBook.getAuthor() + "</u></html>" , 15000);
+//        notificationLabel.addMouseListener(notificationMouseListener);
+        showNotification("<html>Bewerte jetzt: <u>" + newestBook.getTitle() + " von " + newestBook.getAuthor() + "</u></html>" , 15000, index);
     }
 
     /**
@@ -1024,7 +993,7 @@ public class Mainframe extends JFrame {
             setTableLayout();
         } else {
 //            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es gab leider keine Treffer!");
-            showNotification("Es gab leider kein Treffer", 5000);
+            showNotification("Es gab leider kein Treffer", 5000, -1);
             updateModel();
         }
     }

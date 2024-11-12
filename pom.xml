@@ -1,9 +1,9 @@
 <project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 ">
+		 xsi:schemaLocation="https://maven.apache.org/POM/4.0.0">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>booklist</groupId>
 	<artifactId>booklist</artifactId>
-	<version>3.2.0</version>
+	<version>3.2.1</version>
 	<name>booklist</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
