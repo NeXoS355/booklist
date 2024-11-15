@@ -23,7 +23,7 @@ public class Book_Booklist {
 	private String isbn;
 	private Timestamp date;
 	private int bid;
-	private int rating;
+	private double rating;
 
 	/**
 	 * Booklist Entry Constructor
@@ -47,7 +47,7 @@ public class Book_Booklist {
 	 *                     the list
 	 */
 	public Book_Booklist(String author, String title, boolean borrowed, String borrowedTo, String borrowedFrom,
-			String note, String series, String seriesVol, boolean ebook, int rating,Image pic, String desc, String isbn,
+			String note, String series, String seriesVol, boolean ebook, double rating,Image pic, String desc, String isbn,
 			Timestamp date, boolean db) {
 		super();
 		this.author = author;
@@ -302,7 +302,7 @@ public class Book_Booklist {
 		this.ebook = ebook;
 	}
 
-	public int getRating() {
+	public double getRating() {
 		return rating;
 	}
 
@@ -314,7 +314,8 @@ public class Book_Booklist {
 	 *
 	 */
 	public void setRating(int rating, boolean db) {
-		this.rating = rating;
+		System.out.println(rating);
+		this.rating = (double) rating/2;
 		if (db)
 			Database.updateRating(this.getBid(), rating);
 	}

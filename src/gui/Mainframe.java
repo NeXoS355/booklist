@@ -55,7 +55,6 @@ public class Mainframe extends JFrame {
     public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
     public static Font descFont = new Font("Roboto", Font.PLAIN, 16);
     public static BookListModel allEntries;
-    private static BookListModel filteredEntries;
     public static int prozEbook = 0;
     public static int prozAuthor = 0;
     public static int prozTitle = 0;
@@ -204,7 +203,6 @@ public class Mainframe extends JFrame {
 
         logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
         allEntries = new BookListModel(true);
-        filteredEntries = new BookListModel(false);
         tableDisplay = new SimpleTableModel(allEntries);
 
         logger.info("Finished creating List & DB. Start creating GUI Components");
@@ -974,7 +972,7 @@ public class Mainframe extends JFrame {
      * @param text - search String
      */
     public static void search(String text) {
-        filteredEntries = new BookListModel(false);
+        BookListModel filteredEntries = new BookListModel(false);
         text = text.toUpperCase();
         for (int i = 0; i < allEntries.getSize(); i++) {
             Book_Booklist eintrag = allEntries.getElementAt(i);

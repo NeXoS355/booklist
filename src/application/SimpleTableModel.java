@@ -56,7 +56,7 @@ public class SimpleTableModel extends DefaultTableModel {
 					rowData[j] = books.getElementAt(i).getSeries() + " - " + books.getElementAt(i).getSeriesVol();
 				} else if (j == columnRating) {
 					if (books.getElementAt(i).getRating() > 0) {
-						rowData[j] = Integer.toString(books.getElementAt(i).getRating());
+						rowData[j] = Double.toString(books.getElementAt(i).getRating());
 					} else {
 						rowData[j] = "";
 					}

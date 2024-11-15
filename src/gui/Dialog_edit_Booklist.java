@@ -1073,25 +1073,25 @@ public class Dialog_edit_Booklist extends JDialog {
      * sets the correct Rating Icon according to current Rating
      */
     private void setRatingIcon() {
-        if (entry.getRating() == 1) {
+        if (entry.getRating() == 0.5) {
             lblStars.setIcon(zeroHalfStar);
-        } else if (entry.getRating() == 2) {
+        } else if (entry.getRating() == 1) {
             lblStars.setIcon(oneStar);
-        } else if (entry.getRating() == 3) {
+        } else if (entry.getRating() == 1.5) {
             lblStars.setIcon(oneHalfStar);
-        } else if (entry.getRating() == 4) {
+        } else if (entry.getRating() == 2) {
             lblStars.setIcon(twoStar);
-        } else if (entry.getRating() == 5) {
+        } else if (entry.getRating() == 2.5) {
             lblStars.setIcon(twoHalfStar);
-        } else if (entry.getRating() == 6) {
+        } else if (entry.getRating() == 3) {
             lblStars.setIcon(threeStar);
-        } else if (entry.getRating() == 7) {
+        } else if (entry.getRating() == 3.5) {
             lblStars.setIcon(threeHalfStar);
-        } else if (entry.getRating() == 8) {
+        } else if (entry.getRating() == 4) {
             lblStars.setIcon(fourStar);
-        } else if (entry.getRating() == 9) {
+        } else if (entry.getRating() == 4.5) {
             lblStars.setIcon(fourHalfStar);
-        } else if (entry.getRating() == 10) {
+        } else if (entry.getRating() == 5) {
             lblStars.setIcon(fifeStar);
         } else {
             lblStars.setIcon(zeroStar);

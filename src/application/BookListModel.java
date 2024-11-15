@@ -62,7 +62,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					String seriesVolume = rs.getString("seriePart");
 					int int_ebook = rs.getInt("ebook");
 					boolean ebook = int_ebook == 1;
-					int rating = rs.getInt("rating");
+					int nativeRating = rs.getInt("rating");
+					double rating = (double) nativeRating /2;
 					int bid = Integer.parseInt(rs.getString("bid"));
 					Timestamp date = rs.getTimestamp("date");
 
