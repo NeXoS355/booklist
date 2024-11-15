@@ -1004,6 +1004,7 @@ public class Dialog_edit_Booklist extends JDialog {
                     }
                 }
                 Mainframe.logger.info("Buch geändert: {}-{}", entry.getAuthor(), entry.getTitle());
+                Mainframe.showNotification("Buch geändert: " +  entry.getAuthor() + " - " + entry.getTitle());
                 dispose();
             } else {
                 Mainframe.logger.info("Buch ändern: Bereits vorhanden!");

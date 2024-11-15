@@ -30,6 +30,7 @@ import application.HandleConfig;
 import application.GetBookInfosFromWeb;
 
 import static gui.Mainframe.allEntries;
+import static gui.Mainframe.showNotification;
 
 /**
  * Dialog to add new Book to Booklist Table and DB
@@ -442,14 +443,17 @@ public class Dialog_add_Booklist extends JDialog {
 					book = new Book_Booklist(autor, titel, true, txtBorrowedTo.getText(), "", bemerkung, serie,
 							seriePart, ebook, 0, null, null, null, datum, true);
 					allEntries.add(book);
+					showNotification("Buch hinzugefügt: " + autor + " - " + titel);
 				} else if (checkFrom.isSelected()) {
 					book = new Book_Booklist(autor, titel, true, "", txtBorrowedFrom.getText(), bemerkung, serie,
 							seriePart, ebook, 0, null, null, null, datum, true);
 					allEntries.add(book);
+					showNotification("Buch hinzugefügt: " + autor + " - " + titel);
 				} else {
 					book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, ebook, 0, null, null, null,
 							datum, true);
 					allEntries.add(book);
+					showNotification("Buch hinzugefügt: " + autor + " - " + titel);
 				}
 				if (HandleConfig.autoDownload == 1) {
 					Mainframe.executor.submit(() -> {

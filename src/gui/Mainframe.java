@@ -663,12 +663,12 @@ public class Mainframe extends JFrame {
             if (apiConnected) {
                 boolean downloaded = downloadFromApi(false);
                 if (downloaded) {
-                    showNotification("API verbunden - Es wurden Bücher gefunden",5000, -1);
+                    showNotification("API verbunden - Es wurden Bücher gefunden");
                 } else {
-                    showNotification("API verbunden - Keine Bücher gefunden",5000, -1);
+                    showNotification("API verbunden - Keine Bücher gefunden");
                 }
             } else {
-                showNotification("Keine API verbunden", 5000, -1);
+                showNotification("Keine API verbunden");
             }
 
             showLastBookWithoutRating();
@@ -708,6 +708,7 @@ public class Mainframe extends JFrame {
                 allEntries.delete(index);
             }
             allEntries.checkAuthors();
+            showNotification("Buch gelöscht: " + searchAuthor + ", " + searchTitle);
             logger.info("Book deleted: {};{}", searchAuthor, searchTitle);
         }
         if (!treeSelection.isEmpty())
@@ -851,21 +852,21 @@ public class Mainframe extends JFrame {
     }
 
     /**
-     * sets notificationLabel and animates the panel
+     * shows Notification
      *
      * @param message - Message to show on Notification
      * @param timeout - how long should the Notification be shown
-     * @param index - Bookindex to reference in MouseListener
+     * @param bookLinkIndex - Bookindex to reference in MouseListener. -1 for no Link
      */
-    public static void showNotification(String message, int timeout, int index) {
+    public static void showNotification(String message, int timeout, int bookLinkIndex) {
         Mainframe.executor.submit(() -> {
 
             // Benachrichtigungsleiste erstellen
             customNotificationPanel notificationPanel = new customNotificationPanel(message);
             try {
-                notificationPanel.setLocation(0, splitPane.getHeight() - activeNotifications.size() * 30 - activeNotifications.size() * 5);
-                if (index >= 0)
-                    notificationPanel.addBookReference(index);
+                notificationPanel.setLocation(0, splitPane.getHeight() - ((activeNotifications.size()) * 30) - ((activeNotifications.size()) * 5));
+                if (bookLinkIndex >= 0)
+                    notificationPanel.addBookReference(bookLinkIndex);
                 notificationPanel.repaint();
 
 //                    animate(true);
@@ -880,6 +881,15 @@ public class Mainframe extends JFrame {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    /**
+     * shows Notification with default values for timeout and bookLinkIndex
+     *
+     * @param message - Message to show on Notification
+     */
+    public static void showNotification(String message) {
+        showNotification(message,5000,-1);
     }
 
     private static void revalidateActiveNotifications() {

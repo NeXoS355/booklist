@@ -301,7 +301,7 @@ public class HandleConfig {
             out.println("MainframeY=" + Mainframe.getInstance().getY());
             out.println("MainframeWidth=" + Mainframe.getInstance().getWidth());
             out.println("MainframeHeigth=" + Mainframe.getInstance().getHeight());
-
+            Mainframe.showNotification("Einstellungen gespeichert");
         } catch (FileNotFoundException e1) {
             logger.error("Fehler beim speichern der Einstellungen");
             logger.error(e1.getMessage());
