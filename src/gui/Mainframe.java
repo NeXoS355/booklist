@@ -88,6 +88,8 @@ public class Mainframe extends JFrame {
     public static int startX = 150;
     public static int startY = 150;
 
+    public static final Color darkmodeBackgroundColor = new Color(17,17,17);
+
     private Mainframe(boolean visible) throws HeadlessException {
         super("Booklist");
 
@@ -136,53 +138,52 @@ public class Mainframe extends JFrame {
             }
 
         });
-
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             if (HandleConfig.darkmode == 1) {
                 // Change Colors for Darkmode
-                UIManager.put("Panel.background", Color.DARK_GRAY);
+                UIManager.put("Panel.background", darkmodeBackgroundColor);
 
                 UIManager.put("Label.foreground", Color.WHITE);
 
-                UIManager.put("CheckBox.background", Color.DARK_GRAY);
+                UIManager.put("CheckBox.background", darkmodeBackgroundColor);
                 UIManager.put("CheckBox.foreground", Color.WHITE);
 
                 UIManager.put("ComboBox.background", Color.WHITE);
                 UIManager.put("ComboBox.foreground", Color.BLACK);
 
-                UIManager.put("Menu.background", Color.DARK_GRAY);
+                UIManager.put("Menu.background", darkmodeBackgroundColor);
                 UIManager.put("Menu.foreground", Color.WHITE);
                 UIManager.put("Menu.opaque", true);
                 UIManager.put("MenuBar.border", 0);
-                UIManager.put("MenuItem.background", new Color(90, 90, 90));
+                UIManager.put("MenuItem.background", Color.DARK_GRAY);
                 UIManager.put("MenuItem.foreground", Color.WHITE);
                 UIManager.put("MenuItem.opaque", true);
-                UIManager.put("PopupMenu.border", Color.DARK_GRAY);
+                UIManager.put("PopupMenu.border", darkmodeBackgroundColor);
 
-                UIManager.put("Table.background", Color.DARK_GRAY);
+                UIManager.put("Table.background", darkmodeBackgroundColor);
                 UIManager.put("Table.foreground", Color.WHITE);
 
-                UIManager.put("OptionPane.background", Color.DARK_GRAY);
+                UIManager.put("OptionPane.background", darkmodeBackgroundColor);
                 UIManager.put("OptionPane.messageForeground", Color.WHITE);
 
-                UIManager.put("ScrollPane.background", Color.DARK_GRAY);
-                UIManager.put("SplitPane.background", Color.DARK_GRAY);
+                UIManager.put("ScrollPane.background", darkmodeBackgroundColor);
+                UIManager.put("SplitPane.background", darkmodeBackgroundColor);
 
                 UIManager.put("TextField.background", Color.DARK_GRAY);
                 UIManager.put("TextField.inactiveBackground", Color.GRAY);
                 UIManager.put("TextField.foreground", new Color(220, 220, 220));
                 UIManager.put("TextField.caretForeground", UIManager.get("TextField.foreground"));
 
-                UIManager.put("TextArea.background", Color.DARK_GRAY);
+                UIManager.put("TextArea.background", darkmodeBackgroundColor);
                 UIManager.put("TextArea.inactiveForeground", Color.WHITE);
 
-                tree.setBackground(Color.DARK_GRAY);
+                tree.setBackground(darkmodeBackgroundColor);
                 table.getTableHeader().setOpaque(false);
-                table.setBackground(Color.DARK_GRAY);
-                table.getTableHeader().setBackground(Color.DARK_GRAY);
+                table.setBackground(darkmodeBackgroundColor);
+                table.getTableHeader().setBackground(darkmodeBackgroundColor);
                 table.getTableHeader().setForeground(Color.WHITE);
-                this.getContentPane().setBackground(Color.DARK_GRAY);
+                this.getContentPane().setBackground(darkmodeBackgroundColor);
 
             } else {
                 UIManager.put("TextArea.inactiveForeground", Color.BLACK);
@@ -1477,81 +1478,87 @@ public class Mainframe extends JFrame {
      * version. Update is started immediately
      */
     private void checkUpdate() {
-        URL url;
-        try {
-            url = new URI("https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar").toURL();
-            try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-                 FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
-                byte[] dataBuffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                    fileOutputStream.write(dataBuffer, 0, bytesRead);
-                }
-                ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
-                logger.info("Update - Command: {}", pb.command());
-                Process proc = pb.start();
-                // Warte darauf, dass der Prozess abgeschlossen wird
-                int exitCode = proc.waitFor();
-                logger.info("Update - Process closed with Exit-Code: {}", exitCode);
+        Mainframe.executor.submit(() -> {
+            URL url;
+            try {
+                url = new URI("https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar").toURL();
+                showNotification("Download latest Version");
+                try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+                     FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
+                    byte[] dataBuffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                        fileOutputStream.write(dataBuffer, 0, bytesRead);
+                    }
+                    showNotification("Download finished .. checking version ...");
+                    ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
+                    logger.info("Update - Command: {}", pb.command());
+                    Process proc = pb.start();
+                    // Warte darauf, dass der Prozess abgeschlossen wird
+                    int exitCode = proc.waitFor();
+                    showNotification("Process finished .. checking version ...");
+                    logger.info("Update - Process closed with Exit-Code: {}", exitCode);
 
-                // InputStream lesen (kontinuierlich statt mit available())
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                     BufferedReader errorReader = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
+                    // InputStream lesen (kontinuierlich statt mit available())
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+                         BufferedReader errorReader = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
 
-                    // Ausgabe des Prozesses lesen
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        logger.info("Update - detected version: {}", line);
-                        StringBuilder strCurVer = new StringBuilder();
-                        int intCurVer;
-                        String[] splitString = version.split("[.]");
-                        for (String s : splitString) {
-                            strCurVer.append(s);
-                        }
-                        intCurVer = Integer.parseInt(strCurVer.toString());
-
-                        StringBuilder strDownloadedVer = new StringBuilder();
-                        int intDownloadedVer;
-                        splitString = line.split("[.]");
-                        for (String s : splitString) {
-                            strDownloadedVer.append(s);
-                        }
-                        intDownloadedVer = Integer.parseInt(strDownloadedVer.toString());
-
-                        if (intDownloadedVer > intCurVer) {
-                            int antwort = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
-                                    "Es ist ein Update auf Version " + line + " verfügbar,\n Jetzt durchführen?",
-                                    "Update", JOptionPane.YES_NO_OPTION);
-                            if (antwort == JOptionPane.YES_OPTION) {
-                                boolean ret = createBackup();
-                                if (ret) {
-                                    String fileName = new File(Mainframe.class.getProtectionDomain()
-                                            .getCodeSource().getLocation().getPath()).getName();
-                                    pb = new ProcessBuilder("java", "-jar", fileName, "update");
-                                    logger.info("Update - Command: {}", pb.command());
-                                    pb.start();
-                                    logger.info("Update - Process started");
-                                    System.exit(0);
-                                }
+                        // Ausgabe des Prozesses lesen
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            showNotification("Version detected: " + line);
+                            logger.info("Update - detected version: {}", line);
+                            StringBuilder strCurVer = new StringBuilder();
+                            int intCurVer;
+                            String[] splitString = version.split("[.]");
+                            for (String s : splitString) {
+                                strCurVer.append(s);
                             }
+                            intCurVer = Integer.parseInt(strCurVer.toString());
 
-                        } else {
-                            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Kein Update verfügbar");
+                            StringBuilder strDownloadedVer = new StringBuilder();
+                            int intDownloadedVer;
+                            splitString = line.split("[.]");
+                            for (String s : splitString) {
+                                strDownloadedVer.append(s);
+                            }
+                            intDownloadedVer = Integer.parseInt(strDownloadedVer.toString());
+
+                            if (intDownloadedVer > intCurVer) {
+                                int antwort = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
+                                        "Es ist ein Update auf Version " + line + " verfügbar,\n Jetzt durchführen?",
+                                        "Update", JOptionPane.YES_NO_OPTION);
+                                if (antwort == JOptionPane.YES_OPTION) {
+                                    boolean ret = createBackup();
+                                    if (ret) {
+                                        String fileName = new File(Mainframe.class.getProtectionDomain()
+                                                .getCodeSource().getLocation().getPath()).getName();
+                                        pb = new ProcessBuilder("java", "-jar", fileName, "update");
+                                        logger.info("Update - Command: {}", pb.command());
+                                        pb.start();
+                                        logger.info("Update - Process started");
+                                        System.exit(0);
+                                    }
+                                }
+
+                            } else {
+                                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Kein Update verfügbar");
+                            }
+                        }
+
+                        // Fehlerausgabe lesen (falls vorhanden)
+                        while ((line = errorReader.readLine()) != null) {
+                            logger.error("Update - Error: {}", line);
                         }
                     }
-
-                    // Fehlerausgabe lesen (falls vorhanden)
-                    while ((line = errorReader.readLine()) != null) {
-                        logger.error("Update - Error: {}", line);
-                    }
+                } catch (IOException | InterruptedException e1) {
+                    logger.error(e1.getMessage());
                 }
-            } catch (IOException | InterruptedException e1) {
+            } catch (MalformedURLException | URISyntaxException e1) {
                 logger.error(e1.getMessage());
             }
-        } catch (MalformedURLException | URISyntaxException e1) {
-            logger.error(e1.getMessage());
-        }
 
+        });
     }
 
 }

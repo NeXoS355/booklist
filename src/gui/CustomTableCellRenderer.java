@@ -58,14 +58,14 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
             component.setBackground(Color.LIGHT_GRAY);
         } else {
             component.setForeground(new Color(220, 220, 220));
-            component.setBackground(Color.DARK_GRAY);
+            component.setBackground(Mainframe.darkmodeBackgroundColor);
         }
     }
     
     private void setupLightMode(Component component, boolean isSelected, int row) {
         if (isSelected) {
             component.setForeground(Color.WHITE);
-            component.setBackground(Color.DARK_GRAY);
+            component.setBackground(Mainframe.darkmodeBackgroundColor);
         } else if (row == hoveredRow) {
             component.setForeground(Color.BLACK);
             component.setBackground(Color.LIGHT_GRAY);

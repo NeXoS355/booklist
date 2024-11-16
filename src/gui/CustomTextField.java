@@ -31,7 +31,7 @@ public class CustomTextField extends JTextField {
 	 */
 	public CustomTextField() {
 		super();
-		setOpaque(false);
+		setOpaque(true);
 		setFont(Mainframe.defaultFont);
 
 		addPropertyChangeListener(evt -> {
@@ -65,6 +65,7 @@ public class CustomTextField extends JTextField {
 				if (!isEditable()) {
 					setEditable(true);
 					setForeground(UIManager.getColor("TextField.foreground"));
+					System.out.println(UIManager.getColor("TextField.background"));
 					setBackground(UIManager.getColor("TextField.background"));
 					setText("");
 				}
@@ -81,7 +82,7 @@ public class CustomTextField extends JTextField {
 	 */
 	public CustomTextField(String text) {
 		this(null, text, 0);
-		setOpaque(false);
+		setOpaque(true);
 		setFont(Mainframe.defaultFont);
 		
 		addPropertyChangeListener(evt -> {

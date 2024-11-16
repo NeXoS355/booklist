@@ -43,7 +43,7 @@ public class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
 				component.setBackground(Color.LIGHT_GRAY);
 			} else {
 				component.setForeground(new Color(220,220,220));
-				component.setBackground(Color.DARK_GRAY);
+				component.setBackground(Mainframe.darkmodeBackgroundColor);
 			}
 		}
 
