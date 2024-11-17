@@ -49,6 +49,13 @@ public class customNotificationPanel extends JPanel {
         updateUI();
     }
 
+    public void setText(String text) {
+        notificationLabel.setText(text);
+        updateUI();
+        revalidate();
+        repaint();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();

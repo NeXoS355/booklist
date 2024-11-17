@@ -82,13 +82,23 @@ public class Mainframe extends JFrame {
     private static JMenuItem apiDownload;
     private static JMenuItem apiUpload;
     private static String version;
-    private final JTextField txt_search;
+    private JTextField txt_search;
     public static int defaultFrameWidth = 1300;
     public static int defaultFrameHeight = 800;
     public static int startX = 150;
     public static int startY = 150;
 
     public static final Color darkmodeBackgroundColor = new Color(17,17,17);
+
+    private Mainframe() {
+        final Properties properties = new Properties();
+        try {
+            properties.load(this.getClass().getClassLoader().getResourceAsStream("project.properties"));
+            version = properties.getProperty("version");
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+    }
 
     private Mainframe(boolean visible) throws HeadlessException {
         super("Booklist");
@@ -104,8 +114,6 @@ public class Mainframe extends JFrame {
         ImageIcon icon = new ImageIcon(iconURL);
         this.setIconImage(icon.getImage());
 
-        logger = LogManager.getLogger(getClass());
-        logger.info("start creating Frame & readConfig");
         final Properties properties = new Properties();
         try {
             properties.load(this.getClass().getClassLoader().getResourceAsStream("project.properties"));
@@ -113,6 +121,9 @@ public class Mainframe extends JFrame {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
+
+        logger = LogManager.getLogger(getClass());
+        logger.info("start creating Frame & readConfig");
 
         HandleConfig.readConfig();
         if (HandleConfig.debug.equals("WARN")) {
@@ -122,6 +133,7 @@ public class Mainframe extends JFrame {
         }
 
         Mainframe.executor.submit(() -> {
+            checkApiConnection();
             try {
                 File file = new File("latest.jar");
                 if (file.exists()) {
@@ -132,7 +144,6 @@ public class Mainframe extends JFrame {
                     else
                         logger.warn("File detected but could not be deleted: {}", path);
                 }
-                checkApiConnection();
             } catch (IOException e) {
                 logger.error(e.getMessage());
             }
@@ -853,33 +864,46 @@ public class Mainframe extends JFrame {
     /**
      * shows Notification
      *
-     * @param message - Message to show on Notification
-     * @param timeout - how long should the Notification be shown
+     * @param message       - Message to show on Notification
+     * @param timeout       - how long should the Notification be shown
      * @param bookLinkIndex - Bookindex to reference in MouseListener. -1 for no Link
      */
-    public static void showNotification(String message, int timeout, int bookLinkIndex) {
+    public static customNotificationPanel showNotification(String message, int timeout, int bookLinkIndex) {
+        // Benachrichtigungsleiste erstellen
+        customNotificationPanel notificationPanel = new customNotificationPanel(message);
+        // Rufe den Callback auf (im Event-Dispatch-Thread für GUI-Sicherheit)
+
+        notificationPanel.setLocation(0, splitPane.getHeight() - ((activeNotifications.size()) * 30) - ((activeNotifications.size()) * 5));
+        if (bookLinkIndex >= 0)
+            notificationPanel.addBookReference(bookLinkIndex);
+        notificationPanel.repaint();
         Mainframe.executor.submit(() -> {
-
-            // Benachrichtigungsleiste erstellen
-            customNotificationPanel notificationPanel = new customNotificationPanel(message);
             try {
-                notificationPanel.setLocation(0, splitPane.getHeight() - ((activeNotifications.size()) * 30) - ((activeNotifications.size()) * 5));
-                if (bookLinkIndex >= 0)
-                    notificationPanel.addBookReference(bookLinkIndex);
-                notificationPanel.repaint();
-
 //                    animate(true);
                 Thread.sleep(timeout);
 //                    animate(false);
-                notificationPanel.setVisible(false);
-                revalidateActiveNotifications();
-                activeNotifications.remove(notificationPanel);
+                SwingUtilities.invokeLater(() -> {
+                    notificationPanel.setVisible(false);
+                    revalidateActiveNotifications();
+                    activeNotifications.remove(notificationPanel);
+                });
             } catch (InterruptedException e) {
                 revalidateActiveNotifications();
                 activeNotifications.remove(notificationPanel);
                 throw new RuntimeException(e);
             }
+
         });
+        return notificationPanel;
+    }
+
+    /**
+     * shows Notification with default values for bookLinkIndex
+     *
+     * @param message - Message to show on Notification
+     */
+    public static customNotificationPanel showNotification(String message, int timeout) {
+        return showNotification(message, timeout, -1);
     }
 
     /**
@@ -887,8 +911,8 @@ public class Mainframe extends JFrame {
      *
      * @param message - Message to show on Notification
      */
-    public static void showNotification(String message) {
-        showNotification(message,5000,-1);
+    public static customNotificationPanel showNotification(String message) {
+        return showNotification(message, 5000, -1);
     }
 
     private static void revalidateActiveNotifications() {
@@ -1071,56 +1095,6 @@ public class Mainframe extends JFrame {
     }
 
     /**
-     * update the jar file with the already downloaded latest.jar
-     */
-    public static void update() {
-        String fileName = new File(
-                Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
-        try (PrintWriter out = new PrintWriter("update.log")) {
-            Thread.sleep(2000);
-            File source = new File("latest.jar");
-            File dest = new File(fileName);
-            InputStream is = null;
-            OutputStream os = null;
-            out.println("UPDATER: initialize");
-            out.println("UPDATER: detected fileName: " + fileName);
-            try {
-                is = new FileInputStream(source);
-                os = new FileOutputStream(dest);
-                byte[] buffer = new byte[1024];
-                int length;
-                out.println("UPDATER: overwriting file");
-                while ((length = is.read(buffer)) > 0) {
-                    os.write(buffer, 0, length);
-                }
-                out.println("UPDATER: writing complete");
-                out.println("UPDATER: build process");
-                ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName);
-                out.println("UPDATER: " + pb.command());
-                pb.start();
-                out.println("UPDATER: process started");
-                out.println("UPDATER: SUCCESS");
-            } catch (IOException e) {
-                out.println(e.getMessage());
-            } finally {
-                try {
-                    assert is != null;
-                    is.close();
-                    assert os != null;
-                    os.close();
-                } catch (IOException e) {
-                    Mainframe.logger.error(e.getMessage());
-                }
-
-            }
-            out.println("UPDATER: update finished");
-        } catch (FileNotFoundException | InterruptedException e1) {
-            Mainframe.logger.error(e1.getMessage());
-        }
-
-    }
-
-    /**
      * checks the Connection to the supplied WebAPI URL with a short GET Request
      */
     public static void checkApiConnection() {
@@ -1166,53 +1140,6 @@ public class Mainframe extends JFrame {
 
     public static boolean isApiConnected() {
         return apiConnected;
-    }
-
-    /**
-     * start Instance of Mainframe
-     *
-     * @param args - Arguments to trigger different functions
-     */
-    public static void main(String[] args) {
-        if (args.length > 0) {
-            for (String s : args) {
-                switch (s) {
-                    case "version":
-                        createInstance(false);
-                        System.out.println(version);
-                        System.exit(0);
-                        break;
-                    case "update":
-                        System.out.println("update");
-                        update();
-                        System.exit(0);
-                    default:
-                        System.out.println("no argument recognized. Exiting.");
-                        System.exit(0);
-                }
-            }
-        } else {
-            createInstance(true);
-        }
-    }
-
-    /**
-     * start Mainframe for instance
-     */
-    public static void createInstance(boolean visible) {
-        if (instance == null) {
-            System.out.println("creating Instance with visible=" + visible);
-            instance = new Mainframe(visible);
-        }
-    }
-
-    /**
-     * get Mainframe  instance
-     *
-     * @return Mainframe Object
-     */
-    public static Mainframe getInstance() {
-        return instance;
     }
 
     /**
@@ -1474,6 +1401,57 @@ public class Mainframe extends JFrame {
     }
 
     /**
+     * update the jar file with the already downloaded latest.jar
+     */
+    public static void update() {
+        String fileName = new File(
+                Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
+        try (PrintWriter out = new PrintWriter("update.log")) {
+            System.out.println("For more Information please see update.log");
+            Thread.sleep(2000);
+            File source = new File("latest.jar");
+            File dest = new File(fileName);
+            InputStream is = null;
+            OutputStream os = null;
+            out.println("UPDATER: initialize");
+            out.println("UPDATER: detected fileName: " + fileName);
+            try {
+                is = new FileInputStream(source);
+                os = new FileOutputStream(dest);
+                byte[] buffer = new byte[1024];
+                int length;
+                out.println("UPDATER: overwriting file");
+                while ((length = is.read(buffer)) > 0) {
+                    os.write(buffer, 0, length);
+                }
+                out.println("UPDATER: writing complete");
+                out.println("UPDATER: build process");
+                ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName);
+                out.println("UPDATER: " + pb.command());
+                pb.start();
+                out.println("UPDATER: process started");
+                out.println("UPDATER: SUCCESS");
+            } catch (IOException e) {
+                out.println(e.getMessage());
+            } finally {
+                try {
+                    assert is != null;
+                    is.close();
+                    assert os != null;
+                    os.close();
+                } catch (IOException e) {
+                    Mainframe.logger.error(e.getMessage());
+                }
+
+            }
+            out.println("UPDATER: update finished");
+        } catch (FileNotFoundException | InterruptedException e1) {
+            Mainframe.logger.error(e1.getMessage());
+        }
+
+    }
+
+    /**
      * downloads the latest Release jar and checks the versions. If there is a new
      * version. Update is started immediately
      */
@@ -1482,21 +1460,26 @@ public class Mainframe extends JFrame {
             URL url;
             try {
                 url = new URI("https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar").toURL();
-                showNotification("Download latest Version");
+                customNotificationPanel notification1 = showNotification("downloading ...", 20000);
                 try (BufferedInputStream in = new BufferedInputStream(url.openStream());
                      FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
                     byte[] dataBuffer = new byte[1024];
                     int bytesRead;
+                    System.out.println("Start reading latest.jar");
                     while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                         fileOutputStream.write(dataBuffer, 0, bytesRead);
                     }
-                    showNotification("Download finished .. checking version ...");
+                    System.out.println("Finished reading latest.jar");
+                    fileOutputStream.close();
+                    notification1.setText("downloading ... finished");
+                    customNotificationPanel notification2 = showNotification("checking version ...", 20000);
+                    System.out.println("create Process 'latest.jar version'");
                     ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
                     logger.info("Update - Command: {}", pb.command());
                     Process proc = pb.start();
                     // Warte darauf, dass der Prozess abgeschlossen wird
                     int exitCode = proc.waitFor();
-                    showNotification("Process finished .. checking version ...");
+                    notification2.setText("checking version ... finished");
                     logger.info("Update - Process closed with Exit-Code: {}", exitCode);
 
                     // InputStream lesen (kontinuierlich statt mit available())
@@ -1506,7 +1489,7 @@ public class Mainframe extends JFrame {
                         // Ausgabe des Prozesses lesen
                         String line;
                         while ((line = reader.readLine()) != null) {
-                            showNotification("Version detected: " + line);
+                            showNotification("Version detected: " + line, 20000);
                             logger.info("Update - detected version: {}", line);
                             StringBuilder strCurVer = new StringBuilder();
                             int intCurVer;
@@ -1552,13 +1535,62 @@ public class Mainframe extends JFrame {
                         }
                     }
                 } catch (IOException | InterruptedException e1) {
+                    showNotification("Update error. See app.log for details");
                     logger.error(e1.getMessage());
                 }
             } catch (MalformedURLException | URISyntaxException e1) {
+                showNotification("Update error. See app.log for details");
                 logger.error(e1.getMessage());
             }
 
         });
+    }
+
+    /**
+     * start Instance of Mainframe
+     *
+     * @param args - Arguments to trigger different functions
+     */
+    public static void main(String[] args) {
+        if (args.length > 0) {
+            for (String s : args) {
+                System.out.println(s);
+                switch (s) {
+                    case "version":
+                        new Mainframe();
+                        System.out.println(version);
+                        System.exit(0);
+                        break;
+                    case "update":
+                        update();
+                        System.exit(0);
+                    default:
+                        System.out.println("argument not recognized. Exiting.");
+                        System.exit(0);
+                }
+            }
+        } else {
+            createInstance(true);
+        }
+    }
+
+    /**
+     * start Mainframe for instance
+     */
+    public static void createInstance(boolean visible) {
+        if (instance == null) {
+            System.out.println("creating Instance with visible=" + visible);
+            instance = new Mainframe(visible);
+        }
+    }
+
+    /**
+     * get Mainframe  instance
+     *
+     * @return Mainframe Object
+     */
+    public static Mainframe getInstance() {
+        return instance;
     }
 
 }
