@@ -680,10 +680,7 @@ public class Mainframe extends JFrame {
             } else {
                 showNotification("Keine API verbunden");
             }
-
             showLastBookWithoutRating();
-
-
         });
         listScrollPane.setBounds(0,0, layeredPane.getWidth(), layeredPane.getHeight());
         logger.info("Init completed");
@@ -1472,7 +1469,7 @@ public class Mainframe extends JFrame {
                     System.out.println("Finished reading latest.jar");
                     fileOutputStream.close();
                     notification1.setText("downloading ... finished");
-                    customNotificationPanel notification2 = showNotification("checking version ...", 20000);
+                    customNotificationPanel notification2 = showNotification("checking version ...", 10000);
                     System.out.println("create Process 'latest.jar version'");
                     ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
                     logger.info("Update - Command: {}", pb.command());
@@ -1489,7 +1486,7 @@ public class Mainframe extends JFrame {
                         // Ausgabe des Prozesses lesen
                         String line;
                         while ((line = reader.readLine()) != null) {
-                            showNotification("Version detected: " + line, 20000);
+                            showNotification("Version detected: " + line, 10000);
                             logger.info("Update - detected version: {}", line);
                             StringBuilder strCurVer = new StringBuilder();
                             int intCurVer;
@@ -1525,7 +1522,7 @@ public class Mainframe extends JFrame {
                                 }
 
                             } else {
-                                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Kein Update verfügbar");
+                                showNotification("Kein Update verfügbar",10000);
                             }
                         }
 
