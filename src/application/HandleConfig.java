@@ -25,7 +25,7 @@ public class HandleConfig {
 	public static int backup = 0;
 	public static String apiToken = generateRandomToken(64);
 	public static String apiURL = "";
-	public static int darkmode = 1;
+	public static int darkmode = 0;
 
 	/**
 	 * Constructor 
