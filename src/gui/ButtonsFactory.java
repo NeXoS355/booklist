@@ -100,9 +100,13 @@ public class ButtonsFactory {
 
 		if (text.equals("suchen")) {
 			try {
-				imageActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe.png")));
-				imageInActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe_inactive.png")));
-				button.setIcon(new ImageIcon(imageInActive));
+				if (HandleConfig.darkmode == 1) {
+					imageActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe_inv.png")));
+                } else {
+					imageActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe.png")));
+                }
+                imageInActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe_inactive.png")));
+                button.setIcon(new ImageIcon(imageInActive));
 			} catch (IOException e1) {
 				Mainframe.logger.error(e1.getMessage());
 			}
