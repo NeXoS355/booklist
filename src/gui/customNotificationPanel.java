@@ -14,7 +14,7 @@ public class customNotificationPanel extends JPanel {
 
     final JLabel  notificationLabel;
     final static Map<JPanel, Float> panelAlphaMap = new HashMap<>();
-    final Dimension notificationSize;
+    Dimension notificationSize;
     final static Point location = new Point(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5);
     int timer;
     final int oriTimer;
@@ -31,22 +31,7 @@ public class customNotificationPanel extends JPanel {
 //        AtomicReference<Float> alpha = new AtomicReference<>(0.0f);
 //        panelAlphaMap.put(this, 1.0f); // Initialer Alpha-Wert bei 0 (unsichtbar)
 
-        // Panel-Größenbeschränkungen festlegen
-        String compareMessage = message.replaceAll("<\\W?\\w*>","");
-        // Breite und Höhe festlegen
-        if (compareMessage.length() < 40) {
-            notificationSize = new Dimension(400, 30);
-        } else if (compareMessage.length() < 60) {
-            notificationSize = new Dimension(550, 30);
-        } else if (compareMessage.length() < 80) {
-            notificationSize = new Dimension(700, 30);
-        } else {
-            notificationSize = new Dimension(table.getWidth()-10, 30);
-        }
-
-        setPreferredSize(notificationSize);
-        setMaximumSize(notificationSize);
-        setMinimumSize(notificationSize);
+        setSize(message);
 
         setBackground(Color.DARK_GRAY);
         setOpaque(false); // Hintergrundfarbe sichtbar machen
@@ -54,11 +39,6 @@ public class customNotificationPanel extends JPanel {
         notificationLabel.setForeground(Color.WHITE); // Schriftfarbe
         notificationLabel.setFont(Mainframe.defaultFont);
         add(notificationLabel); // Label zum Panel hinzufügen
-
-        int notificationIndex = activeNotifications.size()+1;
-        int yPos = splitPane.getHeight() - ((notificationIndex * 30) + (notificationIndex * 5));
-
-        setBounds(0, yPos, (int) notificationSize.getWidth(), (int) notificationSize.getHeight());
 
         // Panel zur LayeredPane hinzufügen
         Mainframe.layeredPane.add(this, Integer.valueOf(2));
@@ -69,8 +49,30 @@ public class customNotificationPanel extends JPanel {
         updateUI();
     }
 
+    private void setSize(String message) {
+        // Panel-Größenbeschränkungen festlegen
+        String compareMessage = message.replaceAll("<\\W?\\w*>","");
+        // Breite und Höhe festlegen
+        if (compareMessage.length() < 40 && table.getWidth() > 400) {
+            notificationSize = new Dimension(400, 30);
+        } else if (compareMessage.length() < 60 && table.getWidth() > 550) {
+            notificationSize = new Dimension(550, 30);
+        } else if (compareMessage.length() < 80 && table.getWidth() > 700) {
+            notificationSize = new Dimension(700, 30);
+        } else {
+            notificationSize = new Dimension(table.getWidth()-10, 30);
+        }
+        setPreferredSize(notificationSize);
+        setMaximumSize(notificationSize);
+        setMinimumSize(notificationSize);
+        int notificationIndex = activeNotifications.size();
+        int yPos = splitPane.getHeight() - ((notificationIndex * 30) + (notificationIndex * 5));
+        setBounds(0, yPos, (int) notificationSize.getWidth(), (int) notificationSize.getHeight());
+    }
+
     public void setText(String text) {
         notificationLabel.setText(text);
+        setSize(text);
         updateUI();
         revalidate();
         repaint();
