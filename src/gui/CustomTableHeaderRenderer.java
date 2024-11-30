@@ -125,6 +125,7 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 
 		// Header-Farben setzen
 		if (HandleConfig.darkmode == 1) {
+			component.setBackground(Mainframe.darkmodeAccentColor);
 			component.setForeground(Color.WHITE);
 		} else {
 			component.setForeground(Color.BLACK);

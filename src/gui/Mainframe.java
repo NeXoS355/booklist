@@ -4,12 +4,15 @@ import application.BookListModel;
 import application.Book_Booklist;
 import application.HandleConfig;
 import application.SimpleTableModel;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.google.gson.*;
 import data.Database;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
+
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
@@ -88,7 +91,8 @@ public class Mainframe extends JFrame {
     public static int startX = 150;
     public static int startY = 150;
 
-    public static final Color darkmodeBackgroundColor = new Color(17,17,17);
+    public static final Color darkmodeBackgroundColor = new Color(32,32,32);
+    public static final Color darkmodeAccentColor = new Color(70,73,75);
 
     private Mainframe() {
         final Properties properties = new Properties();
@@ -131,7 +135,6 @@ public class Mainframe extends JFrame {
         } else if (HandleConfig.debug.equals("INFO")) {
             Configurator.setLevel(logger, Level.INFO);
         }
-
         Mainframe.executor.submit(() -> {
             checkApiConnection();
             try {
@@ -150,68 +153,24 @@ public class Mainframe extends JFrame {
 
         });
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.setLookAndFeel(new FlatLightLaf());
             if (HandleConfig.darkmode == 1) {
+                UIManager.setLookAndFeel(new FlatDarkLaf());
                 // Change Colors for Darkmode
                 UIManager.put("Panel.background", darkmodeBackgroundColor);
-
-                UIManager.put("Label.foreground", Color.WHITE);
-
-                UIManager.put("CheckBox.background", darkmodeBackgroundColor);
-                UIManager.put("CheckBox.foreground", Color.WHITE);
-
-                UIManager.put("ComboBox.background", Color.WHITE);
-                UIManager.put("ComboBox.foreground", Color.BLACK);
-
-                UIManager.put("Menu.background", darkmodeBackgroundColor);
-                UIManager.put("Menu.foreground", Color.WHITE);
-                UIManager.put("Menu.opaque", true);
-                UIManager.put("MenuBar.border", 0);
-                UIManager.put("MenuItem.background", Color.DARK_GRAY);
-                UIManager.put("MenuItem.foreground", Color.WHITE);
-                UIManager.put("MenuItem.opaque", true);
-                UIManager.put("PopupMenu.border", darkmodeBackgroundColor);
-
-                UIManager.put("Table.background", darkmodeBackgroundColor);
-                UIManager.put("Table.foreground", Color.WHITE);
-
-                UIManager.put("OptionPane.background", darkmodeBackgroundColor);
-                UIManager.put("OptionPane.messageForeground", Color.WHITE);
-
                 UIManager.put("ScrollPane.background", darkmodeBackgroundColor);
                 UIManager.put("SplitPane.background", darkmodeBackgroundColor);
-
-                UIManager.put("TextField.background", Color.DARK_GRAY);
-                UIManager.put("TextField.inactiveBackground", Color.GRAY);
-                UIManager.put("TextField.foreground", new Color(220, 220, 220));
-                UIManager.put("TextField.caretForeground", UIManager.get("TextField.foreground"));
-
-                UIManager.put("TextArea.background", darkmodeBackgroundColor);
-                UIManager.put("TextArea.inactiveForeground", Color.WHITE);
-
-                tree.setBackground(darkmodeBackgroundColor);
-                table.getTableHeader().setOpaque(false);
-                table.setBackground(darkmodeBackgroundColor);
-                table.getTableHeader().setBackground(darkmodeBackgroundColor);
-                table.getTableHeader().setForeground(Color.WHITE);
                 this.getContentPane().setBackground(darkmodeBackgroundColor);
-
+                tree.setBackground(darkmodeBackgroundColor);
             } else {
                 UIManager.put("TextArea.inactiveForeground", Color.BLACK);
-                UIManager.put("Panel.background", Color.WHITE);
-
-                UIManager.put("ComboBox.background", Color.WHITE);
-
-                UIManager.put("CheckBox.background", Color.WHITE);
-
-                UIManager.put("OptionPane.background", Color.WHITE);
-
-                this.getContentPane().setBackground(Color.WHITE);
             }
-        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
-                 | IllegalAccessException e) {
+        } catch (UnsupportedLookAndFeelException e) {
             logger.error(e.getMessage());
         }
+
+        System.out.println(UIManager.getColor("TextField.background"));
 
         logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
         allEntries = new BookListModel(true);

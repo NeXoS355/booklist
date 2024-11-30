@@ -55,6 +55,12 @@
 		</plugins>
 	</build>
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/com.formdev/flatlaf -->
+		<dependency>
+			<groupId>com.formdev</groupId>
+			<artifactId>flatlaf</artifactId>
+			<version>3.5.2</version>
+		</dependency>
 		<!--
             https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
 		<dependency>
