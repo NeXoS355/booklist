@@ -144,6 +144,7 @@ public class Mainframe extends JFrame {
             if (HandleConfig.darkmode == 1) {
                 UIManager.setLookAndFeel(new FlatDarkLaf());
                 // Change Colors for Darkmode
+                UIManager.put("TextField.foreground", Color.WHITE);
                 UIManager.put("Panel.background", darkmodeBackgroundColor);
                 UIManager.put("ScrollPane.background", darkmodeBackgroundColor);
                 UIManager.put("SplitPane.background", darkmodeBackgroundColor);
