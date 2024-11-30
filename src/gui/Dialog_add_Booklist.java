@@ -387,11 +387,11 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 		});
 
-		btn_add = ButtonsFactory.createButton("hinzufügen");
+		btn_add = ButtonsFactory.createButton("Hinzufügen");
 		btn_add.setFont(Mainframe.defaultFont);
 		btn_add.addActionListener(e -> addBook());
 
-		JButton btn_abort = ButtonsFactory.createButton("abbrechen");
+		JButton btn_abort = ButtonsFactory.createButton("Abbrechen");
 		btn_abort.setFont(Mainframe.defaultFont);
 		btn_abort.addActionListener(arg0 -> dispose());
 

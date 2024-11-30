@@ -170,8 +170,6 @@ public class Mainframe extends JFrame {
             logger.error(e.getMessage());
         }
 
-        System.out.println(UIManager.getColor("TextField.background"));
-
         logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
         allEntries = new BookListModel(true);
         tableDisplay = new SimpleTableModel(allEntries);
@@ -740,11 +738,11 @@ public class Mainframe extends JFrame {
         }
         if (success) {
             for (File file : Objects.requireNonNull(from.listFiles())) {
+                File n = new File(to.getAbsolutePath() + "/" + file.getName());
                 if (file.isDirectory()) {
-                    copyFilesInDirectory(file, new File(to.getAbsolutePath() + "/" + file.getName()));
+                    copyFilesInDirectory(file, n);
                 } else {
                     try {
-                        File n = new File(to.getAbsolutePath() + "/" + file.getName());
                         Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {
                         Mainframe.logger.error(e.getMessage());
