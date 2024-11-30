@@ -1,11 +1,6 @@
 package gui;
 
-import java.awt.BorderLayout;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
@@ -37,6 +32,8 @@ public class Dialog_settings extends JDialog {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+	private static JComboBox<Integer> cmbFont;
+	private static JComboBox<Integer> cmbFontDesc;
     private static JComboBox<Integer> cmbAutoDownload;
 	private static JComboBox<Integer> cmbOnDemand;
 	private static JComboBox<String> cmbSearchParam;
@@ -94,7 +91,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 1;
 		Integer[] font = { 12, 14, 16, 18, 20 };
-        JComboBox<Integer> cmbFont = new JComboBox<>(font);
+        cmbFont = new JComboBox<>(font);
 		cmbFont.setSelectedItem(Mainframe.defaultFont.getSize());
 		pnlLeft.add(cmbFont, c);
 		c.gridx = 0;
@@ -104,7 +101,7 @@ public class Dialog_settings extends JDialog {
 		c.gridx = 1;
 		c.gridy = 2;
 		Integer[] fontDesc = { 12, 14, 16, 18, 20 };
-        JComboBox<Integer> cmbFontDesc = new JComboBox<>(fontDesc);
+        cmbFontDesc = new JComboBox<>(fontDesc);
 		cmbFontDesc.setSelectedItem(Mainframe.descFont.getSize());
 		pnlLeft.add(cmbFontDesc, c);
 		c.gridx = 0;
@@ -308,6 +305,8 @@ public class Dialog_settings extends JDialog {
 			Mainframe.logger.info("Save Settings in Program");
 			// set Parameters which can be changed on the fly
 			try {
+				Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFont.getSelectedItem());
+				Mainframe.descFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFontDesc.getSelectedItem());
 				HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
 				HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
 				HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
