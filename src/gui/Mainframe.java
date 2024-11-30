@@ -935,16 +935,19 @@ public class Mainframe extends JFrame {
         for (int i = 0; i < allEntries.getSize(); i++) {
             Book_Booklist entry = allEntries.getElementAt(i);
                 if (newestBook == null) {
-                    newestBook = entry;
+                    if (entry.getRating() == 0 && entry.getDate().after(timespan)) {
+                        newestBook = entry;
+                    }
                 } else if ((newestBook.getDate().before(entry.getDate()) && entry.getRating() == 0 && entry.getDate().after(timespan))) {
                     newestBook = entry;
                 }
             }
 
-        assert newestBook != null;
-        int index = allEntries.getIndexOf(newestBook.getAuthor(),newestBook.getTitle());
-//        notificationLabel.addMouseListener(notificationMouseListener);
-        showNotification("<html>Bewerte jetzt: <u>" + newestBook.getTitle() + " von " + newestBook.getAuthor() + "</u></html>" , 15000, index);
+        if (newestBook != null) {
+            int index = allEntries.getIndexOf(newestBook.getAuthor(),newestBook.getTitle());
+            showNotification("<html>Bewerte jetzt: <u>" + newestBook.getTitle() + " von " + newestBook.getAuthor() + "</u></html>" , 15000, index);
+        }
+
     }
 
     /**
