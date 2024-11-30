@@ -16,7 +16,7 @@ Features:
     display interesting informations about your Database e.g. most popular series or author
     connect your local App with the self hosted WebApp to add Books on every device
 
-Tested with jdk21 and the following dependencies
+Tested with jdk21 and the following dependencies (see also pom.xml)
 
     derby 10.17.1.0
     derbyshared 10.17.1.0
@@ -27,5 +27,6 @@ Tested with jdk21 and the following dependencies
     opencsv 5.9
     zxing_core 3.5.3
     zxing_javase 3.5.3
+    flatlaf 3.5.2
 
     
