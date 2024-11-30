@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.RoundRectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,25 +12,44 @@ import static gui.Mainframe.*;
 
 public class customNotificationPanel extends JPanel {
 
-    JLabel  notificationLabel;
-    static Map<JPanel, Float> panelAlphaMap = new HashMap<>();
-    static final Dimension notificationSize = new Dimension(600, 30); // Breite und Höhe festlegen
-    static Point location = new Point(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5);
+    final JLabel  notificationLabel;
+    final static Map<JPanel, Float> panelAlphaMap = new HashMap<>();
+    final Dimension notificationSize;
+    final static Point location = new Point(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5);
+    int timer;
+    final int oriTimer;
 
-    public customNotificationPanel(String message) {
+
+    public customNotificationPanel(String message, int timer) {
+        message = message.trim();
         notificationLabel = new JLabel(message);
+        this.timer = timer;
+        this.oriTimer = timer;
+
         setLayout(new FlowLayout(FlowLayout.LEFT));
 
 //        AtomicReference<Float> alpha = new AtomicReference<>(0.0f);
 //        panelAlphaMap.put(this, 1.0f); // Initialer Alpha-Wert bei 0 (unsichtbar)
 
         // Panel-Größenbeschränkungen festlegen
+        String compareMessage = message.replaceAll("<\\W?\\w*>","");
+        // Breite und Höhe festlegen
+        if (compareMessage.length() < 40) {
+            notificationSize = new Dimension(400, 30);
+        } else if (compareMessage.length() < 60) {
+            notificationSize = new Dimension(550, 30);
+        } else if (compareMessage.length() < 80) {
+            notificationSize = new Dimension(700, 30);
+        } else {
+            notificationSize = new Dimension(table.getWidth()-10, 30);
+        }
+
         setPreferredSize(notificationSize);
         setMaximumSize(notificationSize);
         setMinimumSize(notificationSize);
 
         setBackground(Color.DARK_GRAY);
-        setOpaque(true); // Hintergrundfarbe sichtbar machen
+        setOpaque(false); // Hintergrundfarbe sichtbar machen
 
         notificationLabel.setForeground(Color.WHITE); // Schriftfarbe
         notificationLabel.setFont(Mainframe.defaultFont);
@@ -54,16 +74,22 @@ public class customNotificationPanel extends JPanel {
         updateUI();
         revalidate();
         repaint();
+        this.timer = this.oriTimer;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        int arc = 20;
+        super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Float alpha = panelAlphaMap.getOrDefault(this, 1.0f); // Default 1.0f, falls nicht vorhanden
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-        super.paintComponent(g2d);
+        g2d.setColor(getBackground());
+        g2d.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), arc, arc));
         g2d.dispose();
     }
+
 
     public void addBookReference(int index) {
             // MouseListener hinzufügen, um den "Link" anklickbar zu machen

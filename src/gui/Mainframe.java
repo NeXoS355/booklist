@@ -135,23 +135,9 @@ public class Mainframe extends JFrame {
         } else if (HandleConfig.debug.equals("INFO")) {
             Configurator.setLevel(logger, Level.INFO);
         }
-        Mainframe.executor.submit(() -> {
-            checkApiConnection();
-            try {
-                File file = new File("latest.jar");
-                if (file.exists()) {
-                    Path path = Paths.get("latest.jar");
-                    boolean deleted = Files.deleteIfExists(path);
-                    if (deleted)
-                        logger.info("File detected and deleted: {}", path);
-                    else
-                        logger.warn("File detected but could not be deleted: {}", path);
-                }
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-            }
 
-        });
+        cleanup();
+
         try {
 //            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             UIManager.setLookAndFeel(new FlatLightLaf());
@@ -626,26 +612,35 @@ public class Mainframe extends JFrame {
         this.setLocation(startX,startY);
         this.setVisible(visible);
 
-        Mainframe.executor.submit(() -> {
-            if (apiConnected) {
-                boolean downloaded = downloadFromApi(false);
-                if (downloaded) {
-                    showNotification("API verbunden - Es wurden Bücher gefunden");
-                } else {
-                    showNotification("API verbunden - Keine Bücher gefunden");
-                }
-            } else {
-                showNotification("Keine API verbunden");
-            }
-            showLastBookWithoutRating();
-        });
+        checkApiConnection();
+        showLastBookWithoutRating();
+
         listScrollPane.setBounds(0,0, layeredPane.getWidth(), layeredPane.getHeight());
         logger.info("Init completed");
     }
 
+    private void cleanup() {
+        Mainframe.executor.submit(() -> {
+            try {
+                File file = new File("latest.jar");
+                if (file.exists()) {
+                    Path path = Paths.get("latest.jar");
+                    boolean deleted = Files.deleteIfExists(path);
+                    if (deleted)
+                        logger.info("File detected and deleted: {}", path);
+                    else
+                        logger.warn("File detected but could not be deleted: {}", path);
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+
+        });
+    }
+
     private static void updateLocationAndBounds() {
         for (JPanel notification : activeNotifications) {
-            int index = activeNotifications.indexOf(notification);
+            int index = activeNotifications.indexOf(notification) + 1;
             notification.setLocation(0, splitPane.getHeight() - index*30 - index*5);
         }
         listScrollPane.setBounds(0,0, layeredPane.getWidth(), layeredPane.getHeight());
@@ -819,12 +814,12 @@ public class Mainframe extends JFrame {
      * shows Notification
      *
      * @param message       - Message to show on Notification
-     * @param timeout       - how long should the Notification be shown
+     * @param timeout       - how long should the Notification be shown in seconds
      * @param bookLinkIndex - Bookindex to reference in MouseListener. -1 for no Link
      */
     public static customNotificationPanel showNotification(String message, int timeout, int bookLinkIndex) {
         // Benachrichtigungsleiste erstellen
-        customNotificationPanel notificationPanel = new customNotificationPanel(message);
+        customNotificationPanel notificationPanel = new customNotificationPanel(message, timeout);
         // Rufe den Callback auf (im Event-Dispatch-Thread für GUI-Sicherheit)
 
         notificationPanel.setLocation(0, splitPane.getHeight() - ((activeNotifications.size()) * 30) - ((activeNotifications.size()) * 5));
@@ -834,16 +829,21 @@ public class Mainframe extends JFrame {
         Mainframe.executor.submit(() -> {
             try {
 //                    animate(true);
-                Thread.sleep(timeout);
+                while (notificationPanel.timer > 0) {
+                    //noinspection BusyWait
+                    Thread.sleep(1000);
+                    notificationPanel.timer -= 1;
+                }
+
 //                    animate(false);
                 SwingUtilities.invokeLater(() -> {
                     notificationPanel.setVisible(false);
-                    revalidateActiveNotifications();
                     activeNotifications.remove(notificationPanel);
+                    updateLocationAndBounds();
                 });
             } catch (InterruptedException e) {
-                revalidateActiveNotifications();
                 activeNotifications.remove(notificationPanel);
+                updateLocationAndBounds();
                 throw new RuntimeException(e);
             }
 
@@ -866,62 +866,8 @@ public class Mainframe extends JFrame {
      * @param message - Message to show on Notification
      */
     public static customNotificationPanel showNotification(String message) {
-        return showNotification(message, 5000, -1);
+        return showNotification(message, 5, -1);
     }
-
-    private static void revalidateActiveNotifications() {
-        for (JPanel notification : activeNotifications) {
-            notification.setLocation(new Point(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5));
-            notification.revalidate();
-            notification.repaint();
-        }
-        updateLocationAndBounds();
-    }
-
-//    /**
-//     * Animation for Notification Panel
-//     *
-//     * @param show - appear or disapper anmiation
-//     */
-//    private static void animate(boolean show) {
-//        // Animation erstellen
-//        int startYPosition;
-//        int targetYPosition;
-//
-//        int xPosition = 0;
-//        if (show) {
-//            startYPosition = splitPane.getHeight();
-//            targetYPosition = splitPane.getHeight() - notificationPanel.getHeight();
-//        } else {
-//            startYPosition = splitPane.getHeight() - notificationPanel.getHeight();
-//            targetYPosition = splitPane.getHeight();
-//        }
-//
-//        animationTimer = new Timer(5, new ActionListener() {
-//            int currentYPosition = startYPosition; // Anfangsposition der Benachrichtigung
-//
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                if (show) {
-//                    if (currentYPosition > targetYPosition) {
-//                        currentYPosition -= 2; // Schrittweise Verschiebung nach unten
-//                        notificationPanel.setLocation(xPosition, currentYPosition);
-//                    } else {
-//                        animationTimer.stop(); // Animation beenden, wenn Ziel erreicht
-//                    }
-//                } else {
-//                    if (currentYPosition < targetYPosition) {
-//                        currentYPosition += 2; // Schrittweise Verschiebung nach unten
-//                        notificationPanel.setLocation(xPosition, currentYPosition);
-//                    } else {
-//                        animationTimer.stop(); // Animation beenden, wenn Ziel erreicht
-//                    }
-//                }
-//            }
-//        });
-//        Timer finalAnimationTimer = animationTimer;
-//        SwingUtilities.invokeLater(finalAnimationTimer::start);
-//    }
 
     /**
      * zeigt eine Benachrichtigung mit dem zuletzt hinzugefügten Buch ohne Rating
@@ -943,7 +889,7 @@ public class Mainframe extends JFrame {
 
         if (newestBook != null) {
             int index = allEntries.getIndexOf(newestBook.getAuthor(),newestBook.getTitle());
-            showNotification("<html>Bewerte jetzt: <u>" + newestBook.getTitle() + " von " + newestBook.getAuthor() + "</u></html>" , 15000, index);
+            showNotification("<html>Bewerte jetzt: <u>" + newestBook.getTitle() + " von " + newestBook.getAuthor() + "</u></html>" , 15, index);
         }
 
     }
@@ -983,8 +929,7 @@ public class Mainframe extends JFrame {
             table.setModel(tableDisplay);
             setTableLayout();
         } else {
-//            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Es gab leider keine Treffer!");
-            showNotification("Es gab leider kein Treffer", 5000, -1);
+            showNotification("Kein Treffer");
             updateModel();
         }
     }
@@ -1074,6 +1019,14 @@ public class Mainframe extends JFrame {
                     apiDownload.setEnabled(true);
                     apiUpload.setEnabled(true);
                 }
+                if (apiConnected) {
+                    boolean downloaded = downloadFromApi(false);
+                    if (downloaded) {
+                        showNotification("API verbunden - Es wurden Bücher gefunden");
+                    } else {
+                        showNotification("API verbunden - Keine Bücher gefunden");
+                    }
+                }
             } catch (MalformedURLException e) {
                 Mainframe.logger.error("MalformedURLException");
                 Mainframe.logger.error(e.getMessage());
@@ -1089,6 +1042,7 @@ public class Mainframe extends JFrame {
                 openWebApi.setEnabled(false);
                 apiDownload.setEnabled(false);
                 apiUpload.setEnabled(false);
+                showNotification("Keine Verbindung zur API");
                 Mainframe.logger.error(e.getMessage());
             }
 
@@ -1102,7 +1056,7 @@ public class Mainframe extends JFrame {
     /**
      * download the saved books via API from the webApp
      */
-    private boolean downloadFromApi(boolean showUi) {
+    private static boolean downloadFromApi(boolean showUi) {
         boolean downloaded = false;
         try {
             logger.info("Web API Download request: {}/api/get.php?token={}", HandleConfig.apiURL, HandleConfig.apiToken);
@@ -1174,7 +1128,7 @@ public class Mainframe extends JFrame {
                     importString = "Anzahl Bücher importiert: " + imported + "\n" + importedBooks;
                 if (imported >= 1 || rejected > 0) {
                     if (showUi)
-                        JOptionPane.showMessageDialog(Mainframe.getInstance(), importString);
+                        showNotification(importString);
 
                     try {
                         // URL des Endpunkts
@@ -1207,7 +1161,7 @@ public class Mainframe extends JFrame {
                     }
                 } else {
                     if (showUi)
-                        JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine Bücher zum abrufen gefunden.");
+                        showNotification("Keine Bücher zum abrufen gefunden.");
                 }
                 con.disconnect();
             } else {
@@ -1225,7 +1179,7 @@ public class Mainframe extends JFrame {
     /**
      * upload all current Books to the webApp with the corresponding Token
      */
-    private void uploadToApi(boolean showUi) {
+    private static void uploadToApi(boolean showUi) {
         try {
             URL deleteUrl = new URI(HandleConfig.apiURL + "/api/deleteSynced.php").toURL();
             deleteUrl.openConnection();
@@ -1261,11 +1215,11 @@ public class Mainframe extends JFrame {
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 logger.info("Bücher erfolgreich hochgeladen!");
                 if (showUi)
-                    JOptionPane.showMessageDialog(this, "Bücher erfolgreich hochgeladen!");
+                    showNotification("Bücher erfolgreich hochgeladen!");
             } else {
                 logger.error("Fehler beim Hochladen der Bücher: {}", responseCode);
                 if (showUi)
-                    JOptionPane.showMessageDialog(this, "Fehler beim Hochladen der Bücher: " + responseCode);
+                    showNotification("Fehler beim Hochladen der Bücher: " + responseCode);
             }
 
             // Verbindung schließen
@@ -1417,7 +1371,7 @@ public class Mainframe extends JFrame {
             URL url;
             try {
                 url = new URI("https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar").toURL();
-                customNotificationPanel notification1 = showNotification("downloading ...", 20000);
+                customNotificationPanel notification1 = showNotification("downloading ...", 10);
                 try (BufferedInputStream in = new BufferedInputStream(url.openStream());
                      FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
                     byte[] dataBuffer = new byte[1024];
@@ -1429,14 +1383,14 @@ public class Mainframe extends JFrame {
                     System.out.println("Finished reading latest.jar");
                     fileOutputStream.close();
                     notification1.setText("downloading ... finished");
-                    customNotificationPanel notification2 = showNotification("checking version ...", 10000);
+                    notification1.setText("checking version ...");
                     System.out.println("create Process 'latest.jar version'");
                     ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
                     logger.info("Update - Command: {}", pb.command());
                     Process proc = pb.start();
                     // Warte darauf, dass der Prozess abgeschlossen wird
                     int exitCode = proc.waitFor();
-                    notification2.setText("checking version ... finished");
+                    notification1.setText("checking version ... finished");
                     logger.info("Update - Process closed with Exit-Code: {}", exitCode);
 
                     // InputStream lesen (kontinuierlich statt mit available())
@@ -1446,7 +1400,6 @@ public class Mainframe extends JFrame {
                         // Ausgabe des Prozesses lesen
                         String line;
                         while ((line = reader.readLine()) != null) {
-                            showNotification("Version detected: " + line, 10000);
                             logger.info("Update - detected version: {}", line);
                             StringBuilder strCurVer = new StringBuilder();
                             int intCurVer;
@@ -1465,6 +1418,7 @@ public class Mainframe extends JFrame {
                             intDownloadedVer = Integer.parseInt(strDownloadedVer.toString());
 
                             if (intDownloadedVer > intCurVer) {
+                                notification1.setText("Update found");
                                 int antwort = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
                                         "Es ist ein Update auf Version " + line + " verfügbar,\n Jetzt durchführen?",
                                         "Update", JOptionPane.YES_NO_OPTION);
@@ -1482,7 +1436,8 @@ public class Mainframe extends JFrame {
                                 }
 
                             } else {
-                                showNotification("Kein Update verfügbar",10000);
+                                notification1.setText("no Update found");
+                                cleanup();
                             }
                         }
 
@@ -1532,6 +1487,8 @@ public class Mainframe extends JFrame {
 
     /**
      * start Mainframe for instance
+     *
+     * @param visible  - should the Mainframe be visible?
      */
     public static void createInstance(boolean visible) {
         if (instance == null) {
