@@ -1021,12 +1021,16 @@ public class Mainframe extends JFrame {
                     apiUpload.setEnabled(true);
                 }
                 if (apiConnected) {
+                    customNotificationPanel notification = showNotification("API verbunden - download ...");
                     boolean downloaded = downloadFromApi(false);
+                    notification.setText("API verbunden - upload ...");
+                    uploadToApi(false);
                     if (downloaded) {
-                        showNotification("API verbunden - Es wurden Bücher gefunden");
+                        notification.setText("API verbunden - Es wurden Bücher gefunden");
                     } else {
-                        showNotification("API verbunden - Keine Bücher gefunden");
+                        notification.setText("API verbunden - Keine Bücher gefunden");
                     }
+
                 }
             } catch (MalformedURLException e) {
                 Mainframe.logger.error("MalformedURLException");
@@ -1371,18 +1375,34 @@ public class Mainframe extends JFrame {
             URL url;
             try {
                 url = new URI("https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar").toURL();
+                // Initialisiere HTTP-Verbindung, um Content-Length zu erhalten
+                HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
+                int contentLength = httpConnection.getContentLength();
+                int fileSize = 0;
+                if (contentLength > -1) {
+                    fileSize = contentLength/1000;
+                    System.out.println("Größe der Datei: " + contentLength/1000 + " KB");
+                }
                 customNotificationPanel notification1 = showNotification("downloading ...", 10);
                 try (BufferedInputStream in = new BufferedInputStream(url.openStream());
                      FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
                     byte[] dataBuffer = new byte[1024];
                     int bytesRead;
+                    int downloadedBytes = 0;
+                    int progress;
+                    int old_progress = 0;
                     System.out.println("Start reading latest.jar");
                     while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                        downloadedBytes += bytesRead;
                         fileOutputStream.write(dataBuffer, 0, bytesRead);
+                        // Fortschritt berechnen und ausgeben
+                        progress = (int) ((((double) downloadedBytes /1000) / (double) fileSize) * 100);
+                        if (progress > old_progress)
+                            notification1.setText("downloading " + progress + "%");
+                        old_progress = progress;
                     }
                     System.out.println("Finished reading latest.jar");
                     fileOutputStream.close();
-                    notification1.setText("downloading ... finished");
                     notification1.setText("checking version ...");
                     System.out.println("create Process 'latest.jar version'");
                     ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
@@ -1450,7 +1470,7 @@ public class Mainframe extends JFrame {
                     showNotification("Update error. See app.log for details");
                     logger.error(e1.getMessage());
                 }
-            } catch (MalformedURLException | URISyntaxException e1) {
+            } catch (URISyntaxException | IOException e1) {
                 showNotification("Update error. See app.log for details");
                 logger.error(e1.getMessage());
             }
