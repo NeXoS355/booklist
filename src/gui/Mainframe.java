@@ -1082,8 +1082,8 @@ public class Mainframe extends JFrame {
                 JsonElement jsonElement = JsonParser.parseString(jsonResponse);
                 int imported = 0;
                 int rejected = 0;
-                StringBuilder importedBooks = new StringBuilder();
-                StringBuilder rejectedBooks = new StringBuilder();
+                ArrayList<String> importedBooks = new ArrayList<>();
+                ArrayList<String> rejectedBooks = new ArrayList<>();
                 if (jsonElement.isJsonArray()) {
                     JsonArray jsonArray = jsonElement.getAsJsonArray();
                     for (JsonElement element : jsonArray) {
@@ -1105,14 +1105,14 @@ public class Mainframe extends JFrame {
                             if (allEntries.getElementAt(i).getAuthor().equals(author)
                                     && allEntries.getElementAt(i).getTitle().equals(title) && !duplicate) {
                                 duplicate = true;
-                                rejectedBooks.append("\n").append(author).append(" - ").append(title);
+                                rejectedBooks.add(author + " - " + title);
                                 rejected += 1;
                             }
                         }
                         if (!duplicate) {
                             Book_Booklist imp = new Book_Booklist(author, title, note, series, seriesPart, boolEbook, 0,
                                     null, "", "", new Timestamp(System.currentTimeMillis()), true);
-                            importedBooks.append("\n").append(author).append(" - ").append(title);
+                            importedBooks.add(imp.getAuthor() + " - " + imp.getTitle());
                             imported += 1;
                             Mainframe.allEntries.add(imp);
                             allEntries.checkAuthors();
@@ -1121,16 +1121,15 @@ public class Mainframe extends JFrame {
                     }
                 }
                 in.close();
-                String importString;
-                if (rejected > 0)
-                    importString = "Anzahl Bücher importiert: " + imported + importedBooks + "\nDupletten erkannt:"
-                            + rejectedBooks;
-                else
-                    importString = "Anzahl Bücher importiert: " + imported + "\n" + importedBooks;
+                if (rejected > 0) {
+                        for (String tmp : rejectedBooks) {
+                            showNotification("Import abgelehnt: " + tmp, 15);
+                        }
+                }
                 if (imported >= 1 || rejected > 0) {
-                    if (showUi)
-                        showNotification(importString);
-
+                        for(String tmp : importedBooks) {
+                            showNotification("Import erfolgreich: " + tmp,15);
+                        }
                     try {
                         // URL des Endpunkts
                         URL deleteUrl = new URI(HandleConfig.apiURL + "/api/delete.php").toURL();
