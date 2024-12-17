@@ -45,7 +45,7 @@ public class Dialog_settings extends JDialog {
 	private static JLabel lblQrCode;
 
     public Dialog_settings(Frame owner, boolean modal) {
-		this.setTitle("Einstellungen");
+		this.setTitle(Localization.get("t.settings"));
 		this.setModal(modal);
 		this.setLayout(new BorderLayout());
 		this.setSize(670, 450);
@@ -78,7 +78,7 @@ public class Dialog_settings extends JDialog {
 		c.anchor = GridBagConstraints.CENTER;
 		c.ipady = 5;
 		c.insets = new Insets(10, 10, 0, 10);
-		JLabel lblFontSize = new JLabel("Schriftgrößen");
+		JLabel lblFontSize = new JLabel(Localization.get("settings.fontSize"));
 		lblFontSize.setFont(Mainframe.defaultFont);
 		pnlLeft.add(lblFontSize, c);
 		c.anchor = GridBagConstraints.WEST;
@@ -86,7 +86,7 @@ public class Dialog_settings extends JDialog {
 		c.gridwidth = 1;
 		c.gridx = 0;
 		c.gridy = 1;
-		JLabel lblFontGeneral = new JLabel("Allgemein");
+		JLabel lblFontGeneral = new JLabel(Localization.get("settings.general"));
 		pnlLeft.add(lblFontGeneral, c);
 		c.gridx = 1;
 		c.gridy = 1;
@@ -96,7 +96,7 @@ public class Dialog_settings extends JDialog {
 		pnlLeft.add(cmbFont, c);
 		c.gridx = 0;
 		c.gridy = 2;
-		JLabel lblFontDesc = new JLabel("Beschreibung");
+		JLabel lblFontDesc = new JLabel(Localization.get("settings.description"));
 		pnlLeft.add(lblFontDesc, c);
 		c.gridx = 1;
 		c.gridy = 2;
@@ -109,7 +109,7 @@ public class Dialog_settings extends JDialog {
 		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.CENTER;
 		c.fill = GridBagConstraints.NONE;
-		JLabel lblFeatures = new JLabel("optionale Features");
+		JLabel lblFeatures = new JLabel(Localization.get("settings.optional"));
 		lblFeatures.setFont(Mainframe.defaultFont);
 		pnlLeft.add(lblFeatures, c);
 		c.gridx = 0;
@@ -117,8 +117,8 @@ public class Dialog_settings extends JDialog {
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		JLabel lblAutoDownload = new JLabel("AutoDownload");
-		lblAutoDownload.setToolTipText("Bei Anlage eines neuen Buches werden direkt Infos aus den APIs abgerufen");
+		JLabel lblAutoDownload = new JLabel(Localization.get("settings.autoDownload"));
+		lblAutoDownload.setToolTipText(Localization.get("settings.tipAutoDownload"));
 		pnlLeft.add(lblAutoDownload, c);
 		c.gridx = 1;
 		c.gridy = 4;
@@ -128,8 +128,8 @@ public class Dialog_settings extends JDialog {
 		pnlLeft.add(cmbAutoDownload, c);
 		c.gridx = 0;
 		c.gridy = 5;
-		JLabel lblOnDemand = new JLabel("Load on Demand");
-		lblOnDemand.setToolTipText("Cover & Beschreibungen werden erst beim öffnen des Bearbeiten Dialogs geladen.");
+		JLabel lblOnDemand = new JLabel(Localization.get("settings.LoadOnDemand"));
+		lblOnDemand.setToolTipText(Localization.get("settings.tipLoadOnDemand"));
 		pnlLeft.add(lblOnDemand, c);
 		c.gridx = 1;
 		c.gridy = 5;
@@ -139,8 +139,8 @@ public class Dialog_settings extends JDialog {
 		pnlLeft.add(cmbOnDemand, c);
 		c.gridx = 0;
 		c.gridy = 7;
-		JLabel lblSearchParam = new JLabel("Suchparameter");
-		lblSearchParam.setToolTipText("Google API Suchparameter. t=Titel, at=Autor+Titel");
+		JLabel lblSearchParam = new JLabel(Localization.get("settings.searchParameter"));
+		lblSearchParam.setToolTipText(Localization.get("settings.tipSearchParameter"));
 		pnlLeft.add(lblSearchParam, c);
 		c.gridx = 1;
 		c.gridy = 7;
@@ -150,8 +150,8 @@ public class Dialog_settings extends JDialog {
 		pnlLeft.add(cmbSearchParam, c);
 		c.gridx = 0;
 		c.gridy = 8;
-		JLabel lblDebug = new JLabel("Debug");
-		lblDebug.setToolTipText("Ausführlichkeit der Logging Aktivität");
+		JLabel lblDebug = new JLabel(Localization.get("settings.debug"));
+		lblDebug.setToolTipText(Localization.get("settings.tipDebug"));
 		pnlLeft.add(lblDebug, c);
 		c.gridx = 1;
 		c.gridy = 8;
@@ -161,9 +161,9 @@ public class Dialog_settings extends JDialog {
 		pnlLeft.add(cmbDebug, c);
 		c.gridx = 0;
 		c.gridy = 9;
-		JLabel lblBackup = new JLabel("Backupverhalten");
+		JLabel lblBackup = new JLabel(Localization.get("settings.backup"));
 		lblBackup.setToolTipText(
-				"0= Kein Backup beim schließen; 1=Abfrage beim schließen; 2=automatisches Backup beim schließen");
+				Localization.get("settings.tipBackup"));
 		pnlLeft.add(lblBackup, c);
 		c.gridx = 1;
 		c.gridy = 9;
@@ -173,8 +173,8 @@ public class Dialog_settings extends JDialog {
 		pnlLeft.add(cmbBackup, c);
 		c.gridx = 0;
 		c.gridy = 10;
-		JLabel lblDark = new JLabel("Darkmode");
-		lblDark.setToolTipText("0= Light Mode; 1=Dark Mode");
+		JLabel lblDark = new JLabel(Localization.get("settings.darkmode"));
+		lblDark.setToolTipText(Localization.get("settings.tipDarkmode"));
 		pnlLeft.add(lblDark, c);
 		c.gridx = 1;
 		c.gridy = 10;
@@ -182,7 +182,7 @@ public class Dialog_settings extends JDialog {
         cmbDark = new JComboBox<>(arrayDark);
 		cmbDark.setSelectedItem(HandleConfig.darkmode);
 		pnlLeft.add(cmbDark, c);
-		JButton btnSave = ButtonsFactory.createButton("Speichern");
+		JButton btnSave = ButtonsFactory.createButton(Localization.get("label.save"));
 		btnSave.setFont(Mainframe.defaultFont);
 		btnSave.addActionListener(e -> {
             saveSettings();
@@ -194,7 +194,7 @@ public class Dialog_settings extends JDialog {
 		c.anchor = GridBagConstraints.WEST;
 		pnlLeft.add(btnSave, c);
 
-		JButton btnAbort = ButtonsFactory.createButton("Abbrechen");
+		JButton btnAbort = ButtonsFactory.createButton(Localization.get("label.abort"));
 		btnAbort.setFont(Mainframe.defaultFont);
 		btnAbort.addActionListener(arg0 -> dispose());
 		c.gridx = 1;
@@ -217,13 +217,13 @@ public class Dialog_settings extends JDialog {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.WEST;
 		JLabel lblApiUrl = new JLabel("Web API URL");
-		lblApiUrl.setToolTipText("URL der web API (https://example.org:4444)");
+		lblApiUrl.setToolTipText("Web API URL (https://example.org:4444)");
 		pnlRight.add(lblApiUrl, c);
 		JLabel lblApiUrlCon = new JLabel(conIcon);
 		if (Mainframe.isApiConnected())
-			lblApiUrlCon.setToolTipText("API ist verbunden");
+			lblApiUrlCon.setToolTipText(Localization.get("api.connected"));
 		else
-			lblApiUrlCon.setToolTipText("API ist nicht verbunden");
+			lblApiUrlCon.setToolTipText(Localization.get("api.notConnected"));
 		c.gridx = 4;
 		c.gridy = 0;
 		c.gridwidth = 1;
@@ -254,7 +254,7 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 1;
 		c.gridwidth = 1;
 		JLabel lblApiToken = new JLabel("Web API Token");
-		lblApiToken.setToolTipText("Identifzierungstoken der web API");
+		lblApiToken.setToolTipText(Localization.get("settings.tipToken"));
 		pnlRight.add(lblApiToken, c);
 		c.gridx = 1;
 		c.gridy = 1;
@@ -264,12 +264,12 @@ public class Dialog_settings extends JDialog {
 		txtApiToken.setEditable(false);
 		pnlRight.add(txtApiToken, c);
 
-		JButton btnGenToken = ButtonsFactory.createButton("generiere");
+		JButton btnGenToken = ButtonsFactory.createButton(Localization.get("settings.generateToken"));
 		btnGenToken.setFont(Mainframe.defaultFont);
 		btnGenToken.addActionListener(e -> {
             int antwort = JOptionPane.showConfirmDialog(null,
-                    "Wirklich neuen Token genrieren?\nDie ausstehenden bücher mit dem alten Token können dann nicht mehr abgerufen werden.",
-                    "generieren", JOptionPane.YES_NO_OPTION);
+					Localization.get("q.generateToken"),
+                    "Token", JOptionPane.YES_NO_OPTION);
             if (antwort == JOptionPane.YES_OPTION) {
                 String token = HandleConfig.generateRandomToken(64);
                 txtApiToken.setText(token);
@@ -337,7 +337,7 @@ public class Dialog_settings extends JDialog {
 			BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
 			lblQrCode.setIcon(new ImageIcon(qrImage));
 		} catch (Exception e1) {
-			Mainframe.logger.error("Fehler beim generieren des QRCodes");
+			Mainframe.logger.error("Erro while generating QR Code");
 			Mainframe.logger.error(e1.getMessage());
 		}
 	}

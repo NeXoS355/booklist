@@ -23,7 +23,7 @@ public class Dialog_info extends JDialog {
 	 */
 	public Dialog_info(Frame owner) {
 
-		this.setTitle("Einstellungen");
+		this.setTitle(Localization.get("t.info"));
 		this.setModal(true);
 		this.setLayout(new GridBagLayout());
 		this.setLocationRelativeTo(owner);
@@ -37,7 +37,7 @@ public class Dialog_info extends JDialog {
 		c.anchor = GridBagConstraints.CENTER;
 		c.ipady = 5;
 		c.insets = new Insets(10, 10, 0, 10);
-		JLabel lblHeader = new JLabel("Infos");
+		JLabel lblHeader = new JLabel(Localization.get("t.info"));
 		lblHeader.setFont(Mainframe.defaultFont);
 		this.add(lblHeader, c);
 		c.anchor = GridBagConstraints.WEST;
@@ -46,7 +46,7 @@ public class Dialog_info extends JDialog {
 		c.gridy = 1;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_DescMostReadAuthor = new JLabel("Meist gelesener Autor:");
+		JLabel lbl_DescMostReadAuthor = new JLabel(Localization.get("info.mostAuthor"));
 		this.add(lbl_DescMostReadAuthor, c);
 		c.gridx = 1;
 		c.gridy = 1;
@@ -59,7 +59,7 @@ public class Dialog_info extends JDialog {
 		c.gridy = 2;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_DescMostReadSeries = new JLabel("Meist gelesene Serie:");
+		JLabel lbl_DescMostReadSeries = new JLabel(Localization.get("info.mostSeries"));
 		this.add(lbl_DescMostReadSeries, c);
 		c.gridx = 1;
 		c.gridy = 2;
@@ -72,7 +72,7 @@ public class Dialog_info extends JDialog {
 		c.gridy = 3;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_DescBestAuthor = new JLabel("Best bewerteter Autor:");
+		JLabel lbl_DescBestAuthor = new JLabel(Localization.get("info.bestAuthor"));
 		this.add(lbl_DescBestAuthor, c);
 		c.gridx = 1;
 		c.gridy = 3;
@@ -85,7 +85,7 @@ public class Dialog_info extends JDialog {
 		c.gridy = 4;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_DescBestSeries = new JLabel("Best bewertete Serie:");
+		JLabel lbl_DescBestSeries = new JLabel(Localization.get("info.bestSeries"));
 		this.add(lbl_DescBestSeries, c);
 		c.gridx = 1;
 		c.gridy = 4;
@@ -98,7 +98,7 @@ public class Dialog_info extends JDialog {
 		c.gridy = 5;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_DescEbook = new JLabel("Anzahl E-Books:");
+		JLabel lbl_DescEbook = new JLabel(Localization.get("info.countEbooks"));
 		this.add(lbl_DescEbook, c);
 		c.gridx = 1;
 		c.gridy = 5;
@@ -111,7 +111,7 @@ public class Dialog_info extends JDialog {
 		c.gridy = 6;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_DescNotEbook = new JLabel("Anzahl Physische bücher:");
+		JLabel lbl_DescNotEbook = new JLabel(Localization.get("info.countBooks"));
 		this.add(lbl_DescNotEbook, c);
 		c.gridx = 1;
 		c.gridy = 6;
@@ -124,7 +124,7 @@ public class Dialog_info extends JDialog {
 		c.gridy = 7;
 		c.weightx = 0.05;
 		c.gridwidth = 1;
-		JLabel lbl_DescYear = new JLabel("Anzahl bücher pro Jahr:");
+		JLabel lbl_DescYear = new JLabel(Localization.get("info.countBooksPerYear"));
 		this.add(lbl_DescYear, c);
 		c.gridx = 1;
 		c.gridy = 7;

@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -91,7 +92,7 @@ public class Dialog_edit_Booklist extends JDialog {
     public Dialog_edit_Booklist(Frame owner, BookListModel bookModel, int index, DefaultTreeModel treeModel) {
 
         Mainframe.logger.info("Book edit: start creating Frame");
-        this.setTitle("Buch bearbeiten");
+        this.setTitle(Localization.get("t.editBook"));
         this.setSize(new Dimension(600, 645));
         this.setLocationRelativeTo(owner);
         this.setAlwaysOnTop(true);
@@ -140,7 +141,8 @@ public class Dialog_edit_Booklist extends JDialog {
          */
         Font changeFont = new Font(Mainframe.defaultFont.getName(), Mainframe.defaultFont.getStyle(), 12);
         JPanel pnlNorthWest = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        JLabel lblDate = new JLabel("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
+
+        JLabel lblDate = new JLabel(MessageFormat.format(Localization.get("book.dateAdded"),new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate())));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate date = entry.getDate().toLocalDateTime().toLocalDate();
         CustomTextField txtDate = new CustomTextField(date.format(formatter));
@@ -179,7 +181,7 @@ public class Dialog_edit_Booklist extends JDialog {
                 LocalDate newDate = LocalDate.parse(txtDate.getText(), formatter);
                 if (!date.equals(newDate)) {
                     bookModel.getElementAt(index).setDate(Timestamp.valueOf(newDate.atStartOfDay()), true);
-                    lblDate.setText("hinzugefügt am: " + new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate()));
+                    lblDate.setText(MessageFormat.format(Localization.get("book.dateAdded"),new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate())));
                 }
                 pnlNorthWest.remove(txtDate);
                 pnlNorthWest.remove(btnOkWest);
@@ -202,8 +204,8 @@ public class Dialog_edit_Booklist extends JDialog {
 
             private void showMenu(MouseEvent e) {
                 JPopupMenu menu = new JPopupMenu();
-                JMenuItem itemEdit = new JMenuItem("bearbeiten");
-                JMenuItem itemDel = new JMenuItem("löschen");
+                JMenuItem itemEdit = new JMenuItem(Localization.get("text.edit"));
+                JMenuItem itemDel = new JMenuItem(Localization.get("text.delete"));
                 menu.add(itemEdit);
                 menu.add(itemDel);
                 menu.show(lblDate, e.getX(), e.getY());
@@ -233,9 +235,9 @@ public class Dialog_edit_Booklist extends JDialog {
 
             private void showMenu(MouseEvent e) {
                 JPopupMenu menu = new JPopupMenu();
-                JMenuItem itemCopy = new JMenuItem("kopieren");
-                JMenuItem itemEdit = new JMenuItem("bearbeiten");
-                JMenuItem itemDel = new JMenuItem("löschen");
+                JMenuItem itemCopy = new JMenuItem(Localization.get("text.copy"));
+                JMenuItem itemEdit = new JMenuItem(Localization.get("text.edit"));
+                JMenuItem itemDel = new JMenuItem(Localization.get("text.delete"));
                 menu.add(itemCopy);
                 menu.add(itemEdit);
                 menu.add(itemDel);
@@ -297,13 +299,13 @@ public class Dialog_edit_Booklist extends JDialog {
 
                 private void showMenu(MouseEvent e) {
                     JPopupMenu menu = new JPopupMenu();
-                    JMenuItem itemDelPic = new JMenuItem("Bild löschen");
-                    JMenuItem itemChanPic = new JMenuItem("Bild bearbeiten");
+                    JMenuItem itemDelPic = new JMenuItem(Localization.get("book.deletePic"));
+                    JMenuItem itemChanPic = new JMenuItem(Localization.get("book.editPic"));
                     menu.add(itemChanPic);
                     menu.add(itemDelPic);
                     menu.show(lblPic, e.getX(), e.getY());
                     itemChanPic.addActionListener(e4 -> {
-                        String webpage = JOptionPane.showInputDialog(null, "Bitte URL einfügen");
+                        String webpage = JOptionPane.showInputDialog(null, Localization.get("book.changePic"));
                         if (webpage != null && !webpage.isEmpty()) {
                             GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, false);
                             lblPic = new JLabel(showImg(entry));
@@ -317,7 +319,7 @@ public class Dialog_edit_Booklist extends JDialog {
                             dispose();
                             new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
                         } else {
-                            JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten");
+                            JOptionPane.showMessageDialog(null, "an error occurred");
                         }
                     });
 
@@ -453,11 +455,11 @@ public class Dialog_edit_Booklist extends JDialog {
 
             private void showMenu(MouseEvent e) {
                 JPopupMenu menu = new JPopupMenu();
-                JMenuItem itemDeleteRating = new JMenuItem("Rating löschen");
+                JMenuItem itemDeleteRating = new JMenuItem(Localization.get("book.deleteRating"));
                 menu.add(itemDeleteRating);
                 menu.show(lblStars, e.getX(), e.getY());
                 itemDeleteRating.addActionListener(e2 -> {
-                    if (Objects.equals(e2.getActionCommand(), "Rating löschen")) {
+                    if (Objects.equals(e2.getActionCommand(), Localization.get("book.deleteRating"))) {
                         setRating(0);
                         setRatingIcon();
                     }
@@ -481,7 +483,7 @@ public class Dialog_edit_Booklist extends JDialog {
         /*
          * create and add components to Panel Center
          */
-        JLabel lblAuthor = new JLabel("Autor:");
+        JLabel lblAuthor = new JLabel(Localization.get("label.author") + ":");
         lblAuthor.setFont(Mainframe.defaultFont);
         lblAuthor.setPreferredSize(new Dimension(width, height));
 
@@ -499,7 +501,7 @@ public class Dialog_edit_Booklist extends JDialog {
                     String typedString = txtAuthor.getText().substring(0, typed);
 
                     if (!txtAuthor.getText().isEmpty()) {
-                        String[] authors = autoCompletion(typedString, "autor");
+                        String[] authors = autoCompletion(typedString, "author");
                         for (int i = 0; i < authors.length && authors[i] != null; i++) {
                             int authorsLength = authors[i].length();
                             String setText = authors[i].substring(typed, authorsLength);
@@ -526,12 +528,12 @@ public class Dialog_edit_Booklist extends JDialog {
             public void keyPressed(KeyEvent e) {
                 if (txtAuthor.getText().length() > 50) {
                     txtAuthor.setEditable(false);
-                    txtAuthor.setText("Nicht mehr als 50 Zeichen!");
+                    txtAuthor.setText(Localization.get("text.longError"));
                 }
             }
 
         });
-        JLabel lblTitle = new JLabel("Titel:");
+        JLabel lblTitle = new JLabel(Localization.get("label.title") + ":");
         lblTitle.setFont(Mainframe.defaultFont);
         lblTitle.setPreferredSize(new Dimension(width, height));
 
@@ -544,7 +546,7 @@ public class Dialog_edit_Booklist extends JDialog {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     save(entry);
                 } else if (!e.isActionKey()) {
-                    if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
+                    if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
                         txtTitle.setText("");
                         btnAdd.setEnabled(true);
                     }
@@ -553,13 +555,13 @@ public class Dialog_edit_Booklist extends JDialog {
                     dispose();
                 if (txtTitle.getText().length() > 50) {
                     txtTitle.setEditable(false);
-                    txtTitle.setText("Nicht mehr als 50 Zeichen!");
+                    txtTitle.setText(Localization.get("text.longError"));
                     txtTitle.setBackground(new Color(255, 105, 105));
                 }
             }
         });
 
-        JLabel lblNote = new JLabel("Bemerkung:");
+        JLabel lblNote = new JLabel(Localization.get("label.note") + ":");
         lblNote.setFont(Mainframe.defaultFont);
         lblNote.setPreferredSize(new Dimension(width, height));
 
@@ -577,7 +579,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
         });
 
-        JLabel lblSeries = new JLabel("Serie | Band:");
+        JLabel lblSeries = new JLabel(Localization.get("label.series") + " | " + Localization.get("label.vol") + ":");
         lblSeries.setFont(Mainframe.defaultFont);
         lblSeries.setPreferredSize(new Dimension(width, height));
 
@@ -594,7 +596,7 @@ public class Dialog_edit_Booklist extends JDialog {
                     String typedString = txtSeries.getText().substring(0, typed);
 
                     if (!txtSeries.getText().isEmpty()) {
-                        String[] series = autoCompletion(typedString, "serie");
+                        String[] series = autoCompletion(typedString, "series");
                         for (int i = 0; i < series.length && series[i] != null; i++) {
                             int authorsLength = series[i].length();
                             String setText = series[i].substring(typed, authorsLength);
@@ -721,7 +723,7 @@ public class Dialog_edit_Booklist extends JDialog {
         /*
          * create components for Panel South
          */
-        checkFrom = new JCheckBox("ausgeliehen von");
+        checkFrom = new JCheckBox(Localization.get("label.borrowed_from"));
         checkFrom.setFont(Mainframe.defaultFont);
         if (!entry.getBorrowedFrom().isEmpty())
             checkFrom.setSelected(true);
@@ -741,7 +743,7 @@ public class Dialog_edit_Booklist extends JDialog {
             }
         });
 
-        checkTo = new JCheckBox("ausgeliehen an");
+        checkTo = new JCheckBox(Localization.get("label.borrowed_to"));
         checkTo.setFont(Mainframe.defaultFont);
         if (!entry.getBorrowedTo().isEmpty())
             checkTo.setSelected(true);
@@ -790,11 +792,11 @@ public class Dialog_edit_Booklist extends JDialog {
 
         });
 
-        btnAdd = ButtonsFactory.createButton("Speichern");
+        btnAdd = ButtonsFactory.createButton(Localization.get("label.save"));
         btnAdd.setFont(Mainframe.defaultFont);
         btnAdd.addActionListener(e -> save(entry));
 
-        JButton btnAbort = ButtonsFactory.createButton("Abbrechen");
+        JButton btnAbort = ButtonsFactory.createButton(Localization.get("label.abort"));
         btnAbort.setFont(Mainframe.defaultFont);
         btnAbort.addActionListener(arg0 -> dispose());
 
@@ -836,7 +838,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
             private void showMenu(MouseEvent e) {
                 JPopupMenu menu = new JPopupMenu();
-                JMenuItem itemDelDesc = new JMenuItem("Beschreibung löschen");
+                JMenuItem itemDelDesc = new JMenuItem(Localization.get("book.deleteDesc"));
                 menu.add(itemDelDesc);
                 menu.show(txtDesc, e.getX(), e.getY());
                 itemDelDesc.addActionListener(e1 -> {
@@ -847,7 +849,7 @@ public class Dialog_edit_Booklist extends JDialog {
                         dispose();
                         new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
                     } else {
-                        JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten");
+                        JOptionPane.showMessageDialog(null, "An Error occurred");
                     }
                 });
 
@@ -877,7 +879,7 @@ public class Dialog_edit_Booklist extends JDialog {
      */
     public String[] autoCompletion(String search, String field) {
         String[] returnArray = null;
-        if (field.equals("autor")) {
+        if (field.equals("author")) {
             int j = 0;
             int authorCount = Mainframe.allEntries.authors.size();
             String[] result = new String[authorCount];
@@ -894,7 +896,7 @@ public class Dialog_edit_Booklist extends JDialog {
                 }
 
             }
-        } else if (field.equals("serie")) {
+        } else if (field.equals("series")) {
             int j = 0;
             String[] series = Mainframe.allEntries.getSeriesFromAuthor(txtAuthor.getText());
             String[] result = new String[series.length];
@@ -1003,12 +1005,13 @@ public class Dialog_edit_Booklist extends JDialog {
                         Database.updateBooklistEntry(bid, "name", txtBorrowedFrom.getText());
                     }
                 }
-                Mainframe.logger.info("Buch geändert: {}-{}", entry.getAuthor(), entry.getTitle());
-                Mainframe.showNotification("Buch geändert: " +  entry.getAuthor() + " - " + entry.getTitle());
+                Mainframe.logger.info("Book edit: {}-{}", entry.getAuthor(), entry.getTitle());
+
+                Mainframe.showNotification(MessageFormat.format(Localization.get("book.edited"),entry.getAuthor(),entry.getTitle()));
                 dispose();
             } else {
-                Mainframe.logger.info("Buch ändern: Bereits vorhanden!");
-                txtTitle.setText("Buch bereits vorhanden!");
+                Mainframe.logger.info("Book edit: already exist!");
+                txtTitle.setText(Localization.get("text.duplicateError"));
                 txtTitle.setBackground(new Color(255, 105, 105));
                 btnAdd.setEnabled(false);
             }

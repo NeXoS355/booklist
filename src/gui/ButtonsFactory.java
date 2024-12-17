@@ -98,7 +98,7 @@ public class ButtonsFactory {
 		JButton button = createButton();
 		button.setText(text);
 
-		if (text.equals("suchen")) {
+		if (text.equals(Localization.get("search.button"))) {
 			try {
 				if (HandleConfig.darkmode == 1) {
 					imageActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe_inv.png")));
@@ -115,14 +115,14 @@ public class ButtonsFactory {
 		button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseExited(MouseEvent e) {
-				if (text.equals("suchen")) {
+				if (text.equals(Localization.get("search.button"))) {
 					button.setIcon(new ImageIcon(imageInActive));
 				}
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				if (text.equals("suchen")) {
+				if (text.equals(Localization.get("search.button"))) {
 					button.setIcon(new ImageIcon(imageActive));
 				}
 

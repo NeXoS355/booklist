@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
@@ -38,6 +39,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
+import java.util.Locale;
 
 /**
  * Main Window to show Table of Entries and Tree of authors
@@ -112,6 +114,9 @@ public class Mainframe extends JFrame {
         this.setResizable(true);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
+        // Standard-Locale setzen
+        Localization.setLocale(Locale.GERMAN);
+
         URL iconURL = getClass().getResource("/resources/Icon.png");
         // iconURL is null when not found
         assert iconURL != null;
@@ -168,7 +173,7 @@ public class Mainframe extends JFrame {
 
         txt_search = new CustomTextField();
         txt_search.setToolTipText("Suchtext");
-        txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
+        txt_search.setText(MessageFormat.format(Localization.get("search.text"),allEntries.getSize()));
         setSearchTextColorActive(false);
         txt_search.setMargin(new Insets(0, 10, 0, 0));
         txt_search.addMouseListener(new MouseAdapter() {
@@ -204,7 +209,7 @@ public class Mainframe extends JFrame {
 
             @Override
             public void focusGained(FocusEvent e) {
-                if (txt_search.getText().contains("Suche ..."))
+                if (txt_search.getText().contains(Localization.get("search.shortText")))
                     txt_search.setText("");
                 setSearchTextColorActive(true);
             }
@@ -215,12 +220,12 @@ public class Mainframe extends JFrame {
         btn_add.setFont(btn_add.getFont().deriveFont(Font.BOLD, 20));
         btn_add.addActionListener(e -> {
             new Dialog_add_Booklist(Mainframe.getInstance());
-            txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
+            txt_search.setText(MessageFormat.format(Localization.get("search.text"),allEntries.getSize()));
         });
 
         panel.add(btn_add, BorderLayout.WEST);
 
-        JButton btn_search = ButtonsFactory.createButton("suchen");
+        JButton btn_search = ButtonsFactory.createButton(Localization.get("search.button"));
         btn_search.setFont(btn_search.getFont().deriveFont(Font.BOLD, 13));
         btn_search.addActionListener(e -> {
             search(txt_search.getText());
@@ -229,7 +234,7 @@ public class Mainframe extends JFrame {
             setLastSearch(txt_search.getText());
             if (allEntries.getSize() == 0) {
                 updateModel();
-                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine übereinstimmung gefunden");
+                JOptionPane.showMessageDialog(Mainframe.getInstance(), Localization.get("search.error"));
             }
         });
 
@@ -240,34 +245,34 @@ public class Mainframe extends JFrame {
         panel.add(pnlMenu, BorderLayout.NORTH);
 
         JMenuBar menue = new JMenuBar();
-        JMenu datei = new JMenu("Datei");
-        JMenu extras = new JMenu("Extras");
-        JMenu hilfe = new JMenu("Hilfe");
+        JMenu datei = new JMenu(Localization.get("menu.file"));
+        JMenu extras = new JMenu(Localization.get("menu.extras"));
+        JMenu hilfe = new JMenu(Localization.get("menu.help"));
 
         JMenuItem backup = new JMenuItem("DB Backup");
         backup.addActionListener(e -> {
             boolean ret = createBackup();
             if (ret)
-                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
+                JOptionPane.showMessageDialog(Mainframe.getInstance(), Localization.get("backup.success"));
             else
                 JOptionPane.showMessageDialog(Mainframe.getInstance(),
-                        "Backup fehlgeschlagen oder nicht vollständig.");
+                        Localization.get("backup.error"));
         });
-        JMenuItem close = new JMenuItem("Schließen");
+        JMenuItem close = new JMenuItem(Localization.get("menu.close"));
         close.addActionListener(e -> dispose());
-        JMenuItem wishlist = new JMenuItem("Wunschliste");
+        JMenuItem wishlist = new JMenuItem(Localization.get("menu.wishlist"));
         wishlist.addActionListener(e -> {
             if (wishlist_instance == null)
                 wishlist_instance = new wishlist(Mainframe.getInstance(), true);
             else
                 wishlist_instance.setVisible(true);
         });
-        JMenuItem update = new JMenuItem("auf Aktualisierung prüfen...");
+        JMenuItem update = new JMenuItem(Localization.get("menu.update"));
         update.addActionListener(e -> {
             logger.info("check for Updates");
             checkUpdate();
         });
-        JMenuItem about = new JMenuItem("über");
+        JMenuItem about = new JMenuItem(Localization.get("menu.about"));
         about.addActionListener(e -> {
             String javaVersion = System.getProperty("java.version");
             String text = "https://github.com/NeXoS355/booklist" + "\n\nProgram Version: " + version
@@ -275,31 +280,31 @@ public class Mainframe extends JFrame {
                     + javaVersion + "\nApache Derby Version: " + Database.readCurrentDBVersion();
             JOptionPane.showMessageDialog(Mainframe.getInstance(), text);
         });
-        JMenuItem ExcelExport = new JMenuItem("CSV Export");
+        JMenuItem ExcelExport = new JMenuItem(Localization.get("menu.csv"));
         ExcelExport.addActionListener(e -> {
             int antwort = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
-                    "Es wird eine csv Datei im Programmpfad abgelegt.\nFortfahren?", "Export",
+                    Localization.get("csv.question"), "Export",
                     JOptionPane.YES_NO_OPTION);
             if (antwort == JOptionPane.YES_OPTION) {
                 boolean check = Database.CSVExport();
                 if (check) {
-                    JOptionPane.showMessageDialog(Mainframe.getInstance(), "Liste erfolgreich exportiert!");
+                    JOptionPane.showMessageDialog(Mainframe.getInstance(), Localization.get("csv.success"));
                 } else {
                     JOptionPane.showMessageDialog(Mainframe.getInstance(),
-                            "Datei konnte nicht geschrieben werden!");
+                            Localization.get("csv.error"));
                 }
             }
         });
-        JMenuItem settings = new JMenuItem("Einstellungen");
+        JMenuItem settings = new JMenuItem(Localization.get("menu.settings"));
         settings.addActionListener(e -> new Dialog_settings(Mainframe.getInstance(), true));
-        JMenuItem info = new JMenuItem("Info");
+        JMenuItem info = new JMenuItem(Localization.get("menu.info"));
         info.addActionListener(e -> new Dialog_info(Mainframe.getInstance()));
-        apiDownload = new JMenuItem("Web API Abruf");
+        apiDownload = new JMenuItem(Localization.get("menu.webapiget"));
         apiDownload.addActionListener(e -> Mainframe.executor.submit(() -> downloadFromApi(true)));
 
-        apiUpload = new JMenuItem("Web API Upload");
+        apiUpload = new JMenuItem(Localization.get("menu.webapiupload"));
         apiUpload.addActionListener(e -> Mainframe.executor.submit(() -> uploadToApi(true)));
-        openWebApi = new JMenuItem("Webapp öffnen");
+        openWebApi = new JMenuItem(Localization.get("menu.webappopen"));
         openWebApi.addActionListener(e -> {
             logger.info("open Web API Website");
             Desktop desktop = Desktop.getDesktop();
@@ -336,7 +341,7 @@ public class Mainframe extends JFrame {
         hilfe.add(about);
         pnlMenu.add(menue, BorderLayout.WEST);
 
-        JLabel lblVersion = new JLabel("Version: " + version);
+        JLabel lblVersion = new JLabel(Localization.get("text.version") +": " + version);
 
         lblVersion.setFont(new Font(lblVersion.getFont().getName(), Font.BOLD, lblVersion.getFont().getSize()));
         lblVersion.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -382,7 +387,7 @@ public class Mainframe extends JFrame {
                     int index = allEntries.getIndexOf(searchAutor, searchTitel);
                     new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
                 }
-                txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
+                txt_search.setText(MessageFormat.format(Localization.get("search.text"),allEntries.getSize()));
                 if (SwingUtilities.isRightMouseButton(e)) {
                     JTable table2 = (JTable) e.getSource();
                     int row = table2.rowAtPoint(e.getPoint());
@@ -401,27 +406,27 @@ public class Mainframe extends JFrame {
 
             private void showMenu(MouseEvent e) {
                 JPopupMenu menu = new JPopupMenu();
-                JMenuItem itemAddBook = new JMenuItem("Buch hinzufügen");
-                JMenuItem itemDelBook = new JMenuItem("Buch löschen");
-                JMenuItem itemChanBook = new JMenuItem("Buch bearbeiten");
-                JMenuItem itemAnalyzeAuthor = new JMenuItem("Serie analysieren (Beta)");
+                JMenuItem itemAddBook = new JMenuItem(Localization.get("contextMenu.addBook"));
+                JMenuItem itemDelBook = new JMenuItem(Localization.get("contextMenu.delBook"));
+                JMenuItem itemChanBook = new JMenuItem(Localization.get("contextMenu.editBook"));
+                JMenuItem itemAnalyzeAuthor = new JMenuItem(Localization.get("contextMenu.analyzeSeries"));
                 menu.add(itemAddBook);
                 menu.add(itemChanBook);
                 menu.add(itemDelBook);
                 menu.add(itemAnalyzeAuthor);
                 menu.show(table, e.getX(), e.getY());
                 itemAddBook.addActionListener(e2 -> {
-                    if (Objects.equals(e2.getActionCommand(), "Buch hinzufügen")) {
+                    if (Objects.equals(e2.getActionCommand(), Localization.get("contextMenu.addBook"))) {
                         new Dialog_add_Booklist(Mainframe.getInstance());
                     }
                 });
                 itemDelBook.addActionListener(e3 -> {
-                    if (Objects.equals(e3.getActionCommand(), "Buch löschen")) {
+                    if (Objects.equals(e3.getActionCommand(), Localization.get("contextMenu.delBook"))) {
                         deleteBook();
                     }
                 });
                 itemChanBook.addActionListener(e4 -> {
-                    if (Objects.equals(e4.getActionCommand(), "Buch bearbeiten")) {
+                    if (Objects.equals(e4.getActionCommand(), Localization.get("contextMenu.editBook"))) {
                         String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
                         String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
                         int index = allEntries.getIndexOf(searchAutor, searchTitel);
@@ -429,7 +434,7 @@ public class Mainframe extends JFrame {
                     }
                 });
                 itemAnalyzeAuthor.addActionListener(e5 -> {
-                    if (Objects.equals(e5.getActionCommand(), "Serie analysieren (Beta)")) {
+                    if (Objects.equals(e5.getActionCommand(), Localization.get("contextMenu.analyzeSeries"))) {
                         String seriesName = (String) table.getValueAt(table.getSelectedRow(), 3);
                         seriesName = seriesName.split(" - [0-9]")[0];
                         if (wishlist_instance == null)
@@ -439,7 +444,7 @@ public class Mainframe extends JFrame {
                         gui.wishlist.updateModel();
                         if (!success) {
                             JOptionPane.showMessageDialog(Mainframe.getInstance(),
-                                    "Es wurden keine bücher gefunden");
+                                    Localization.get("analyze.error"));
                         } else {
                             wishlist_instance.setVisible(true);
                         }
@@ -457,7 +462,7 @@ public class Mainframe extends JFrame {
                     deleteBook();
                 }
                 allEntries.checkAuthors();
-                txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
+                txt_search.setText(MessageFormat.format(Localization.get("search.text"),allEntries.getSize()));
             }
         });
         logger.info("Start creating Tree Contents + ScrollPane");
@@ -493,7 +498,7 @@ public class Mainframe extends JFrame {
                         if (path != null)
                             tree.setSelectionPath(path);
                     }
-                    boolean isAutor = tree.getSelectionPath().getLastPathComponent().toString().contains("Autoren");
+                    boolean isAutor = tree.getSelectionPath().getLastPathComponent().toString().contains(Localization.get("tree.root"));
                     String text = tree.getSelectionPath().getLastPathComponent().toString();
                     String[] text_array = text.split(Pattern.quote(" ("));
                     text = text_array[0];
@@ -512,7 +517,7 @@ public class Mainframe extends JFrame {
                     else
                         setLastSearch(text);
                     table.clearSelection();
-                    txt_search.setText("Suche ... (" + allEntries.getSize() + ")");
+                    txt_search.setText(MessageFormat.format(Localization.get("search.text"),allEntries.getSize()));
                 }
             }
 
@@ -523,11 +528,11 @@ public class Mainframe extends JFrame {
 
             private void showMenu(MouseEvent e) {
                 JPopupMenu menu = new JPopupMenu();
-                JMenuItem itemAddBuch = new JMenuItem("Buch hinzufügen");
+                JMenuItem itemAddBuch = new JMenuItem(Localization.get("contextMenu.addBook"));
                 menu.add(itemAddBuch);
                 menu.show(tree, e.getX(), e.getY());
                 itemAddBuch.addActionListener(e6 -> {
-                    if (e6.getActionCommand().equals("Buch hinzufügen")) {
+                    if (e6.getActionCommand().equals(Localization.get("contextMenu.addBook"))) {
                         new Dialog_add_Booklist(Mainframe.getInstance());
                     }
                 });
@@ -578,16 +583,16 @@ public class Mainframe extends JFrame {
                     createBackup();
                 } else if (HandleConfig.backup == 1) {
                     logger.info("Frame Closing: ask do Backup?");
-                    if (JOptionPane.showConfirmDialog(null, "Backup erstellen?", "Backup?", JOptionPane.YES_NO_OPTION,
+                    if (JOptionPane.showConfirmDialog(null, Localization.get("q.backup"), "Backup?", JOptionPane.YES_NO_OPTION,
                             JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
 
                         boolean ret = createBackup();
                         if (ret) {
-                            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Backup erfolgreich.");
+                            JOptionPane.showMessageDialog(Mainframe.getInstance(), Localization.get("backup.success"));
                             logger.info("Frame Closing: Backup success");
                         } else {
                             JOptionPane.showMessageDialog(Mainframe.getInstance(),
-                                    "Backup fehlgeschlagen oder nicht vollständig.");
+                                    Localization.get("backup.error"));
                             logger.info("Frame Closing: Backup failed");
                         }}
                 }
@@ -661,14 +666,15 @@ public class Mainframe extends JFrame {
             String searchAuthor = (String) table.getValueAt(j, 1);
             String searchTitle = (String) table.getValueAt(j, 2);
             int index = allEntries.getIndexOf(searchAuthor, searchTitle);
+
             int answer = JOptionPane.showConfirmDialog(null,
-                    "Wirklich '" + searchAuthor + " - " + searchTitle + "' löschen?", "löschen",
+                    MessageFormat.format(Localization.get("book.deleteQuestion"),searchAuthor,searchTitle), Localization.get("q.delete"),
                     JOptionPane.YES_NO_OPTION);
             if (answer == JOptionPane.YES_OPTION) {
                 allEntries.delete(index);
             }
             allEntries.checkAuthors();
-            showNotification("Buch gelöscht: " + searchAuthor + ", " + searchTitle);
+            showNotification(MessageFormat.format(Localization.get("book.deleted"),searchAuthor,searchTitle));
             logger.info("Book deleted: {};{}", searchAuthor, searchTitle);
         }
         if (!treeSelection.isEmpty())
@@ -681,7 +687,7 @@ public class Mainframe extends JFrame {
      * updates the JTree
      */
     public static void updateNode() {
-        rootNode = new DefaultMutableTreeNode("Autoren (" + allEntries.authors.size() + ")");
+        rootNode = new DefaultMutableTreeNode(Localization.get("tree.root") + " (" + allEntries.authors.size() + ")");
         treeModel = new DefaultTreeModel(rootNode);
         for (int i = 0; i < allEntries.authors.size(); i++) {
             String autor = allEntries.authors.get(i);
@@ -695,7 +701,7 @@ public class Mainframe extends JFrame {
                         treeModel.insertNodeInto(serieNode, autorNode, j);
                     }
                 } catch (NullPointerException e) {
-                    Mainframe.logger.info("Mainframe Keine Serie gefunden zu {}", autor);
+                    logger.info("Mainframe No Series found for {}", autor);
                 }
 
             }
@@ -890,7 +896,7 @@ public class Mainframe extends JFrame {
 
         if (newestBook != null) {
             int index = allEntries.getIndexOf(newestBook.getAuthor(),newestBook.getTitle());
-            showNotification("<html>Bewerte jetzt: <u>" + newestBook.getTitle() + " von " + newestBook.getAuthor() + "</u></html>" , 15, index);
+            showNotification(MessageFormat.format(Localization.get("book.doRating"),newestBook.getTitle(),newestBook.getAuthor()) , 15, index);
         }
 
     }
@@ -930,7 +936,7 @@ public class Mainframe extends JFrame {
             table.setModel(tableDisplay);
             setTableLayout();
         } else {
-            showNotification("Kein Treffer");
+            showNotification(Localization.get("search.error"));
             updateModel();
         }
     }
@@ -1021,14 +1027,14 @@ public class Mainframe extends JFrame {
                     apiUpload.setEnabled(true);
                 }
                 if (apiConnected) {
-                    customNotificationPanel notification = showNotification("API verbunden - download ...");
+                    customNotificationPanel notification = showNotification(Localization.get("api.connectedDownload"));
                     boolean downloaded = downloadFromApi(false);
-                    notification.setText("API verbunden - upload ...");
+                    notification.setText(Localization.get("api.connectedUpload"));
                     uploadToApi(false);
                     if (downloaded) {
-                        notification.setText("API verbunden - Es wurden Bücher gefunden");
+                        notification.setText(Localization.get("api.successNewBooks"));
                     } else {
-                        notification.setText("API verbunden - Keine Bücher gefunden");
+                        notification.setText(Localization.get("api.successNoBooks"));
                     }
 
                 }
@@ -1047,7 +1053,7 @@ public class Mainframe extends JFrame {
                 openWebApi.setEnabled(false);
                 apiDownload.setEnabled(false);
                 apiUpload.setEnabled(false);
-                showNotification("Keine Verbindung zur API");
+                showNotification(Localization.get("api.noConnect"));
                 Mainframe.logger.error(e.getMessage());
             }
 
@@ -1127,12 +1133,12 @@ public class Mainframe extends JFrame {
                 in.close();
                 if (rejected > 0) {
                         for (String tmp : rejectedBooks) {
-                            showNotification("Import abgelehnt: " + tmp, 15);
+                            showNotification(MessageFormat.format(Localization.get("api.importDeclined"),tmp), 15);
                         }
                 }
                 if (imported >= 1 || rejected > 0) {
                         for(String tmp : importedBooks) {
-                            showNotification("Import erfolgreich: " + tmp,15);
+                            showNotification(MessageFormat.format(Localization.get("api.importSuccess"),tmp),15);
                         }
                     try {
                         // URL des Endpunkts
@@ -1165,7 +1171,7 @@ public class Mainframe extends JFrame {
                     }
                 } else {
                     if (showUi)
-                        showNotification("Keine Bücher zum abrufen gefunden.");
+                        showNotification(Localization.get("api.importNoBooks"));
                 }
                 con.disconnect();
             } else {
@@ -1175,7 +1181,7 @@ public class Mainframe extends JFrame {
         } catch (URISyntaxException | IOException e) {
             logger.error(e.getMessage());
             if (showUi)
-                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Abruf.");
+                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Error in API Call");
         }
         return downloaded;
     }
@@ -1217,13 +1223,13 @@ public class Mainframe extends JFrame {
             // Antwort vom Server lesen
             int responseCode = con.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                logger.info("Bücher erfolgreich hochgeladen!");
+                logger.info("Books successfully uploaded");
                 if (showUi)
-                    showNotification("Bücher erfolgreich hochgeladen!");
+                    showNotification(Localization.get("api.uploadSuccess"));
             } else {
-                logger.error("Fehler beim Hochladen der Bücher: {}", responseCode);
+                logger.error("Error while uploading: {}", responseCode);
                 if (showUi)
-                    showNotification("Fehler beim Hochladen der Bücher: " + responseCode);
+                    showNotification(MessageFormat.format(Localization.get("api.uploadError"),responseCode));
             }
 
             // Verbindung schließen
@@ -1231,7 +1237,7 @@ public class Mainframe extends JFrame {
         } catch (URISyntaxException | IOException e) {
             logger.error(e.getMessage());
             if (showUi)
-                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Fehler beim API Upload.");
+                JOptionPane.showMessageDialog(Mainframe.getInstance(), "Error while API Upload.");
         }
 
     }
@@ -1383,7 +1389,7 @@ public class Mainframe extends JFrame {
                     fileSize = contentLength/1000;
                     System.out.println("Größe der Datei: " + contentLength/1000 + " KB");
                 }
-                customNotificationPanel notification1 = showNotification("downloading ...", 10);
+                customNotificationPanel notification1 = showNotification(Localization.get("update.download"), 10);
                 try (BufferedInputStream in = new BufferedInputStream(url.openStream());
                      FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
                     byte[] dataBuffer = new byte[1024];
@@ -1398,19 +1404,19 @@ public class Mainframe extends JFrame {
                         // Fortschritt berechnen und ausgeben
                         progress = (int) ((((double) downloadedBytes /1000) / (double) fileSize) * 100);
                         if (progress > old_progress)
-                            notification1.setText("downloading " + progress + "%");
+                            notification1.setText(Localization.get("update.download") + " " + progress + "%");
                         old_progress = progress;
                     }
                     System.out.println("Finished reading latest.jar");
                     fileOutputStream.close();
-                    notification1.setText("checking version ...");
+                    notification1.setText(Localization.get("update.versionCheck"));
                     System.out.println("create Process 'latest.jar version'");
                     ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
                     logger.info("Update - Command: {}", pb.command());
                     Process proc = pb.start();
                     // Warte darauf, dass der Prozess abgeschlossen wird
                     int exitCode = proc.waitFor();
-                    notification1.setText("checking version ... finished");
+                    notification1.setText(Localization.get("update.versionCheckFin"));
                     logger.info("Update - Process closed with Exit-Code: {}", exitCode);
 
                     // InputStream lesen (kontinuierlich statt mit available())
@@ -1438,9 +1444,9 @@ public class Mainframe extends JFrame {
                             intDownloadedVer = Integer.parseInt(strDownloadedVer.toString());
 
                             if (intDownloadedVer > intCurVer) {
-                                notification1.setText("Update found");
+                                notification1.setText(Localization.get("update.update"));
                                 int antwort = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
-                                        "Es ist ein Update auf Version " + line + " verfügbar,\n Jetzt durchführen?",
+                                        MessageFormat.format(Localization.get("q.update"),line),
                                         "Update", JOptionPane.YES_NO_OPTION);
                                 if (antwort == JOptionPane.YES_OPTION) {
                                     boolean ret = createBackup();
@@ -1456,7 +1462,7 @@ public class Mainframe extends JFrame {
                                 }
 
                             } else {
-                                notification1.setText("no Update found");
+                                notification1.setText(Localization.get("update.noUpdate"));
                                 cleanup();
                             }
                         }

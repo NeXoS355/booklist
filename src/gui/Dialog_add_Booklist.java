@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.io.Serial;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -58,7 +59,7 @@ public class Dialog_add_Booklist extends JDialog {
 	 */
 	public Dialog_add_Booklist(Frame owner) {
 		Mainframe.logger.info("Book add: start creating Frame");
-		this.setTitle("Buch hinzufügen");
+		this.setTitle(Localization.get("t.addBook"));
 		this.setSize(new Dimension(500, 420));
 		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
@@ -80,7 +81,7 @@ public class Dialog_add_Booklist extends JDialog {
 		/*
 		 * Create Components for Panel West
 		 */
-		JLabel lbl_author = new JLabel("Autor:");
+		JLabel lbl_author = new JLabel(Localization.get("label.author")+ ":");
 		lbl_author.setFont(Mainframe.defaultFont);
 		lbl_author.setSize(new Dimension(width, height));
 
@@ -101,7 +102,7 @@ public class Dialog_add_Booklist extends JDialog {
 					String typedString = txtAuthor.getText().substring(0, typed);
 
 					if (!txtAuthor.getText().isEmpty()) {
-						String[] autoren = autoCompletion(typedString, "autor");
+						String[] autoren = autoCompletion(typedString, "author");
 						for (int i = 0; i < autoren.length && autoren[i] != null; i++) {
 							int autorenLength = autoren[i].length();
 							String setText = autoren[i].substring(typed, autorenLength);
@@ -128,13 +129,13 @@ public class Dialog_add_Booklist extends JDialog {
 			public void keyPressed(KeyEvent e) {
 				if (txtAuthor.getText().length() > 50) {
 					txtAuthor.setEditable(false);
-					txtAuthor.setText("Nicht mehr als 50 Zeichen!");
+					txtAuthor.setText(Localization.get("text.longError"));
 				}
 			}
 
 		});
 
-		JLabel lbl_title = new JLabel("Titel:");
+		JLabel lbl_title = new JLabel(Localization.get("label.title") + ":");
 		lbl_title.setFont(Mainframe.defaultFont);
 		lbl_title.setPreferredSize(new Dimension(width, height));
 
@@ -147,7 +148,7 @@ public class Dialog_add_Booklist extends JDialog {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					addBook();
 				} else if (!e.isActionKey()) {
-					if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
+					if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
 						txtTitle.setText("");
 						btn_add.setEnabled(true);
 					}
@@ -156,12 +157,12 @@ public class Dialog_add_Booklist extends JDialog {
 					dispose();
 				if (txtTitle.getText().length() > 50) {
 					txtTitle.setEditable(false);
-					txtTitle.setText("Nicht mehr als 50 Zeichen!");
+					txtTitle.setText(Localization.get("text.longError"));
 				}
 			}
 		});
 
-		JLabel lbl_merk = new JLabel("Bemerkung:");
+		JLabel lbl_merk = new JLabel(Localization.get("label.note") + ":");
 		lbl_merk.setFont(Mainframe.defaultFont);
 		lbl_merk.setPreferredSize(new Dimension(width, height));
 
@@ -180,7 +181,7 @@ public class Dialog_add_Booklist extends JDialog {
 
 		});
 
-		JLabel lbl_serie = new JLabel("Serie | Band:");
+		JLabel lbl_serie = new JLabel(Localization.get("label.series")+ " | " + Localization.get("label.vol"));
 		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(width, height));
 
@@ -197,7 +198,7 @@ public class Dialog_add_Booklist extends JDialog {
 					String typedString = txtSerie.getText().substring(0, typed);
 
 					if (!txtSerie.getText().isEmpty()) {
-						String[] serien = autoCompletion(typedString, "serie");
+						String[] serien = autoCompletion(typedString, "series");
 						for (int i = 0; i < serien.length && serien[i] != null; i++) {
 							int autorenLength = serien[i].length();
 							String setText = serien[i].substring(typed, autorenLength);
@@ -324,7 +325,7 @@ public class Dialog_add_Booklist extends JDialog {
 		/*
 		 * create components for Panel South
 		 */
-		checkFrom = new JCheckBox("ausgeliehen von");
+		checkFrom = new JCheckBox(Localization.get("label.borrowed_from"));
 		checkFrom.setFont(Mainframe.defaultFont);
 		checkFrom.setSelected(false);
 		checkFrom.addActionListener(new ActionListener() {
@@ -341,7 +342,7 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 		});
 
-		checkTo = new JCheckBox("ausgeliehen an");
+		checkTo = new JCheckBox(Localization.get("label.borrowed_to"));
 		checkTo.setFont(Mainframe.defaultFont);
 		checkTo.setSelected(false);
 		checkTo.addActionListener(new ActionListener() {
@@ -387,11 +388,11 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 		});
 
-		btn_add = ButtonsFactory.createButton("Hinzufügen");
+		btn_add = ButtonsFactory.createButton(Localization.get("label.save"));
 		btn_add.setFont(Mainframe.defaultFont);
 		btn_add.addActionListener(e -> addBook());
 
-		JButton btn_abort = ButtonsFactory.createButton("Abbrechen");
+		JButton btn_abort = ButtonsFactory.createButton(Localization.get("label.abort"));
 		btn_abort.setFont(Mainframe.defaultFont);
 		btn_abort.addActionListener(arg0 -> dispose());
 
@@ -443,17 +444,17 @@ public class Dialog_add_Booklist extends JDialog {
 					book = new Book_Booklist(autor, titel, true, txtBorrowedTo.getText(), "", bemerkung, serie,
 							seriePart, ebook, 0, null, null, null, datum, true);
 					allEntries.add(book);
-					showNotification("Buch hinzugefügt: " + autor + " - " + titel);
+					showNotification(MessageFormat.format(Localization.get("book.added"),autor,titel));
 				} else if (checkFrom.isSelected()) {
 					book = new Book_Booklist(autor, titel, true, "", txtBorrowedFrom.getText(), bemerkung, serie,
 							seriePart, ebook, 0, null, null, null, datum, true);
 					allEntries.add(book);
-					showNotification("Buch hinzugefügt: " + autor + " - " + titel);
+					showNotification(MessageFormat.format(Localization.get("book.added"),autor,titel));
 				} else {
 					book = new Book_Booklist(autor, titel, bemerkung, serie, seriePart, ebook, 0, null, null, null,
 							datum, true);
 					allEntries.add(book);
-					showNotification("Buch hinzugefügt: " + autor + " - " + titel);
+					showNotification(MessageFormat.format(Localization.get("book.added"),autor,titel));
 				}
 				if (HandleConfig.autoDownload == 1) {
 					Mainframe.executor.submit(() -> {
@@ -471,7 +472,7 @@ public class Dialog_add_Booklist extends JDialog {
 				dispose();
 
 			} else {
-				txtTitle.setText("Buch bereits vorhanden!");
+				txtTitle.setText(Localization.get("text.duplicateError"));
 				btn_add.setEnabled(false);
 				txtTitle.setBackground(new Color(255, 105, 105));
 			}
@@ -498,7 +499,7 @@ public class Dialog_add_Booklist extends JDialog {
 	 */
 	public String[] autoCompletion(String search, String field) {
 		String[] returnArray = null;
-		if (field.equals("autor")) {
+		if (field.equals("author")) {
 			int j = 0;
 			int anz_autoren = allEntries.authors.size();
 			String[] result = new String[anz_autoren];
@@ -515,7 +516,7 @@ public class Dialog_add_Booklist extends JDialog {
 				}
 
 			}
-		} else if (field.equals("serie")) {
+		} else if (field.equals("series")) {
 			int j = 0;
 			String[] serien = allEntries.getSeriesFromAuthor(txtAuthor.getText());
 			String[] result = new String[serien.length];
