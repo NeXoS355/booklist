@@ -2,18 +2,14 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
-import java.util.HashMap;
-import java.util.Map;
 
 import static gui.Mainframe.*;
 
 public class customNotificationPanel extends JPanel {
 
     final JLabel  notificationLabel;
-    final static Map<JPanel, Float> panelAlphaMap = new HashMap<>();
     Dimension notificationSize;
     final static Point location = new Point(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5);
     int timer;
@@ -21,24 +17,34 @@ public class customNotificationPanel extends JPanel {
 
 
     public customNotificationPanel(String message, int timer) {
+        setLayout(new BorderLayout());
+        setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         message = message.trim();
         notificationLabel = new JLabel(message);
         this.timer = timer;
         this.oriTimer = timer;
 
-        setLayout(new FlowLayout(FlowLayout.LEFT));
-
-//        AtomicReference<Float> alpha = new AtomicReference<>(0.0f);
-//        panelAlphaMap.put(this, 1.0f); // Initialer Alpha-Wert bei 0 (unsichtbar)
-
         setSize(message);
+
+        // MouseListener hinzufügen, um den Timer zu ändern
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                setTimer(50000);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setTimer(oriTimer);
+            }
+        });
 
         setBackground(Color.DARK_GRAY);
         setOpaque(false); // Hintergrundfarbe sichtbar machen
 
         notificationLabel.setForeground(Color.WHITE); // Schriftfarbe
         notificationLabel.setFont(Mainframe.defaultFont);
-        add(notificationLabel); // Label zum Panel hinzufügen
+        add(notificationLabel, BorderLayout.CENTER); // Label zum Panel hinzufügen
 
         // Panel zur LayeredPane hinzufügen
         Mainframe.layeredPane.add(this, Integer.valueOf(2));
@@ -47,6 +53,10 @@ public class customNotificationPanel extends JPanel {
 
         setVisible(true);
         updateUI();
+    }
+
+    private void setTimer(int time) {
+        this.timer = time;
     }
 
     private void setSize(String message) {
@@ -85,8 +95,6 @@ public class customNotificationPanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        Float alpha = panelAlphaMap.getOrDefault(this, 1.0f); // Default 1.0f, falls nicht vorhanden
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
         g2d.setColor(getBackground());
         g2d.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), arc, arc));
         g2d.dispose();
