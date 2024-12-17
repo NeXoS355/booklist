@@ -32,6 +32,7 @@ public class Dialog_settings extends JDialog {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+	private static JComboBox<String> cmbLang;
 	private static JComboBox<Integer> cmbFont;
 	private static JComboBox<Integer> cmbFontDesc;
     private static JComboBox<Integer> cmbAutoDownload;
@@ -48,7 +49,7 @@ public class Dialog_settings extends JDialog {
 		this.setTitle(Localization.get("t.settings"));
 		this.setModal(modal);
 		this.setLayout(new BorderLayout());
-		this.setSize(670, 450);
+		this.setSize(670, 480);
 		this.setLocationRelativeTo(owner);
 
         URL connectionUrl;
@@ -72,12 +73,26 @@ public class Dialog_settings extends JDialog {
 
 		GridBagConstraints c = new GridBagConstraints();
 
+
+		c.anchor = GridBagConstraints.WEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = 1;
 		c.gridx = 0;
 		c.gridy = 0;
-		c.gridwidth = 4;
-		c.anchor = GridBagConstraints.CENTER;
 		c.ipady = 5;
 		c.insets = new Insets(10, 10, 0, 10);
+		JLabel lblLang = new JLabel(Localization.get("settings.language"));
+		pnlLeft.add(lblLang, c);
+		c.gridx = 1;
+		c.gridy = 0;
+		String[] lang = { "Deutsch", "English" };
+		cmbLang = new JComboBox<>(lang);
+		cmbLang.setSelectedItem(HandleConfig.lang);
+		pnlLeft.add(cmbLang, c);
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridwidth = 4;
+		c.anchor = GridBagConstraints.CENTER;
 		JLabel lblFontSize = new JLabel(Localization.get("settings.fontSize"));
 		lblFontSize.setFont(Mainframe.defaultFont);
 		pnlLeft.add(lblFontSize, c);
@@ -85,27 +100,27 @@ public class Dialog_settings extends JDialog {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridwidth = 1;
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = 2;
 		JLabel lblFontGeneral = new JLabel(Localization.get("settings.general"));
 		pnlLeft.add(lblFontGeneral, c);
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = 2;
 		Integer[] font = { 12, 14, 16, 18, 20 };
         cmbFont = new JComboBox<>(font);
 		cmbFont.setSelectedItem(Mainframe.defaultFont.getSize());
 		pnlLeft.add(cmbFont, c);
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 3;
 		JLabel lblFontDesc = new JLabel(Localization.get("settings.description"));
 		pnlLeft.add(lblFontDesc, c);
 		c.gridx = 1;
-		c.gridy = 2;
+		c.gridy = 3;
 		Integer[] fontDesc = { 12, 14, 16, 18, 20 };
         cmbFontDesc = new JComboBox<>(fontDesc);
 		cmbFontDesc.setSelectedItem(Mainframe.descFont.getSize());
 		pnlLeft.add(cmbFontDesc, c);
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = 4;
 		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.CENTER;
 		c.fill = GridBagConstraints.NONE;
@@ -113,7 +128,7 @@ public class Dialog_settings extends JDialog {
 		lblFeatures.setFont(Mainframe.defaultFont);
 		pnlLeft.add(lblFeatures, c);
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 5;
 		c.gridwidth = 1;
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -121,18 +136,18 @@ public class Dialog_settings extends JDialog {
 		lblAutoDownload.setToolTipText(Localization.get("settings.tipAutoDownload"));
 		pnlLeft.add(lblAutoDownload, c);
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = 5;
 		Integer[] arrayAutoDownload = { 0, 1 };
 		cmbAutoDownload = new JComboBox<>(arrayAutoDownload);
 		cmbAutoDownload.setSelectedItem(HandleConfig.autoDownload);
 		pnlLeft.add(cmbAutoDownload, c);
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = 6;
 		JLabel lblOnDemand = new JLabel(Localization.get("settings.LoadOnDemand"));
 		lblOnDemand.setToolTipText(Localization.get("settings.tipLoadOnDemand"));
 		pnlLeft.add(lblOnDemand, c);
 		c.gridx = 1;
-		c.gridy = 5;
+		c.gridy = 6;
 		Integer[] arrayOnDemand = { 0, 1 };
 		cmbOnDemand = new JComboBox<>(arrayOnDemand);
 		cmbOnDemand.setSelectedItem(HandleConfig.loadOnDemand);
@@ -305,6 +320,7 @@ public class Dialog_settings extends JDialog {
 			Mainframe.logger.info("Save Settings in Program");
 			// set Parameters which can be changed on the fly
 			try {
+				HandleConfig.lang= (String) cmbLang.getSelectedItem();
 				Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFont.getSelectedItem());
 				Mainframe.descFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFontDesc.getSelectedItem());
 				HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();

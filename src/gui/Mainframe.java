@@ -114,9 +114,6 @@ public class Mainframe extends JFrame {
         this.setResizable(true);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Standard-Locale setzen
-        Localization.setLocale(Locale.GERMAN);
-
         URL iconURL = getClass().getResource("/resources/Icon.png");
         // iconURL is null when not found
         assert iconURL != null;
@@ -142,6 +139,20 @@ public class Mainframe extends JFrame {
         }
 
         cleanup();
+        // Standard-Locale setzen
+        if (HandleConfig.lang.equals("English")) {
+            Localization.setLocale(Locale.ENGLISH);
+            UIManager.put("OptionPane.yesButtonText", "Yes");
+            UIManager.put("OptionPane.noButtonText", "No");
+            UIManager.put("OptionPane.cancelButtonText", "Cancel");
+            UIManager.put("OptionPane.closeButtonText", "Close");
+        } else {
+            Localization.setLocale(Locale.GERMAN);
+            UIManager.put("OptionPane.yesButtonText", "Ja");
+            UIManager.put("OptionPane.noButtonText", "Nein");
+            UIManager.put("OptionPane.cancelButtonText", "Abbrechen");
+            UIManager.put("OptionPane.closeButtonText", "Schließen");
+        }
 
         try {
 //            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

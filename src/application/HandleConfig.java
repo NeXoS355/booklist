@@ -18,6 +18,7 @@ import static gui.Mainframe.logger;
 
 public class HandleConfig {
 
+    public static String lang = "GERMAN";
 	public static int autoDownload = 0;
 	public static int loadOnDemand = 1;
 	public static String debug = "WARN";
@@ -55,6 +56,10 @@ public class HandleConfig {
                     value = row[1];
                     if (row.length == 2) {
                         switch (setting) {
+                            case "lang" -> {
+                                lang = value.trim();
+                                logger.info("lang: {}",lang);
+                            }
                             case "fontSize" -> {
                                 try {
                                     size = Integer.parseInt(value.trim());
@@ -259,6 +264,7 @@ public class HandleConfig {
         logger.info("Save Settings to File");
 
         try (PrintWriter out = new PrintWriter("config.conf")) {
+            out.println("lang=" + HandleConfig.lang);
             out.println("fontSize=" + Mainframe.defaultFont.getSize());
             out.println("descFontSize=" + Mainframe.descFont.getSize());
             out.println("autoDownload=" + autoDownload);
