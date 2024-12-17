@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.io.Serial;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
@@ -45,7 +46,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 	public Dialog_edit_Wishlist(Frame owner, WishlistListModel entries, int index) {
 		Mainframe.logger.info("Wishlist Book edit: start creating Frame");
-		this.setTitle("Buch bearbeiten");
+		this.setTitle(Localization.get("t.editBook"));
 		this.setSize(new Dimension(500, 300));
 		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
@@ -84,7 +85,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		int height = 60;
 		int width = 100;
 
-		JLabel lbl_datum = new JLabel("Datum: " + new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDate()));
+		JLabel lbl_datum = new JLabel(MessageFormat.format(Localization.get("book.dateAdded"),new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDate())));
 		panelNorth.add(lbl_datum);
 
 		// Empty Panel top Gap
@@ -97,7 +98,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 		/*
 		 * create and add components to Panel Center
 		 */
-		JLabel lbl_author = new JLabel("Autor:");
+		JLabel lbl_author = new JLabel(Localization.get("label.author") + ":");
 		lbl_author.setFont(Mainframe.defaultFont);
 		lbl_author.setPreferredSize(new Dimension(width, height));
 		txtAuthor = new CustomTextField(eintrag.getAuthor());
@@ -131,7 +132,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 			}
 
 		});
-		JLabel lbl_title = new JLabel("Titel:");
+		JLabel lbl_title = new JLabel(Localization.get("label.title") + ":");
 		lbl_title.setFont(Mainframe.defaultFont);
 		lbl_title.setPreferredSize(new Dimension(width, height));
 		txtTitle = new CustomTextField(eintrag.getTitle());
@@ -144,7 +145,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					speichern(eintrag);
 				} else if (!e.isActionKey()) {
-					if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
+					if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
 						txtTitle.setText("");
 					}
 				}
@@ -152,7 +153,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 					dispose();
 				if (txtTitle.getText().length() > 50) {
 					txtTitle.setEditable(false);
-					txtTitle.setText("Nicht mehr als 50 Zeichen!");
+					txtTitle.setText(Localization.get("text.longError"));
 					txtTitle.setBackground(new Color(255, 105, 105));
 				}
 
@@ -175,7 +176,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (txtTitle.getText().equals("Nicht mehr als 50 Zeichen!")) {
+				if (txtTitle.getText().equals(Localization.get("text.longError"))) {
 					txtTitle.setEditable(true);
 					txtTitle.setForeground(UIManager.getColor("TextField.foreground"));
 					txtTitle.setBackground(UIManager.getColor("TextField.background"));
@@ -185,7 +186,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		});
 
-		JLabel lbl_merk = new JLabel("Bemerkung:");
+		JLabel lbl_merk = new JLabel(Localization.get("label.note") + ":");
 		lbl_merk.setFont(Mainframe.defaultFont);
 		lbl_merk.setPreferredSize(new Dimension(width, height));
 
@@ -219,7 +220,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 
 		});
 
-		JLabel lbl_serie = new JLabel("Serie | Band:");
+		JLabel lbl_serie = new JLabel(Localization.get("label.series") + " | " + Localization.get("label.vol") + ":");
 		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(width, height));
 
@@ -357,11 +358,11 @@ public class Dialog_edit_Wishlist extends JDialog {
 		/*
 		 * create components for Panel South
 		 */
-		JButton btnAdd = ButtonsFactory.createButton("Speichern");
+		JButton btnAdd = ButtonsFactory.createButton(Localization.get("label.save"));
 		btnAdd.setFont(Mainframe.defaultFont);
 		btnAdd.addActionListener(e -> speichern(eintrag));
 
-		JButton btnAbort = ButtonsFactory.createButton("Abbrechen");
+		JButton btnAbort = ButtonsFactory.createButton(Localization.get("label.abort"));
 		btnAbort.setFont(Mainframe.defaultFont);
 		btnAbort.addActionListener(arg0 -> dispose());
 		
@@ -406,7 +407,7 @@ public class Dialog_edit_Wishlist extends JDialog {
 				dispose();
 				Mainframe.logger.info("Wishlist Book edit: Book saved successfully");
 			} else {
-				txtTitle.setText("Buch bereits vorhanden!");
+				txtTitle.setText(Localization.get("text.duplicateError"));
 				txtTitle.setBackground(new Color(255, 105, 105));
 			}
 		} else {

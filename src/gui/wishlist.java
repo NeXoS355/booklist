@@ -126,30 +126,30 @@ public class wishlist extends JFrame {
 
 			private void showMenu(MouseEvent e) {
 				JPopupMenu menu = new JPopupMenu();
-				JMenuItem itemAddBook = new JMenuItem("Buch hinzufügen");
-				JMenuItem itemDelBook = new JMenuItem("Buch löschen");
-				JMenuItem itemChanBook = new JMenuItem("Buch bearbeiten");
-				JMenuItem itemConvertBook = new JMenuItem("Buch konvertieren");
+				JMenuItem itemAddBook = new JMenuItem(Localization.get("contextMenu.addBook"));
+				JMenuItem itemDelBook = new JMenuItem(Localization.get("contextMenu.delBook"));
+				JMenuItem itemChanBook = new JMenuItem(Localization.get("contextMenu.editBook"));
+				JMenuItem itemConvertBook = new JMenuItem(Localization.get("contextMenu.convertBook"));
 				menu.add(itemAddBook);
 				menu.add(itemChanBook);
 				menu.add(itemDelBook);
 				menu.add(itemConvertBook);
 				menu.show(table, e.getX(), e.getY());
 				itemAddBook.addActionListener(e4 -> {
-                    if (Objects.equals(e4.getActionCommand(), "Buch hinzufügen")) {
+                    if (Objects.equals(e4.getActionCommand(), Localization.get("contextMenu.addBook"))) {
                         new Dialog_add_Wishlist(instance);
                         Mainframe.logger.info("Menu;Wishlist open Add Dialog");
                     }
                     updateModel();
                 });
 				itemDelBook.addActionListener(e3 -> {
-                    if (Objects.equals(e3.getActionCommand(), "Buch löschen")) {
+                    if (Objects.equals(e3.getActionCommand(), Localization.get("contextMenu.delBook"))) {
                         deleteBook();
                         updateModel();
                     }
                 });
 				itemChanBook.addActionListener(e2 -> {
-                    if (Objects.equals(e2.getActionCommand(), "Buch bearbeiten")) {
+                    if (Objects.equals(e2.getActionCommand(), Localization.get("contextMenu.editBook"))) {
                         String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
                         String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
                         int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
@@ -159,7 +159,7 @@ public class wishlist extends JFrame {
                     }
                 });
 				itemConvertBook.addActionListener(e1 -> {
-                    if (Objects.equals(e1.getActionCommand(), "Buch konvertieren")) {
+                    if (Objects.equals(e1.getActionCommand(), Localization.get("contextMenu.convertBook"))) {
                         String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
                         String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
                         int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
@@ -251,7 +251,7 @@ public class wishlist extends JFrame {
             String searchAuthor = (String) table.getValueAt(j, 0);
             String searchTitle = (String) table.getValueAt(j, 1);
             int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
-            int response = JOptionPane.showConfirmDialog(this, "Wirklich '" + searchTitle + "' löschen?", "löschen",
+            int response = JOptionPane.showConfirmDialog(this, Localization.get("book.deleteQuestion"), Localization.get("text.delete"),
                     JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
                 wishlistEntries.delete(index);

@@ -42,7 +42,7 @@ public class Dialog_add_Wishlist extends JDialog {
 
 	public Dialog_add_Wishlist(Frame owner) {
 		Mainframe.logger.info("Wishlist Book add: start creating Frame");
-		this.setTitle("Buch hinzufügen");
+		this.setTitle(Localization.get("t.addBook"));
 		this.setSize(new Dimension(500, 320));
 		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
@@ -65,7 +65,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		/*
 		 * Create Components for Panel West
 		 */
-		JLabel lbl_author = new JLabel("Autor:");
+		JLabel lbl_author = new JLabel(Localization.get("label.author") + ":");
 		lbl_author.setFont(Mainframe.defaultFont);
 		lbl_author.setSize(new Dimension(width, height));
 		
@@ -105,7 +105,7 @@ public class Dialog_add_Wishlist extends JDialog {
 
 		});
 		
-		JLabel lbl_title = new JLabel("Titel:");
+		JLabel lbl_title = new JLabel(Localization.get("label.title") + ":");
 		lbl_title.setFont(Mainframe.defaultFont);
 		lbl_title.setPreferredSize(new Dimension(width, height));
 		
@@ -119,7 +119,7 @@ public class Dialog_add_Wishlist extends JDialog {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					addBuch();
 				} else if (!e.isActionKey()) {
-					if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
+					if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
 						txtTitle.setText("");
 					}
 				}
@@ -127,7 +127,7 @@ public class Dialog_add_Wishlist extends JDialog {
 					dispose();
 				if (txtTitle.getText().length() > 50) {
 					txtTitle.setEditable(false);
-					txtTitle.setText("Nicht mehr als 50 Zeichen!");
+					txtTitle.setText(Localization.get("text.longError"));
 					txtTitle.setBackground(new Color(255, 105, 105));
 				}
 			}
@@ -146,12 +146,12 @@ public class Dialog_add_Wishlist extends JDialog {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (txtTitle.getText().equals("Nicht mehr als 50 Zeichen!")) {
+				if (txtTitle.getText().equals(Localization.get("text.longError"))) {
 					txtTitle.setEditable(true);
 					txtTitle.setBackground(UIManager.getColor("TextField.foreground"));
 					txtTitle.setBackground(UIManager.getColor("TextField.background"));
 					txtTitle.setText("");
-				} else if (txtTitle.getText().equals("Buch bereits vorhanden!")) {
+				} else if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
 					txtTitle.setBackground(UIManager.getColor("TextField.foreground"));
 					txtTitle.setBackground(UIManager.getColor("TextField.background"));
 					txtTitle.setText("");
@@ -160,7 +160,7 @@ public class Dialog_add_Wishlist extends JDialog {
 
 		});
 
-		JLabel lbl_merk = new JLabel("Bemerkung:");
+		JLabel lbl_merk = new JLabel(Localization.get("label.note") + ":");
 		lbl_merk.setFont(Mainframe.defaultFont);
 		lbl_merk.setPreferredSize(new Dimension(width, height));
 		
@@ -196,7 +196,7 @@ public class Dialog_add_Wishlist extends JDialog {
 
 		});
 		
-		JLabel lbl_serie = new JLabel("Serie | Band:");
+		JLabel lbl_serie = new JLabel(Localization.get("label.series") + " | " + Localization.get("label.vol") + ":");
 		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(width, height));
 		
@@ -325,11 +325,11 @@ public class Dialog_add_Wishlist extends JDialog {
 		c.insets = new Insets(10, 10, 0, 0);
 		panel_center.add(txtSeriesVol, c);
 
-		JButton btn_add = ButtonsFactory.createButton("hinzufügen");
+		JButton btn_add = ButtonsFactory.createButton(Localization.get("label.save"));
 		btn_add.setFont(Mainframe.defaultFont);
 		btn_add.addActionListener(e -> addBuch());
 
-		JButton btn_abort = ButtonsFactory.createButton("abbrechen");
+		JButton btn_abort = ButtonsFactory.createButton(Localization.get("label.abort"));
 		btn_abort.setFont(Mainframe.defaultFont);
 		btn_abort.addActionListener(arg0 -> dispose());
 		
@@ -366,7 +366,7 @@ public class Dialog_add_Wishlist extends JDialog {
                 wishlist.wishlistEntries.add(new Book_Wishlist(autor, titel, bemerkung, serie, seriePart, datum, true));
                 dispose();
             } else {
-                txtTitle.setText("Buch bereits vorhanden!");
+                txtTitle.setText(Localization.get("text.duplicateError"));
                 txtTitle.setBackground(new Color(255, 105, 105));
             }
             Mainframe.logger.info("Book add: saved successfully");
