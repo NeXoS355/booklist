@@ -8,23 +8,18 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.Serial;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.UIManager;
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import application.Book_Booklist;
 import application.HandleConfig;
@@ -47,7 +42,7 @@ public class Dialog_add_Booklist extends JDialog {
 	private final JCheckBox checkTo;
 	private final CustomTextField txtBorrowedTo;
 	private final CustomTextField txtNote;
-	private final CustomTextField txtSerie;
+	private final CustomTextField txtSeries;
 	private final CustomTextField txtSeriesVol;
 	private final JCheckBox checkEbook;
 	private final JButton btn_add;
@@ -94,45 +89,67 @@ public class Dialog_add_Booklist extends JDialog {
 		txtAuthor.addKeyListener(new KeyAdapter() {
 
 			@Override
-			public void keyReleased(KeyEvent e) {
-				int typed = txtAuthor.getCaretPosition();
-
-				if (e.getKeyCode() >= 65 && e.getKeyCode() <= 105) {
-
-					String typedString = txtAuthor.getText().substring(0, typed);
-
-					if (!txtAuthor.getText().isEmpty()) {
-						String[] autoren = autoCompletion(typedString, "author");
-						for (int i = 0; i < autoren.length && autoren[i] != null; i++) {
-							int autorenLength = autoren[i].length();
-							String setText = autoren[i].substring(typed, autorenLength);
-							txtAuthor.setText(typedString + setText);
-							txtAuthor.setCaretPosition(typed);
-							txtAuthor.setSelectionStart(typed);
-							txtAuthor.setSelectionEnd(autoren[i].length());
-						}
-					}
-				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-					typed = txtAuthor.getCaretPosition();
-					txtAuthor.setText(txtAuthor.getText().substring(0, typed));
-				} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-					typed = txtAuthor.getCaretPosition();
-					txtAuthor.setText(txtAuthor.getText().substring(0, typed));
-				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBook();
+			public void keyPressed(KeyEvent e) {
+				switch (e.getKeyCode()) {
+					case KeyEvent.VK_ENTER -> addBook(); // Speichern
+					case KeyEvent.VK_ESCAPE -> dispose(); // Abbrechen
 				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
+			}
+		});
+		JPopupMenu suggestionsPopup = new JPopupMenu();
+		txtAuthor.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				showSuggestions();
 			}
 
 			@Override
-			public void keyPressed(KeyEvent e) {
-				if (txtAuthor.getText().length() > 50) {
-					txtAuthor.setEditable(false);
-					txtAuthor.setText(Localization.get("text.longError"));
-				}
+			public void removeUpdate(DocumentEvent e) {
+				showSuggestions();
 			}
 
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// not used
+			}
+
+			private void showSuggestions() {
+				String typedText = txtAuthor.getText().trim();
+
+				// Popup zurücksetzen
+				suggestionsPopup.setVisible(false);
+				suggestionsPopup.removeAll();
+
+				if (typedText.isEmpty()) {
+					return; // Keine Eingabe -> nichts tun
+				} else if (typedText.length() > 50) {
+					JMenuItem item = new JMenuItem(Localization.get("text.longError"));
+					suggestionsPopup.add(item);
+					suggestionsPopup.show(txtAuthor, 0, txtAuthor.getHeight());
+					txtAuthor.setEditable(false);
+					return;
+				}
+
+				String[] suggestions = autoCompletion(typedText, "author");
+
+				if (suggestions.length == 0) {
+					return; // Keine Vorschläge -> nichts anzeigen
+				}
+
+				// Vorschläge hinzufügen
+				for (String suggestion : suggestions) {
+					JMenuItem item = new JMenuItem(suggestion);
+					item.addActionListener(e -> {
+                        txtAuthor.setText(suggestion);
+                        suggestionsPopup.setVisible(false);
+                    });
+					suggestionsPopup.add(item);
+				}
+
+				// Popup anzeigen
+				suggestionsPopup.show(txtAuthor, 0, txtAuthor.getHeight());
+				txtAuthor.grabFocus();
+			}
 		});
 
 		JLabel lbl_title = new JLabel(Localization.get("label.title") + ":");
@@ -185,42 +202,71 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(width, height));
 
-		txtSerie = new CustomTextField();
-		txtSerie.setPreferredSize(new Dimension(50, height));
-		txtSerie.addKeyListener(new KeyAdapter() {
+		txtSeries = new CustomTextField();
+		txtSeries.setPreferredSize(new Dimension(50, height));
+		txtSeries.addKeyListener(new KeyAdapter() {
 
 			@Override
-			public void keyReleased(KeyEvent e) {
-				int typed = txtSerie.getCaretPosition();
-
-				if (e.getKeyCode() >= 65 && e.getKeyCode() <= 105) {
-
-					String typedString = txtSerie.getText().substring(0, typed);
-
-					if (!txtSerie.getText().isEmpty()) {
-						String[] serien = autoCompletion(typedString, "series");
-						for (int i = 0; i < serien.length && serien[i] != null; i++) {
-							int autorenLength = serien[i].length();
-							String setText = serien[i].substring(typed, autorenLength);
-							txtSerie.setText(typedString + setText);
-							txtSerie.setCaretPosition(typed);
-							txtSerie.setSelectionStart(typed);
-							txtSerie.setSelectionEnd(serien[i].length());
-						}
-					}
-				} else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-					typed = txtSerie.getCaretPosition();
-					txtSerie.setText(txtSerie.getText().substring(0, typed));
-				} else if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-					typed = txtSerie.getCaretPosition();
-					txtSerie.setText(txtSerie.getText().substring(0, typed));
-				} else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBook();
+			public void keyPressed(KeyEvent e) {
+				switch (e.getKeyCode()) {
+					case KeyEvent.VK_ENTER -> addBook(); // Speichern
+					case KeyEvent.VK_ESCAPE -> dispose(); // Abbrechen
 				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
+			}
+		});
+		txtSeries.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				showSuggestions();
 			}
 
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				showSuggestions();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// not used
+			}
+
+			private void showSuggestions() {
+				String typedText = txtSeries.getText().trim();
+
+				// Popup zurücksetzen
+				suggestionsPopup.setVisible(false);
+				suggestionsPopup.removeAll();
+
+				if (typedText.isEmpty()) {
+					return; // Keine Eingabe -> nichts tun
+				} else if (typedText.length() > 50) {
+					JMenuItem item = new JMenuItem(Localization.get("text.longError"));
+					suggestionsPopup.add(item);
+					suggestionsPopup.show(txtSeries, 0, txtSeries.getHeight());
+					txtSeries.setEditable(false);
+					return;
+				}
+
+				String[] suggestions = autoCompletion(typedText, "series");
+
+				if (suggestions.length == 0) {
+					return; // Keine Vorschläge -> nichts anzeigen
+				}
+
+				// Vorschläge hinzufügen
+				for (String suggestion : suggestions) {
+					JMenuItem item = new JMenuItem(suggestion);
+					item.addActionListener(e -> {
+                        txtSeries.setText(suggestion);
+                        suggestionsPopup.setVisible(false);
+                    });
+					suggestionsPopup.add(item);
+				}
+
+				// Popup anzeigen
+				suggestionsPopup.show(txtSeries, 0, txtSeries.getHeight());
+				txtSeries.grabFocus();
+			}
 		});
 
 		txtSeriesVol = new CustomTextField();
@@ -301,7 +347,7 @@ public class Dialog_add_Booklist extends JDialog {
 		c.weightx = 0.5;
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		panel_center.add(txtSerie, c);
+		panel_center.add(txtSeries, c);
 		c.gridx = 2;
 		c.gridy = 3;
 		c.weightx = 0.1;
@@ -434,7 +480,7 @@ public class Dialog_add_Booklist extends JDialog {
 			String autor = txtAuthor.getText();
 			String titel = txtTitle.getText();
 			String bemerkung = txtNote.getText();
-			String serie = txtSerie.getText();
+			String serie = txtSeries.getText();
 			String seriePart = txtSeriesVol.getText();
 			boolean ebook = checkEbook.isSelected();
 			Timestamp datum = new Timestamp(System.currentTimeMillis());
@@ -498,43 +544,33 @@ public class Dialog_add_Booklist extends JDialog {
 	 * 
 	 */
 	public String[] autoCompletion(String search, String field) {
-		String[] returnArray = null;
-		if (field.equals("author")) {
-			int j = 0;
-			int anz_autoren = allEntries.authors.size();
-			String[] result = new String[anz_autoren];
-			for (int i = 0; i < anz_autoren; i++) {
-				if (allEntries.authors.get(i).startsWith(search)) {
-					result[j] = allEntries.authors.get(i);
-					j++;
-				}
-			}
-			returnArray = new String[j];
-			for (int i = 0; i < j; i++) {
-				if (result[i] != null) {
-					returnArray[i] = result[i];
-				}
-
-			}
-		} else if (field.equals("series")) {
-			int j = 0;
-			String[] serien = allEntries.getSeriesFromAuthor(txtAuthor.getText());
-			String[] result = new String[serien.length];
-            for (String s : serien) {
-                if (s.startsWith(search)) {
-                    result[j] = s;
-                    j++;
-                }
-            }
-			returnArray = new String[j];
-			for (int i = 0; i < j; i++) {
-				if (result[i] != null) {
-					returnArray[i] = result[i];
-				}
-
-			}
+		// Eingabe validieren
+		if (search == null || search.isEmpty() || field == null) {
+			return new String[0];
 		}
-		return returnArray;
+		search = search.trim().toLowerCase();
+		List<String> suggestions;
+		if (field.equals("author")) {
+			String finalSearch = search;
+			suggestions = Mainframe.allEntries.authors.stream()
+					.filter(author -> author.toLowerCase().startsWith(finalSearch))
+					.collect(Collectors.toList());
+		} else if (field.equals("series")) {
+			String author = txtAuthor.getText();
+			if (author == null || author.isEmpty()) {
+				return new String[0];
+			}
+			String[] series = Mainframe.allEntries.getSeriesFromAuthor(author);
+			suggestions = new ArrayList<>();
+			for (String s : series) {
+				if (s.toLowerCase().startsWith(search)) {
+					suggestions.add(s);
+				}
+			}
+		} else {
+			return new String[0];
+		}
+		return suggestions.toArray(new String[0]);
 	}
 
 	/**
