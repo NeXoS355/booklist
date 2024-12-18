@@ -3,8 +3,7 @@ package gui;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.net.URL;
@@ -44,6 +43,7 @@ public class Dialog_settings extends JDialog {
     private static JTextField txtApiUrl;
 	private static JTextField txtApiToken;
 	private static JLabel lblQrCode;
+	private static boolean restartNeeded = false;
 
     public Dialog_settings(Frame owner, boolean modal) {
 		this.setTitle(Localization.get("t.settings"));
@@ -195,7 +195,8 @@ public class Dialog_settings extends JDialog {
 		c.gridy = 10;
 		Integer[] arrayDark = { 0, 1 };
         cmbDark = new JComboBox<>(arrayDark);
-		cmbDark.setSelectedItem(HandleConfig.darkmode);
+		cmbDark.setSelectedItem(HandleConfig.tmpDarkmode);
+		cmbDark.addItemListener(e -> restartNeeded = true);
 		pnlLeft.add(cmbDark, c);
 		JButton btnSave = ButtonsFactory.createButton(Localization.get("label.save"));
 		btnSave.setFont(Mainframe.defaultFont);
@@ -317,31 +318,36 @@ public class Dialog_settings extends JDialog {
 
 	@SuppressWarnings("DataFlowIssue")
     public static void saveSettings() {
-			Mainframe.logger.info("Save Settings in Program");
-			// set Parameters which can be changed on the fly
-			try {
-				HandleConfig.lang= (String) cmbLang.getSelectedItem();
-				Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFont.getSelectedItem());
-				Mainframe.descFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFontDesc.getSelectedItem());
-				HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
-				HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
-				HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
-				HandleConfig.debug = (String) cmbDebug.getSelectedItem();
-				HandleConfig.backup = (int) cmbBackup.getSelectedItem();
-				HandleConfig.darkmode = (int) cmbDark.getSelectedItem();
-				HandleConfig.apiToken = txtApiToken.getText();
-				HandleConfig.apiURL = txtApiUrl.getText();
-			} catch (NullPointerException e) {
-				Mainframe.logger.error(e.getMessage());
+		Mainframe.logger.info("Save Settings in Program");
+		boolean apiChanged = !HandleConfig.apiToken.equals(txtApiToken.getText()) || !HandleConfig.apiURL.equals(txtApiUrl.getText());
+
+		try {
+			HandleConfig.lang = (String) cmbLang.getSelectedItem();
+			Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFont.getSelectedItem());
+			Mainframe.descFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFontDesc.getSelectedItem());
+			HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
+			HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
+			HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
+			HandleConfig.debug = (String) cmbDebug.getSelectedItem();
+			HandleConfig.backup = (int) cmbBackup.getSelectedItem();
+			HandleConfig.tmpDarkmode = (int) cmbDark.getSelectedItem();
+			HandleConfig.apiToken = txtApiToken.getText();
+			HandleConfig.apiURL = txtApiUrl.getText();
+		} catch (NullPointerException e) {
+			Mainframe.logger.error(e.getMessage());
+			JOptionPane.showMessageDialog(null, Localization.get("settings.saveError"));
+		}
+		if (!HandleConfig.apiURL.isEmpty()) {
+			if (HandleConfig.apiURL.endsWith("/")) {
+				HandleConfig.apiURL = HandleConfig.apiURL.substring(0, HandleConfig.apiURL.length() - 1);
+				System.out.println(HandleConfig.apiURL);
 			}
-			if (!HandleConfig.apiURL.isEmpty()) {
-				if (HandleConfig.apiURL.endsWith("/")) {
-					HandleConfig.apiURL = HandleConfig.apiURL.substring(0, HandleConfig.apiURL.length() - 1);
-					System.out.println(HandleConfig.apiURL);
-				}
-			}
-		Mainframe.executor.submit(Mainframe::checkApiConnection);
+		}
+		if (apiChanged)
+			Mainframe.executor.submit(Mainframe::checkApiConnection);
 		Mainframe.executor.submit(HandleConfig::writeSettings);
+		if (restartNeeded)
+			JOptionPane.showMessageDialog(null, Localization.get("settings.restart"));
 	}
 	// Method to generate and display a QR code
 	private void generateQRCode(String url) {

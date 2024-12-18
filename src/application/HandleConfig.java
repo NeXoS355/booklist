@@ -27,6 +27,7 @@ public class HandleConfig {
 	public static String apiToken = generateRandomToken(64);
 	public static String apiURL = "";
 	public static int darkmode = 0;
+    public static int tmpDarkmode = 0;
 
 	/**
 	 * Constructor 
@@ -170,6 +171,7 @@ public class HandleConfig {
                                     int tmp = Integer.parseInt(value.trim());
                                     if (tmp >= 0 && tmp < 2) {
                                         darkmode = tmp;
+                                        tmpDarkmode = tmp;
                                         logger.info("darkmode: {}", darkmode);
                                     } else
                                         JOptionPane.showMessageDialog(null,
@@ -274,7 +276,7 @@ public class HandleConfig {
             out.println("backup=" + backup);
             out.println("apiToken=" + apiToken);
             out.println("apiURL=" + apiURL);
-            out.println("darkmode=" + darkmode);
+            out.println("darkmode=" + tmpDarkmode);
 
             TableColumnModel columnModel = Mainframe.table.getColumnModel();
 
