@@ -772,9 +772,11 @@ public class Mainframe extends JFrame {
      * @param to   - path where to save the file
      */
     private static void copyFileToDirectory(File file, File to) throws IOException {
-        boolean success = false;
+        boolean success;
         if (!to.exists()) {
             success = to.mkdirs();
+        } else {
+            success = true;
         }
         if (success) {
             File n = new File(to.getAbsolutePath() + "/" + file.getName());
