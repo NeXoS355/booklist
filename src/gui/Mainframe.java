@@ -655,10 +655,13 @@ public class Mainframe extends JFrame {
         });
     }
 
-    private static void updateLocationAndBounds() {
+    static void updateLocationAndBounds() {
         for (JPanel notification : activeNotifications) {
             int index = activeNotifications.indexOf(notification) + 1;
             notification.setLocation(0, splitPane.getHeight() - index*30 - index*5);
+            notification.setBounds(0, splitPane.getHeight() - index*30 - index*5, notification.getWidth(), notification.getHeight());
+            System.out.println(index + "/" + activeNotifications.size() + " | " + (splitPane.getHeight() - index*30 - index*5));
+
         }
         listScrollPane.setBounds(0,0, layeredPane.getWidth(), layeredPane.getHeight());
         // Revalidate und Repaint sofort aufrufen
@@ -841,7 +844,6 @@ public class Mainframe extends JFrame {
         // Benachrichtigungsleiste erstellen
         customNotificationPanel notificationPanel = new customNotificationPanel(message, timeout);
         // Rufe den Callback auf (im Event-Dispatch-Thread für GUI-Sicherheit)
-
         notificationPanel.setLocation(0, splitPane.getHeight() - ((activeNotifications.size()) * 30) - ((activeNotifications.size()) * 5));
         if (bookLinkIndex >= 0)
             notificationPanel.addBookReference(bookLinkIndex);
@@ -1149,7 +1151,7 @@ public class Mainframe extends JFrame {
                             showNotification(MessageFormat.format(Localization.get("api.importDeclined"),tmp), 15);
                         }
                 }
-                if (imported >= 1 || rejected > 0) {
+                if (imported >= 1) {
                         for(String tmp : importedBooks) {
                             showNotification(MessageFormat.format(Localization.get("api.importSuccess"),tmp),15);
                         }
@@ -1175,10 +1177,8 @@ public class Mainframe extends JFrame {
                         responseCode = con.getResponseCode();
                         logger.info("Web API DELETE books responseCode: {}", responseCode);
 
-                        if (imported >= 1) {
-                            uploadToApi(showUi);
-                            downloaded = true;
-                        }
+                        uploadToApi(showUi);
+                        downloaded = true;
                     } catch (Exception e) {
                         logger.error(e.getMessage());
                     }

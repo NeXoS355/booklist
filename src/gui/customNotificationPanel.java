@@ -11,7 +11,6 @@ public class customNotificationPanel extends JPanel {
 
     final JLabel  notificationLabel;
     Dimension notificationSize;
-    final static Point location = new Point(0, splitPane.getHeight() - activeNotifications.size()*30 - activeNotifications.size()*5);
     int timer;
     final int oriTimer;
 
@@ -49,7 +48,7 @@ public class customNotificationPanel extends JPanel {
         // Panel zur LayeredPane hinzufügen
         Mainframe.layeredPane.add(this, Integer.valueOf(2));
         activeNotifications.add(this);
-        setLocation(location);
+        Mainframe.updateLocationAndBounds();
 
         setVisible(true);
         updateUI();
@@ -84,8 +83,6 @@ public class customNotificationPanel extends JPanel {
         notificationLabel.setText(text);
         setSize(text);
         updateUI();
-        revalidate();
-        repaint();
         this.timer = this.oriTimer;
     }
 
