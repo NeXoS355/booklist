@@ -85,6 +85,7 @@ public class Dialog_settings extends JDialog {
 		pnlLeft.add(lblLang, c);
 		c.gridx = 1;
 		c.gridy = 0;
+		c.fill = GridBagConstraints.NONE;
 		String[] lang = { "Deutsch", "English" };
 		cmbLang = new JComboBox<>(lang);
 		cmbLang.setSelectedItem(HandleConfig.lang);

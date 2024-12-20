@@ -683,10 +683,10 @@ public class Mainframe extends JFrame {
                     JOptionPane.YES_NO_OPTION);
             if (answer == JOptionPane.YES_OPTION) {
                 allEntries.delete(index);
+                allEntries.checkAuthors();
+                showNotification(MessageFormat.format(Localization.get("book.deleted"),searchAuthor,searchTitle));
+                logger.info("Book deleted: {};{}", searchAuthor, searchTitle);
             }
-            allEntries.checkAuthors();
-            showNotification(MessageFormat.format(Localization.get("book.deleted"),searchAuthor,searchTitle));
-            logger.info("Book deleted: {};{}", searchAuthor, searchTitle);
         }
         if (!treeSelection.isEmpty())
             search(treeSelection);
