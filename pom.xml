@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>booklist</groupId>
 	<artifactId>booklist</artifactId>
-	<version>3.2.7</version>
+	<version>3.2.8</version>
 	<name>booklist</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
