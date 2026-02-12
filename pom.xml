@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>booklist</groupId>
 	<artifactId>booklist</artifactId>
-	<version>3.2.8</version>
+	<version>3.2.9</version>
 	<name>booklist</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -59,7 +59,7 @@
 		<dependency>
 			<groupId>com.formdev</groupId>
 			<artifactId>flatlaf</artifactId>
-			<version>3.5.2</version>
+			<version>3.7</version>
 		</dependency>
 		<!--
             https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
@@ -122,12 +122,12 @@
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-core</artifactId>
-				<version>2.24.1</version>
+				<version>2.25.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-api</artifactId>
-				<version>2.24.1</version>
+				<version>2.25.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.derby</groupId>
@@ -147,27 +147,27 @@
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
-				<version>2.11.0</version>
+				<version>2.13.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.opencsv</groupId>
 				<artifactId>opencsv</artifactId>
-				<version>5.9</version>
+				<version>5.12.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.zxing</groupId>
 				<artifactId>core</artifactId>
-				<version>3.5.3</version>
+				<version>3.5.4</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.zxing</groupId>
 				<artifactId>javase</artifactId>
-				<version>3.5.3</version>
+				<version>3.5.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-api</artifactId>
-				<version>5.11.2</version>
+				<version>5.14.2</version>
 			</dependency>
 
 		</dependencies>
