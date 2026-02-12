@@ -21,12 +21,12 @@ Tested with jdk21 and the following dependencies (see also pom.xml)
     derby 10.17.1.0
     derbyshared 10.17.1.0
     derbytools 10.17.1.0
-    gson 2.11.0
-    log4j-core 2.23.1
-    log4j-api 2.23.1
-    opencsv 5.9
-    zxing_core 3.5.3
-    zxing_javase 3.5.3
-    flatlaf 3.5.2
+    gson 2.13.2
+    log4j-core 2.25.3
+    log4j-api 2.25.3
+    opencsv 5.12.0
+    zxing_core 3.5.4
+    zxing_javase 3.5.4
+    flatlaf 3.7
 
     
