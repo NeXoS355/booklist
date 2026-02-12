@@ -1286,6 +1286,7 @@ public class Mainframe extends JFrame {
       jsonBook.addProperty("bid", book.getBid());
       jsonBook.addProperty("author", book.getAuthor());
       jsonBook.addProperty("title", book.getTitle());
+      jsonBook.addProperty("series", book.getSeries());
       jsonArray.add(jsonBook);
 
     }
