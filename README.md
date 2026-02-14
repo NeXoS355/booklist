@@ -21,7 +21,6 @@ Pairs with a self-hosted [Web App](https://github.com/NeXoS355/booklist_webapp) 
 
 **Automation**
 - Fetch covers, descriptions and metadata via Google Books API
-- Scan ISBN barcodes to quickly find book info
 - Built-in update mechanism with SHA-256 verification
 
 **Wishlist**
@@ -64,7 +63,7 @@ java -jar target/booklist-3.4.1-jar-with-dependencies.jar
 | [Apache Derby](https://db.apache.org/derby/) | 10.17.1.0 | Embedded database |
 | [Gson](https://github.com/google/gson) | 2.13.2 | JSON parsing |
 | [OpenCSV](https://opencsv.sourceforge.net/) | 5.12.0 | CSV export |
-| [ZXing](https://github.com/zxing/zxing) | 3.5.4 | Barcode scanning |
+| [ZXing](https://github.com/zxing/zxing) | 3.5.4 | QRCode generation |
 | [Log4j](https://logging.apache.org/log4j/) | 2.25.3 | Logging |
 
 ## License
