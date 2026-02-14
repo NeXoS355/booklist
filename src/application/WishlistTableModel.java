@@ -1,5 +1,7 @@
 package application;
 
+import gui.Localization;
+
 import javax.swing.table.DefaultTableModel;
 import java.io.Serial;
 
@@ -11,7 +13,12 @@ public class WishlistTableModel extends DefaultTableModel {
     public WishlistTableModel(WishlistListModel books) {
 
 		super();
-        String[] columnNames = {"Autor", "Titel", "Serie", "Bemerkung"};
+        String[] columnNames = {
+            Localization.get("label.author"),
+            Localization.get("label.title"),
+            Localization.get("label.series"),
+            Localization.get("label.note")
+        };
         this.setColumnIdentifiers(columnNames);
 		
 		for(int i = 0;i<this.getRowCount();i++) {

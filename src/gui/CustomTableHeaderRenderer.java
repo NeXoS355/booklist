@@ -25,27 +25,25 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 	private final Map<Integer, Icon> columnIcons = new HashMap<>();
 
     public CustomTableHeaderRenderer() {
-		if (HandleConfig.darkmode == 1) {
-			URL ebookIconURL = getClass().getResource("/resources/ebook_inv.png");
-			assert ebookIconURL != null;
+		String ebookPath = HandleConfig.darkmode == 1 ? "/resources/ebook_inv.png" : "/resources/ebook.png";
+		URL ebookIconURL = getClass().getResource(ebookPath);
+		if (ebookIconURL != null) {
 			ImageIcon ebookIcon = new ImageIcon(ebookIconURL);
 			scaledEbookIcon = new ImageIcon(
 					ebookIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
 			);
 		} else {
-			URL ebookIconURL = getClass().getResource("/resources/ebook.png");
-			assert ebookIconURL != null;
-			ImageIcon ebookIcon = new ImageIcon(ebookIconURL);
-			scaledEbookIcon = new ImageIcon(
-					ebookIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
-			);
+			Mainframe.logger.error("Resource not found: {}", ebookPath);
 		}
 		URL starIconURL = getClass().getResource("/resources/star.png");
-		assert starIconURL != null;
-		ImageIcon starIcon = new ImageIcon(starIconURL);
-		scaledStarIcon = new ImageIcon(
-				starIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
-		);
+		if (starIconURL != null) {
+			ImageIcon starIcon = new ImageIcon(starIconURL);
+			scaledStarIcon = new ImageIcon(
+					starIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH)
+			);
+		} else {
+			Mainframe.logger.error("Resource not found: /resources/star.png");
+		}
     }
 
 	// Methode zum Setzen eines Icons für eine bestimmte Spalte
@@ -60,9 +58,9 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 		setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY));
 		setupHeaderCell(component, column, value);
 
-		if (table.getColumnName(column).equals("Rating"))
+		if (table.getColumnName(column).equals(Localization.get("column.rating")))
 			setColumnIcon(column, scaledStarIcon);
-		else if (table.getColumnName(column).equals("E-Book"))
+		else if (table.getColumnName(column).equals(Localization.get("column.ebook")))
 			setColumnIcon(column, scaledEbookIcon);
 		else
 			setColumnIcon(column, null);

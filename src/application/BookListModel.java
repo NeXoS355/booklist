@@ -83,10 +83,11 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 						desc = rs.getString("description");
 						isbn = rs.getString("isbn");
 						borrowed = rs.getString("ausgeliehen");
-						if (borrowed.equals("an")) {
+						BorrowStatus borrowStatus = BorrowStatus.fromDbValue(borrowed);
+						if (borrowStatus == BorrowStatus.LENT_TO) {
 							boolBorrowed = true;
 							borrowedTo = rs.getString("name").trim();
-						} else if (borrowed.equals("von")) {
+						} else if (borrowStatus == BorrowStatus.BORROWED_FROM) {
 							boolBorrowed = true;
 							borrowedFrom = rs.getString("name").trim();
 						}
@@ -110,6 +111,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			}
 		} catch (SQLException | IOException e) {
 			Mainframe.logger.error(e.getMessage());
+		} finally {
+			Database.closeResultSet(rs);
 		}
 	}
 
@@ -122,8 +125,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 */
 	public static void loadOnDemand(Book_Booklist book) {
 		if (Objects.equals(book.getDesc(), "") && book.getPic() == null) {
+			ResultSet rs = null;
 			try {
-				ResultSet rs = Database.selectFromBooklist(book.getBid());
+				rs = Database.selectFromBooklist(book.getBid());
 				while (rs.next()) {
 					String note = rs.getString("bemerkung");
 					Blob picture = rs.getBlob("pic");
@@ -146,11 +150,12 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					book.setRating(rating, false);
 
 					String borrowed = rs.getString("ausgeliehen");
-					if (borrowed.equals("an")) {
+					BorrowStatus borrowStatus = BorrowStatus.fromDbValue(borrowed);
+					if (borrowStatus == BorrowStatus.LENT_TO) {
 						String borrowedTo = rs.getString("name").trim();
 						book.setBorrowedTo(borrowedTo);
 						book.setBorrowed(true);
-					} else if (borrowed.equals("von")) {
+					} else if (borrowStatus == BorrowStatus.BORROWED_FROM) {
 						String borrowedFrom = rs.getString("name").trim();
 						book.setBorrowedFrom(borrowedFrom);
 						book.setBorrowed(true);
@@ -159,6 +164,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				}
 			} catch (SQLException | IOException e) {
 				Mainframe.logger.error(e.getMessage());
+			} finally {
+				Database.closeResultSet(rs);
 			}
         }
 	}
@@ -171,15 +178,18 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		authors.clear();
 
 		if (useDB) {
+			ResultSet rs = null;
 			try {
 				String[] columnName = { "autor" };
-				ResultSet rs = Database.getColumnsFromBooklist(columnName);
+				rs = Database.getColumnsFromBooklist(columnName);
 				while (rs.next()) {
 					authors.add(rs.getString(1));
 				}
 				Mainframe.logger.info("Updated Author List through DB");
 			} catch (SQLException e) {
 				Mainframe.logger.error(e.getMessage());
+			} finally {
+				Database.closeResultSet(rs);
 			}
 		} else {
 			for (int i = 0; i < getBooks().size(); i++) {
@@ -226,8 +236,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		ArrayList<String> seriesList = new ArrayList<>();
 
 		if (useDB) {
+			ResultSet rs = null;
 			try {
-				ResultSet rs = Database.getColumnWithWhere("serie", "autor", author);
+				rs = Database.getColumnWithWhere("serie", "autor", author);
 				while (rs.next()) {
 					String series = rs.getString(1);
 					if (!series.isEmpty())
@@ -236,6 +247,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				Mainframe.logger.info("Got Series from Author through DB: {}", author);
 			} catch (SQLException e) {
 				Mainframe.logger.error(e.getMessage());
+			} finally {
+				Database.closeResultSet(rs);
 			}
 		} else {
 			for (int i = 0; i < getBooks().size(); i++) {
@@ -275,8 +288,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 */
 	public static boolean authorHasSeries(String author) {
 		if (useDB) {
+			ResultSet rs = null;
 			try {
-				ResultSet rs = Database.getColumnWithWhere("serie", "autor", author);
+				rs = Database.getColumnWithWhere("serie", "autor", author);
 				while (rs.next()) {
 					String series = rs.getString(1);
 					if (!series.isEmpty()) {
@@ -285,6 +299,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				}
 			} catch (SQLException e) {
 				Mainframe.logger.error(e.getMessage());
+			} finally {
+				Database.closeResultSet(rs);
 			}
 		} else {
 			for (int i = 0; i < Mainframe.allEntries.getBooks().size(); i++) {
@@ -331,6 +347,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			}
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
+		} finally {
+			Database.closeResultSet(rs);
 		}
 		return mostOfValue;
 	}
@@ -367,6 +385,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			}
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
+		} finally {
+			Database.closeResultSet(rs);
 		}
 		return BestOfRating;
 	}
@@ -409,6 +429,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			}
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
+		} finally {
+			Database.closeResultSet(rs);
 		}
 		return count;
 	}
@@ -433,6 +455,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
+		} finally {
+			Database.closeResultSet(rs);
 		}
 		result.append("</html>");
 		return result.toString();

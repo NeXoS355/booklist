@@ -72,15 +72,13 @@ public class Book_Booklist {
 		try {
 			if (db) {
 				if (!borrowedTo.isEmpty())
-
-					bid = Database.addToBooklist(author, title, "an", borrowedTo, note, series, seriesVol, ebook,
+					bid = Database.addToBooklist(author, title, BorrowStatus.LENT_TO.getDbValue(), borrowedTo, note, series, seriesVol, ebook,
 							date.toString());
-
 				else if (!borrowedFrom.isEmpty())
-					bid = Database.addToBooklist(author, title, "von", borrowedFrom, note, series, seriesVol, ebook,
+					bid = Database.addToBooklist(author, title, BorrowStatus.BORROWED_FROM.getDbValue(), borrowedFrom, note, series, seriesVol, ebook,
 							date.toString());
 				else
-					bid = Database.addToBooklist(author, title, "nein", "", note, series, seriesVol, ebook,
+					bid = Database.addToBooklist(author, title, BorrowStatus.NONE.getDbValue(), "", note, series, seriesVol, ebook,
 							date.toString());
 			}
 		} catch (SQLException e) {

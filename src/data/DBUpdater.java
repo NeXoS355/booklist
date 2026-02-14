@@ -281,11 +281,10 @@ public class DBUpdater {
 	 * @param con - Connection to Database
 	 */
 	public static String checkVersion(Connection con) {
-		Statement st;
-		ResultSet rs;
+		ResultSet rs = null;
 		String version = "";
 		try {
-			st = con.createStatement();
+			Statement st = con.createStatement();
 			rs = st.executeQuery("SELECT version from versions");
 			while (rs.next()) {
 				version = rs.getString("version").trim();
@@ -293,6 +292,8 @@ public class DBUpdater {
 			}
 		} catch (SQLException e) {
 			JOptionPane.showMessageDialog(null, "version konnte nicht aus der Datenbank ausgelesen werden!");
+		} finally {
+			Database.closeResultSet(rs);
 		}
 		return version;
 	}

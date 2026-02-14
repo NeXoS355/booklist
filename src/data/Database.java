@@ -101,23 +101,37 @@ public class Database {
 				printSQLException(e);
 			}
 		} finally {
-			if (createBooklist != null && createWishlist != null) {
-				try {
-					createBooklist.close();
-					createWishlist.close();
-                    assert createVersions != null;
-                    createVersions.close();
-					Mainframe.logger.info("DB closed");
-				} catch (SQLException e) {
-					Mainframe.logger.error(e.getMessage());
-				}
+			try {
+				if (createBooklist != null) createBooklist.close();
+				if (createWishlist != null) createWishlist.close();
+				if (createVersions != null) createVersions.close();
+				Mainframe.logger.info("DB closed");
+			} catch (SQLException e) {
+				Mainframe.logger.error(e.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * Closes a ResultSet and its parent Statement to prevent resource leaks.
+	 *
+	 * @param rs - ResultSet to close (may be null)
+	 */
+	public static void closeResultSet(ResultSet rs) {
+		if (rs != null) {
+			try {
+				Statement st = rs.getStatement();
+				rs.close();
+				if (st != null) st.close();
+			} catch (SQLException e) {
+				Mainframe.logger.error(e.getMessage());
 			}
 		}
 	}
 
 	/**
 	 * prints SQL Exception to console and logger
-	 * 
+	 *
 	 * @param e - Exception handler
 	 */
 	private static void printSQLException(SQLException e) {
@@ -339,7 +353,7 @@ public class Database {
 	 * @return - DB version String with last modified date
 	 */
 	public static String readCurrentLayoutVersion() {
-		ResultSet rs;
+		ResultSet rs = null;
 		String version = "";
 		String sql = "SELECT * FROM versions";
 		try {
@@ -348,9 +362,10 @@ public class Database {
 			while (rs.next()) {
 				version = rs.getString("version").trim();
 			}
-			st.close();
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim auslesen der DB Version");
+		} finally {
+			closeResultSet(rs);
 		}
 		return version;
 	}

@@ -55,10 +55,12 @@ public class Dialog_edit_Wishlist extends JDialog {
     Book_Wishlist eintrag = entries.getElementAt(index);
 
     URL iconURL = getClass().getResource("/resources/Icon.png");
-    // iconURL is null when not found
-    assert iconURL != null;
-    ImageIcon icon = new ImageIcon(iconURL);
-    this.setIconImage(icon.getImage());
+    if (iconURL != null) {
+      ImageIcon icon = new ImageIcon(iconURL);
+      this.setIconImage(icon.getImage());
+    } else {
+      Mainframe.logger.error("Resource not found: /resources/Icon.png");
+    }
 
     this.setLayout(new BorderLayout(10, 10));
 

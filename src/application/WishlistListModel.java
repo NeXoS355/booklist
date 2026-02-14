@@ -38,9 +38,10 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 				}
 
 			}
-			rs.close();
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
+		} finally {
+			Database.closeResultSet(rs);
 		}
 	}
 

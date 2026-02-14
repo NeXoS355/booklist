@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -34,12 +35,12 @@ public class Dialog_settings extends JDialog {
   private static JComboBox<String> cmbLang;
   private static JComboBox<Integer> cmbFont;
   private static JComboBox<Integer> cmbFontDesc;
-  private static JComboBox<Integer> cmbAutoDownload;
-  private static JComboBox<Integer> cmbOnDemand;
+  private static JCheckBox chkAutoDownload;
+  private static JCheckBox chkOnDemand;
   private static JComboBox<String> cmbSearchParam;
   private static JComboBox<String> cmbDebug;
   private static JComboBox<Integer> cmbBackup;
-  private static JComboBox<Integer> cmbDark;
+  private static JCheckBox chkDark;
   private static JTextField txtApiUrl;
   private static JTextField txtApiToken;
   private static JLabel lblQrCode;
@@ -57,7 +58,10 @@ public class Dialog_settings extends JDialog {
       connectionUrl = getClass().getResource("/resources/connection_good.png");
     else
       connectionUrl = getClass().getResource("/resources/connection_bad.png");
-    assert connectionUrl != null;
+    if (connectionUrl == null) {
+      Mainframe.logger.error("Resource not found: connection icon");
+      return;
+    }
     ImageIcon conIcon = new ImageIcon(connectionUrl);
 
     URL copyUrl;
@@ -65,7 +69,10 @@ public class Dialog_settings extends JDialog {
       copyUrl = getClass().getResource("/resources/copy_inv.png");
     else
       copyUrl = getClass().getResource("/resources/copy.png");
-    assert copyUrl != null;
+    if (copyUrl == null) {
+      Mainframe.logger.error("Resource not found: copy icon");
+      return;
+    }
     ImageIcon copyIcon = new ImageIcon(copyUrl);
 
     JPanel pnlLeft = new JPanel();
@@ -88,6 +95,7 @@ public class Dialog_settings extends JDialog {
     String[] lang = { "Deutsch", "English" };
     cmbLang = new JComboBox<>(lang);
     cmbLang.setSelectedItem(HandleConfig.lang);
+    cmbLang.addItemListener(e -> restartNeeded = true);
     pnlLeft.add(cmbLang, c);
     c.gridx = 0;
     c.gridy = 1;
@@ -137,10 +145,9 @@ public class Dialog_settings extends JDialog {
     pnlLeft.add(lblAutoDownload, c);
     c.gridx = 1;
     c.gridy = 5;
-    Integer[] arrayAutoDownload = { 0, 1 };
-    cmbAutoDownload = new JComboBox<>(arrayAutoDownload);
-    cmbAutoDownload.setSelectedItem(HandleConfig.autoDownload);
-    pnlLeft.add(cmbAutoDownload, c);
+    chkAutoDownload = new JCheckBox();
+    chkAutoDownload.setSelected(HandleConfig.autoDownload == 1);
+    pnlLeft.add(chkAutoDownload, c);
     c.gridx = 0;
     c.gridy = 6;
     JLabel lblOnDemand = new JLabel(Localization.get("settings.LoadOnDemand"));
@@ -148,10 +155,9 @@ public class Dialog_settings extends JDialog {
     pnlLeft.add(lblOnDemand, c);
     c.gridx = 1;
     c.gridy = 6;
-    Integer[] arrayOnDemand = { 0, 1 };
-    cmbOnDemand = new JComboBox<>(arrayOnDemand);
-    cmbOnDemand.setSelectedItem(HandleConfig.loadOnDemand);
-    pnlLeft.add(cmbOnDemand, c);
+    chkOnDemand = new JCheckBox();
+    chkOnDemand.setSelected(HandleConfig.loadOnDemand == 1);
+    pnlLeft.add(chkOnDemand, c);
     c.gridx = 0;
     c.gridy = 7;
     JLabel lblSearchParam = new JLabel(Localization.get("settings.searchParameter"));
@@ -193,11 +199,10 @@ public class Dialog_settings extends JDialog {
     pnlLeft.add(lblDark, c);
     c.gridx = 1;
     c.gridy = 10;
-    Integer[] arrayDark = { 0, 1 };
-    cmbDark = new JComboBox<>(arrayDark);
-    cmbDark.setSelectedItem(HandleConfig.tmpDarkmode);
-    cmbDark.addItemListener(e -> restartNeeded = true);
-    pnlLeft.add(cmbDark, c);
+    chkDark = new JCheckBox();
+    chkDark.setSelected(HandleConfig.tmpDarkmode == 1);
+    chkDark.addItemListener(e -> restartNeeded = true);
+    pnlLeft.add(chkDark, c);
     JButton btnSave = ButtonsFactory.createButton(Localization.get("label.save"));
     btnSave.setFont(Mainframe.defaultFont);
     btnSave.addActionListener(e -> {
@@ -326,12 +331,12 @@ public class Dialog_settings extends JDialog {
       HandleConfig.lang = (String) cmbLang.getSelectedItem();
       Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFont.getSelectedItem());
       Mainframe.descFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFontDesc.getSelectedItem());
-      HandleConfig.loadOnDemand = (int) cmbOnDemand.getSelectedItem();
-      HandleConfig.autoDownload = (int) cmbAutoDownload.getSelectedItem();
+      HandleConfig.loadOnDemand = chkOnDemand.isSelected() ? 1 : 0;
+      HandleConfig.autoDownload = chkAutoDownload.isSelected() ? 1 : 0;
       HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
       HandleConfig.debug = (String) cmbDebug.getSelectedItem();
       HandleConfig.backup = (int) cmbBackup.getSelectedItem();
-      HandleConfig.tmpDarkmode = (int) cmbDark.getSelectedItem();
+      HandleConfig.tmpDarkmode = chkDark.isSelected() ? 1 : 0;
       HandleConfig.apiToken = txtApiToken.getText();
       HandleConfig.apiURL = txtApiUrl.getText();
     } catch (NullPointerException e) {

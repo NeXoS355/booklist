@@ -1,5 +1,7 @@
 package application;
 
+import gui.Localization;
+
 import javax.swing.table.DefaultTableModel;
 import java.io.Serial;
 
@@ -8,9 +10,24 @@ public class SimpleTableModel extends DefaultTableModel {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	//default column Names, not used if already set in config.conf
-	public static final String[] columnNames = { "E-Book", "Autor", "Titel", "Serie", "Rating" };
+	// Internal column keys for identification (language-independent)
+	public static final String KEY_EBOOK = "ebook";
+	public static final String KEY_AUTHOR = "author";
+	public static final String KEY_TITLE = "title";
+	public static final String KEY_SERIES = "series";
+	public static final String KEY_RATING = "rating";
 
+	// Column key order, persisted in config.conf as layoutSort
+	public static final String[] columnKeys = { KEY_EBOOK, KEY_AUTHOR, KEY_TITLE, KEY_SERIES, KEY_RATING };
+
+	// Display names loaded from Localization
+	public static final String[] columnNames = new String[columnKeys.length];
+
+	public static void initColumnNames() {
+		for (int i = 0; i < columnKeys.length; i++) {
+			columnNames[i] = Localization.get("column." + columnKeys[i]);
+		}
+	}
 
     public SimpleTableModel(BookListModel books) {
 
@@ -27,13 +44,13 @@ public class SimpleTableModel extends DefaultTableModel {
 		int columnSeries = 0;
 		int columnRating = 0;
 
-		for (int i = 0; i < columnNames.length; i++) {
-            switch (columnNames[i]) {
-                case "E-Book" -> columnEbook = i;
-                case "Autor" -> columnAuthor = i;
-                case "Titel" -> columnTitle = i;
-                case "Serie" -> columnSeries = i;
-                case "Rating" -> columnRating = i;
+		for (int i = 0; i < columnKeys.length; i++) {
+            switch (columnKeys[i]) {
+                case KEY_EBOOK -> columnEbook = i;
+                case KEY_AUTHOR -> columnAuthor = i;
+                case KEY_TITLE -> columnTitle = i;
+                case KEY_SERIES -> columnSeries = i;
+                case KEY_RATING -> columnRating = i;
             }
 		}
 

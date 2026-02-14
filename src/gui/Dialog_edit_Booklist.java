@@ -46,6 +46,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.tree.DefaultTreeModel;
 
+import application.BorrowStatus;
 import application.Book_Booklist;
 import application.HandleConfig;
 import application.BookListModel;
@@ -110,14 +111,18 @@ public class Dialog_edit_Booklist extends JDialog {
     }
 
     URL ackRatingIconURL = getClass().getResource("/resources/ackRating.png");
-    assert ackRatingIconURL != null;
-    ImageIcon ackRating = new ImageIcon(ackRatingIconURL);
+    if (ackRatingIconURL == null) {
+      Mainframe.logger.error("Resource not found: /resources/ackRating.png");
+    }
+    ImageIcon ackRating = ackRatingIconURL != null ? new ImageIcon(ackRatingIconURL) : new ImageIcon();
 
     URL iconURL = getClass().getResource("/resources/Icon.png");
-    // iconURL is null when not found
-    assert iconURL != null;
-    ImageIcon icon = new ImageIcon(iconURL);
-    this.setIconImage(icon.getImage());
+    if (iconURL != null) {
+      ImageIcon icon = new ImageIcon(iconURL);
+      this.setIconImage(icon.getImage());
+    } else {
+      Mainframe.logger.error("Resource not found: /resources/Icon.png");
+    }
 
     this.setLayout(new BorderLayout(10, 10));
 
@@ -357,39 +362,17 @@ public class Dialog_edit_Booklist extends JDialog {
      * create and add components to Rating Panel
      */
     lblStars = new JLabel();
-    URL zeroStarUrl = getClass().getResource("/resources/0Star.png");
-    assert zeroStarUrl != null;
-    zeroStar = new ImageIcon(zeroStarUrl);
-    URL zeroHalfStarUrl = getClass().getResource("/resources/0_5Star.png");
-    assert zeroHalfStarUrl != null;
-    zeroHalfStar = new ImageIcon(zeroHalfStarUrl);
-    URL oneStarUrl = getClass().getResource("/resources/1Star.png");
-    assert oneStarUrl != null;
-    oneStar = new ImageIcon(oneStarUrl);
-    URL oneHalfStarUrl = getClass().getResource("/resources/1_5Star.png");
-    assert oneHalfStarUrl != null;
-    oneHalfStar = new ImageIcon(oneHalfStarUrl);
-    URL twoStarUrl = getClass().getResource("/resources/2Star.png");
-    assert twoStarUrl != null;
-    twoStar = new ImageIcon(twoStarUrl);
-    URL twoHalfStarUrl = getClass().getResource("/resources/2_5Star.png");
-    assert twoHalfStarUrl != null;
-    twoHalfStar = new ImageIcon(twoHalfStarUrl);
-    URL threeStarUrl = getClass().getResource("/resources/3Star.png");
-    assert threeStarUrl != null;
-    threeStar = new ImageIcon(threeStarUrl);
-    URL threeHalfStarUrl = getClass().getResource("/resources/3_5Star.png");
-    assert threeHalfStarUrl != null;
-    threeHalfStar = new ImageIcon(threeHalfStarUrl);
-    URL fourStarUrl = getClass().getResource("/resources/4Star.png");
-    assert fourStarUrl != null;
-    fourStar = new ImageIcon(fourStarUrl);
-    URL fourHalfStarUrl = getClass().getResource("/resources/4_5Star.png");
-    assert fourHalfStarUrl != null;
-    fourHalfStar = new ImageIcon(fourHalfStarUrl);
-    URL fifeStarUrl = getClass().getResource("/resources/5Star.png");
-    assert fifeStarUrl != null;
-    fifeStar = new ImageIcon(fifeStarUrl);
+    zeroStar = loadIcon("/resources/0Star.png");
+    zeroHalfStar = loadIcon("/resources/0_5Star.png");
+    oneStar = loadIcon("/resources/1Star.png");
+    oneHalfStar = loadIcon("/resources/1_5Star.png");
+    twoStar = loadIcon("/resources/2Star.png");
+    twoHalfStar = loadIcon("/resources/2_5Star.png");
+    threeStar = loadIcon("/resources/3Star.png");
+    threeHalfStar = loadIcon("/resources/3_5Star.png");
+    fourStar = loadIcon("/resources/4Star.png");
+    fourHalfStar = loadIcon("/resources/4_5Star.png");
+    fifeStar = loadIcon("/resources/5Star.png");
 
     lblAckRating = new JLabel(ackRating);
     lblAckRating.setVisible(false);
@@ -1006,19 +989,19 @@ public class Dialog_edit_Booklist extends JDialog {
         if (oldBorrowed) {
           if (newBorrwoedTo && oldNameBorrowedTo.isEmpty()) {
             entry.setBorrowedTo(txtBorrowedTo.getText());
-            Database.updateBooklistEntry(bid, "ausgeliehen", "an");
+            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.LENT_TO.getDbValue());
             Database.updateBooklistEntry(bid, "name", txtBorrowedTo.getText());
           }
           if (newBorrwoedFrom && oldNameBorrowedFrom.isEmpty()) {
             entry.setBorrowedFrom(txtBorrowedFrom.getText());
-            Database.updateBooklistEntry(bid, "ausgeliehen", "von");
+            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.BORROWED_FROM.getDbValue());
             Database.updateBooklistEntry(bid, "name", txtBorrowedFrom.getText());
           }
           if (!newBorrwoedTo && !newBorrwoedFrom) {
             entry.setBorrowed(false);
             entry.setBorrowedFrom("");
             entry.setBorrowedTo("");
-            Database.updateBooklistEntry(bid, "ausgeliehen", "nein");
+            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.NONE.getDbValue());
             Database.updateBooklistEntry(bid, "name", "");
           }
         }
@@ -1026,12 +1009,12 @@ public class Dialog_edit_Booklist extends JDialog {
           if (newBorrwoedTo) {
             entry.setBorrowed(true);
             entry.setBorrowedTo(txtBorrowedTo.getText());
-            Database.updateBooklistEntry(bid, "ausgeliehen", "an");
+            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.LENT_TO.getDbValue());
             Database.updateBooklistEntry(bid, "name", txtBorrowedTo.getText());
           } else if (newBorrwoedFrom) {
             entry.setBorrowed(true);
             entry.setBorrowedFrom(txtBorrowedFrom.getText());
-            Database.updateBooklistEntry(bid, "ausgeliehen", "von");
+            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.BORROWED_FROM.getDbValue());
             Database.updateBooklistEntry(bid, "name", txtBorrowedFrom.getText());
           }
         }
@@ -1191,6 +1174,15 @@ public class Dialog_edit_Booklist extends JDialog {
     g2.dispose();
 
     return finalImage;
+  }
+
+  private ImageIcon loadIcon(String path) {
+    URL url = getClass().getResource(path);
+    if (url == null) {
+      Mainframe.logger.error("Resource not found: {}", path);
+      return new ImageIcon();
+    }
+    return new ImageIcon(url);
   }
 
 }

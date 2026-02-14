@@ -198,7 +198,7 @@ public class HandleConfig {
               }
               case "layoutSort" -> {
                 String[] values = value.trim().split(",");
-                System.arraycopy(values, 0, SimpleTableModel.columnNames, 0, values.length);
+                System.arraycopy(values, 0, SimpleTableModel.columnKeys, 0, values.length);
               }
               case "MainframeX" -> {
                 try {
@@ -297,16 +297,7 @@ public class HandleConfig {
 
       out.println(strWidth);
 
-      String strColumnTitle = "layoutSort=" +
-          columnModel.getColumn(0).getHeaderValue() +
-          "," +
-          columnModel.getColumn(1).getHeaderValue() +
-          "," +
-          columnModel.getColumn(2).getHeaderValue() +
-          "," +
-          columnModel.getColumn(3).getHeaderValue() +
-          "," +
-          columnModel.getColumn(4).getHeaderValue();
+      String strColumnTitle = "layoutSort=" + String.join(",", SimpleTableModel.columnKeys);
       out.println(strColumnTitle);
 
       out.println("MainframeX=" + Mainframe.getInstance().getX());

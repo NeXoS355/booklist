@@ -116,9 +116,12 @@ public class Mainframe extends JFrame {
 
     URL iconURL = getClass().getResource("/resources/Icon.png");
     // iconURL is null when not found
-    assert iconURL != null;
-    ImageIcon icon = new ImageIcon(iconURL);
-    this.setIconImage(icon.getImage());
+    if (iconURL != null) {
+      ImageIcon icon = new ImageIcon(iconURL);
+      this.setIconImage(icon.getImage());
+    } else {
+      logger.error("Resource not found: /resources/Icon.png");
+    }
 
     final Properties properties = new Properties();
     try {
@@ -173,6 +176,7 @@ public class Mainframe extends JFrame {
       logger.error(e.getMessage());
     }
 
+    SimpleTableModel.initColumnNames();
     logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
     allEntries = new BookListModel(true);
     tableDisplay = new SimpleTableModel(allEntries);
@@ -184,8 +188,7 @@ public class Mainframe extends JFrame {
 
     txt_search = new CustomTextField();
     txt_search.setToolTipText("Suchtext");
-    txt_search.setText(MessageFormat.format(Localization.get("search.text"), allEntries.getSize()));
-    setSearchTextColorActive(false);
+    updateSearchPlaceholder();
     txt_search.setMargin(new Insets(0, 10, 0, 0));
     txt_search.addMouseListener(new MouseAdapter() {
 
@@ -206,23 +209,9 @@ public class Mainframe extends JFrame {
           setLastSearch(txt_search.getText());
           if (tableDisplay.getRowCount() == 0) {
             updateModel();
-            JOptionPane.showMessageDialog(Mainframe.getInstance(), "Keine übereinstimmung gefunden");
+            JOptionPane.showMessageDialog(Mainframe.getInstance(), Localization.get("search.error"));
           }
         }
-      }
-    });
-    txt_search.addFocusListener(new FocusListener() {
-
-      @Override
-      public void focusLost(FocusEvent e) {
-        setSearchTextColorActive(false);
-      }
-
-      @Override
-      public void focusGained(FocusEvent e) {
-        if (txt_search.getText().contains(Localization.get("search.shortText")))
-          txt_search.setText("");
-        setSearchTextColorActive(true);
       }
     });
     panel.add(txt_search, BorderLayout.CENTER);
@@ -231,7 +220,7 @@ public class Mainframe extends JFrame {
     btn_add.setFont(btn_add.getFont().deriveFont(Font.BOLD, 20));
     btn_add.addActionListener(e -> {
       new Dialog_add_Booklist(Mainframe.getInstance());
-      txt_search.setText(MessageFormat.format(Localization.get("search.text"), allEntries.getSize()));
+      updateSearchPlaceholder();
     });
 
     panel.add(btn_add, BorderLayout.WEST);
@@ -240,7 +229,6 @@ public class Mainframe extends JFrame {
     btn_search.setFont(btn_search.getFont().deriveFont(Font.BOLD, 13));
     btn_search.addActionListener(e -> {
       search(txt_search.getText());
-      setSearchTextColorActive(false);
       tree.clearSelection();
       setLastSearch(txt_search.getText());
       if (allEntries.getSize() == 0) {
@@ -400,7 +388,7 @@ public class Mainframe extends JFrame {
           int index = allEntries.getIndexOf(searchAutor, searchTitel);
           new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
         }
-        txt_search.setText(MessageFormat.format(Localization.get("search.text"), allEntries.getSize()));
+        updateSearchPlaceholder();
         if (SwingUtilities.isRightMouseButton(e)) {
           JTable table2 = (JTable) e.getSource();
           int row = table2.rowAtPoint(e.getPoint());
@@ -475,7 +463,7 @@ public class Mainframe extends JFrame {
           deleteBook();
         }
         allEntries.checkAuthors();
-        txt_search.setText(MessageFormat.format(Localization.get("search.text"), allEntries.getSize()));
+        updateSearchPlaceholder();
       }
     });
     logger.info("Start creating Tree Contents + ScrollPane");
@@ -531,7 +519,7 @@ public class Mainframe extends JFrame {
           else
             setLastSearch(text);
           table.clearSelection();
-          txt_search.setText(MessageFormat.format(Localization.get("search.text"), allEntries.getSize()));
+          updateSearchPlaceholder();
         }
       }
 
@@ -807,29 +795,29 @@ public class Mainframe extends JFrame {
     int minProzSeries = total * 10 / 100;
     int minProzRating = total * 5 / 100;
 
-    for (int i = 0; i < SimpleTableModel.columnNames.length; i++) {
-      switch (SimpleTableModel.columnNames[i]) {
-        case "E-Book" -> {
+    for (int i = 0; i < SimpleTableModel.columnKeys.length; i++) {
+      switch (SimpleTableModel.columnKeys[i]) {
+        case SimpleTableModel.KEY_EBOOK -> {
           columnModel.getColumn(i).setMinWidth(minProzEbook);
           columnModel.getColumn(i).setMaxWidth(50);
           columnModel.getColumn(i).setPreferredWidth(prozEbook);
         }
-        case "Autor" -> {
+        case SimpleTableModel.KEY_AUTHOR -> {
           columnModel.getColumn(i).setMinWidth(minProzAuthor);
           columnModel.getColumn(i).setMaxWidth(Integer.MAX_VALUE);
           columnModel.getColumn(i).setPreferredWidth(prozAuthor);
         }
-        case "Titel" -> {
+        case SimpleTableModel.KEY_TITLE -> {
           columnModel.getColumn(i).setMinWidth(minProzTitle);
           columnModel.getColumn(i).setMaxWidth(Integer.MAX_VALUE);
           columnModel.getColumn(i).setPreferredWidth(prozTitle);
         }
-        case "Serie" -> {
+        case SimpleTableModel.KEY_SERIES -> {
           columnModel.getColumn(i).setMinWidth(minProzSeries);
           columnModel.getColumn(i).setMaxWidth(Integer.MAX_VALUE);
           columnModel.getColumn(i).setPreferredWidth(prozSeries);
         }
-        case "Rating" -> {
+        case SimpleTableModel.KEY_RATING -> {
           columnModel.getColumn(i).setMinWidth(minProzRating);
           columnModel.getColumn(i).setMaxWidth(50);
           columnModel.getColumn(i).setPreferredWidth(prozRating);
@@ -1332,19 +1320,11 @@ public class Mainframe extends JFrame {
   }
 
   /**
-   * set Active Color of search TextField
+   * Updates the placeholder text of the search field with the current book count.
    */
-  public void setSearchTextColorActive(boolean value) {
-    if (value) {
-      if (HandleConfig.darkmode == 1) {
-        txt_search.setForeground(Color.WHITE);
-        txt_search.setCaretColor(Color.WHITE);
-      } else {
-        txt_search.setForeground(Color.BLACK);
-      }
-    } else {
-      txt_search.setForeground(Color.GRAY);
-    }
+  public void updateSearchPlaceholder() {
+    txt_search.putClientProperty("JTextField.placeholderText",
+        MessageFormat.format(Localization.get("search.text"), allEntries.getSize()));
   }
 
   /**
@@ -1382,10 +1362,8 @@ public class Mainframe extends JFrame {
         out.println(e.getMessage());
       } finally {
         try {
-          assert is != null;
-          is.close();
-          assert os != null;
-          os.close();
+          if (is != null) is.close();
+          if (os != null) os.close();
         } catch (IOException e) {
           Mainframe.logger.error(e.getMessage());
         }

@@ -61,10 +61,12 @@ public class Dialog_add_Booklist extends JDialog {
 		this.setAlwaysOnTop(true);
 
 		URL iconURL = getClass().getResource("/resources/Icon.png");
-		// iconURL is null when not found
-        assert iconURL != null;
-        ImageIcon icon = new ImageIcon(iconURL);
-		this.setIconImage(icon.getImage());
+		if (iconURL != null) {
+			ImageIcon icon = new ImageIcon(iconURL);
+			this.setIconImage(icon.getImage());
+		} else {
+			Mainframe.logger.error("Resource not found: /resources/Icon.png");
+		}
 
 		this.setLayout(new BorderLayout(10, 10));
 
