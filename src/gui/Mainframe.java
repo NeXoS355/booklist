@@ -1542,7 +1542,7 @@ public class Mainframe extends JFrame {
    */
   public static void createInstance(boolean visible) {
     if (instance == null) {
-      logger.info("Creating Instance with visible={}", visible);
+      System.out.println("Creating Instance with visible=" + visible);
       instance = new Mainframe(visible);
     }
   }
