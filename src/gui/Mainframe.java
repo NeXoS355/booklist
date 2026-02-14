@@ -1498,14 +1498,22 @@ public class Mainframe extends JFrame {
           return;
         }
 
-        // Download-URL aus den Release Assets lesen
+        // Download-URL und SHA-256 Digest aus den Release Assets lesen
         String downloadUrl = "https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar";
+        String expectedDigest = null;
         if (release.has("assets")) {
           var assets = release.getAsJsonArray("assets");
           for (var asset : assets) {
-            String name = asset.getAsJsonObject().get("name").getAsString();
+            JsonObject assetObj = asset.getAsJsonObject();
+            String name = assetObj.get("name").getAsString();
             if (name.endsWith(".jar")) {
-              downloadUrl = asset.getAsJsonObject().get("browser_download_url").getAsString();
+              downloadUrl = assetObj.get("browser_download_url").getAsString();
+              if (assetObj.has("digest") && !assetObj.get("digest").isJsonNull()) {
+                String digest = assetObj.get("digest").getAsString();
+                if (digest.startsWith("sha256:")) {
+                  expectedDigest = digest.substring(7);
+                }
+              }
               break;
             }
           }
@@ -1542,12 +1550,30 @@ public class Mainframe extends JFrame {
         }
         logger.info("Update - download complete");
 
-        // Content-Length Prüfung
-        if (fileSize > 0 && latestJar.length() != fileSize) {
-          logger.error("Update - file size mismatch: expected {} bytes, got {} bytes", fileSize, latestJar.length());
-          latestJar.delete();
-          notification.setText(Localization.get("update.error"));
-          return;
+        // SHA-256 Prüfung
+        if (expectedDigest != null) {
+          java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+          try (java.io.InputStream fis = new java.io.FileInputStream(latestJar)) {
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = fis.read(buf)) != -1) {
+              md.update(buf, 0, n);
+            }
+          }
+          StringBuilder sb = new StringBuilder();
+          for (byte b : md.digest()) {
+            sb.append(String.format("%02x", b));
+          }
+          String actualDigest = sb.toString();
+          if (!actualDigest.equals(expectedDigest)) {
+            logger.error("Update - SHA-256 mismatch: expected {}, got {}", expectedDigest, actualDigest);
+            latestJar.delete();
+            notification.setText(Localization.get("update.error"));
+            return;
+          }
+          logger.info("Update - SHA-256 verified OK");
+        } else {
+          logger.warn("Update - no SHA-256 digest available, skipping verification");
         }
 
         // Update starten: aktuelles JAR durch neues ersetzen
@@ -1557,7 +1583,7 @@ public class Mainframe extends JFrame {
         pb.start();
         System.exit(0);
 
-      } catch (URISyntaxException | IOException e) {
+      } catch (URISyntaxException | IOException | java.security.NoSuchAlgorithmException e) {
         showNotification("Update error. See app.log for details");
         logger.error("Update error: {}", e.getMessage());
       }
