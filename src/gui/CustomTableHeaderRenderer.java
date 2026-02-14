@@ -58,7 +58,6 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 		Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		currentTable = table;
 		setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY));
-		setupHeaderCell(component, column, value);
 
 		if (table.getColumnName(column).equals(Localization.get("column.rating")))
 			setColumnIcon(column, scaledStarIcon);
@@ -66,6 +65,8 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 			setColumnIcon(column, scaledEbookIcon);
 		else
 			setColumnIcon(column, null);
+
+		setupHeaderCell(component, column, value);
 
 		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override

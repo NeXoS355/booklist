@@ -829,19 +829,21 @@ public class Mainframe extends JFrame {
   public static void setTableLayout() {
     TableColumnModel columnModel = table.getColumnModel();
 
+    // Mindestbreite fuer Ebook/Rating anhand FontMetrics berechnen (aufloesungsunabhaengig)
+    FontMetrics fm = table.getFontMetrics(table.getFont());
+    int minFixedWidth = fm.stringWidth("5.0") + 20; // breitester Inhalt + Padding
+
     int total = columnModel.getTotalColumnWidth();
-    int minProzEbook = total * 5 / 100;
     int minProzAuthor = total * 10 / 100;
     int minProzTitle = total * 10 / 100;
     int minProzSeries = total * 10 / 100;
-    int minProzRating = total * 5 / 100;
 
     for (int i = 0; i < SimpleTableModel.columnKeys.length; i++) {
       switch (SimpleTableModel.columnKeys[i]) {
         case SimpleTableModel.KEY_EBOOK -> {
-          columnModel.getColumn(i).setMinWidth(minProzEbook);
-          columnModel.getColumn(i).setMaxWidth(50);
-          columnModel.getColumn(i).setPreferredWidth(prozEbook);
+          columnModel.getColumn(i).setMinWidth(minFixedWidth);
+          columnModel.getColumn(i).setMaxWidth(minFixedWidth);
+          columnModel.getColumn(i).setPreferredWidth(minFixedWidth);
         }
         case SimpleTableModel.KEY_AUTHOR -> {
           columnModel.getColumn(i).setMinWidth(minProzAuthor);
@@ -859,9 +861,9 @@ public class Mainframe extends JFrame {
           columnModel.getColumn(i).setPreferredWidth(prozSeries);
         }
         case SimpleTableModel.KEY_RATING -> {
-          columnModel.getColumn(i).setMinWidth(minProzRating);
-          columnModel.getColumn(i).setMaxWidth(50);
-          columnModel.getColumn(i).setPreferredWidth(prozRating);
+          columnModel.getColumn(i).setMinWidth(minFixedWidth);
+          columnModel.getColumn(i).setMaxWidth(minFixedWidth);
+          columnModel.getColumn(i).setPreferredWidth(minFixedWidth);
         }
       }
 

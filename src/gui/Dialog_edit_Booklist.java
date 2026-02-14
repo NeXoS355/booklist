@@ -9,7 +9,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.net.URL;
@@ -72,18 +71,7 @@ public class Dialog_edit_Booklist extends JDialog {
   private final JCheckBox checkEbook;
   private final JButton btnAdd;
   private JLabel lblPic;
-  private final JLabel lblStars;
-  private final ImageIcon zeroStar;
-  private final ImageIcon zeroHalfStar;
-  private final ImageIcon oneStar;
-  private final ImageIcon oneHalfStar;
-  private final ImageIcon twoStar;
-  private final ImageIcon twoHalfStar;
-  private final ImageIcon threeStar;
-  private final ImageIcon threeHalfStar;
-  private final ImageIcon fourStar;
-  private final ImageIcon fourHalfStar;
-  private final ImageIcon fifeStar;
+  private final StarRatingPanel starRatingPanel;
   private final JLabel lblAckRating;
   private boolean ack = false;
   private final JPanel panelEastRating = new JPanel(new GridBagLayout());
@@ -361,107 +349,36 @@ public class Dialog_edit_Booklist extends JDialog {
     /*
      * create and add components to Rating Panel
      */
-    lblStars = new JLabel();
-    zeroStar = loadIcon("/resources/0Star.png");
-    zeroHalfStar = loadIcon("/resources/0_5Star.png");
-    oneStar = loadIcon("/resources/1Star.png");
-    oneHalfStar = loadIcon("/resources/1_5Star.png");
-    twoStar = loadIcon("/resources/2Star.png");
-    twoHalfStar = loadIcon("/resources/2_5Star.png");
-    threeStar = loadIcon("/resources/3Star.png");
-    threeHalfStar = loadIcon("/resources/3_5Star.png");
-    fourStar = loadIcon("/resources/4Star.png");
-    fourHalfStar = loadIcon("/resources/4_5Star.png");
-    fifeStar = loadIcon("/resources/5Star.png");
+    starRatingPanel = new StarRatingPanel();
+    starRatingPanel.setRating(entry.getRating());
+
+    starRatingPanel.setRatingChangeListener(newRating -> {
+      if (!ack) {
+        int segment = (int) (newRating * 2);
+        setRating(segment);
+      }
+    });
+
+    starRatingPanel.setRightClickListener(() -> {
+      JPopupMenu menu = new JPopupMenu();
+      JMenuItem itemDeleteRating = new JMenuItem(Localization.get("book.deleteRating"));
+      menu.add(itemDeleteRating);
+      menu.show(starRatingPanel, starRatingPanel.getWidth() / 2, starRatingPanel.getHeight() / 2);
+      itemDeleteRating.addActionListener(e2 -> {
+        if (Objects.equals(e2.getActionCommand(), Localization.get("book.deleteRating"))) {
+          setRating(0);
+          starRatingPanel.setRating(0);
+        }
+      });
+    });
 
     lblAckRating = new JLabel(ackRating);
     lblAckRating.setVisible(false);
 
-    setRatingIcon();
-
-    lblStars.addMouseMotionListener(new MouseMotionAdapter() {
-
-      @Override
-      public void mouseMoved(MouseEvent e) {
-        if (!ack) {
-          int segmentWidth = lblStars.getWidth() / 10;
-          int mouse = e.getX();
-          int segment = mouse / segmentWidth + 1;
-
-          switch (segment) {
-            case 1:
-              lblStars.setIcon(zeroHalfStar);
-              break;
-            case 2:
-              lblStars.setIcon(oneStar);
-              break;
-            case 3:
-              lblStars.setIcon(oneHalfStar);
-              break;
-            case 4:
-              lblStars.setIcon(twoStar);
-              break;
-            case 5:
-              lblStars.setIcon(twoHalfStar);
-              break;
-            case 6:
-              lblStars.setIcon(threeStar);
-              break;
-            case 7:
-              lblStars.setIcon(threeHalfStar);
-              break;
-            case 8:
-              lblStars.setIcon(fourStar);
-              break;
-            case 9:
-              lblStars.setIcon(fourHalfStar);
-              break;
-            case 10:
-              lblStars.setIcon(fifeStar);
-              break;
-          }
-        }
-      }
-    });
-
-    lblStars.addMouseListener(new MouseAdapter() {
-
-      @Override
-      public void mouseExited(MouseEvent e) {
-        setRatingIcon();
-      }
-
-      @Override
-      public void mouseClicked(MouseEvent e) {
-        int segmentWidth = lblStars.getWidth() / 10;
-        int mouse = e.getX();
-        int segment = mouse / segmentWidth + 1;
-
-        if (SwingUtilities.isLeftMouseButton(e)) {
-          setRating(segment);
-        } else if (SwingUtilities.isRightMouseButton(e)) {
-          showMenu(e);
-        }
-      }
-
-      private void showMenu(MouseEvent e) {
-        JPopupMenu menu = new JPopupMenu();
-        JMenuItem itemDeleteRating = new JMenuItem(Localization.get("book.deleteRating"));
-        menu.add(itemDeleteRating);
-        menu.show(lblStars, e.getX(), e.getY());
-        itemDeleteRating.addActionListener(e2 -> {
-          if (Objects.equals(e2.getActionCommand(), Localization.get("book.deleteRating"))) {
-            setRating(0);
-            setRatingIcon();
-          }
-        });
-      }
-    });
-
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridx = 0;
     gbc.gridy = 0;
-    panelEastRating.add(lblStars, gbc);
+    panelEastRating.add(starRatingPanel, gbc);
     gbc.gridx = 0;
     gbc.gridy = 1;
     gbc.anchor = GridBagConstraints.SOUTH;
@@ -1087,35 +1004,6 @@ public class Dialog_edit_Booklist extends JDialog {
   }
 
   /**
-   * sets the correct Rating Icon according to current Rating
-   */
-  private void setRatingIcon() {
-    if (entry.getRating() == 0.5) {
-      lblStars.setIcon(zeroHalfStar);
-    } else if (entry.getRating() == 1) {
-      lblStars.setIcon(oneStar);
-    } else if (entry.getRating() == 1.5) {
-      lblStars.setIcon(oneHalfStar);
-    } else if (entry.getRating() == 2) {
-      lblStars.setIcon(twoStar);
-    } else if (entry.getRating() == 2.5) {
-      lblStars.setIcon(twoHalfStar);
-    } else if (entry.getRating() == 3) {
-      lblStars.setIcon(threeStar);
-    } else if (entry.getRating() == 3.5) {
-      lblStars.setIcon(threeHalfStar);
-    } else if (entry.getRating() == 4) {
-      lblStars.setIcon(fourStar);
-    } else if (entry.getRating() == 4.5) {
-      lblStars.setIcon(fourHalfStar);
-    } else if (entry.getRating() == 5) {
-      lblStars.setIcon(fifeStar);
-    } else {
-      lblStars.setIcon(zeroStar);
-    }
-  }
-
-  /**
    * sets the definied Rating of Booklist entry and shows Acknowldge Icon
    *
    * @param segment - rating to set according to mouse position
@@ -1124,13 +1012,16 @@ public class Dialog_edit_Booklist extends JDialog {
 
     Mainframe.logger.info("Rating set: {}", segment);
     entry.setRating(segment, true);
+    starRatingPanel.setRating(entry.getRating());
 
     Mainframe.executor.submit(() -> {
       try {
         ack = true;
+        starRatingPanel.setEnabled(false);
         lblAckRating.setVisible(true);
         Thread.sleep(2000);
         lblAckRating.setVisible(false);
+        starRatingPanel.setEnabled(true);
         panelEastRating.repaint();
         ack = false;
       } catch (InterruptedException e1) {
@@ -1176,13 +1067,5 @@ public class Dialog_edit_Booklist extends JDialog {
     return finalImage;
   }
 
-  private ImageIcon loadIcon(String path) {
-    URL url = getClass().getResource(path);
-    if (url == null) {
-      Mainframe.logger.error("Resource not found: {}", path);
-      return new ImageIcon();
-    }
-    return new ImageIcon(url);
-  }
 
 }
