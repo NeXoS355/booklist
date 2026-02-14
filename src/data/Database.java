@@ -314,7 +314,7 @@ public class Database {
                 String autor = bookBooklist.getAuthor();
                 String titel = bookBooklist.getTitle();
                 String ausgeliehen_an = bookBooklist.getBorrowedTo();
-                String ausgeliehen_von = bookBooklist.getBorrowedTo();
+                String ausgeliehen_von = bookBooklist.getBorrowedFrom();
                 String bemerkung = bookBooklist.getNote();
                 String datum = bookBooklist.getDate().toString();
                 String serie = bookBooklist.getSeries();

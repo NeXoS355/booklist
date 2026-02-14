@@ -56,7 +56,7 @@ public class wishlist extends JFrame {
 		this.setLayout(new BorderLayout(10, 10));
 		this.setSize(700, 700);
 		this.setLocationRelativeTo(owner);
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		if (HandleConfig.darkmode == 1) {
 			table.getTableHeader().setOpaque(false);
@@ -101,13 +101,6 @@ public class wishlist extends JFrame {
 					int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
 					Mainframe.logger.info("Clickcount: {};Wishlist open Edit Dialog ", e.getClickCount());
 					new Dialog_edit_Wishlist(instance, wishlistEntries, index);
-				}
-				if (SwingUtilities.isRightMouseButton(e)) {
-					JTable table2 = (JTable) e.getSource();
-					int row = table2.rowAtPoint(e.getPoint());
-					if (row > -1)
-						table2.setRowSelectionInterval(row, row);
-					showMenu(e);
 				}
 				if (SwingUtilities.isRightMouseButton(e)) {
 					JTable table2 = (JTable) e.getSource();
@@ -226,7 +219,6 @@ public class wishlist extends JFrame {
 		Mainframe.logger.info("Wishlist: Frame created successfully");
 		this.add(north_panel, BorderLayout.NORTH);
 		this.add(mid_panel, BorderLayout.CENTER);
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.setVisible(visible);
 
 	}

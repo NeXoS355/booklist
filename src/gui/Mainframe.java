@@ -1097,7 +1097,7 @@ public class Mainframe extends JFrame {
   private static boolean downloadFromApi(boolean showUi) {
     boolean downloaded = false;
     try {
-      logger.info("Web API Download request: {}/api/get.php?token={}", HandleConfig.apiURL, HandleConfig.apiToken);
+      logger.info("Web API Download request: {}/api/get.php?token=****{}", HandleConfig.apiURL, HandleConfig.apiToken.substring(HandleConfig.apiToken.length() - 4));
       URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
       HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
       con.setRequestMethod("GET");
@@ -1241,7 +1241,7 @@ public class Mainframe extends JFrame {
 
     try {
       // URL des API-Endpunkts
-      logger.info("Web API request: {}/api/upload.php?token={}", HandleConfig.apiURL, HandleConfig.apiToken);
+      logger.info("Web API request: {}/api/upload.php?token=****{}", HandleConfig.apiURL, HandleConfig.apiToken.substring(HandleConfig.apiToken.length() - 4));
 
       HttpURLConnection con = getHttpURLConnection();
 

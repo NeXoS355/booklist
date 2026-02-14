@@ -190,13 +190,11 @@ public class HandleConfig {
               }
               case "layoutWidth" -> {
                 String[] values = value.trim().split(",");
-                for (int j = 0; j < values.length; j++) {
-                  Mainframe.prozEbook = Integer.parseInt(values[0]);
-                  Mainframe.prozAuthor = Integer.parseInt(values[1]);
-                  Mainframe.prozTitle = Integer.parseInt(values[2]);
-                  Mainframe.prozSeries = Integer.parseInt(values[3]);
-                  Mainframe.prozRating = Integer.parseInt(values[4]);
-                }
+                Mainframe.prozEbook = Integer.parseInt(values[0]);
+                Mainframe.prozAuthor = Integer.parseInt(values[1]);
+                Mainframe.prozTitle = Integer.parseInt(values[2]);
+                Mainframe.prozSeries = Integer.parseInt(values[3]);
+                Mainframe.prozRating = Integer.parseInt(values[4]);
               }
               case "layoutSort" -> {
                 String[] values = value.trim().split(",");
@@ -314,7 +312,7 @@ public class HandleConfig {
       out.println("MainframeX=" + Mainframe.getInstance().getX());
       out.println("MainframeY=" + Mainframe.getInstance().getY());
       out.println("MainframeWidth=" + Mainframe.getInstance().getWidth());
-      out.println("MainframeHeigth=" + Mainframe.getInstance().getHeight());
+      out.println("MainframeHeight=" + Mainframe.getInstance().getHeight());
       Mainframe.showNotification("Einstellungen gespeichert");
     } catch (FileNotFoundException e1) {
       logger.error("Fehler beim speichern der Einstellungen");
