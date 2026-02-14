@@ -50,6 +50,7 @@ import application.Book_Booklist;
 import application.HandleConfig;
 import application.BookListModel;
 import application.GetBookInfosFromWeb;
+import application.SimpleTableModel;
 import data.Database;
 
 /**
@@ -75,6 +76,7 @@ public class Dialog_edit_Booklist extends JDialog {
   private final JLabel lblAckRating;
   private boolean ack = false;
   private final JPanel panelEastRating = new JPanel(new GridBagLayout());
+  private JTextArea txtDesc;
   private final Book_Booklist entry;
 
   /**
@@ -219,8 +221,10 @@ public class Dialog_edit_Booklist extends JDialog {
         });
         itemDel.addActionListener(e4 -> {
           entry.setIsbn("", true);
-          dispose();
-          new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
+          lblDate.setText(MessageFormat.format(Localization.get("book.dateAdded"),
+              new SimpleDateFormat("dd.MM.yyyy").format(entry.getDate())));
+          pnlNorthWest.revalidate();
+          pnlNorthWest.repaint();
         });
 
       }
@@ -256,13 +260,14 @@ public class Dialog_edit_Booklist extends JDialog {
               pnlNorthEast.add(txtIsbn);
             }
           }
-          pnlNorthEast.revalidate(); // Löst die Neulayoutierung aus
-          pnlNorthEast.repaint(); // Aktualisiert die Anzeige
+          pnlNorthEast.revalidate();
+          pnlNorthEast.repaint();
         });
         itemDel.addActionListener(e4 -> {
           entry.setIsbn("", true);
-          dispose();
-          new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
+          lblIsbn.setText("ISBN: ");
+          pnlNorthEast.revalidate();
+          pnlNorthEast.repaint();
         });
 
       }
@@ -289,11 +294,14 @@ public class Dialog_edit_Booklist extends JDialog {
       lblPic = new JLabel(new ImageIcon(scaledImage));
 
       lblPic.setPreferredSize(new Dimension(160, 280));
+      lblPic.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
       lblPic.addMouseListener(new MouseAdapter() {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-          if (SwingUtilities.isRightMouseButton(e)) {
+          if (SwingUtilities.isLeftMouseButton(e)) {
+            showCoverOverlay(entry);
+          } else if (SwingUtilities.isRightMouseButton(e)) {
             showMenu(e);
           }
         }
@@ -309,16 +317,14 @@ public class Dialog_edit_Booklist extends JDialog {
             String webpage = JOptionPane.showInputDialog(null, Localization.get("book.changePic"));
             if (webpage != null && !webpage.isEmpty()) {
               GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, false);
-              lblPic = new JLabel(showImg(entry));
+              updateCoverDisplay(entry, panelEastBorder);
             }
           });
           itemDelPic.addActionListener(e3 -> {
             boolean state = GetBookInfosFromWeb.deletePic(entry.getBid());
             if (state) {
-              // JOptionPane.showMessageDialog(null, "Bild erfolgreich geloescht");
               entry.setPic(null);
-              dispose();
-              new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
+              updateCoverDisplay(entry, panelEastBorder);
             } else {
               JOptionPane.showMessageDialog(null, "an error occurred");
             }
@@ -340,8 +346,17 @@ public class Dialog_edit_Booklist extends JDialog {
             GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, true);
           }
         }
-        dispose();
-        new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
+        SwingUtilities.invokeLater(() -> {
+          updateCoverDisplay(entry, panelEastBorder);
+          if (entry.getIsbn() != null && !entry.getIsbn().isEmpty()) {
+            lblIsbn.setText("ISBN: " + entry.getIsbn());
+            pnlNorthEast.revalidate();
+            pnlNorthEast.repaint();
+          }
+          if (txtDesc != null && entry.getDesc() != null && !entry.getDesc().isEmpty()) {
+            txtDesc.setText(entry.getDesc());
+          }
+        });
       }));
       panelEastBorder.add(btnDownloadInfo, BorderLayout.CENTER);
     }
@@ -754,7 +769,7 @@ public class Dialog_edit_Booklist extends JDialog {
     /*
      * create TextArea for Description
      */
-    JTextArea txtDesc = new JTextArea(10, 30);
+    txtDesc = new JTextArea(10, 30);
     txtDesc.setText(entry.getDesc());
     txtDesc.setEnabled(false);
     txtDesc.setLineWrap(true);
@@ -784,10 +799,10 @@ public class Dialog_edit_Booklist extends JDialog {
         itemDelDesc.addActionListener(e1 -> {
           boolean state = Database.delDesc(entry.getBid());
           if (state) {
-            // JOptionPane.showMessageDialog(null, "Beschreibung erfolgreich geloescht");
             entry.setDesc(null, true);
-            dispose();
-            new Dialog_edit_Booklist(owner, bookModel, index, treeModel);
+            txtDesc.setText("");
+            txtDesc.revalidate();
+            txtDesc.repaint();
           } else {
             JOptionPane.showMessageDialog(null, "An Error occurred");
           }
@@ -1004,6 +1019,88 @@ public class Dialog_edit_Booklist extends JDialog {
   }
 
   /**
+   * Zeigt das Cover vergroessert als Overlay ueber dem Dialog an.
+   * Klick auf das Overlay schliesst es wieder.
+   */
+  private void showCoverOverlay(Book_Booklist entry) {
+    Image img = entry.getPic();
+    if (img == null) return;
+
+    JPanel overlay = new JPanel() {
+      @Serial
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g.create();
+        // Hintergrund abdunkeln
+        g2.setColor(new Color(0, 0, 0, 180));
+        g2.fillRect(0, 0, getWidth(), getHeight());
+
+        // Bild skalieren mit Seitenverhaeltnis
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        int imgW = img.getWidth(null);
+        int imgH = img.getHeight(null);
+        int padding = 40;
+        int maxW = getWidth() - padding * 2;
+        int maxH = getHeight() - padding * 2;
+        double scale = Math.min((double) maxW / imgW, (double) maxH / imgH);
+        int drawW = (int) (imgW * scale);
+        int drawH = (int) (imgH * scale);
+        int x = (getWidth() - drawW) / 2;
+        int y = (getHeight() - drawH) / 2;
+        g2.drawImage(img, x, y, drawW, drawH, null);
+        g2.dispose();
+      }
+    };
+    overlay.setOpaque(false);
+    overlay.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    overlay.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        getRootPane().setGlassPane(new JPanel());
+        getRootPane().getGlassPane().setVisible(false);
+      }
+    });
+
+    getRootPane().setGlassPane(overlay);
+    overlay.setVisible(true);
+  }
+
+  /**
+   * Aktualisiert die Cover-Anzeige im East-Panel ohne Dialog-Neuaufbau.
+   */
+  private void updateCoverDisplay(Book_Booklist entry, JPanel panelEastBorder) {
+    // Vorherige Komponente im CENTER entfernen
+    BorderLayout layout = (BorderLayout) panelEastBorder.getLayout();
+    Component center = layout.getLayoutComponent(BorderLayout.CENTER);
+    if (center != null) {
+      panelEastBorder.remove(center);
+    }
+
+    ImageIcon imgIcn = showImg(entry);
+    if (imgIcn != null) {
+      BufferedImage originalImage = new BufferedImage(imgIcn.getIconWidth(), imgIcn.getIconHeight(),
+          BufferedImage.TYPE_INT_ARGB);
+      Graphics2D g2d = originalImage.createGraphics();
+      g2d.drawImage(imgIcn.getImage(), 0, 0, null);
+      g2d.dispose();
+      BufferedImage scaledImage = getScaledImage(originalImage);
+      lblPic = new JLabel(new ImageIcon(scaledImage));
+      lblPic.setPreferredSize(new Dimension(160, 280));
+      panelEastBorder.add(lblPic, BorderLayout.CENTER);
+    } else {
+      lblPic = null;
+      JLabel placeholder = new JLabel("No Cover", SwingConstants.CENTER);
+      panelEastBorder.add(placeholder, BorderLayout.CENTER);
+    }
+
+    panelEastBorder.revalidate();
+    panelEastBorder.repaint();
+  }
+
+  /**
    * sets the definied Rating of Booklist entry and shows Acknowldge Icon
    *
    * @param segment - rating to set according to mouse position
@@ -1013,6 +1110,28 @@ public class Dialog_edit_Booklist extends JDialog {
     Mainframe.logger.info("Rating set: {}", segment);
     entry.setRating(segment, true);
     starRatingPanel.setRating(entry.getRating());
+
+    // Rating-Wert direkt in der Tabelle aktualisieren
+    String ratingStr = segment > 0 ? Double.toString(entry.getRating()) : "";
+    int ratingCol = -1;
+    int authorCol = -1;
+    int titleCol = -1;
+    for (int c = 0; c < SimpleTableModel.columnKeys.length; c++) {
+      switch (SimpleTableModel.columnKeys[c]) {
+        case SimpleTableModel.KEY_RATING -> ratingCol = c;
+        case SimpleTableModel.KEY_AUTHOR -> authorCol = c;
+        case SimpleTableModel.KEY_TITLE -> titleCol = c;
+      }
+    }
+    if (ratingCol >= 0 && authorCol >= 0 && titleCol >= 0) {
+      for (int row = 0; row < Mainframe.table.getRowCount(); row++) {
+        if (entry.getAuthor().equals(Mainframe.table.getValueAt(row, authorCol))
+            && entry.getTitle().equals(Mainframe.table.getValueAt(row, titleCol))) {
+          Mainframe.table.setValueAt(ratingStr, row, ratingCol);
+          break;
+        }
+      }
+    }
 
     Mainframe.executor.submit(() -> {
       try {

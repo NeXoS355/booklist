@@ -1,5 +1,7 @@
 package application;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -169,13 +171,19 @@ public class GetBookInfosFromWeb {
 						var volumeInfo = firstItem.getAsJsonObject("volumeInfo");
 						if (volumeInfo.has("imageLinks") && cCover == 0) {
 							var imageLinks = volumeInfo.getAsJsonObject("imageLinks");
-							if (imageLinks.has("smallThumbnail")) {
-								String link = imageLinks.get("smallThumbnail").getAsString();
-								// Downloading Image
+							String link = null;
+							if (imageLinks.has("thumbnail")) {
+								link = imageLinks.get("thumbnail").getAsString();
+							} else if (imageLinks.has("smallThumbnail")) {
+								link = imageLinks.get("smallThumbnail").getAsString();
+							}
+							if (link != null) {
+								// zoom=1 liefert die hoechste verfuegbare Aufloesung
+								link = link.replaceAll("&zoom=\\d+", "&zoom=1");
 								savePic(link, entry);
 								cCover = 1;
 							} else {
-								Mainframe.logger.info("WebInfo Download: 'smallThumbnail' not found!");
+								Mainframe.logger.info("WebInfo Download: no image link found!");
 							}
 						} else {
 							Mainframe.logger.info("WebInfo Download: 'ImageLink' not found!");
@@ -359,33 +367,44 @@ public class GetBookInfosFromWeb {
 	 * @param weblink - Link where to get the Bookcover
 	 * @param entry   - Bookentry to save the Cover
 	 */
+	private static final int MAX_COVER_WIDTH = 600;
+	private static final float JPEG_QUALITY = 0.92f;
+
 	public static void savePic(String weblink, Book_Booklist entry) {
 		try (BufferedInputStream in = new BufferedInputStream(new URI(weblink).toURL().openStream())) {
 
 			BufferedImage originalImage = ImageIO.read(in);
 
-			// Erstellen eines neuen Bildes mit korrektem Farbtyp
-			BufferedImage convertedImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
-					BufferedImage.TYPE_INT_RGB);
+			// Bei Bedarf auf Maximalbreite skalieren (Seitenverhaeltnis beibehalten)
+			BufferedImage scaledImage;
+			if (originalImage.getWidth() > MAX_COVER_WIDTH) {
+				int newHeight = (int) ((double) MAX_COVER_WIDTH / originalImage.getWidth() * originalImage.getHeight());
+				scaledImage = new BufferedImage(MAX_COVER_WIDTH, newHeight, BufferedImage.TYPE_INT_RGB);
+				Graphics2D g2 = scaledImage.createGraphics();
+				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				g2.drawImage(originalImage, 0, 0, MAX_COVER_WIDTH, newHeight, null);
+				g2.dispose();
+			} else {
+				scaledImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
+						BufferedImage.TYPE_INT_RGB);
+				scaledImage.createGraphics().drawImage(originalImage, 0, 0, null);
+			}
 
-			convertedImage.createGraphics().drawImage(originalImage, 0, 0, null);
-
-			// Für JPEG-Bilder: Qualitätseinstellungen definieren
+			// JPEG mit guter Qualitaet speichern
 			Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
 			ImageWriter writer = writers.next();
 			ImageWriteParam param = writer.getDefaultWriteParam();
 			param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-			param.setCompressionQuality(1.0f); // Höchste Qualität
+			param.setCompressionQuality(JPEG_QUALITY);
 
-			// In ByteArray schreiben mit hoher Qualität
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {
 				writer.setOutput(ios);
-				writer.write(null, new IIOImage(convertedImage, null, null), param);
+				writer.write(null, new IIOImage(scaledImage, null, null), param);
 			}
 
 			byte[] imageData = baos.toByteArray();
-			entry.setPic(convertedImage);
+			entry.setPic(scaledImage);
 
 			baos.close();
 			in.close();

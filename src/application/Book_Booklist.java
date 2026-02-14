@@ -312,7 +312,6 @@ public class Book_Booklist {
 	 *
 	 */
 	public void setRating(int rating, boolean db) {
-		System.out.println(rating);
 		this.rating = (double) rating/2;
 		if (db)
 			Database.updateRating(this.getBid(), rating);

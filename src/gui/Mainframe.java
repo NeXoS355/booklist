@@ -880,36 +880,25 @@ public class Mainframe extends JFrame {
    *                      Link
    */
   public static customNotificationPanel showNotification(String message, int timeout, int bookLinkIndex) {
-    // Benachrichtigungsleiste erstellen
     customNotificationPanel notificationPanel = new customNotificationPanel(message, timeout);
-    // Rufe den Callback auf (im Event-Dispatch-Thread für GUI-Sicherheit)
     notificationPanel.setLocation(0,
         splitPane.getHeight() - ((activeNotifications.size()) * 30) - ((activeNotifications.size()) * 5));
     if (bookLinkIndex >= 0)
       notificationPanel.addBookReference(bookLinkIndex);
     notificationPanel.repaint();
-    Mainframe.executor.submit(() -> {
-      try {
-        // animate(true);
-        while (notificationPanel.timer > 0) {
-          // noinspection BusyWait
-          Thread.sleep(1000);
-          notificationPanel.timer -= 1;
-        }
 
-        // animate(false);
-        SwingUtilities.invokeLater(() -> {
-          notificationPanel.setVisible(false);
-          activeNotifications.remove(notificationPanel);
-          updateLocationAndBounds();
-        });
-      } catch (InterruptedException e) {
+    Timer swingTimer = new Timer(1000, null);
+    swingTimer.addActionListener(e -> {
+      notificationPanel.timer -= 1;
+      if (notificationPanel.timer <= 0) {
+        swingTimer.stop();
+        notificationPanel.setVisible(false);
         activeNotifications.remove(notificationPanel);
         updateLocationAndBounds();
-        throw new RuntimeException(e);
       }
-
     });
+    swingTimer.start();
+
     return notificationPanel;
   }
 
@@ -1374,162 +1363,162 @@ public class Mainframe extends JFrame {
   /**
    * update the jar file with the already downloaded latest.jar
    */
+  /**
+   * Kopiert latest.jar ueber die aktuelle JAR und startet die App neu.
+   * Wird als separater Prozess ausgefuehrt (java -jar app.jar update).
+   */
   public static void update() {
     String fileName = new File(
         Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
-    try (PrintWriter out = new PrintWriter("update.log")) {
-      System.out.println("For more Information please see update.log");
+    try (PrintWriter log = new PrintWriter("update.log")) {
       Thread.sleep(2000);
       File source = new File("latest.jar");
       File dest = new File(fileName);
-      InputStream is = null;
-      OutputStream os = null;
-      out.println("UPDATER: initialize");
-      out.println("UPDATER: detected fileName: " + fileName);
-      try {
-        is = new FileInputStream(source);
-        os = new FileOutputStream(dest);
-        byte[] buffer = new byte[1024];
+      log.println("UPDATER: initialize");
+      log.println("UPDATER: detected fileName: " + fileName);
+      try (InputStream is = new FileInputStream(source);
+           OutputStream os = new FileOutputStream(dest)) {
+        byte[] buffer = new byte[8192];
         int length;
-        out.println("UPDATER: overwriting file");
+        log.println("UPDATER: overwriting file");
         while ((length = is.read(buffer)) > 0) {
           os.write(buffer, 0, length);
         }
-        out.println("UPDATER: writing complete");
-        out.println("UPDATER: build process");
+        log.println("UPDATER: writing complete");
         ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName);
-        out.println("UPDATER: " + pb.command());
+        log.println("UPDATER: starting " + pb.command());
         pb.start();
-        out.println("UPDATER: process started");
-        out.println("UPDATER: SUCCESS");
+        log.println("UPDATER: SUCCESS");
       } catch (IOException e) {
-        out.println(e.getMessage());
-      } finally {
-        try {
-          if (is != null) is.close();
-          if (os != null) os.close();
-        } catch (IOException e) {
-          Mainframe.logger.error(e.getMessage());
-        }
-
+        log.println("UPDATER: ERROR - " + e.getMessage());
       }
-      out.println("UPDATER: update finished");
     } catch (FileNotFoundException | InterruptedException e1) {
-      Mainframe.logger.error(e1.getMessage());
+      e1.printStackTrace();
     }
-
   }
 
   /**
-   * downloads the latest Release jar and checks the versions. If there is a new
-   * version. Update is started immediately
+   * Prueft ueber die GitHub API ob ein Update verfuegbar ist.
+   * Nur wenn eine neuere Version gefunden wird, wird die JAR heruntergeladen.
    */
   private void checkUpdate() {
     Mainframe.executor.submit(() -> {
-      URL url;
       try {
-        url = new URI("https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar").toURL();
-        // Initialisiere HTTP-Verbindung, um Content-Length zu erhalten
-        HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
-        int contentLength = httpConnection.getContentLength();
-        int fileSize = 0;
-        if (contentLength > -1) {
-          fileSize = contentLength / 1000;
-          System.out.println("Größe der Datei: " + contentLength / 1000 + " KB");
+        // Version ueber GitHub API pruefen (wenige KB statt gesamte JAR)
+        customNotificationPanel notification = showNotification(Localization.get("update.versionCheck"), 15);
+        URL apiUrl = new URI("https://api.github.com/repos/NeXoS355/booklist/releases/latest").toURL();
+        HttpURLConnection apiConn = (HttpURLConnection) apiUrl.openConnection();
+        apiConn.setRequestProperty("Accept", "application/vnd.github+json");
+        apiConn.setRequestMethod("GET");
+
+        if (apiConn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+          notification.setText(Localization.get("api.noConnect"));
+          logger.error("Update - GitHub API returned: {}", apiConn.getResponseCode());
+          return;
         }
-        customNotificationPanel notification1 = showNotification(Localization.get("update.download"), 10);
-        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
-            FileOutputStream fileOutputStream = new FileOutputStream("latest.jar")) {
-          byte[] dataBuffer = new byte[1024];
+
+        StringBuilder response = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(apiConn.getInputStream(), StandardCharsets.UTF_8))) {
+          String line;
+          while ((line = reader.readLine()) != null) {
+            response.append(line);
+          }
+        }
+        apiConn.disconnect();
+
+        JsonObject release = JsonParser.parseString(response.toString()).getAsJsonObject();
+        String latestTag = release.get("tag_name").getAsString().replaceAll("^v", "");
+        logger.info("Update - current version: {}, latest version: {}", version, latestTag);
+
+        int currentVer = parseVersion(version);
+        int latestVer = parseVersion(latestTag);
+
+        if (latestVer <= currentVer) {
+          notification.setText(Localization.get("update.noUpdate"));
+          logger.info("Update - no update available");
+          return;
+        }
+
+        // Update verfuegbar
+        notification.setText(Localization.get("update.update"));
+        int answer = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
+            MessageFormat.format(Localization.get("q.update"), latestTag),
+            "Update", JOptionPane.YES_NO_OPTION);
+        if (answer != JOptionPane.YES_OPTION) {
+          return;
+        }
+
+        // Backup erstellen und JAR herunterladen
+        boolean backupOk = createBackup();
+        if (!backupOk) {
+          logger.error("Update - backup failed, aborting update");
+          return;
+        }
+
+        // Download-URL aus den Release Assets lesen
+        String downloadUrl = "https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar";
+        if (release.has("assets")) {
+          var assets = release.getAsJsonArray("assets");
+          for (var asset : assets) {
+            String name = asset.getAsJsonObject().get("name").getAsString();
+            if (name.endsWith(".jar")) {
+              downloadUrl = asset.getAsJsonObject().get("browser_download_url").getAsString();
+              break;
+            }
+          }
+        }
+
+        URL jarUrl = new URI(downloadUrl).toURL();
+        HttpURLConnection httpConn = (HttpURLConnection) jarUrl.openConnection();
+        int fileSize = httpConn.getContentLength();
+        logger.info("Update - downloading JAR ({} KB)", fileSize > 0 ? fileSize / 1024 : "unknown");
+
+        notification.setText(Localization.get("update.download"));
+        try (BufferedInputStream in = new BufferedInputStream(jarUrl.openStream());
+             FileOutputStream fos = new FileOutputStream("latest.jar")) {
+          byte[] buffer = new byte[8192];
           int bytesRead;
-          int downloadedBytes = 0;
-          int progress;
-          int old_progress = 0;
-          System.out.println("Start reading latest.jar");
-          while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-            downloadedBytes += bytesRead;
-            fileOutputStream.write(dataBuffer, 0, bytesRead);
-            // Fortschritt berechnen und ausgeben
-            progress = (int) ((((double) downloadedBytes / 1000) / (double) fileSize) * 100);
-            if (progress > old_progress)
-              notification1.setText(Localization.get("update.download") + " " + progress + "%");
-            old_progress = progress;
-          }
-          System.out.println("Finished reading latest.jar");
-          fileOutputStream.close();
-          notification1.setText(Localization.get("update.versionCheck"));
-          System.out.println("create Process 'latest.jar version'");
-          ProcessBuilder pb = new ProcessBuilder("java", "-jar", "latest.jar", "version");
-          logger.info("Update - Command: {}", pb.command());
-          Process proc = pb.start();
-          // Warte darauf, dass der Prozess abgeschlossen wird
-          int exitCode = proc.waitFor();
-          notification1.setText(Localization.get("update.versionCheckFin"));
-          logger.info("Update - Process closed with Exit-Code: {}", exitCode);
-
-          // InputStream lesen (kontinuierlich statt mit available())
-          try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-              BufferedReader errorReader = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
-
-            // Ausgabe des Prozesses lesen
-            String line;
-            while ((line = reader.readLine()) != null) {
-              logger.info("Update - detected version: {}", line);
-              StringBuilder strCurVer = new StringBuilder();
-              int intCurVer;
-              String[] splitString = version.split("[.]");
-              for (String s : splitString) {
-                strCurVer.append(s);
-              }
-              intCurVer = Integer.parseInt(strCurVer.toString());
-
-              StringBuilder strDownloadedVer = new StringBuilder();
-              int intDownloadedVer;
-              splitString = line.split("[.]");
-              for (String s : splitString) {
-                strDownloadedVer.append(s);
-              }
-              intDownloadedVer = Integer.parseInt(strDownloadedVer.toString());
-
-              if (intDownloadedVer > intCurVer) {
-                notification1.setText(Localization.get("update.update"));
-                int antwort = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
-                    MessageFormat.format(Localization.get("q.update"), line),
-                    "Update", JOptionPane.YES_NO_OPTION);
-                if (antwort == JOptionPane.YES_OPTION) {
-                  boolean ret = createBackup();
-                  if (ret) {
-                    String fileName = new File(Mainframe.class.getProtectionDomain()
-                        .getCodeSource().getLocation().getPath()).getName();
-                    pb = new ProcessBuilder("java", "-jar", fileName, "update");
-                    logger.info("Update - Command: {}", pb.command());
-                    pb.start();
-                    logger.info("Update - Process started");
-                    System.exit(0);
-                  }
-                }
-
-              } else {
-                notification1.setText(Localization.get("update.noUpdate"));
-                cleanup();
+          int downloaded = 0;
+          int oldProgress = 0;
+          while ((bytesRead = in.read(buffer)) != -1) {
+            fos.write(buffer, 0, bytesRead);
+            downloaded += bytesRead;
+            if (fileSize > 0) {
+              int progress = (int) ((double) downloaded / fileSize * 100);
+              if (progress > oldProgress) {
+                notification.setText(Localization.get("update.download") + " " + progress + "%");
+                oldProgress = progress;
               }
             }
-
-            // Fehlerausgabe lesen (falls vorhanden)
-            while ((line = errorReader.readLine()) != null) {
-              logger.error("Update - Error: {}", line);
-            }
           }
-        } catch (IOException | InterruptedException e1) {
-          showNotification("Update error. See app.log for details");
-          logger.error(e1.getMessage());
         }
-      } catch (URISyntaxException | IOException e1) {
-        showNotification("Update error. See app.log for details");
-        logger.error(e1.getMessage());
-      }
+        logger.info("Update - download complete");
 
+        // Update starten: aktuelles JAR durch neues ersetzen
+        String fileName = new File(Mainframe.class.getProtectionDomain()
+            .getCodeSource().getLocation().getPath()).getName();
+        ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName, "update");
+        logger.info("Update - starting: {}", pb.command());
+        pb.start();
+        System.exit(0);
+
+      } catch (URISyntaxException | IOException e) {
+        showNotification("Update error. See app.log for details");
+        logger.error("Update error: {}", e.getMessage());
+      }
     });
+  }
+
+  /**
+   * Wandelt einen Versionsstring (z.B. "3.3.0") in einen int um (330).
+   */
+  private static int parseVersion(String ver) {
+    StringBuilder sb = new StringBuilder();
+    for (String part : ver.split("[.]")) {
+      sb.append(part);
+    }
+    return Integer.parseInt(sb.toString());
   }
 
   /**
@@ -1538,22 +1527,9 @@ public class Mainframe extends JFrame {
    * @param args - Arguments to trigger different functions
    */
   public static void main(String[] args) {
-    if (args.length > 0) {
-      for (String s : args) {
-        switch (s) {
-          case "version":
-            new Mainframe();
-            System.out.println(version);
-            System.exit(0);
-            break;
-          case "update":
-            update();
-            System.exit(0);
-          default:
-            System.out.println("argument not recognized. Exiting.");
-            System.exit(0);
-        }
-      }
+    if (args.length > 0 && "update".equals(args[0])) {
+      update();
+      System.exit(0);
     } else {
       createInstance(true);
     }
@@ -1566,7 +1542,7 @@ public class Mainframe extends JFrame {
    */
   public static void createInstance(boolean visible) {
     if (instance == null) {
-      System.out.println("creating Instance with visible=" + visible);
+      logger.info("Creating Instance with visible={}", visible);
       instance = new Mainframe(visible);
     }
   }
