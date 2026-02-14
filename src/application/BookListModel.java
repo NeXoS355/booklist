@@ -402,47 +402,34 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	}
 
 	/**
-	 * gets
-	 * 
-	 * @return return a List with Authors or Series with the best overall Rating
+	 * Counts ebooks (ebook=1) or physical books (ebook=0 or NULL)
+	 *
+	 * @param ebook - 1 for ebooks, 0 for physical books
+	 * @return count of matching books
 	 */
 	public static int getEbookCount(int ebook) {
-		int noEbook = 0;
-		int count = 0;
+		int ebookCount = 0;
+		int physicalCount = 0;
 
 		ResultSet rs = Database.getColumnCountsWithGroup("ebook");
-
 		try {
 			while (rs.next()) {
-				count = rs.getInt(1);
+				int count = rs.getInt(1);
 				String isEbook = rs.getString(2);
 
-				if (ebook == 1 && isEbook.equals("1")) {
-					return count;
-				} else if (ebook == 0 && isEbook == null) {
-					if (noEbook == 0) {
-						noEbook += count;
-					} else {
-						noEbook += count;
-						return noEbook;
-					}
-				} else if (ebook == 0 && isEbook.equals("0")) {
-					if (noEbook == 0) {
-						noEbook += count;
-					} else {
-						noEbook += count;
-						return noEbook;
-					}
-
+				if ("1".equals(isEbook)) {
+					ebookCount += count;
+				} else {
+					// ebook=0 oder NULL → physisches Buch
+					physicalCount += count;
 				}
-
 			}
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		} finally {
 			Database.closeResultSet(rs);
 		}
-		return count;
+		return ebook == 1 ? ebookCount : physicalCount;
 	}
 
 	/**
