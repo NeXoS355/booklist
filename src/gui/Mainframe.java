@@ -709,16 +709,17 @@ public class Mainframe extends JFrame {
   private void cleanup() {
     Mainframe.executor.submit(() -> {
       try {
-        File file = new File("latest.jar");
+        File jarFile = new File(Mainframe.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        File baseDir = jarFile.getParentFile();
+        File file = new File(baseDir, "latest.jar");
         if (file.exists()) {
-          Path path = Paths.get("latest.jar");
-          boolean deleted = Files.deleteIfExists(path);
+          boolean deleted = Files.deleteIfExists(file.toPath());
           if (deleted)
-            logger.info("File detected and deleted: {}", path);
+            logger.info("File detected and deleted: {}", file.getAbsolutePath());
           else
-            logger.warn("File detected but could not be deleted: {}", path);
+            logger.warn("File detected but could not be deleted: {}", file.getAbsolutePath());
         }
-      } catch (IOException e) {
+      } catch (IOException | URISyntaxException e) {
         logger.error(e.getMessage());
       }
 
@@ -1034,17 +1035,18 @@ public class Mainframe extends JFrame {
    */
   public static boolean createBackup() {
     try {
-      String filepath = Mainframe.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-      String[] fileArray = filepath.split("/");
-      String filename = fileArray[fileArray.length - 1];
+      File jarFile = new File(Mainframe.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+      String filename = jarFile.getName();
+      File baseDir = jarFile.getParentFile();
       if (filename.contains(".jar")) {
         Date dt = new Date();
         long LongTime = dt.getTime();
         String StrTime = Long.toString(LongTime).substring(0, Long.toString(LongTime).length() - 3);
-        copyFilesInDirectory(new File("BooklistDB"), new File("Sicherung/" + StrTime + "/BooklistDB"));
-        copyFileToDirectory(new File("derby.log"), new File("Sicherung/" + StrTime));
-        copyFileToDirectory(new File("config.conf"), new File("Sicherung/" + StrTime));
-        copyFileToDirectory(new File(filename), new File("Sicherung/" + StrTime));
+        File backupDir = new File(baseDir, "Sicherung/" + StrTime);
+        copyFilesInDirectory(new File(baseDir, "BooklistDB"), new File(backupDir, "BooklistDB"));
+        copyFileToDirectory(new File(baseDir, "derby.log"), backupDir);
+        copyFileToDirectory(new File(baseDir, "config.conf"), backupDir);
+        copyFileToDirectory(jarFile, backupDir);
         Mainframe.logger.info("Backup created");
         return true;
       } else {
@@ -1406,31 +1408,33 @@ public class Mainframe extends JFrame {
    * Wird als separater Prozess ausgefuehrt (java -jar app.jar update).
    */
   public static void update() {
-    String fileName = new File(
-        Mainframe.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
-    try (PrintWriter log = new PrintWriter("update.log")) {
-      Thread.sleep(2000);
-      File source = new File("latest.jar");
-      File dest = new File(fileName);
-      log.println("UPDATER: initialize");
-      log.println("UPDATER: detected fileName: " + fileName);
-      try (InputStream is = new FileInputStream(source);
-           OutputStream os = new FileOutputStream(dest)) {
-        byte[] buffer = new byte[8192];
-        int length;
-        log.println("UPDATER: overwriting file");
-        while ((length = is.read(buffer)) > 0) {
-          os.write(buffer, 0, length);
+    try {
+      File jarFile = new File(Mainframe.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+      File baseDir = jarFile.getParentFile();
+      try (PrintWriter log = new PrintWriter(new File(baseDir, "update.log"))) {
+        Thread.sleep(2000);
+        File source = new File(baseDir, "latest.jar");
+        log.println("UPDATER: initialize");
+        log.println("UPDATER: detected fileName: " + jarFile.getAbsolutePath());
+        try (InputStream is = new FileInputStream(source);
+             OutputStream os = new FileOutputStream(jarFile)) {
+          byte[] buffer = new byte[8192];
+          int length;
+          log.println("UPDATER: overwriting file");
+          while ((length = is.read(buffer)) > 0) {
+            os.write(buffer, 0, length);
+          }
+          log.println("UPDATER: writing complete");
+          ProcessBuilder pb = new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath());
+          pb.directory(baseDir);
+          log.println("UPDATER: starting " + pb.command());
+          pb.start();
+          log.println("UPDATER: SUCCESS");
+        } catch (IOException e) {
+          log.println("UPDATER: ERROR - " + e.getMessage());
         }
-        log.println("UPDATER: writing complete");
-        ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName);
-        log.println("UPDATER: starting " + pb.command());
-        pb.start();
-        log.println("UPDATER: SUCCESS");
-      } catch (IOException e) {
-        log.println("UPDATER: ERROR - " + e.getMessage());
       }
-    } catch (FileNotFoundException | InterruptedException e1) {
+    } catch (FileNotFoundException | InterruptedException | URISyntaxException e1) {
       e1.printStackTrace();
     }
   }
@@ -1512,9 +1516,14 @@ public class Mainframe extends JFrame {
         int fileSize = httpConn.getContentLength();
         logger.info("Update - downloading JAR ({} KB)", fileSize > 0 ? fileSize / 1024 : "unknown");
 
+        File jarFile = new File(Mainframe.class.getProtectionDomain()
+            .getCodeSource().getLocation().toURI());
+        File baseDir = jarFile.getParentFile();
+
         notification.setText(Localization.get("update.download"));
+        File latestJar = new File(baseDir, "latest.jar");
         try (BufferedInputStream in = new BufferedInputStream(jarUrl.openStream());
-             FileOutputStream fos = new FileOutputStream("latest.jar")) {
+             FileOutputStream fos = new FileOutputStream(latestJar)) {
           byte[] buffer = new byte[8192];
           int bytesRead;
           int downloaded = 0;
@@ -1533,10 +1542,17 @@ public class Mainframe extends JFrame {
         }
         logger.info("Update - download complete");
 
+        // Content-Length Prüfung
+        if (fileSize > 0 && latestJar.length() != fileSize) {
+          logger.error("Update - file size mismatch: expected {} bytes, got {} bytes", fileSize, latestJar.length());
+          latestJar.delete();
+          notification.setText(Localization.get("update.error"));
+          return;
+        }
+
         // Update starten: aktuelles JAR durch neues ersetzen
-        String fileName = new File(Mainframe.class.getProtectionDomain()
-            .getCodeSource().getLocation().getPath()).getName();
-        ProcessBuilder pb = new ProcessBuilder("java", "-jar", fileName, "update");
+        ProcessBuilder pb = new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath(), "update");
+        pb.directory(baseDir);
         logger.info("Update - starting: {}", pb.command());
         pb.start();
         System.exit(0);
