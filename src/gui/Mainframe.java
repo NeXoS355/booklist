@@ -352,6 +352,7 @@ public class Mainframe extends JFrame {
     logger.info("Finished creating GUI Components. Start creating Table Contents");
 
     table.setModel(tableDisplay);
+    table.setAutoCreateRowSorter(true);
     table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
     CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer(this.getTitle());
     table.setDefaultRenderer(Object.class, tableRenderer);

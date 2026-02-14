@@ -50,7 +50,7 @@ public class GetBookInfosFromWeb {
 			}
 
 			StringBuilder str = new StringBuilder();
-			if (entry.getIsbn().isEmpty()) {
+			if (entry.getIsbn() == null || entry.getIsbn().isEmpty()) {
 				if (HandleConfig.searchParam.equals("at")) {
 					str.append(sanitizeString(entry.getAuthor())).append("+");
 				}

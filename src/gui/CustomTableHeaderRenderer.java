@@ -15,6 +15,7 @@ import java.awt.*;
 import java.io.Serial;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
@@ -55,6 +56,7 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 		Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		currentTable = table;
 		setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY));
 		setupHeaderCell(component, column, value);
 
@@ -98,6 +100,8 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 		return component;
 	}
 
+	private JTable currentTable;
+
 	private void setupHeaderCell(Component component, int column, Object value) {
 		setFont(new Font("Roboto", Font.BOLD, 16));
 
@@ -119,6 +123,9 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 			else
 				label.setText(value != null ? value.toString() : "");
 
+			// Sort indicator
+			label.setText(label.getText() + getSortIndicator(currentTable, column));
+
 		}
 
 		// Header-Farben setzen
@@ -129,5 +136,15 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 			component.setForeground(Color.BLACK);
 			component.setBackground(new Color(240, 240, 240));
 		}
+	}
+
+	private String getSortIndicator(JTable table, int column) {
+		RowSorter<?> sorter = table.getRowSorter();
+		if (sorter == null) return "";
+		List<? extends RowSorter.SortKey> sortKeys = sorter.getSortKeys();
+		if (sortKeys.isEmpty()) return "";
+		RowSorter.SortKey key = sortKeys.get(0);
+		if (key.getColumn() != column) return "";
+		return key.getSortOrder() == SortOrder.ASCENDING ? " \u25B2" : " \u25BC";
 	}
 }
