@@ -243,9 +243,10 @@ public class Database {
 	public static ResultSet getColumnWithWhere(String columnName, String whereColumn, String whereValue) {
 		ResultSet rs = null;
 		try {
-			Statement st = con.createStatement();
-			rs = st.executeQuery(
-					"SELECT DISTINCT " + columnName + " FROM books WHERE " + whereColumn + "='" + whereValue + "'");
+			PreparedStatement st = con.prepareStatement(
+					"SELECT DISTINCT " + columnName + " FROM books WHERE " + whereColumn + "=?");
+			st.setString(1, whereValue);
+			rs = st.executeQuery();
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
