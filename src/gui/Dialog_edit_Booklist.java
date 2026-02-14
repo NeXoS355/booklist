@@ -43,6 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
 import javax.swing.tree.DefaultTreeModel;
 
 import application.Book_Booklist;
@@ -496,6 +497,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
     txtAuthor = new CustomTextField(entry.getAuthor());
     txtAuthor.setPreferredSize(new Dimension(50, height));
+    ((AbstractDocument) txtAuthor.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
 
     txtAuthor.addKeyListener(new KeyAdapter() {
 
@@ -533,12 +535,6 @@ public class Dialog_edit_Booklist extends JDialog {
 
         if (typedText.isEmpty()) {
           return; // Keine Eingabe -> nichts tun
-        } else if (typedText.length() > 50) {
-          JMenuItem item = new JMenuItem(Localization.get("text.longError"));
-          suggestionsPopup.add(item);
-          suggestionsPopup.show(txtAuthor, 0, txtAuthor.getHeight());
-          txtAuthor.setEditable(false);
-          return;
         }
 
         String[] suggestions = autoCompletion(typedText, "author");
@@ -569,6 +565,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
     txtTitle = new CustomTextField(entry.getTitle());
     txtTitle.setPreferredSize(new Dimension(50, height));
+    ((AbstractDocument) txtTitle.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
     txtTitle.addKeyListener(new KeyAdapter() {
 
       @Override
@@ -583,11 +580,6 @@ public class Dialog_edit_Booklist extends JDialog {
         }
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
           dispose();
-        if (txtTitle.getText().length() > 50) {
-          txtTitle.setEditable(false);
-          txtTitle.setText(Localization.get("text.longError"));
-          txtTitle.setBackground(new Color(255, 105, 105));
-        }
       }
     });
 
@@ -597,6 +589,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
     txtNote = new CustomTextField(entry.getNote());
     txtNote.setPreferredSize(new Dimension(50, height));
+    ((AbstractDocument) txtNote.getDocument()).setDocumentFilter(new LengthDocumentFilter(100));
     txtNote.addKeyListener(new KeyAdapter() {
 
       @Override
@@ -615,6 +608,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
     txtSeries = new CustomTextField(entry.getSeries());
     txtSeries.setPreferredSize(new Dimension(50, height));
+    ((AbstractDocument) txtSeries.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
     txtSeries.addKeyListener(new KeyAdapter() {
 
       @Override
@@ -650,12 +644,6 @@ public class Dialog_edit_Booklist extends JDialog {
 
         if (typedText.isEmpty()) {
           return; // Keine Eingabe -> nichts tun
-        } else if (typedText.length() > 50) {
-          JMenuItem item = new JMenuItem(Localization.get("text.longError"));
-          suggestionsPopup.add(item);
-          suggestionsPopup.show(txtSeries, 0, txtSeries.getHeight());
-          txtSeries.setEditable(false);
-          return;
         }
 
         String[] suggestions = autoCompletion(typedText, "series");
@@ -682,6 +670,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
     txtSeriesVol = new CustomTextField(entry.getSeriesVol());
     txtSeriesVol.setPreferredSize(new Dimension(50, height));
+    ((AbstractDocument) txtSeriesVol.getDocument()).setDocumentFilter(new LengthDocumentFilter(2));
     txtSeriesVol.addKeyListener(new KeyAdapter() {
 
       @Override
@@ -690,10 +679,6 @@ public class Dialog_edit_Booklist extends JDialog {
           save(entry);
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
           dispose();
-        if (txtSeriesVol.getText().length() > 2) {
-          txtSeriesVol.setBackground(new Color(255, 105, 105));
-        } else
-          txtSeriesVol.setBackground(UIManager.getColor("TextField.background"));
       }
 
     });
@@ -818,6 +803,7 @@ public class Dialog_edit_Booklist extends JDialog {
     txtBorrowedFrom = new CustomTextField(entry.getBorrowedFrom());
     if (entry.getBorrowedFrom().isEmpty())
       txtBorrowedFrom.setVisible(false);
+    ((AbstractDocument) txtBorrowedFrom.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
     txtBorrowedFrom.addKeyListener(new KeyAdapter() {
 
       @Override
@@ -833,6 +819,7 @@ public class Dialog_edit_Booklist extends JDialog {
     txtBorrowedTo = new CustomTextField(entry.getBorrowedTo());
     if (entry.getBorrowedTo().isEmpty())
       txtBorrowedTo.setVisible(false);
+    ((AbstractDocument) txtBorrowedTo.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
     txtBorrowedTo.addKeyListener(new KeyAdapter() {
 
       @Override

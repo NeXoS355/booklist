@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
+import javax.swing.text.AbstractDocument;
 
 import application.Book_Booklist;
 import application.Book_Wishlist;
@@ -75,6 +76,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		txtAuthor = new CustomTextField();
 		txtAuthor.setPreferredSize(new Dimension(50, height));
 		txtAuthor.setBorder(standardBorder);
+		((AbstractDocument) txtAuthor.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
 		txtAuthor.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -112,6 +114,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		txtTitle = new CustomTextField();
 		txtTitle.setPreferredSize(new Dimension(50, height));
 		txtTitle.setBorder(standardBorder);
+		((AbstractDocument) txtTitle.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
 		txtTitle.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -125,11 +128,6 @@ public class Dialog_add_Wishlist extends JDialog {
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
-				if (txtTitle.getText().length() > 50) {
-					txtTitle.setEditable(false);
-					txtTitle.setText(Localization.get("text.longError"));
-					txtTitle.setBackground(new Color(255, 105, 105));
-				}
 			}
 		});
 		txtTitle.addMouseListener(new MouseAdapter() {
@@ -146,12 +144,7 @@ public class Dialog_add_Wishlist extends JDialog {
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (txtTitle.getText().equals(Localization.get("text.longError"))) {
-					txtTitle.setEditable(true);
-					txtTitle.setBackground(UIManager.getColor("TextField.foreground"));
-					txtTitle.setBackground(UIManager.getColor("TextField.background"));
-					txtTitle.setText("");
-				} else if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
+				if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
 					txtTitle.setBackground(UIManager.getColor("TextField.foreground"));
 					txtTitle.setBackground(UIManager.getColor("TextField.background"));
 					txtTitle.setText("");
@@ -168,6 +161,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		txtNote = new CustomTextField();
 		txtNote.setPreferredSize(new Dimension(50, height));
 		txtNote.setBorder(standardBorder);
+		((AbstractDocument) txtNote.getDocument()).setDocumentFilter(new LengthDocumentFilter(100));
 		txtNote.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -204,6 +198,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		txtSeries = new CustomTextField();
 		txtSeries.setPreferredSize(new Dimension(50, height));
 		txtSeries.setBorder(standardBorder);
+		((AbstractDocument) txtSeries.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
 		txtSeries.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -235,6 +230,7 @@ public class Dialog_add_Wishlist extends JDialog {
 		txtSeriesVol = new CustomTextField();
 		txtSeriesVol.setPreferredSize(new Dimension(50, height));
 		txtSeriesVol.setBorder(standardBorder);
+		((AbstractDocument) txtSeriesVol.getDocument()).setDocumentFilter(new LengthDocumentFilter(2));
 		txtSeriesVol.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -244,11 +240,6 @@ public class Dialog_add_Wishlist extends JDialog {
 				}
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
 					dispose();
-				if (txtSeriesVol.getText().length() > 2) {
-					txtSeriesVol.setBackground(new Color(255, 105, 105));
-					txtSeriesVol.setText("");
-				} else
-					txtSeriesVol.setBackground(UIManager.getColor("TextField.background"));
 			}
 		});
 		txtSeriesVol.addMouseListener(new MouseAdapter() {

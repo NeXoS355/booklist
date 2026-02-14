@@ -318,11 +318,13 @@ public class Mainframe extends JFrame {
     openWebApi = new JMenuItem(Localization.get("menu.webappopen"));
     openWebApi.addActionListener(e -> {
       logger.info("open Web API Website");
-      Desktop desktop = Desktop.getDesktop();
-      URI oURL;
       try {
-        oURL = new URI(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
-        desktop.browse(oURL);
+        URI oURL = new URI(HandleConfig.apiURL + "?token=" + HandleConfig.apiToken);
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+          Desktop.getDesktop().browse(oURL);
+        } else {
+          new ProcessBuilder("xdg-open", oURL.toString()).start();
+        }
       } catch (URISyntaxException | IOException e1) {
         logger.error(e1.getMessage());
       }
