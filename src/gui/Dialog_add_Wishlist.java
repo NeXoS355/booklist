@@ -26,6 +26,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.text.AbstractDocument;
 
+import com.formdev.flatlaf.util.UIScale;
 import application.Book_Booklist;
 import application.Book_Wishlist;
 
@@ -44,7 +45,7 @@ public class Dialog_add_Wishlist extends JDialog {
 	public Dialog_add_Wishlist(Frame owner) {
 		Mainframe.logger.info("Wishlist Book add: start creating Frame");
 		this.setTitle(Localization.get("t.addBook"));
-		this.setSize(new Dimension(500, 320));
+		this.setSize(new Dimension(UIScale.scale(500), UIScale.scale(320)));
 		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
 
@@ -62,8 +63,8 @@ public class Dialog_add_Wishlist extends JDialog {
 		panel_center.setLayout(new GridBagLayout());
 		
 		
-		int height = 60;
-		int width = 100;
+		int height = UIScale.scale(60);
+		int width = UIScale.scale(100);
 		
 		/*
 		 * Create Components for Panel West

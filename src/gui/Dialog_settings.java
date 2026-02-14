@@ -26,6 +26,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
+import com.formdev.flatlaf.util.UIScale;
 import application.HandleConfig;
 
 public class Dialog_settings extends JDialog {
@@ -50,7 +51,7 @@ public class Dialog_settings extends JDialog {
     this.setTitle(Localization.get("t.settings"));
     this.setModal(modal);
     this.setLayout(new BorderLayout());
-    this.setSize(670, 515);
+    this.setSize(UIScale.scale(670), UIScale.scale(515));
     this.setLocationRelativeTo(owner);
 
     URL connectionUrl;
@@ -115,7 +116,7 @@ public class Dialog_settings extends JDialog {
     c.gridy = 2;
     Integer[] font = { 12, 14, 16, 18, 20 };
     cmbFont = new JComboBox<>(font);
-    cmbFont.setSelectedItem(Mainframe.defaultFont.getSize());
+    cmbFont.setSelectedItem(UIScale.unscale(Mainframe.defaultFont.getSize()));
     pnlLeft.add(cmbFont, c);
     c.gridx = 0;
     c.gridy = 3;
@@ -125,7 +126,7 @@ public class Dialog_settings extends JDialog {
     c.gridy = 3;
     Integer[] fontDesc = { 12, 14, 16, 18, 20 };
     cmbFontDesc = new JComboBox<>(fontDesc);
-    cmbFontDesc.setSelectedItem(Mainframe.descFont.getSize());
+    cmbFontDesc.setSelectedItem(UIScale.unscale(Mainframe.descFont.getSize()));
     pnlLeft.add(cmbFontDesc, c);
     c.gridx = 0;
     c.gridy = 4;
@@ -329,8 +330,8 @@ public class Dialog_settings extends JDialog {
 
     try {
       HandleConfig.lang = (String) cmbLang.getSelectedItem();
-      Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFont.getSelectedItem());
-      Mainframe.descFont = new Font("Roboto", Font.PLAIN, (Integer) cmbFontDesc.getSelectedItem());
+      Mainframe.defaultFont = new Font("Roboto", Font.PLAIN, UIScale.scale((Integer) cmbFont.getSelectedItem()));
+      Mainframe.descFont = new Font("Roboto", Font.PLAIN, UIScale.scale((Integer) cmbFontDesc.getSelectedItem()));
       HandleConfig.loadOnDemand = chkOnDemand.isSelected() ? 1 : 0;
       HandleConfig.autoDownload = chkAutoDownload.isSelected() ? 1 : 0;
       HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();

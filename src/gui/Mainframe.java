@@ -6,6 +6,7 @@ import application.HandleConfig;
 import application.SimpleTableModel;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.util.UIScale;
 import com.google.gson.*;
 import data.Database;
 import org.apache.logging.log4j.Level;
@@ -22,6 +23,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -34,6 +36,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
+import javax.imageio.ImageIO;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,8 +59,8 @@ public class Mainframe extends JFrame {
    */
   public static final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-  public static Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
-  public static Font descFont = new Font("Roboto", Font.PLAIN, 16);
+  public static Font defaultFont;
+  public static Font descFont;
   public static BookListModel allEntries;
   public static int prozEbook = 0;
   public static int prozAuthor = 0;
@@ -89,6 +92,8 @@ public class Mainframe extends JFrame {
   private static String version;
   private JTextField txt_search;
   private static JButton btnSearchReset;
+  private static JButton btnFab;
+  private static int FAB_SIZE = 48;
   public static int defaultFrameWidth = 1300;
   public static int defaultFrameHeight = 800;
   public static int startX = 150;
@@ -177,6 +182,11 @@ public class Mainframe extends JFrame {
       logger.error(e.getMessage());
     }
 
+    // Fonts nach FlatLaf-Init skalieren
+    defaultFont = defaultFont.deriveFont((float) UIScale.scale(defaultFont.getSize()));
+    descFont = descFont.deriveFont((float) UIScale.scale(descFont.getSize()));
+    FAB_SIZE = UIScale.scale(48);
+
     SimpleTableModel.initColumnNames();
     logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
     allEntries = new BookListModel(true);
@@ -217,26 +227,14 @@ public class Mainframe extends JFrame {
     });
     panel.add(txt_search, BorderLayout.CENTER);
 
-    JButton btn_add = ButtonsFactory.createButton("+");
-    btn_add.setFont(btn_add.getFont().deriveFont(Font.BOLD, 20));
-    btn_add.addActionListener(e -> {
-      new Dialog_add_Booklist(Mainframe.getInstance());
-      updateSearchPlaceholder();
-    });
-
-    panel.add(btn_add, BorderLayout.WEST);
-
-    JButton btn_search = ButtonsFactory.createButton(Localization.get("search.button"));
-    btn_search.setFont(btn_search.getFont().deriveFont(Font.BOLD, 13));
-    btn_search.addActionListener(e -> {
-      search(txt_search.getText());
-      tree.clearSelection();
-      setLastSearch(txt_search.getText());
-      if (allEntries.getSize() == 0) {
-        updateModel();
-        JOptionPane.showMessageDialog(Mainframe.getInstance(), Localization.get("search.error"));
-      }
-    });
+    // Lupen-Icon als leadingIcon im Suchfeld
+    try {
+      String lupePath = HandleConfig.darkmode == 1 ? "/resources/lupe_inv.png" : "/resources/lupe.png";
+      BufferedImage lupeImage = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource(lupePath)));
+      txt_search.putClientProperty("JTextField.leadingIcon", new ImageIcon(lupeImage));
+    } catch (IOException ex) {
+      logger.error(ex.getMessage());
+    }
 
     Color resetColor = new Color(200, 50, 50);
     Color resetHoverColor = new Color(160, 30, 30);
@@ -259,7 +257,7 @@ public class Mainframe extends JFrame {
     btnSearchReset.setFocusable(false);
     btnSearchReset.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     btnSearchReset.setMargin(new Insets(0, 3, 0, 3));
-    btnSearchReset.setPreferredSize(new Dimension(22, 22));
+    btnSearchReset.setPreferredSize(new Dimension(UIScale.scale(22), UIScale.scale(22)));
     btnSearchReset.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseEntered(MouseEvent e) { btnSearchReset.setBackground(resetHoverColor); }
@@ -270,13 +268,12 @@ public class Mainframe extends JFrame {
     btnSearchReset.addActionListener(e -> {
       txt_search.setText("");
       setLastSearch("");
+      tree.clearSelection();
       updateModel();
       updateSearchPlaceholder();
       btnSearchReset.setVisible(false);
     });
     txt_search.putClientProperty("JTextField.trailingComponent", btnSearchReset);
-
-    panel.add(btn_search, BorderLayout.EAST);
 
     JPanel pnlMenu = new JPanel();
     pnlMenu.setLayout(new BorderLayout());
@@ -401,7 +398,7 @@ public class Mainframe extends JFrame {
     table.setFont(defaultFont);
     table.setShowHorizontalLines(false);
     table.setIntercellSpacing(new Dimension(0, 0));
-    table.setRowHeight(table.getRowHeight() + 6);
+    table.setRowHeight(UIScale.scale(table.getRowHeight() + 6));
     table.addMouseMotionListener(new MouseMotionAdapter() {
 
       @Override
@@ -489,7 +486,6 @@ public class Mainframe extends JFrame {
             } else {
               wishlist_instance.setVisible(true);
             }
-
           }
         });
       }
@@ -517,6 +513,47 @@ public class Mainframe extends JFrame {
     layeredPane.setLayout(null);
     layeredPane.add(listScrollPane, Integer.valueOf(1)); // Die Tabelle im unteren Layer
 
+    // Floating Action Button (FAB) zum Hinzufügen von Büchern
+    btnFab = new JButton("+") {
+      @Serial
+      private static final long serialVersionUID = 1L;
+
+      @Override
+      protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        Color accent = UIManager.getColor("Component.accentColor");
+        if (accent == null) accent = new Color(0, 120, 212);
+        g2.setColor(getModel().isRollover() ? accent.brighter() : accent);
+        g2.fillOval(0, 0, getWidth(), getHeight());
+        g2.dispose();
+        super.paintComponent(g);
+      }
+    };
+    btnFab.setFont(defaultFont.deriveFont(Font.BOLD, defaultFont.getSize() * 1.5f));
+    btnFab.setForeground(Color.WHITE);
+    btnFab.setContentAreaFilled(false);
+    btnFab.setOpaque(false);
+    btnFab.setBorderPainted(false);
+    btnFab.setFocusPainted(false);
+    btnFab.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    btnFab.setSize(FAB_SIZE, FAB_SIZE);
+    btnFab.putClientProperty("JButton.buttonType", "none");
+    btnFab.addActionListener(e -> {
+      new Dialog_add_Booklist(Mainframe.getInstance());
+      updateSearchPlaceholder();
+    });
+    layeredPane.add(btnFab, Integer.valueOf(2));
+
+    // Position bei Resize aktualisieren
+    layeredPane.addComponentListener(new ComponentAdapter() {
+      @Override
+      public void componentResized(ComponentEvent e) {
+        int fabMargin = UIScale.scale(20);
+        btnFab.setLocation(layeredPane.getWidth() - FAB_SIZE - fabMargin, layeredPane.getHeight() - FAB_SIZE - fabMargin);
+      }
+    });
+
     pnl_mid.add(layeredPane, BorderLayout.CENTER);
 
     rootNode.removeAllChildren();
@@ -527,6 +564,7 @@ public class Mainframe extends JFrame {
     CustomTreeCellRenderer renderer = new CustomTreeCellRenderer();
     tree.setCellRenderer(renderer);
     tree.putClientProperty("JTree.lineStyle", "None");
+    tree.setRowHeight(UIScale.scale(24));
 
     tree.addMouseListener(new MouseAdapter() {
       @Override
@@ -605,7 +643,7 @@ public class Mainframe extends JFrame {
       treeScrollPane.getViewport().setBackground(new Color(75, 75, 75));
     JScrollBar treeVerticalScrollBar = treeScrollPane.getVerticalScrollBar();
     treeVerticalScrollBar.setUI(new CustomScrollBar());
-    treeScrollPane.setPreferredSize(new Dimension(300, pnl_mid.getHeight()));
+    treeScrollPane.setPreferredSize(new Dimension(UIScale.scale(300), pnl_mid.getHeight()));
 
     splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, layeredPane);
     this.add(splitPane, BorderLayout.CENTER);
@@ -688,16 +726,21 @@ public class Mainframe extends JFrame {
   }
 
   static void updateLocationAndBounds() {
+    int notifGap = UIScale.scale(8);
+    int marginLeft = UIScale.scale(16);
+    int marginBottom = UIScale.scale(16);
+    int yOffset = marginBottom;
     for (JPanel notification : activeNotifications) {
-      int index = activeNotifications.indexOf(notification) + 1;
-      notification.setLocation(0, splitPane.getHeight() - index * 30 - index * 5);
-      notification.setBounds(0, splitPane.getHeight() - index * 30 - index * 5, notification.getWidth(),
-          notification.getHeight());
-      // System.out.println(index + "/" + activeNotifications.size() + " | " +
-      // (splitPane.getHeight() - index*30 - index*5));
-
+      yOffset += notification.getHeight() + notifGap;
+      int xPos = marginLeft;
+      int yPos = splitPane.getHeight() - yOffset;
+      notification.setLocation(xPos, yPos);
+      notification.setBounds(xPos, yPos, notification.getWidth(), notification.getHeight());
     }
     listScrollPane.setBounds(0, 0, layeredPane.getWidth(), layeredPane.getHeight());
+    if (btnFab != null) {
+      btnFab.setLocation(layeredPane.getWidth() - FAB_SIZE - 20, layeredPane.getHeight() - FAB_SIZE - 20);
+    }
     // Revalidate und Repaint sofort aufrufen
     SwingUtilities.invokeLater(() -> {
       table.revalidate();
@@ -881,20 +924,15 @@ public class Mainframe extends JFrame {
    */
   public static customNotificationPanel showNotification(String message, int timeout, int bookLinkIndex) {
     customNotificationPanel notificationPanel = new customNotificationPanel(message, timeout);
-    notificationPanel.setLocation(0,
-        splitPane.getHeight() - ((activeNotifications.size()) * 30) - ((activeNotifications.size()) * 5));
     if (bookLinkIndex >= 0)
       notificationPanel.addBookReference(bookLinkIndex);
-    notificationPanel.repaint();
 
     Timer swingTimer = new Timer(1000, null);
     swingTimer.addActionListener(e -> {
       notificationPanel.timer -= 1;
       if (notificationPanel.timer <= 0) {
         swingTimer.stop();
-        notificationPanel.setVisible(false);
-        activeNotifications.remove(notificationPanel);
-        updateLocationAndBounds();
+        notificationPanel.startFadeOut();
       }
     });
     swingTimer.start();
@@ -1527,6 +1565,24 @@ public class Mainframe extends JFrame {
    * @param args - Arguments to trigger different functions
    */
   public static void main(String[] args) {
+    // HiDPI-Skalierung: System-DPI erkennen und FlatLaf-Skalierung setzen
+    if (System.getProperty("flatlaf.uiScale") == null) {
+      try {
+        int dpi = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
+        if (dpi > 96) {
+          float scale = dpi / 96f;
+          scale = Math.round(scale * 4f) / 4f;
+          System.setProperty("flatlaf.uiScale", String.valueOf(scale));
+        }
+      } catch (Exception ignored) {
+        // Fallback: keine Skalierung
+      }
+    }
+
+    // Default-Fonts initialisieren (werden ggf. durch Config überschrieben)
+    defaultFont = new Font("Roboto", Font.PLAIN, 16);
+    descFont = new Font("Roboto", Font.PLAIN, 16);
+
     if (args.length > 0 && "update".equals(args[0])) {
       update();
       System.exit(0);

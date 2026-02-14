@@ -9,6 +9,7 @@ import java.io.Serial;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 
+import com.formdev.flatlaf.util.UIScale;
 import application.BookListModel;
 
 public class Dialog_info extends JDialog {
@@ -136,7 +137,7 @@ public class Dialog_info extends JDialog {
 		lbl_Year.setText(BookListModel.getBooksPerYear());
 		this.add(lbl_Year, c);
 		
-		this.setSize(400, 175+28*countYears);
+		this.setSize(UIScale.scale(400), UIScale.scale(175+28*countYears));
 		this.setVisible(true);
 	}
 

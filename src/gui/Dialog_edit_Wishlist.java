@@ -28,6 +28,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.text.AbstractDocument;
 
+import com.formdev.flatlaf.util.UIScale;
 import application.Book_Booklist;
 import application.Book_Wishlist;
 import application.WishlistListModel;
@@ -48,7 +49,7 @@ public class Dialog_edit_Wishlist extends JDialog {
   public Dialog_edit_Wishlist(Frame owner, WishlistListModel entries, int index) {
     Mainframe.logger.info("Wishlist Book edit: start creating Frame");
     this.setTitle(Localization.get("t.editBook"));
-    this.setSize(new Dimension(500, 330));
+    this.setSize(new Dimension(UIScale.scale(500), UIScale.scale(330)));
     this.setLocationRelativeTo(owner);
     this.setAlwaysOnTop(true);
 
@@ -85,8 +86,8 @@ public class Dialog_edit_Wishlist extends JDialog {
     panelSouth.setLayout(new GridLayout(1, 2, 10, 10));
     // panel_south.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
-    int height = 60;
-    int width = 100;
+    int height = UIScale.scale(60);
+    int width = UIScale.scale(100);
 
     JLabel lbl_datum = new JLabel(MessageFormat.format(Localization.get("book.dateAdded"),
         new SimpleDateFormat("dd.MM.yyyy").format(eintrag.getDate())));

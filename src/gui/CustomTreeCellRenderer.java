@@ -5,11 +5,14 @@ import java.awt.Component;
 import java.awt.Font;
 import java.io.Serial;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JTree;
+import javax.swing.UIManager;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import application.HandleConfig;
+import com.formdev.flatlaf.util.UIScale;
 
 public class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
 
@@ -19,51 +22,61 @@ public class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
 
 	public void setHoveredRow(int row) {
 		this.hoveredRow = row;
-		
 	}
-
 
 	public CustomTreeCellRenderer() {
-		setFont(new Font("Roboto", Font.PLAIN, 16));
+		setFont(Mainframe.defaultFont);
+		setBorderSelectionColor(null);
 	}
-	
-	
 
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf,
 			int row, boolean hasFocus) {
-		
-		Component component = super.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, hasFocus);
-		
-		if (HandleConfig.darkmode == 1) {
-			if (isSelected) {
-				component.setForeground(Color.WHITE);
-				component.setBackground(Color.GRAY);
-			} else if (row == hoveredRow) {
-				component.setForeground(Color.BLACK);
-				component.setBackground(Color.LIGHT_GRAY);
+
+		super.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, hasFocus);
+
+		setIcon(null);
+
+		if (value instanceof DefaultMutableTreeNode) {
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+			DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+			String nodeText = node.getUserObject().toString();
+
+			if (parent != null && parent.getParent() == null) {
+				// Autoren-Ebene
+				int bookCount = Mainframe.allEntries.getBookCountForAuthor(nodeText);
+				setText("\u25CF " + nodeText + "  (" + bookCount + ")");
+				setFont(Mainframe.defaultFont);
+			} else if (parent != null && parent.getParent() != null && parent.getParent().getParent() == null) {
+				// Serien-Ebene
+				setText("  \u25B8 " + nodeText);
+				setFont(Mainframe.defaultFont.deriveFont(Font.PLAIN, Mainframe.defaultFont.getSize() * 0.9f));
 			} else {
-				component.setForeground(new Color(220,220,220));
-				component.setBackground(Mainframe.darkmodeBackgroundColor);
+				// Root-Node
+				setFont(Mainframe.defaultFont.deriveFont(Font.BOLD));
 			}
 		}
 
-		else {
-			if (isSelected) {
-				component.setForeground(Color.WHITE);
-				component.setBackground(Color.DARK_GRAY);
-			} else if (row == hoveredRow) {
-				component.setForeground(Color.BLACK);
-				component.setBackground(Color.LIGHT_GRAY);
-			} else {
-				component.setForeground(Color.BLACK);
-				component.setBackground(Color.WHITE);
-			}
+		setBorder(BorderFactory.createEmptyBorder(UIScale.scale(1), 0, UIScale.scale(1), 0));
+
+		Color textFg = UIManager.getColor("Tree.textForeground");
+		Color textBg = UIManager.getColor("Tree.textBackground");
+
+		if (isSelected) {
+			setForeground(Color.WHITE);
+			setBackground(new Color(60, 60, 60));
+			setBackgroundSelectionColor(new Color(60, 60, 60));
+			setTextSelectionColor(Color.WHITE);
+		} else if (row == hoveredRow) {
+			Color hoverBg = UIManager.getColor("Tree.selectionInactiveBackground");
+			setForeground(textFg);
+			setBackground(hoverBg != null ? hoverBg : UIManager.getColor("control"));
+		} else {
+			setForeground(textFg);
+			setBackground(textBg);
 		}
 
-		// Da die Hintergrundfarbe nicht automatisch gezeichnet wird, erzwinge das Malen
-		((JComponent) component).setOpaque(true);
-		return component;
+		setOpaque(true);
+		return this;
 	}
-
 
 }

@@ -1,5 +1,6 @@
 package gui;
 
+import com.formdev.flatlaf.util.UIScale;
 import application.HandleConfig;
 
 import javax.swing.*;
@@ -21,8 +22,8 @@ public class StarRatingPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private static final int STAR_COUNT = 5;
-	private static final int STAR_SIZE = 24;
-	private static final int STAR_GAP = 4;
+	private static final int STAR_SIZE = UIScale.scale(24);
+	private static final int STAR_GAP = UIScale.scale(4);
 
 	private double rating = 0;
 	private double hoverRating = -1;

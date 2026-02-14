@@ -57,7 +57,7 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 			int row, int column) {
 		Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		currentTable = table;
-		setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY));
+		setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UIManager.getColor("Separator.foreground")));
 
 		if (table.getColumnName(column).equals(Localization.get("column.rating")))
 			setColumnIcon(column, scaledStarIcon);
@@ -104,7 +104,7 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 	private JTable currentTable;
 
 	private void setupHeaderCell(Component component, int column, Object value) {
-		setFont(new Font("Roboto", Font.BOLD, 16));
+		setFont(Mainframe.defaultFont.deriveFont(Font.BOLD));
 
 		if (component instanceof JLabel) {
 			JLabel label = (JLabel) component;
@@ -130,13 +130,8 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 		}
 
 		// Header-Farben setzen
-		if (HandleConfig.darkmode == 1) {
-			component.setBackground(Mainframe.darkmodeAccentColor);
-			component.setForeground(Color.WHITE);
-		} else {
-			component.setForeground(Color.BLACK);
-			component.setBackground(new Color(240, 240, 240));
-		}
+		component.setBackground(UIManager.getColor("TableHeader.background"));
+		component.setForeground(UIManager.getColor("TableHeader.foreground"));
 	}
 
 	private String getSortIndicator(JTable table, int column) {

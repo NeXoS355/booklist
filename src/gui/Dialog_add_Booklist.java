@@ -22,6 +22,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 
+import com.formdev.flatlaf.util.UIScale;
 import application.Book_Booklist;
 import application.HandleConfig;
 import application.GetBookInfosFromWeb;
@@ -56,7 +57,7 @@ public class Dialog_add_Booklist extends JDialog {
 	public Dialog_add_Booklist(Frame owner) {
 		Mainframe.logger.info("Book add: start creating Frame");
 		this.setTitle(Localization.get("t.addBook"));
-		this.setSize(new Dimension(500, 420));
+		this.setSize(new Dimension(UIScale.scale(500), UIScale.scale(420)));
 		this.setLocationRelativeTo(owner);
 		this.setAlwaysOnTop(true);
 
@@ -73,8 +74,8 @@ public class Dialog_add_Booklist extends JDialog {
 		JPanel panel_center = new JPanel();
 		panel_center.setLayout(new GridBagLayout());
 
-		int height = 60;
-		int width = 100;
+		int height = UIScale.scale(60);
+		int width = UIScale.scale(100);
 
 		/*
 		 * Create Components for Panel West

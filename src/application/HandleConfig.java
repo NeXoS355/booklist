@@ -12,6 +12,7 @@ import java.security.SecureRandom;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableColumnModel;
 
+import com.formdev.flatlaf.util.UIScale;
 import gui.Mainframe;
 
 import static gui.Mainframe.logger;
@@ -244,8 +245,8 @@ public class HandleConfig {
     } else {
       Mainframe.executor.submit(() -> {
         try (PrintWriter out = new PrintWriter("config.conf")) {
-          out.println("fontSize=" + Mainframe.defaultFont.getSize());
-          out.println("descFontSize=" + Mainframe.descFont.getSize());
+          out.println("fontSize=" + UIScale.unscale(Mainframe.defaultFont.getSize()));
+          out.println("descFontSize=" + UIScale.unscale(Mainframe.descFont.getSize()));
           out.println("autoDownload=" + autoDownload);
           out.println("loadOnDemand=" + loadOnDemand);
           out.println("useDB=" + BookListModel.useDB);
@@ -271,8 +272,8 @@ public class HandleConfig {
 
     try (PrintWriter out = new PrintWriter("config.conf")) {
       out.println("lang=" + HandleConfig.lang);
-      out.println("fontSize=" + Mainframe.defaultFont.getSize());
-      out.println("descFontSize=" + Mainframe.descFont.getSize());
+      out.println("fontSize=" + UIScale.unscale(Mainframe.defaultFont.getSize()));
+      out.println("descFontSize=" + UIScale.unscale(Mainframe.descFont.getSize()));
       out.println("autoDownload=" + autoDownload);
       out.println("loadOnDemand=" + loadOnDemand);
       out.println("searchParam=" + searchParam);

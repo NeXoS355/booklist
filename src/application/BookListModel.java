@@ -315,6 +315,16 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		return false;
 	}
 
+	public int getBookCountForAuthor(String author) {
+		int count = 0;
+		for (Book_Booklist book : getBooks()) {
+			if (book.getAuthor().equals(author)) {
+				count++;
+			}
+		}
+		return count;
+	}
+
 	/**
 	 * queries the Database for a specific column and gets the most Occurences
 	 * 

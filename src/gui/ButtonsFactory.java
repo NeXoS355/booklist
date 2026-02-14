@@ -1,133 +1,58 @@
 package gui;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.Objects;
+import java.io.Serial;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-
-import application.HandleConfig;
 
 public class ButtonsFactory {
 
-	static BufferedImage imageActive = null;
-	static BufferedImage imageInActive = null;
-
 	public static JButton createButton() {
-		JButton button = new JButton();
+		JButton button = new JButton() {
+			@Serial
+			private static final long serialVersionUID = 1L;
+			private boolean hovered = false;
+
+			{
+				addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseEntered(MouseEvent e) { hovered = true; repaint(); }
+					@Override
+					public void mouseExited(MouseEvent e) { hovered = false; repaint(); }
+				});
+			}
+
+			@Override
+			protected void paintComponent(Graphics g) {
+				if (hovered) {
+					Graphics2D g2 = (Graphics2D) g.create();
+					g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+					g2.setColor(new Color(128, 128, 128, 50));
+					g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+					g2.dispose();
+				}
+				super.paintComponent(g);
+			}
+		};
+		button.putClientProperty("JButton.buttonType", "none");
 		button.setContentAreaFilled(false);
-		button.setOpaque(true);
+		button.setOpaque(false);
+		button.setBorderPainted(false);
 		button.setFocusPainted(false);
-		button.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		button.setFont(Mainframe.defaultFont);
-
-		if (HandleConfig.darkmode == 0) {
-			button.setForeground(new Color(75, 75, 75));
-
-			button.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseExited(MouseEvent e) {
-					button.setBackground(new Color(240, 240, 240));
-					button.setForeground(new Color(50, 50, 50));
-				}
-
-				@Override
-				public void mouseEntered(MouseEvent e) {
-					button.setContentAreaFilled(true);
-					button.setBackground(new Color(220, 220, 220));
-					button.setForeground(Color.BLACK);
-				}
-
-				@Override
-				public void mousePressed(MouseEvent e) {
-					Mainframe.executor.submit(() -> {
-						try {
-							button.setBackground(new Color(200, 200, 200));
-							Thread.sleep(200);
-							button.setBackground(new Color(220, 220, 220));
-						} catch (InterruptedException e1) {
-							Mainframe.logger.error(e1.getMessage());
-						}
-
-					});
-				}
-			});
-		} else {
-			button.setBackground(Color.DARK_GRAY);
-			button.setForeground(Color.LIGHT_GRAY);
-
-			button.addMouseListener(new MouseAdapter() {
-
-				@Override
-				public void mouseExited(MouseEvent e) {
-					button.setBackground(Color.DARK_GRAY);
-					button.setForeground(Color.LIGHT_GRAY);
-				}
-
-				@Override
-				public void mouseEntered(MouseEvent e) {
-					button.setBackground(new Color(75, 75, 75));
-					button.setForeground(Color.WHITE);
-				}
-
-				@Override
-				public void mousePressed(MouseEvent e) {
-					Mainframe.executor.submit(() -> {
-						try {
-							button.setBackground(new Color(85, 85, 85));
-							Thread.sleep(200);
-							button.setBackground(new Color(75, 75, 75));
-						} catch (InterruptedException e1) {
-							Mainframe.logger.error(e1.getMessage());
-						}
-
-					});
-				}
-
-			});
-		}
-
+		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		return button;
 	}
 
 	public static JButton createButton(String text) {
 		JButton button = createButton();
 		button.setText(text);
-
-		if (text.equals(Localization.get("search.button"))) {
-			try {
-				if (HandleConfig.darkmode == 1) {
-					imageActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe_inv.png")));
-                } else {
-					imageActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe.png")));
-                }
-                imageInActive = ImageIO.read(Objects.requireNonNull(Mainframe.class.getResource("/resources/lupe_inactive.png")));
-                button.setIcon(new ImageIcon(imageInActive));
-			} catch (IOException e1) {
-				Mainframe.logger.error(e1.getMessage());
-			}
-		}
-
-		button.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseExited(MouseEvent e) {
-				if (text.equals(Localization.get("search.button"))) {
-					button.setIcon(new ImageIcon(imageInActive));
-				}
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				if (text.equals(Localization.get("search.button"))) {
-					button.setIcon(new ImageIcon(imageActive));
-				}
-
-			}
-		});
 		return button;
 	}
 

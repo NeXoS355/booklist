@@ -27,6 +27,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
 
 import application.Book_Booklist;
+import com.formdev.flatlaf.util.UIScale;
 import application.Book_Wishlist;
 import application.HandleConfig;
 import application.WishlistListModel;
@@ -42,7 +43,7 @@ public class wishlist extends JFrame {
 	public static WishlistListModel wishlistEntries;
 	private static final JTable table = new JTable();
 	private static int lastHoverRow = -1;
-	public static final Font defaultFont = new Font("Roboto", Font.PLAIN, 16);
+	// Nutzt Mainframe.defaultFont für konsistente Skalierung
 
 	/**
 	 * wishlist Constructor
@@ -54,7 +55,7 @@ public class wishlist extends JFrame {
 		super("Wishlist");
 		instance = this;
 		this.setLayout(new BorderLayout(10, 10));
-		this.setSize(700, 700);
+		this.setSize(UIScale.scale(700), UIScale.scale(700));
 		this.setLocationRelativeTo(owner);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -89,8 +90,8 @@ public class wishlist extends JFrame {
 		header.setDefaultRenderer(tableHeaderRenderer);
 		table.setShowHorizontalLines(false);
 		table.setIntercellSpacing(new Dimension(0, 0));
-		table.setFont(defaultFont);
-		table.setRowHeight(table.getRowHeight() + 6);
+		table.setFont(Mainframe.defaultFont);
+		table.setRowHeight(UIScale.scale(table.getRowHeight() + 6));
 		table.addMouseListener(new MouseAdapter() {
 
 			@Override

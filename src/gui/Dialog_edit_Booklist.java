@@ -45,6 +45,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.tree.DefaultTreeModel;
 
+import com.formdev.flatlaf.util.UIScale;
 import application.BorrowStatus;
 import application.Book_Booklist;
 import application.HandleConfig;
@@ -90,7 +91,7 @@ public class Dialog_edit_Booklist extends JDialog {
 
     Mainframe.logger.info("Book edit: start creating Frame");
     this.setTitle(Localization.get("t.editBook"));
-    this.setSize(new Dimension(600, 685));
+    this.setSize(new Dimension(UIScale.scale(600), UIScale.scale(685)));
     this.setLocationRelativeTo(owner);
     this.setAlwaysOnTop(true);
 
@@ -134,13 +135,13 @@ public class Dialog_edit_Booklist extends JDialog {
     JPanel panelSouth = new JPanel();
     panelSouth.setLayout(new GridLayout(3, 2, 10, 10));
 
-    int height = 60;
-    int width = 100;
+    int height = UIScale.scale(60);
+    int width = UIScale.scale(100);
 
     /*
      * create and add components to Panel North
      */
-    Font changeFont = new Font(Mainframe.defaultFont.getName(), Mainframe.defaultFont.getStyle(), 12);
+    Font changeFont = Mainframe.defaultFont.deriveFont((float) Mainframe.defaultFont.getSize() * 0.75f);
     JPanel pnlNorthWest = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
     JLabel lblDate = new JLabel(MessageFormat.format(Localization.get("book.dateAdded"),
@@ -293,7 +294,7 @@ public class Dialog_edit_Booklist extends JDialog {
       BufferedImage scaledImage = getScaledImage(originalImage);
       lblPic = new JLabel(new ImageIcon(scaledImage));
 
-      lblPic.setPreferredSize(new Dimension(160, 280));
+      lblPic.setPreferredSize(new Dimension(UIScale.scale(160), UIScale.scale(280)));
       lblPic.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
       lblPic.addMouseListener(new MouseAdapter() {
 
@@ -776,7 +777,8 @@ public class Dialog_edit_Booklist extends JDialog {
     txtDesc.setWrapStyleWord(true);
     txtDesc.setFont(Mainframe.descFont);
     // txtDesc.setDisabledTextColor(Color.BLACK);
-    this.setSize(this.getWidth(), this.getHeight() + (Mainframe.descFont.getSize() - 16) * 14);
+    int baseDescSize = com.formdev.flatlaf.util.UIScale.unscale(Mainframe.descFont.getSize());
+    this.setSize(this.getWidth(), this.getHeight() + (baseDescSize - 16) * 14);
     JScrollPane scrollDesc = new JScrollPane(txtDesc, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
     JScrollBar tableVerticalScrollBar = scrollDesc.getVerticalScrollBar();
@@ -1088,7 +1090,7 @@ public class Dialog_edit_Booklist extends JDialog {
       g2d.dispose();
       BufferedImage scaledImage = getScaledImage(originalImage);
       lblPic = new JLabel(new ImageIcon(scaledImage));
-      lblPic.setPreferredSize(new Dimension(160, 280));
+      lblPic.setPreferredSize(new Dimension(UIScale.scale(160), UIScale.scale(280)));
       panelEastBorder.add(lblPic, BorderLayout.CENTER);
     } else {
       lblPic = null;
