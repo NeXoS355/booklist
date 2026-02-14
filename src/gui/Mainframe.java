@@ -88,6 +88,7 @@ public class Mainframe extends JFrame {
   private static JMenuItem apiUpload;
   private static String version;
   private JTextField txt_search;
+  private static JButton btnSearchReset;
   public static int defaultFrameWidth = 1300;
   public static int defaultFrameHeight = 800;
   public static int startX = 150;
@@ -236,6 +237,44 @@ public class Mainframe extends JFrame {
         JOptionPane.showMessageDialog(Mainframe.getInstance(), Localization.get("search.error"));
       }
     });
+
+    Color resetColor = new Color(200, 50, 50);
+    Color resetHoverColor = new Color(160, 30, 30);
+    btnSearchReset = new JButton("✕") {
+      @Override
+      protected void paintComponent(Graphics g) {
+        g.setColor(getBackground());
+        g.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+        super.paintComponent(g);
+      }
+    };
+    btnSearchReset.putClientProperty("JButton.buttonType", "none");
+    btnSearchReset.setFont(btnSearchReset.getFont().deriveFont(Font.BOLD, 10f));
+    btnSearchReset.setForeground(Color.WHITE);
+    btnSearchReset.setBackground(resetColor);
+    btnSearchReset.setOpaque(false);
+    btnSearchReset.setContentAreaFilled(false);
+    btnSearchReset.setToolTipText(Localization.get("search.reset"));
+    btnSearchReset.setBorderPainted(false);
+    btnSearchReset.setFocusable(false);
+    btnSearchReset.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    btnSearchReset.setMargin(new Insets(0, 3, 0, 3));
+    btnSearchReset.setPreferredSize(new Dimension(22, 22));
+    btnSearchReset.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseEntered(MouseEvent e) { btnSearchReset.setBackground(resetHoverColor); }
+      @Override
+      public void mouseExited(MouseEvent e) { btnSearchReset.setBackground(resetColor); }
+    });
+    btnSearchReset.setVisible(false);
+    btnSearchReset.addActionListener(e -> {
+      txt_search.setText("");
+      setLastSearch("");
+      updateModel();
+      updateSearchPlaceholder();
+      btnSearchReset.setVisible(false);
+    });
+    txt_search.putClientProperty("JTextField.trailingComponent", btnSearchReset);
 
     panel.add(btn_search, BorderLayout.EAST);
 
@@ -734,6 +773,7 @@ public class Mainframe extends JFrame {
     table.setModel(tableDisplay);
     treeSelection = "";
     setTableLayout();
+    if (btnSearchReset != null) btnSearchReset.setVisible(false);
     Mainframe.logger.info("Mainframe Model updated");
   }
 
@@ -951,6 +991,7 @@ public class Mainframe extends JFrame {
       tableDisplay = new SimpleTableModel(filteredEntries);
       table.setModel(tableDisplay);
       setTableLayout();
+      btnSearchReset.setVisible(true);
     } else {
       showNotification(Localization.get("search.error"));
       updateModel();
