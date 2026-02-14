@@ -57,7 +57,7 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 			int row, int column) {
 		Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		currentTable = table;
-		setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UIManager.getColor("Separator.foreground")));
+		setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
 
 		if (table.getColumnName(column).equals(Localization.get("column.rating")))
 			setColumnIcon(column, scaledStarIcon);
@@ -104,7 +104,7 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 	private JTable currentTable;
 
 	private void setupHeaderCell(Component component, int column, Object value) {
-		setFont(Mainframe.defaultFont.deriveFont(Font.BOLD));
+		setFont(Mainframe.defaultFont.deriveFont(Font.BOLD, Mainframe.defaultFont.getSize() * 0.78f));
 
 		if (component instanceof JLabel) {
 			JLabel label = (JLabel) component;
@@ -114,15 +114,17 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 			if (icon != null) {
 				label.setIcon(icon);
 				label.setHorizontalTextPosition(JLabel.RIGHT);
-				label.setIconTextGap(5); // Abstand zwischen Icon und Text
+				label.setIconTextGap(5);
 			} else {
 				label.setIcon(null);
 			}
 
-			if (label.getIcon() != null)
+			if (label.getIcon() != null) {
 				label.setText("");
-			else
-				label.setText(value != null ? value.toString() : "");
+			} else {
+				String text = value != null ? value.toString().toUpperCase() : "";
+				label.setText(text);
+			}
 
 			// Sort indicator
 			label.setText(label.getText() + getSortIndicator(currentTable, column));

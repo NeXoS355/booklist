@@ -62,10 +62,14 @@ public class CustomTreeCellRenderer extends DefaultTreeCellRenderer {
 		Color textBg = UIManager.getColor("Tree.textBackground");
 
 		if (isSelected) {
-			setForeground(Color.WHITE);
-			setBackground(new Color(60, 60, 60));
-			setBackgroundSelectionColor(new Color(60, 60, 60));
-			setTextSelectionColor(Color.WHITE);
+			Color selBg = UIManager.getColor("Tree.selectionBackground");
+			Color selFg = UIManager.getColor("Tree.selectionForeground");
+			if (selBg == null) selBg = new Color(60, 60, 60);
+			if (selFg == null) selFg = Color.WHITE;
+			setForeground(selFg);
+			setBackground(selBg);
+			setBackgroundSelectionColor(selBg);
+			setTextSelectionColor(selFg);
 		} else if (row == hoveredRow) {
 			Color hoverBg = UIManager.getColor("Tree.selectionInactiveBackground");
 			setForeground(textFg);

@@ -29,7 +29,7 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 		Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, UIManager.getColor("Separator.foreground")));
+		setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
 
 	    // Ausrichtung für erste Spalte zentriert, rest bleibt linksbündig
 	    if (parent.equals("Booklist") && (column == 0 || column == 4)) {

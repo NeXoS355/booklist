@@ -99,8 +99,8 @@ public class Mainframe extends JFrame {
   public static int startX = 150;
   public static int startY = 150;
 
-  public static final Color darkmodeBackgroundColor = new Color(32, 32, 32);
-  public static final Color darkmodeAccentColor = new Color(70, 73, 75);
+  public static final Color darkmodeBackgroundColor = new Color(18, 18, 18);
+  public static final Color darkmodeAccentColor = new Color(200, 155, 110);
 
   private Mainframe() {
     final Properties properties = new Properties();
@@ -168,16 +168,53 @@ public class Mainframe extends JFrame {
       UIManager.setLookAndFeel(new FlatLightLaf());
       if (HandleConfig.darkmode == 1) {
         UIManager.setLookAndFeel(new FlatDarkLaf());
-        // Change Colors for Darkmode
+
+        // --- Dark Mode: Refined Slate Palette ---
+        UIManager.put("Component.accentColor", darkmodeAccentColor);
         UIManager.put("TextField.foreground", Color.WHITE);
+
+        // Backgrounds
         UIManager.put("Panel.background", darkmodeBackgroundColor);
         UIManager.put("ScrollPane.background", darkmodeBackgroundColor);
         UIManager.put("SplitPane.background", darkmodeBackgroundColor);
+        UIManager.put("SplitPaneDivider.draggingColor", darkmodeBackgroundColor);
+        UIManager.put("SplitPane.dividerColor", darkmodeBackgroundColor);
+
+        // Table
+        UIManager.put("Table.background", darkmodeBackgroundColor);
+        UIManager.put("Table.selectionBackground", new Color(56, 48, 38));
+        UIManager.put("Table.selectionInactiveBackground", new Color(40, 40, 40));
+
+        // Table Header — gleiche Farbe wie Zeilen, Unterscheidung durch Schrift
+        UIManager.put("TableHeader.background", darkmodeBackgroundColor);
+        UIManager.put("TableHeader.foreground", new Color(120, 120, 120));
+        UIManager.put("TableHeader.bottomSeparatorColor", new Color(48, 48, 48));
+
+        // Borders
+        UIManager.put("Separator.foreground", new Color(48, 48, 48));
+
+        // Tree
+        UIManager.put("Tree.selectionBackground", new Color(48, 42, 34));
+        UIManager.put("Tree.selectionForeground", Color.WHITE);
+
         this.getContentPane().setBackground(darkmodeBackgroundColor);
         tree.setBackground(darkmodeBackgroundColor);
       } else {
         UIManager.put("TextArea.inactiveForeground", Color.BLACK);
+
+        UIManager.put("Table.selectionBackground", new Color(62, 62, 62));
+
+        // Light Mode: Tree-Selection explizit setzen (sonst weiß auf weiß)
+        UIManager.put("Tree.selectionBackground", new Color(210, 215, 225));
+        UIManager.put("Tree.selectionForeground", Color.BLACK);
       }
+
+      // --- Beide Modi: Menüleiste nahtlos in Hintergrund ---
+      UIManager.put("MenuBar.borderColor", UIManager.getColor("Panel.background"));
+      UIManager.put("MenuBar.background", UIManager.getColor("Panel.background"));
+      UIManager.put("MenuBar.underlineSelectionColor", UIManager.getColor("Component.accentColor"));
+      UIManager.put("MenuBar.border", BorderFactory.createEmptyBorder());
+
     } catch (UnsupportedLookAndFeelException e) {
       logger.error(e.getMessage());
     }
@@ -195,12 +232,20 @@ public class Mainframe extends JFrame {
     logger.info("Finished creating List & DB. Start creating GUI Components");
 
     JPanel panel = new JPanel();
-    panel.setLayout(new BorderLayout(10, 5));
+    panel.setLayout(new BorderLayout(UIScale.scale(10), UIScale.scale(5)));
+    panel.setBorder(BorderFactory.createEmptyBorder(UIScale.scale(4), UIScale.scale(8), UIScale.scale(4), UIScale.scale(8)));
 
     txt_search = new CustomTextField();
     txt_search.setToolTipText("Suchtext");
     updateSearchPlaceholder();
-    txt_search.setMargin(new Insets(0, 10, 0, 0));
+    txt_search.setMargin(new Insets(UIScale.scale(4), UIScale.scale(10), UIScale.scale(4), 0));
+    txt_search.putClientProperty("JComponent.roundRect", true);
+
+    if (HandleConfig.darkmode == 1) {
+        txt_search.putClientProperty("FlatLaf.style","focusColor: #FFFFFF; focusedBorderColor: #FFFFFF; focusWidth: 2");
+    } else {
+        txt_search.putClientProperty("FlatLaf.style","focusColor: #000000; focusedBorderColor: #000000; focusWidth: 2");
+    }
     txt_search.addMouseListener(new MouseAdapter() {
 
       @Override
@@ -247,7 +292,7 @@ public class Mainframe extends JFrame {
       }
     };
     btnSearchReset.putClientProperty("JButton.buttonType", "none");
-    btnSearchReset.setFont(btnSearchReset.getFont().deriveFont(Font.BOLD, 10f));
+    btnSearchReset.setFont(btnSearchReset.getFont().deriveFont(Font.BOLD, 16f));
     btnSearchReset.setForeground(Color.WHITE);
     btnSearchReset.setBackground(resetColor);
     btnSearchReset.setOpaque(false);
@@ -257,7 +302,7 @@ public class Mainframe extends JFrame {
     btnSearchReset.setFocusable(false);
     btnSearchReset.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     btnSearchReset.setMargin(new Insets(0, 3, 0, 3));
-    btnSearchReset.setPreferredSize(new Dimension(UIScale.scale(22), UIScale.scale(22)));
+    btnSearchReset.setPreferredSize(new Dimension(UIScale.scale(30), UIScale.scale(30)));
     btnSearchReset.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseEntered(MouseEvent e) { btnSearchReset.setBackground(resetHoverColor); }
@@ -280,6 +325,8 @@ public class Mainframe extends JFrame {
     panel.add(pnlMenu, BorderLayout.NORTH);
 
     JMenuBar menue = new JMenuBar();
+    menue.setBorder(BorderFactory.createEmptyBorder());
+    menue.setBorderPainted(false);
     JMenu datei = new JMenu(Localization.get("menu.file"));
     JMenu extras = new JMenu(Localization.get("menu.extras"));
     JMenu hilfe = new JMenu(Localization.get("menu.help"));
@@ -396,9 +443,9 @@ public class Mainframe extends JFrame {
     JTableHeader header = table.getTableHeader();
     header.setDefaultRenderer(tableHeaderRenderer);
     table.setFont(defaultFont);
-    table.setShowHorizontalLines(false);
+    table.setShowGrid(false);
     table.setIntercellSpacing(new Dimension(0, 0));
-    table.setRowHeight(UIScale.scale(table.getRowHeight() + 6));
+    table.setRowHeight(UIScale.scale(table.getRowHeight() + 22));
     table.addMouseMotionListener(new MouseMotionAdapter() {
 
       @Override
@@ -506,8 +553,7 @@ public class Mainframe extends JFrame {
 
     JPanel pnl_mid = new JPanel(new BorderLayout());
 
-    if (HandleConfig.darkmode == 1)
-      listScrollPane.getViewport().setBackground(new Color(75, 75, 75));
+    listScrollPane.getViewport().setBackground(UIManager.getColor("Table.background"));
     JScrollBar tableVerticalScrollBar = listScrollPane.getVerticalScrollBar();
     tableVerticalScrollBar.setUI(new CustomScrollBar());
     layeredPane.setLayout(null);
@@ -639,13 +685,14 @@ public class Mainframe extends JFrame {
     });
     JScrollPane treeScrollPane = new JScrollPane(tree, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-    if (HandleConfig.darkmode == 1)
-      treeScrollPane.getViewport().setBackground(new Color(75, 75, 75));
+    treeScrollPane.getViewport().setBackground(UIManager.getColor("Panel.background"));
+    treeScrollPane.setBorder(BorderFactory.createEmptyBorder());
     JScrollBar treeVerticalScrollBar = treeScrollPane.getVerticalScrollBar();
     treeVerticalScrollBar.setUI(new CustomScrollBar());
     treeScrollPane.setPreferredSize(new Dimension(UIScale.scale(300), pnl_mid.getHeight()));
 
     splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, layeredPane);
+    splitPane.setBorder(BorderFactory.createEmptyBorder());
     this.add(splitPane, BorderLayout.CENTER);
     this.add(panel, BorderLayout.NORTH);
 
