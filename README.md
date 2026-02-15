@@ -60,7 +60,7 @@ java -jar target/booklist-3.4.1-jar-with-dependencies.jar
 | Library | Version | Purpose |
 |---------|---------|---------|
 | [FlatLaf](https://www.formdev.com/flatlaf/) | 3.7 | Modern Look & Feel |
-| [Apache Derby](https://db.apache.org/derby/) | 10.17.1.0 | Embedded database |
+| [SQLite](https://github.com/xerial/sqlite-jdbc/) | 3.51.2.0 | Embedded database |
 | [Gson](https://github.com/google/gson) | 2.13.2 | JSON parsing |
 | [OpenCSV](https://opencsv.sourceforge.net/) | 5.12.0 | CSV export |
 | [ZXing](https://github.com/zxing/zxing) | 3.5.4 | QRCode generation |
