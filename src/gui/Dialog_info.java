@@ -56,10 +56,10 @@ public class Dialog_info extends JDialog {
 		highlights.setAlignmentX(Component.LEFT_ALIGNMENT);
 		highlights.setOpaque(false);
 
-		String mostAuthor = BookListModel.getMostOf("autor").toString().replace("[", "").replace("]", "");
-		String mostSeries = BookListModel.getMostOf("serie").toString().replace("[", "").replace("]", "");
-		String bestAuthor = BookListModel.getBestRatingOf("autor").toString().replace("[", "").replace("]", "");
-		String bestSeries = BookListModel.getBestRatingOf("serie").toString().replace("[", "").replace("]", "");
+		String mostAuthor = BookListModel.getMostOf("author").toString().replace("[", "").replace("]", "");
+		String mostSeries = BookListModel.getMostOf("series").toString().replace("[", "").replace("]", "");
+		String bestAuthor = BookListModel.getBestRatingOf("author").toString().replace("[", "").replace("]", "");
+		String bestSeries = BookListModel.getBestRatingOf("series").toString().replace("[", "").replace("]", "");
 
 		highlights.add(createStatCard(Localization.get("info.mostAuthor"), mostAuthor.isEmpty() ? "—" : mostAuthor));
 		highlights.add(createStatCard(Localization.get("info.bestAuthor"), bestAuthor.isEmpty() ? "—" : bestAuthor));
@@ -147,7 +147,7 @@ public class Dialog_info extends JDialog {
 
 	private Map<String, Integer> getBooksPerYearData() {
 		Map<String, Integer> data = new LinkedHashMap<>();
-		ResultSet rs = Database.getColumnCountsWithGroup("YEAR(date)");
+		ResultSet rs = Database.getColumnCountsWithGroup("strftime('%Y', added_date)");
 		try {
 			while (rs != null && rs.next()) {
 				int count = rs.getInt(1);
@@ -166,7 +166,7 @@ public class Dialog_info extends JDialog {
 
 	private Map<String, Integer> getTopAuthorsData(int limit) {
 		Map<String, Integer> all = new LinkedHashMap<>();
-		ResultSet rs = Database.getColumnCountsWithGroup("autor");
+		ResultSet rs = Database.getColumnCountsWithGroup("author");
 		try {
 			while (rs != null && rs.next()) {
 				int count = rs.getInt(1);

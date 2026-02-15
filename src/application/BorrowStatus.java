@@ -1,9 +1,9 @@
 package application;
 
 public enum BorrowStatus {
-	LENT_TO("an"),
-	BORROWED_FROM("von"),
-	NONE("nein");
+	LENT_TO("lent"),
+	BORROWED_FROM("borrowed"),
+	NONE("none");
 
 	private final String dbValue;
 

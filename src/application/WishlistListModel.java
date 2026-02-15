@@ -24,14 +24,18 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 		try {
 			while (rs.next()) {
 				try {
-					String author = rs.getString("autor").trim();
-					String title = rs.getString("titel").trim();
-					String note = rs.getString("bemerkung").trim();
-					String series = rs.getString("serie").trim();
-					String seriesVol = rs.getString("seriePart");
-					Timestamp date = rs.getTimestamp("date");
-					books.add(new Book_Wishlist(author, title, note, series,
-							seriesVol, date, false));
+					String author = rs.getString("author").trim();
+					String title = rs.getString("title").trim();
+					String note = rs.getString("note").trim();
+					String series = rs.getString("series").trim();
+					int seriesVolInt = rs.getInt("series_vol");
+					String seriesVol = rs.wasNull() ? "" : String.valueOf(seriesVolInt);
+					Timestamp date = rs.getTimestamp("added_date");
+					int wid = rs.getInt("wid");
+					Book_Wishlist book = new Book_Wishlist(author, title, note, series,
+							seriesVol, date, false);
+					book.setWid(wid);
+					books.add(book);
 
 				} catch (DateTimeParseException ex1) {
 					System.err.println("Datum falsch waehrend DB auslesen");
@@ -58,7 +62,7 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 	}
 
 	public void delete(int index) {
-		Database.deleteFromWishlist(books.get(index).getAuthor(), books.get(index).getTitle());
+		Database.deleteFromWishlist(books.get(index).getWid());
 		books.remove(index);
 		fireIntervalRemoved(this, index, index);
 	}

@@ -2,9 +2,9 @@ package application;
 
 import java.awt.Image;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serial;
-import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -20,7 +20,7 @@ import gui.Mainframe;
 import gui.wishlist;
 
 /**
- * 
+ *
  */
 public class BookListModel extends AbstractListModel<Book_Booklist> {
 
@@ -31,7 +31,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	public static boolean useDB = false;
 
 	/**
-	 * Constructor 
+	 * Constructor
 	 * Manages the Booklist and Authorlist
 	 */
 	public BookListModel(boolean fill) {
@@ -56,20 +56,20 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				try {
 					// necessary Variables which cannot be loaded onDemand
 					Book_Booklist book;
-					String author = rs.getString("autor").trim();
-					String title = rs.getString("titel").trim();
-					String series = rs.getString("serie").trim();
-					String seriesVolume = rs.getString("seriePart");
+					String author = rs.getString("author").trim();
+					String title = rs.getString("title").trim();
+					String series = rs.getString("series").trim();
+					int seriesVolInt = rs.getInt("series_vol");
+					String seriesVolume = rs.wasNull() ? "" : String.valueOf(seriesVolInt);
 					int int_ebook = rs.getInt("ebook");
 					boolean ebook = int_ebook == 1;
-					int nativeRating = rs.getInt("rating");
-					double rating = (double) nativeRating /2;
-					int bid = Integer.parseInt(rs.getString("bid"));
-					Timestamp date = rs.getTimestamp("date");
+					double rating = rs.getDouble("rating");
+					int bid = rs.getInt("bid");
+					Timestamp date = rs.getTimestamp("added_date");
 
 					// Empty Variables for LoadOnDemand
 					String note = "";
-					Blob picture = null;
+					byte[] picBytes = null;
 					String desc = "";
 					String isbn = "";
 					String borrowed;
@@ -78,23 +78,23 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					boolean boolBorrowed = false;
 
 					if (HandleConfig.loadOnDemand == 0) {
-						note = rs.getString("bemerkung");
-						picture = rs.getBlob("pic");
+						note = rs.getString("note");
+						picBytes = rs.getBytes("pic");
 						desc = rs.getString("description");
 						isbn = rs.getString("isbn");
-						borrowed = rs.getString("ausgeliehen");
+						borrowed = rs.getString("borrow_status");
 						BorrowStatus borrowStatus = BorrowStatus.fromDbValue(borrowed);
 						if (borrowStatus == BorrowStatus.LENT_TO) {
 							boolBorrowed = true;
-							borrowedTo = rs.getString("name").trim();
+							borrowedTo = rs.getString("borrower").trim();
 						} else if (borrowStatus == BorrowStatus.BORROWED_FROM) {
 							boolBorrowed = true;
-							borrowedFrom = rs.getString("name").trim();
+							borrowedFrom = rs.getString("borrower").trim();
 						}
 					}
 					Image buf_pic = null;
-					if (picture != null) {
-						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
+					if (picBytes != null) {
+						BufferedInputStream bis_pic = new BufferedInputStream(new ByteArrayInputStream(picBytes));
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
 					book = new Book_Booklist(author, title, boolBorrowed, borrowedTo, borrowedFrom, note, series,
@@ -102,9 +102,6 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					book.setBid(bid);
 					getBooks().add(book);
 					Mainframe.logger.info("Buch ausgelesen: {}-{}", book.getAuthor(), book.getTitle());
-					if (bid > Database.highestBid) {
-						Database.highestBid = bid;
-					}
 				} catch (DateTimeParseException e) {
 					Mainframe.logger.error(e);
 				}
@@ -119,9 +116,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	/**
 	 * This method loads the extended information which are not loaded on Startup
 	 * if "loadOnDemand = 1".
-	 * 
+	 *
 	 * @param book - load values of this Book Entry
-	 * 
+	 *
 	 */
 	public static void loadOnDemand(Book_Booklist book) {
 		if (Objects.equals(book.getDesc(), "") && book.getPic() == null) {
@@ -129,16 +126,16 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			try {
 				rs = Database.selectFromBooklist(book.getBid());
 				while (rs.next()) {
-					String note = rs.getString("bemerkung");
-					Blob picture = rs.getBlob("pic");
+					String note = rs.getString("note");
+					byte[] picBytes = rs.getBytes("pic");
 					String desc = rs.getString("description");
-					Timestamp datum = rs.getTimestamp("date");
+					Timestamp datum = rs.getTimestamp("added_date");
 					String isbn = rs.getString("isbn");
-					int rating = rs.getInt("rating");
+					double rating = rs.getDouble("rating");
 
 					Image buf_pic = null;
-					if (picture != null) {
-						BufferedInputStream bis_pic = new BufferedInputStream(picture.getBinaryStream());
+					if (picBytes != null) {
+						BufferedInputStream bis_pic = new BufferedInputStream(new ByteArrayInputStream(picBytes));
 						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
 					}
 
@@ -149,14 +146,14 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					book.setIsbn(isbn, false);
 					book.setRating(rating, false);
 
-					String borrowed = rs.getString("ausgeliehen");
+					String borrowed = rs.getString("borrow_status");
 					BorrowStatus borrowStatus = BorrowStatus.fromDbValue(borrowed);
 					if (borrowStatus == BorrowStatus.LENT_TO) {
-						String borrowedTo = rs.getString("name").trim();
+						String borrowedTo = rs.getString("borrower").trim();
 						book.setBorrowedTo(borrowedTo);
 						book.setBorrowed(true);
 					} else if (borrowStatus == BorrowStatus.BORROWED_FROM) {
-						String borrowedFrom = rs.getString("name").trim();
+						String borrowedFrom = rs.getString("borrower").trim();
 						book.setBorrowedFrom(borrowedFrom);
 						book.setBorrowed(true);
 					}
@@ -172,7 +169,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * updates the author list and updates the displayed Tree
-	 * 
+	 *
 	 */
 	public void checkAuthors() {
 		authors.clear();
@@ -180,7 +177,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		if (useDB) {
 			ResultSet rs = null;
 			try {
-				String[] columnName = { "autor" };
+				String[] columnName = { "author" };
 				rs = Database.getColumnsFromBooklist(columnName);
 				while (rs.next()) {
 					authors.add(rs.getString(1));
@@ -203,9 +200,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * Adds book to Booklist
-	 * 
+	 *
 	 * @param book - Book Object
-	 * 
+	 *
 	 */
 	public void add(Book_Booklist book) {
 		books.add(book);
@@ -215,9 +212,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * Deletes book from Booklist
-	 * 
+	 *
 	 * @param index - index of Book in List
-	 * 
+	 *
 	 */
 	public void delete(int index) {
 		Database.deleteFromBooklist(getBooks().get(index).getBid());
@@ -227,9 +224,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * Gets all distinct series from a specific author
-	 * 
+	 *
 	 * @param author - Full name of Author
-	 * 
+	 *
 	 * @return String Array with all distinct series of the specified author
 	 */
 	public String[] getSeriesFromAuthor(String author) {
@@ -238,7 +235,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		if (useDB) {
 			ResultSet rs = null;
 			try {
-				rs = Database.getColumnWithWhere("serie", "autor", author);
+				rs = Database.getColumnWithWhere("series", "author", author);
 				while (rs.next()) {
 					String series = rs.getString(1);
 					if (!series.isEmpty())
@@ -281,16 +278,16 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * checks if an author has a series
-	 * 
+	 *
 	 * @param author - Full name of Author
-	 * 
+	 *
 	 * @return "true" of has series else "false"
 	 */
 	public static boolean authorHasSeries(String author) {
 		if (useDB) {
 			ResultSet rs = null;
 			try {
-				rs = Database.getColumnWithWhere("serie", "autor", author);
+				rs = Database.getColumnWithWhere("series", "author", author);
 				while (rs.next()) {
 					String series = rs.getString(1);
 					if (!series.isEmpty()) {
@@ -327,7 +324,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * queries the Database for a specific column and gets the most Occurences
-	 * 
+	 *
 	 * @return return a List with the value(s) with the most Occurences in the
 	 *         specified column
 	 */
@@ -365,7 +362,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * gets Author or Series with the best overall Rating
-	 * 
+	 *
 	 * @return return a List with Authors or Series with the best overall Rating
 	 */
 	public static ArrayList<String> getBestRatingOf(String getValue) {
@@ -420,7 +417,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				if ("1".equals(isEbook)) {
 					ebookCount += count;
 				} else {
-					// ebook=0 oder NULL → physisches Buch
+					// ebook=0 → physisches Buch
 					physicalCount += count;
 				}
 			}
@@ -433,14 +430,14 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	}
 
 	/**
-	 * gets Author or Series with the best overall Rating
-	 * 
-	 * @return return a String with Authors or Series with the best overall Rating
+	 * gets books per year statistics
+	 *
+	 * @return return a String with book counts per year
 	 */
 	public static String getBooksPerYear() {
 		StringBuilder result = new StringBuilder();
 		result.append("<html>");
-		ResultSet rs = Database.getColumnCountsWithGroup("YEAR(date)");
+		ResultSet rs = Database.getColumnCountsWithGroup("strftime('%Y', added_date)");
 
 		try {
 			while (rs.next()) {
@@ -461,9 +458,9 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * get Element at specific index
-	 * 
+	 *
 	 * @param arg0 - index which to get
-	 * 
+	 *
 	 * @return Book Object at specified index
 	 */
 	@Override
@@ -486,7 +483,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * get size of Booklist
-	 * 
+	 *
 	 * @return size of Booklist
 	 */
 	@Override
@@ -496,7 +493,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * get whole Booklist
-	 * 
+	 *
 	 * @return ArrayList with all Books
 	 */
 	public ArrayList<Book_Booklist> getBooks() {
@@ -505,10 +502,10 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 
 	/**
 	 * analyzes one specified Bookseries
-	 * 
+	 *
 	 * @param series - Name of Series
 	 * @param author - Name of corresponding author
-	 * 
+	 *
 	 * @return true if Book was found else false
 	 */
 	public boolean analyzeSeries(String series, String author) {

@@ -390,8 +390,9 @@ public class Dialog_edit_Wishlist extends JDialog {
       String newSeriePart = txtSeriesVol.getText();
       Timestamp datum = new Timestamp(System.currentTimeMillis());
       if (!Duplicant(newAutor, newTitel)) {
-        Database.deleteFromWishlist(oldAutor, oldTitel);
-        Database.addToWishlist(newAutor, newTitel, newBemerkung, newSerie, newSeriePart, datum.toString());
+        Database.deleteFromWishlist(eintrag.getWid());
+        int newWid = Database.addToWishlist(newAutor, newTitel, newBemerkung, newSerie, newSeriePart, datum.toString());
+        eintrag.setWid(newWid);
         eintrag.setAuthor(newAutor);
         eintrag.setTitle(newTitel);
         eintrag.setNote(newBemerkung);

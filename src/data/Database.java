@@ -12,8 +12,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
-import org.apache.derby.tools.sysinfo;
-
 import com.opencsv.CSVWriter;
 
 import application.BookListModel;
@@ -21,94 +19,97 @@ import application.Book_Booklist;
 import gui.Mainframe;
 
 /**
- * Contains methods to handle Derby Database Connection and Queries
+ * Contains methods to handle SQLite Database Connection and Queries
  */
 public class Database {
 
 	private static Connection con = null;
-	public static int highestBid = 100000;
 
 	/**
-	 * Create Connection to Derby Database
-	 *
+	 * Create Connection to SQLite Database
 	 */
 	public static void createConnection() {
-		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 		try {
 			if (con == null || con.isClosed()) {
-				Class.forName(driver);
-				con = DriverManager.getConnection("jdbc:derby:BooklistDB;create=true;upgrade=true");
+				DerbyMigrator.migrateIfNeeded();
+				con = DriverManager.getConnection("jdbc:sqlite:booklist.db");
+				try (Statement st = con.createStatement()) {
+					st.execute("PRAGMA journal_mode=WAL");
+					st.execute("PRAGMA foreign_keys=ON");
+					st.execute("PRAGMA busy_timeout=5000");
+				}
 				createTable(con);
 			}
 			DBUpdater.checkUpdate(con);
 		} catch (SQLException e) {
 			System.err.println("Verbindung konnte nicht hergestellt werden");
 			Mainframe.logger.error(e.getMessage());
-		} catch (ClassNotFoundException e) {
-			System.err.println("Verbindung konnte nicht hergestellt werden. Class not found");
-			Mainframe.logger.error(e.getMessage());
 		}
 	}
 
 	/**
-	 * Close Connection to Derby Database
-	 * 
+	 * Close Connection to SQLite Database
 	 */
 	public static void closeConnection() {
 		try {
-			DriverManager.getConnection("jdbc:derby:;shutdown=true");
-		} catch (SQLException e) {
-			if (((e.getErrorCode() == 50000) && ("XJ015".equals(e.getSQLState())))) {
-				Mainframe.logger.info("Derby shut down normally");
-			} else {
-				System.err.println("Derby did not shut down normally");
-				Mainframe.logger.error("Derby did not shut down normally");
-				printSQLException(e);
+			if (con != null && !con.isClosed()) {
+				con.close();
+				Mainframe.logger.info("Database connection closed");
 			}
+		} catch (SQLException e) {
+			Mainframe.logger.error("Error closing database connection: {}", e.getMessage());
 		}
-
 	}
 
 	/**
-	 * checks Derby DB Tables and creates them if needed
-	 * 
+	 * checks DB Tables and creates them if needed
+	 *
 	 * @param con - Connection Object from "createConnection" Function
 	 */
 	public static void createTable(Connection con) {
-		Statement createBooklist = null;
-		Statement createWishlist = null;
-		Statement createVersions = null;
-		PreparedStatement pst;
-		Timestamp datum = new Timestamp(System.currentTimeMillis());
-		try {
-			createBooklist = con.createStatement();
-			createBooklist.execute(
-					"CREATE TABLE books (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, ausgeliehen VARCHAR(4), name VARCHAR(50),bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2),ebook NUMERIC(1,0),rating NUMERIC(2,0),pic blob,description clob (64 M), isbn varchar(13),date timestamp,bid NUMERIC(6,0) NOT NULL, CONSTRAINT buecher_pk PRIMARY KEY (bid))");
-			createWishlist = con.createStatement();
-			createWishlist.execute(
-					"CREATE TABLE wishlist (autor VARCHAR(50) NOT NULL, titel VARCHAR(50) NOT NULL, bemerkung VARCHAR(100),serie VARCHAR(50),seriePart VARCHAR(2), date timestamp, CONSTRAINT wishlist_pk PRIMARY KEY (autor,titel))");
-			createVersions = con.createStatement();
-			createVersions.execute("CREATE TABLE versions (version VARCHAR(10) NOT NULL, date timestamp NOT NULL)");
-			String sql = "INSERT INTO versions (version ,date) VALUES ('3.1.6','" + datum + "')";
-			pst = con.prepareStatement(sql);
-			pst.execute();
-			Mainframe.logger.info("Datenbanken erstellt");
-			pst.close();
+		try (Statement st = con.createStatement()) {
+			st.execute("CREATE TABLE IF NOT EXISTS books ("
+					+ "bid INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ "author TEXT NOT NULL, "
+					+ "title TEXT NOT NULL, "
+					+ "borrow_status TEXT DEFAULT 'none', "
+					+ "borrower TEXT DEFAULT '', "
+					+ "note TEXT DEFAULT '', "
+					+ "series TEXT DEFAULT '', "
+					+ "series_vol INTEGER, "
+					+ "ebook INTEGER DEFAULT 0, "
+					+ "rating REAL DEFAULT 0.0, "
+					+ "pic BLOB, "
+					+ "description TEXT, "
+					+ "isbn TEXT, "
+					+ "added_date TEXT)");
+			st.execute("CREATE TABLE IF NOT EXISTS wishlist ("
+					+ "wid INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ "author TEXT NOT NULL, "
+					+ "title TEXT NOT NULL, "
+					+ "note TEXT DEFAULT '', "
+					+ "series TEXT DEFAULT '', "
+					+ "series_vol INTEGER, "
+					+ "added_date TEXT)");
+			st.execute("CREATE TABLE IF NOT EXISTS versions ("
+					+ "version TEXT NOT NULL, "
+					+ "added_date TEXT NOT NULL)");
+
+			// Insert initial version if versions table is empty
+			try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM versions")) {
+				if (rs.next() && rs.getInt(1) == 0) {
+					Timestamp datum = new Timestamp(System.currentTimeMillis());
+					try (PreparedStatement pst = con.prepareStatement(
+							"INSERT INTO versions (version, added_date) VALUES (?, ?)")) {
+						pst.setString(1, "4.0.0");
+						pst.setString(2, datum.toString());
+						pst.execute();
+					}
+					Mainframe.logger.info("Datenbanken erstellt");
+				}
+			}
 		} catch (SQLException e) {
-			if ("X0Y32".equals(e.getSQLState())) {
-				Mainframe.logger.info("Datenbank existiert bereits");
-			} else {
-				printSQLException(e);
-			}
-		} finally {
-			try {
-				if (createBooklist != null) createBooklist.close();
-				if (createWishlist != null) createWishlist.close();
-				if (createVersions != null) createVersions.close();
-				Mainframe.logger.info("DB closed");
-			} catch (SQLException e) {
-				Mainframe.logger.error(e.getMessage());
-			}
+			printSQLException(e);
 		}
 	}
 
@@ -139,20 +140,19 @@ public class Database {
 		System.err.println("  SQL State:  " + e.getSQLState());
 		System.err.println("  Error Code: " + e.getErrorCode());
 		System.err.println("  Message:    " + e.getMessage());
-		// for stack infos, refer to derby.log or uncomment this:
 		Mainframe.logger.error(e.getMessage());
 	}
 
 	/**
 	 * reads whole table "books" from Database
-	 * 
+	 *
 	 * @return - ResultSet with all entries from Table "books"
 	 */
 	public static ResultSet readDbBooklist() {
 		ResultSet rs = null;
 		try {
 			Statement st = con.createStatement();
-			rs = st.executeQuery("SELECT * FROM books ORDER BY autor, serie, seriePart");
+			rs = st.executeQuery("SELECT * FROM books ORDER BY author, series, series_vol");
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
@@ -161,7 +161,7 @@ public class Database {
 
 	/**
 	 * reads only mandatory columns of table "books"
-	 * 
+	 *
 	 * @return - ResultSet with only mandatory columns from Table "books"
 	 */
 	public static ResultSet readDbBooklistLite() {
@@ -169,7 +169,7 @@ public class Database {
 		try {
 			Statement st = con.createStatement();
 			rs = st.executeQuery(
-					"SELECT autor,titel,ebook,serie,seriePart,rating,bid,date FROM books ORDER BY autor, serie, seriePart");
+					"SELECT author,title,ebook,series,series_vol,rating,bid,added_date FROM books ORDER BY author, series, series_vol");
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
@@ -179,9 +179,9 @@ public class Database {
 	/**
 	 * reads single DISTINCT column from table "books" to get e.g. different
 	 * authors or series info
-	 * 
+	 *
 	 * @param columnName - Array of column names to retrieve
-	 * 
+	 *
 	 * @return - ResultSet with only mandatory columns from Table "books"
 	 */
 	public static ResultSet getColumnsFromBooklist(String[] columnName) {
@@ -209,12 +209,12 @@ public class Database {
 		}
 		return rs;
 	}
-	
+
 	/**
 	 * calculates the Median Rating  with specific group by Clause
-	 * 
+	 *
 	 * @param columnName - name of the column to retrieve
-	 * 
+	 *
 	 * @return - ResultSet with Average Rating over specific Group
 	 */
 	public static ResultSet getAvgRating(String[] columnName) {
@@ -247,11 +247,11 @@ public class Database {
 	/**
 	 * reads single DISTINCT column from table "books" to get e.g. different
 	 * authors or series info
-	 * 
+	 *
 	 * @param columnName  - name of the column to retrieve
 	 * @param whereColumn - name of column to filter
 	 * @param whereValue  - value to search in column "whereColumn"
-	 * 
+	 *
 	 * @return - ResultSet with only mandatory columns from Table "books"
 	 */
 	public static ResultSet getColumnWithWhere(String columnName, String whereColumn, String whereValue) {
@@ -269,9 +269,9 @@ public class Database {
 
 	/**
 	 * counts columns with GROUP BY Clause
-	 * 
+	 *
 	 * @param groupByColumn - name of column to group
-	 * 
+	 *
 	 * @return - Returns ResultSet of Query with GrouBy Clause. [1] Count, [2] groupByColumn
 	 */
 	public static ResultSet getColumnCountsWithGroup(String groupByColumn) {
@@ -287,9 +287,9 @@ public class Database {
 
 	/**
 	 * reads one specific book from table "books"
-	 * 
+	 *
 	 * @param bid - Book ID of needed entry
-	 * 
+	 *
 	 * @return - ResultSet with one entry from Table "books"
 	 */
 	public static ResultSet selectFromBooklist(int bid) {
@@ -307,7 +307,7 @@ public class Database {
 	/**
 	 * exports all entries from booklist to .csv file (books.csv) in the same
 	 * Directory
-	 * 
+	 *
 	 * @return - success value
 	 */
 	public static boolean CSVExport() {
@@ -349,7 +349,7 @@ public class Database {
 
 	/**
 	 * read the current DB Layout from table "versions"
-	 * 
+	 *
 	 * @return - DB version String with last modified date
 	 */
 	public static String readCurrentLayoutVersion() {
@@ -369,19 +369,28 @@ public class Database {
 		}
 		return version;
 	}
-	
+
 	/**
-	 * read the current version of apache derby
-	 * 
-	 * @return - apache derby version String
+	 * read the current version of SQLite
+	 *
+	 * @return - SQLite version String
 	 */
 	public static String readCurrentDBVersion() {
-        return sysinfo.getVersionString();
+		String version = "";
+		try (Statement st = con.createStatement();
+			 ResultSet rs = st.executeQuery("SELECT sqlite_version()")) {
+			if (rs.next()) {
+				version = rs.getString(1);
+			}
+		} catch (SQLException e) {
+			Mainframe.logger.error("Fehler beim auslesen der SQLite Version");
+		}
+		return version;
 	}
 
 	/**
 	 * deletes one specific book from table "books"
-	 * 
+	 *
 	 * @param bid - Book ID of entry
 	 */
 	public static void deleteFromBooklist(int bid) {
@@ -399,7 +408,7 @@ public class Database {
 
 	/**
 	 * saves a new entry to booklist
-	 * 
+	 *
 	 * @param author    - full name of the Author
 	 * @param title     - title of the Book
 	 * @param borrowed  - set if borrowed From or To
@@ -409,17 +418,14 @@ public class Database {
 	 * @param seriesVol - set which volume is the book in the specified series
 	 * @param ebook     - boolean variable if Book is an ebook
 	 * @param date      - date when the entry was added
-	 * 
+	 *
 	 * @return assigned bid of the newly added book
 	 */
 	public static int addToBooklist(String author, String title, String borrowed, String name, String note,
 			String series, String seriesVol, boolean ebook, String date) throws SQLException {
-		String sql = "INSERT INTO books(autor,titel,ausgeliehen,name,bemerkung,serie,seriePart,ebook,date,bid) VALUES(?,?,?,?,?,?,?,?,?,?)";
-		PreparedStatement st = con.prepareStatement(sql);
-		highestBid++;
-		int int_ebook = 0;
-		if (ebook)
-			int_ebook = 1;
+		String sql = "INSERT INTO books(author,title,borrow_status,borrower,note,series,series_vol,ebook,added_date) VALUES(?,?,?,?,?,?,?,?,?)";
+		PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+		int int_ebook = ebook ? 1 : 0;
 
 		st.setString(1, author);
 		st.setString(2, title);
@@ -427,25 +433,37 @@ public class Database {
 		st.setString(4, name);
 		st.setString(5, note);
 		st.setString(6, series);
-		st.setString(7, seriesVol);
+		if (seriesVol != null && !seriesVol.trim().isEmpty()) {
+			try {
+				st.setInt(7, Integer.parseInt(seriesVol.trim()));
+			} catch (NumberFormatException e) {
+				st.setNull(7, java.sql.Types.INTEGER);
+			}
+		} else {
+			st.setNull(7, java.sql.Types.INTEGER);
+		}
 		st.setInt(8, int_ebook);
 		st.setString(9, date);
-		st.setInt(10, highestBid);
 		st.executeUpdate();
+
+		int generatedBid;
+		try (ResultSet keys = st.getGeneratedKeys()) {
+			keys.next();
+			generatedBid = keys.getInt(1);
+		}
 		st.close();
 
 		Mainframe.logger
-				.info("Booklist Datenbank Eintrag erstellt: {},{},{},{},{},{},{},{},{},{}", author, title, borrowed, name, note,series,seriesVol,date,int_ebook,(highestBid));
-		return highestBid;
+				.info("Booklist Datenbank Eintrag erstellt: {},{},{},{},{},{},{},{},{}", author, title, borrowed, name, note,series,seriesVol,date,int_ebook);
+		return generatedBid;
 	}
 
 	/**
 	 * updates a specified column with provided value and bid
-	 * 
+	 *
 	 * @param bid     - book id
 	 * @param colName - set value of this column
 	 * @param value   - set column to this value
-	 * 
 	 */
 	public static void updateBooklistEntry(int bid, String colName, String value) {
 		String sql = "update books set " + colName + "=? where bid=?";
@@ -464,22 +482,21 @@ public class Database {
 
 	/**
 	 * updates the "pic" column of specific Book entry
-	 * 
+	 *
 	 * @param bid   - book id
 	 * @param photo - photo data
-	 * 
 	 */
 	public static void updatePic(int bid, InputStream photo) {
 		String sql = "update books set pic=? where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
-			st.setBinaryStream(1, photo);
+			st.setBytes(1, photo.readAllBytes());
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
 			Mainframe.logger.info("Cover gespeichert: {}", bid);
-		} catch (SQLException e) {
+		} catch (SQLException | IOException e) {
 			Mainframe.logger.error("Fehler beim speichern des Covers: {}", bid);
 		}
 
@@ -487,9 +504,9 @@ public class Database {
 
 	/**
 	 * empties the "pic" column of specific Book
-	 * 
+	 *
 	 * @param bid - book id
-	 * 
+	 *
 	 * @return success value
 	 */
 	public static boolean delPic(int bid) {
@@ -511,10 +528,9 @@ public class Database {
 
 	/**
 	 * updates the "description" column of specific Book entry
-	 * 
+	 *
 	 * @param bid  - book id
 	 * @param desc - description String
-	 * 
 	 */
 	public static void updateDesc(int bid, String desc) {
 		String sql = "update books set description=? where bid=?";
@@ -534,9 +550,9 @@ public class Database {
 
 	/**
 	 * empties the "description" column of specific Book
-	 * 
+	 *
 	 * @param bid - book id
-	 * 
+	 *
 	 * @return success value
 	 */
 	public static boolean delDesc(int bid) {
@@ -558,10 +574,9 @@ public class Database {
 
 	/**
 	 * updates the "isbn" column of specific Book entry
-	 * 
+	 *
 	 * @param bid  - book id
 	 * @param isbn - isbn Number as String
-	 * 
 	 */
 	public static void updateIsbn(int bid, String isbn) {
 		String sql = "update books set isbn=? where bid=?";
@@ -580,14 +595,13 @@ public class Database {
 	}
 
 	/**
-	 * updates the "date" column of specific Book entry
+	 * updates the "added_date" column of specific Book entry
 	 *
 	 * @param bid  - book id
 	 * @param date - new Date as String
-	 *
 	 */
 	public static void updateDate(int bid, String date) {
-		String sql = "update books set date=? where bid=?";
+		String sql = "update books set added_date=? where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
@@ -604,17 +618,16 @@ public class Database {
 
 	/**
 	 * updates the "rating" column of specific Book entry
-	 * 
+	 *
 	 * @param bid    - book id
-	 * @param rating - rating Number
-	 * 
+	 * @param rating - rating as double (0.0 - 5.0)
 	 */
-	public static void updateRating(int bid, int rating) {
+	public static void updateRating(int bid, double rating) {
 		String sql = "update books set rating=? where bid=?";
 		PreparedStatement st;
 		try {
 			st = con.prepareStatement(sql);
-			st.setInt(1, rating);
+			st.setDouble(1, rating);
 			st.setInt(2, bid);
 			st.execute();
 			st.close();
@@ -627,14 +640,14 @@ public class Database {
 
 	/**
 	 * reads all columns of table "wishlist" from Database
-	 * 
+	 *
 	 * @return - ResultSet with all columns from Table "wishlist"
 	 */
 	public static ResultSet readDbWishlist() {
 		ResultSet rs = null;
 		try {
 			Statement st = con.createStatement();
-			rs = st.executeQuery("SELECT * FROM wishlist ORDER BY autor");
+			rs = st.executeQuery("SELECT * FROM wishlist ORDER BY author");
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim auslesen der Wunschliste");
 		}
@@ -643,53 +656,66 @@ public class Database {
 
 	/**
 	 * saves a new entry to wishlist
-	 * 
+	 *
 	 * @param author    - full name of the Author
 	 * @param title     - title of the Book
 	 * @param note      - free String input about Book or Author
 	 * @param series    - series of book
 	 * @param seriesVol - set which volume is the book in the specified series
 	 * @param date      - date when the entry was added
-	 * 
+	 *
+	 * @return assigned wid of the newly added wishlist entry
 	 */
-	public static void addToWishlist(String author, String title, String note, String series, String seriesVol,
+	public static int addToWishlist(String author, String title, String note, String series, String seriesVol,
 			String date) {
 		try {
-			String sql = "INSERT INTO wishlist(autor,titel,bemerkung,serie,seriePart,date) VALUES(?,?,?,?,?,?)";
-			PreparedStatement st = con.prepareStatement(sql);
+			String sql = "INSERT INTO wishlist(author,title,note,series,series_vol,added_date) VALUES(?,?,?,?,?,?)";
+			PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			st.setString(1, author);
 			st.setString(2, title);
 			st.setString(3, note);
 			st.setString(4, series);
-			st.setString(5, seriesVol);
+			if (seriesVol != null && !seriesVol.trim().isEmpty()) {
+				try {
+					st.setInt(5, Integer.parseInt(seriesVol.trim()));
+				} catch (NumberFormatException e) {
+					st.setNull(5, java.sql.Types.INTEGER);
+				}
+			} else {
+				st.setNull(5, java.sql.Types.INTEGER);
+			}
 			st.setString(6, date);
 			st.executeUpdate();
+
+			int generatedWid;
+			try (ResultSet keys = st.getGeneratedKeys()) {
+				keys.next();
+				generatedWid = keys.getInt(1);
+			}
 			st.close();
 			Mainframe.logger.info("Wishlist Datenbank Eintrag erstellt: {},{},{},{},{},{}", author ,title, note,series, seriesVol, date);
+			return generatedWid;
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim speichern des Buchs (Wunschliste): {}-{}",author,title);
+			return -1;
 		}
 	}
 
 	/**
 	 * deletes one specific book from table "wishlist"
-	 * 
-	 * @param author - name of author
-	 * @param title  - title of the book
+	 *
+	 * @param wid - wishlist entry id
 	 */
-	public static void deleteFromWishlist(String author, String title) {
+	public static void deleteFromWishlist(int wid) {
 		try {
-			String sql = "DELETE FROM wishlist WHERE autor = ? AND titel = ?";
+			String sql = "DELETE FROM wishlist WHERE wid = ?";
 			PreparedStatement st = con.prepareStatement(sql);
-			st.setString(1, author);
-			st.setString(2, title);
+			st.setInt(1, wid);
 			st.executeUpdate();
 			st.close();
-			Mainframe.logger.info("Wishlist Datenbank Eintrag geloescht: {},{}", author,title);
-		} catch (
-
-		SQLException e) {
-			Mainframe.logger.error("Fehler beim löschen des Buchs (Wunschliste): {}-{}", author, title);
+			Mainframe.logger.info("Wishlist Datenbank Eintrag geloescht: {}", wid);
+		} catch (SQLException e) {
+			Mainframe.logger.error("Fehler beim löschen des Buchs (Wunschliste): {}", wid);
 		}
 	}
 

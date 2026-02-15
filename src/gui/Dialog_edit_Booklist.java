@@ -895,23 +895,23 @@ public class Dialog_edit_Booklist extends JDialog {
       if (checkInput(newAuthor, newTitle, Mainframe.allEntries.getIndexOf(oldAutor, oldTitel))) {
         if (!oldAutor.equals(newAuthor)) {
           entry.setAuthor(newAuthor);
-          Database.updateBooklistEntry(bid, "autor", newAuthor);
+          Database.updateBooklistEntry(bid, "author", newAuthor);
         }
         if (!oldTitel.equals(newTitle)) {
           entry.setTitle(newTitle);
-          Database.updateBooklistEntry(bid, "titel", newTitle);
+          Database.updateBooklistEntry(bid, "title", newTitle);
         }
         if (!oldNote.equals(newNote)) {
           entry.setNote(newNote);
-          Database.updateBooklistEntry(bid, "bemerkung", newNote);
+          Database.updateBooklistEntry(bid, "note", newNote);
         }
         if (!oldSeries.equals(newSeries)) {
           entry.setSeries(newSeries);
-          Database.updateBooklistEntry(bid, "serie", newSeries);
+          Database.updateBooklistEntry(bid, "series", newSeries);
         }
         if (!oldSeriesVol.equals(newSeriesVol)) {
           entry.setSeriesVol(newSeriesVol);
-          Database.updateBooklistEntry(bid, "seriePart", newSeriesVol);
+          Database.updateBooklistEntry(bid, "series_vol", newSeriesVol);
         }
         if (oldEbook != newEbook) {
           entry.setEbook(newEbook);
@@ -923,33 +923,33 @@ public class Dialog_edit_Booklist extends JDialog {
         if (oldBorrowed) {
           if (newBorrwoedTo && oldNameBorrowedTo.isEmpty()) {
             entry.setBorrowedTo(txtBorrowedTo.getText());
-            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.LENT_TO.getDbValue());
-            Database.updateBooklistEntry(bid, "name", txtBorrowedTo.getText());
+            Database.updateBooklistEntry(bid, "borrow_status", BorrowStatus.LENT_TO.getDbValue());
+            Database.updateBooklistEntry(bid, "borrower", txtBorrowedTo.getText());
           }
           if (newBorrwoedFrom && oldNameBorrowedFrom.isEmpty()) {
             entry.setBorrowedFrom(txtBorrowedFrom.getText());
-            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.BORROWED_FROM.getDbValue());
-            Database.updateBooklistEntry(bid, "name", txtBorrowedFrom.getText());
+            Database.updateBooklistEntry(bid, "borrow_status", BorrowStatus.BORROWED_FROM.getDbValue());
+            Database.updateBooklistEntry(bid, "borrower", txtBorrowedFrom.getText());
           }
           if (!newBorrwoedTo && !newBorrwoedFrom) {
             entry.setBorrowed(false);
             entry.setBorrowedFrom("");
             entry.setBorrowedTo("");
-            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.NONE.getDbValue());
-            Database.updateBooklistEntry(bid, "name", "");
+            Database.updateBooklistEntry(bid, "borrow_status", BorrowStatus.NONE.getDbValue());
+            Database.updateBooklistEntry(bid, "borrower", "");
           }
         }
         if (!oldBorrowed) {
           if (newBorrwoedTo) {
             entry.setBorrowed(true);
             entry.setBorrowedTo(txtBorrowedTo.getText());
-            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.LENT_TO.getDbValue());
-            Database.updateBooklistEntry(bid, "name", txtBorrowedTo.getText());
+            Database.updateBooklistEntry(bid, "borrow_status", BorrowStatus.LENT_TO.getDbValue());
+            Database.updateBooklistEntry(bid, "borrower", txtBorrowedTo.getText());
           } else if (newBorrwoedFrom) {
             entry.setBorrowed(true);
             entry.setBorrowedFrom(txtBorrowedFrom.getText());
-            Database.updateBooklistEntry(bid, "ausgeliehen", BorrowStatus.BORROWED_FROM.getDbValue());
-            Database.updateBooklistEntry(bid, "name", txtBorrowedFrom.getText());
+            Database.updateBooklistEntry(bid, "borrow_status", BorrowStatus.BORROWED_FROM.getDbValue());
+            Database.updateBooklistEntry(bid, "borrower", txtBorrowedFrom.getText());
           }
         }
         Mainframe.logger.info("Book edit: {}-{}", entry.getAuthor(), entry.getTitle());
@@ -1110,7 +1110,7 @@ public class Dialog_edit_Booklist extends JDialog {
   private void setRating(int segment) {
 
     Mainframe.logger.info("Rating set: {}", segment);
-    entry.setRating(segment, true);
+    entry.setRating((double) segment / 2, true);
     starRatingPanel.setRating(entry.getRating());
 
     // Rating-Wert direkt in der Tabelle aktualisieren

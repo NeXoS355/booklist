@@ -331,7 +331,7 @@ public class Mainframe extends JFrame {
     JMenu extras = new JMenu(Localization.get("menu.extras"));
     JMenu hilfe = new JMenu(Localization.get("menu.help"));
 
-    JMenuItem backup = new JMenuItem("DB Backup");
+    JMenuItem backup = new JMenuItem("Backup");
     backup.addActionListener(e -> {
       boolean ret = createBackup();
       if (ret)
@@ -359,7 +359,7 @@ public class Mainframe extends JFrame {
       String javaVersion = System.getProperty("java.version");
       String text = "https://github.com/NeXoS355/booklist" + "\n\nProgram Version: " + version
           + "\nDB Layout Version: " + Database.readCurrentLayoutVersion() + "\n\nLocal Java Version: "
-          + javaVersion + "\nApache Derby Version: " + Database.readCurrentDBVersion();
+          + javaVersion + "\nSQLite Version: " + Database.readCurrentDBVersion();
       JOptionPane.showMessageDialog(Mainframe.getInstance(), text);
     });
     JMenuItem ExcelExport = new JMenuItem(Localization.get("menu.csv"));
@@ -1084,15 +1084,14 @@ public class Mainframe extends JFrame {
     try {
       File jarFile = new File(Mainframe.class.getProtectionDomain().getCodeSource().getLocation().toURI());
       String filename = jarFile.getName();
-      File baseDir = jarFile.getParentFile();
+      File workingDir = new File(System.getProperty("user.dir"));
       if (filename.contains(".jar")) {
         Date dt = new Date();
         long LongTime = dt.getTime();
         String StrTime = Long.toString(LongTime).substring(0, Long.toString(LongTime).length() - 3);
-        File backupDir = new File(baseDir, "Sicherung/" + StrTime);
-        copyFilesInDirectory(new File(baseDir, "BooklistDB"), new File(backupDir, "BooklistDB"));
-        copyFileToDirectory(new File(baseDir, "derby.log"), backupDir);
-        copyFileToDirectory(new File(baseDir, "config.conf"), backupDir);
+        File backupDir = new File(workingDir, "Backup/" + StrTime);
+        copyFileToDirectory(new File(workingDir, "booklist.db"), backupDir);
+        copyFileToDirectory(new File(workingDir, "config.conf"), backupDir);
         copyFileToDirectory(jarFile, backupDir);
         Mainframe.logger.info("Backup created");
         return true;

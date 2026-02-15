@@ -6,6 +6,7 @@ import data.Database;
 
 public class Book_Wishlist {
 
+	private int wid;
 	private String author;
 	private String title;
 	private String note;
@@ -22,7 +23,7 @@ public class Book_Wishlist {
 		this.seriesVol = seriesVol;
 		this.date = date;
 		if (db) {
-				Database.addToWishlist(author, title, note, series, seriesVol, date.toString());
+				this.wid = Database.addToWishlist(author, title, note, series, seriesVol, date.toString());
 		}
 	}
 
@@ -106,7 +107,13 @@ public class Book_Wishlist {
 	public void setSeriesVol(String seriesVol) {
 		this.seriesVol = seriesVol;
 	}
-	
-	
+
+	public int getWid() {
+		return wid;
+	}
+
+	public void setWid(int wid) {
+		this.wid = wid;
+	}
 
 }

@@ -311,8 +311,8 @@ public class Book_Booklist {
 	 * @param db     - boolean value if value should be written to db
 	 *
 	 */
-	public void setRating(int rating, boolean db) {
-		this.rating = (double) rating/2;
+	public void setRating(double rating, boolean db) {
+		this.rating = rating;
 		if (db)
 			Database.updateRating(this.getBid(), rating);
 	}
