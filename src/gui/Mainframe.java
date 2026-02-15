@@ -90,6 +90,7 @@ public class Mainframe extends JFrame {
   private static JMenuItem apiDownload;
   private static JMenuItem apiUpload;
   private static String version;
+  private static final String MIGRATION_BRIDGE_TAG = "4.0.1";
   private JTextField txt_search;
   private static JButton btnSearchReset;
   private static JButton btnFab;
@@ -147,7 +148,6 @@ public class Mainframe extends JFrame {
       Configurator.setLevel(logger, Level.INFO);
     }
 
-    cleanup();
     // Standard-Locale setzen
     if (HandleConfig.lang.equals("English")) {
       Localization.setLocale(Locale.ENGLISH);
@@ -162,6 +162,8 @@ public class Mainframe extends JFrame {
       UIManager.put("OptionPane.cancelButtonText", "Abbrechen");
       UIManager.put("OptionPane.closeButtonText", "Schließen");
     }
+
+    cleanup();
 
     try {
       // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -227,6 +229,7 @@ public class Mainframe extends JFrame {
     SimpleTableModel.initColumnNames();
     logger.info("Finished create Frame & readConfig. Start creating Lists and readDB");
     allEntries = new BookListModel(true);
+    cleanupDerbyAfterMigration();
     tableDisplay = new SimpleTableModel(allEntries);
 
     logger.info("Finished creating List & DB. Start creating GUI Components");
@@ -287,7 +290,7 @@ public class Mainframe extends JFrame {
       @Override
       protected void paintComponent(Graphics g) {
         g.setColor(getBackground());
-        g.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+        g.fillRoundRect(0, 0, getWidth(), getHeight(), getHeight(), getHeight());
         super.paintComponent(g);
       }
     };
@@ -766,11 +769,54 @@ public class Mainframe extends JFrame {
           else
             logger.warn("File detected but could not be deleted: {}", file.getAbsolutePath());
         }
+
       } catch (IOException | URISyntaxException e) {
         logger.error(e.getMessage());
       }
 
     });
+  }
+
+  /**
+   * Räumt Derby-Dateien auf, nachdem die SQLite-Migration erfolgreich war.
+   * Wird nach der DB-Initialisierung aufgerufen, damit booklist.db bereits existiert.
+   */
+  private void cleanupDerbyAfterMigration() {
+    File sqliteDb = new File("booklist.db");
+    File derbyDir = new File("BooklistDB");
+    if (sqliteDb.exists() && derbyDir.exists() && derbyDir.isDirectory()) {
+      Mainframe.executor.submit(() -> {
+        try {
+          deleteDirectoryRecursive(derbyDir.toPath());
+          logger.info("Derby-Dateien nach erfolgreicher Migration entfernt: {}", derbyDir.getAbsolutePath());
+
+          File derbyLog = new File("derby.log");
+          if (derbyLog.exists()) {
+            Files.deleteIfExists(derbyLog.toPath());
+            logger.info("derby.log entfernt");
+          }
+
+          SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
+              Mainframe.getInstance(),
+              Localization.get("update.migrationDone"),
+              "Info",
+              JOptionPane.INFORMATION_MESSAGE));
+        } catch (IOException e) {
+          logger.error("Fehler beim Aufräumen der Derby-Dateien: {}", e.getMessage());
+        }
+      });
+    }
+  }
+
+  private static void deleteDirectoryRecursive(Path path) throws IOException {
+    if (Files.isDirectory(path)) {
+      try (var entries = Files.newDirectoryStream(path)) {
+        for (Path entry : entries) {
+          deleteDirectoryRecursive(entry);
+        }
+      }
+    }
+    Files.deleteIfExists(path);
   }
 
   static void updateLocationAndBounds() {
@@ -1648,6 +1694,128 @@ public class Mainframe extends JFrame {
   }
 
   /**
+   * Ruft ein GitHub Release anhand eines Tags ab.
+   */
+  private static JsonObject fetchReleaseByTag(String tag) throws IOException, URISyntaxException {
+    URL apiUrl = new URI("https://api.github.com/repos/NeXoS355/booklist/releases/tags/" + tag).toURL();
+    HttpURLConnection apiConn = (HttpURLConnection) apiUrl.openConnection();
+    apiConn.setRequestProperty("Accept", "application/vnd.github+json");
+    apiConn.setRequestMethod("GET");
+
+    if (apiConn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+      throw new IOException("GitHub API returned: " + apiConn.getResponseCode());
+    }
+
+    StringBuilder response = new StringBuilder();
+    try (BufferedReader reader = new BufferedReader(
+        new InputStreamReader(apiConn.getInputStream(), StandardCharsets.UTF_8))) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        response.append(line);
+      }
+    }
+    apiConn.disconnect();
+    return JsonParser.parseString(response.toString()).getAsJsonObject();
+  }
+
+  /**
+   * Prüft ob eine Derby-DB vorhanden ist, die noch nicht nach SQLite migriert wurde,
+   * und ob die aktuelle Version den DerbyMigrator nicht mehr an Bord hat.
+   * Nur dann wird die Brückenversion benötigt.
+   */
+  private static boolean needsDerbyMigrationBridge() {
+    if (!new File("BooklistDB").exists() || new File("booklist.db").exists()) {
+      return false;
+    }
+    try {
+      Class.forName("data.DerbyMigrator");
+      return false; // DerbyMigrator vorhanden, kann selbst migrieren
+    } catch (ClassNotFoundException e) {
+      return true; // Derby entfernt, Brückenversion nötig
+    }
+  }
+
+  /**
+   * Lädt die Brückenversion (4.0.x) herunter, die die Derby→SQLite Migration durchführen kann.
+   * Ersetzt die aktuelle JAR und startet neu.
+   */
+  private static void handleMigrationBridge() {
+    System.out.println("Derby-DB erkannt, SQLite-DB fehlt. Brückenversion für Migration wird geladen...");
+
+    try {
+      UIManager.setLookAndFeel(new FlatDarkLaf());
+    } catch (Exception ignored) {}
+
+    // Logger initialisieren (wird von HandleConfig.readConfig() benötigt)
+    logger = LogManager.getLogger(Mainframe.class);
+
+    // Localization initialisieren (Config ist noch nicht gelesen, daher Sprache aus config.conf lesen)
+    HandleConfig.readConfig();
+    if (HandleConfig.lang.equals("English")) {
+      Localization.setLocale(Locale.ENGLISH);
+    } else {
+      Localization.setLocale(Locale.GERMAN);
+    }
+
+    int answer = JOptionPane.showConfirmDialog(null,
+        MessageFormat.format(Localization.get("q.updateMigration"), MIGRATION_BRIDGE_TAG),
+        "Migration",
+        JOptionPane.YES_NO_OPTION);
+    if (answer != JOptionPane.YES_OPTION) {
+      System.out.println("Migration abgelehnt. Programm wird beendet.");
+      System.exit(0);
+    }
+
+    try {
+      JsonObject release = fetchReleaseByTag(MIGRATION_BRIDGE_TAG);
+
+      String downloadUrl = null;
+      if (release.has("assets")) {
+        for (var asset : release.getAsJsonArray("assets")) {
+          JsonObject assetObj = asset.getAsJsonObject();
+          if (assetObj.get("name").getAsString().endsWith(".jar")) {
+            downloadUrl = assetObj.get("browser_download_url").getAsString();
+            break;
+          }
+        }
+      }
+
+      if (downloadUrl == null) {
+        JOptionPane.showMessageDialog(null,
+            Localization.get("update.error"), "Error", JOptionPane.ERROR_MESSAGE);
+        System.exit(1);
+      }
+
+      File jarFile = new File(Mainframe.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+      File baseDir = jarFile.getParentFile();
+      File latestJar = new File(baseDir, "latest.jar");
+
+      System.out.println("Lade Brückenversion herunter: " + downloadUrl);
+      URL jarUrl = new URI(downloadUrl).toURL();
+      try (BufferedInputStream in = new BufferedInputStream(jarUrl.openStream());
+           FileOutputStream fos = new FileOutputStream(latestJar)) {
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+        while ((bytesRead = in.read(buffer)) != -1) {
+          fos.write(buffer, 0, bytesRead);
+        }
+      }
+
+      System.out.println("Download abgeschlossen. Starte Update-Prozess...");
+      ProcessBuilder pb = new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath(), "update");
+      pb.directory(baseDir);
+      pb.start();
+      System.exit(0);
+
+    } catch (Exception e) {
+      System.err.println("Fehler bei Migration-Bridge: " + e.getMessage());
+      JOptionPane.showMessageDialog(null,
+          Localization.get("update.error"), "Error", JOptionPane.ERROR_MESSAGE);
+      System.exit(1);
+    }
+  }
+
+  /**
    * start Instance of Mainframe
    *
    * @param args - Arguments to trigger different functions
@@ -1674,6 +1842,8 @@ public class Mainframe extends JFrame {
     if (args.length > 0 && "update".equals(args[0])) {
       update();
       System.exit(0);
+    } else if (needsDerbyMigrationBridge()) {
+      handleMigrationBridge();
     } else {
       createInstance(true);
     }
