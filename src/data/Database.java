@@ -31,7 +31,6 @@ public class Database {
 	public static void createConnection() {
 		try {
 			if (con == null || con.isClosed()) {
-				DerbyMigrator.migrateIfNeeded();
 				con = DriverManager.getConnection("jdbc:sqlite:booklist.db");
 				try (Statement st = con.createStatement()) {
 					st.execute("PRAGMA journal_mode=WAL");
