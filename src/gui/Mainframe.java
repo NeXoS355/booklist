@@ -1685,7 +1685,7 @@ public class Mainframe extends JFrame {
   /**
    * Wandelt einen Versionsstring (z.B. "3.3.0") in einen int um (330).
    */
-  private static int parseVersion(String ver) {
+  static int parseVersion(String ver) {
     StringBuilder sb = new StringBuilder();
     for (String part : ver.split("[.]")) {
       sb.append(part);

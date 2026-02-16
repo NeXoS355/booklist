@@ -188,7 +188,7 @@ public class HandleConfig {
     }
   }
 
-  private static int getInt(Properties props, String key, int defaultValue) {
+  static int getInt(Properties props, String key, int defaultValue) {
     String value = props.getProperty(key);
     if (value == null) return defaultValue;
     try {
@@ -199,7 +199,7 @@ public class HandleConfig {
     }
   }
 
-  private static int getInt(Properties props, String key, int defaultValue, int min, int max) {
+  static int getInt(Properties props, String key, int defaultValue, int min, int max) {
     int value = getInt(props, key, defaultValue);
     if (value < min || value > max) {
       logger.error("Fehler in der config ({}): Wert {} nicht im Bereich {}-{}", key, value, min, max);
