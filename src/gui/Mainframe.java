@@ -334,15 +334,6 @@ public class Mainframe extends JFrame {
     JMenu extras = new JMenu(Localization.get("menu.extras"));
     JMenu hilfe = new JMenu(Localization.get("menu.help"));
 
-    JMenuItem backup = new JMenuItem("Backup");
-    backup.addActionListener(e -> {
-      boolean ret = createBackup();
-      if (ret)
-        JOptionPane.showMessageDialog(Mainframe.getInstance(), Localization.get("backup.success"));
-      else
-        JOptionPane.showMessageDialog(Mainframe.getInstance(),
-            Localization.get("backup.error"));
-    });
     JMenuItem close = new JMenuItem(Localization.get("menu.close"));
     close.addActionListener(e -> System.exit(0));
     JMenuItem wishlist = new JMenuItem(Localization.get("menu.wishlist"));
@@ -417,8 +408,11 @@ public class Mainframe extends JFrame {
 
     datei.add(settings);
     datei.add(close);
+    JMenuItem manageBackups = new JMenuItem(Localization.get("menu.manageBackups"));
+    manageBackups.addActionListener(e -> new Dialog_backup(Mainframe.getInstance()));
+
     extras.add(ExcelExport);
-    extras.add(backup);
+    extras.add(manageBackups);
     extras.add(wishlist);
     extras.add(apiDownload);
     extras.add(apiUpload);
@@ -1868,6 +1862,10 @@ public class Mainframe extends JFrame {
    */
   public static Mainframe getInstance() {
     return instance;
+  }
+
+  public static String getVersion() {
+    return version;
   }
 
 }

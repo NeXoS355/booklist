@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.table.TableColumnModel;
 
@@ -113,8 +114,24 @@ public class HandleConfig {
 
       String layoutSort = props.getProperty("layoutSort");
       if (layoutSort != null) {
-        String[] values = layoutSort.trim().split(",");
-        System.arraycopy(values, 0, SimpleTableModel.columnKeys, 0, values.length);
+        try {
+          String[] values = layoutSort.trim().split(",");
+          Set<String> validKeys = Set.of(
+              SimpleTableModel.KEY_EBOOK, SimpleTableModel.KEY_AUTHOR,
+              SimpleTableModel.KEY_TITLE, SimpleTableModel.KEY_SERIES,
+              SimpleTableModel.KEY_RATING);
+          if (values.length != SimpleTableModel.columnKeys.length) {
+            throw new IllegalArgumentException("Erwartete " + SimpleTableModel.columnKeys.length + " Spalten, gefunden: " + values.length);
+          }
+          for (String key : values) {
+            if (!validKeys.contains(key.trim())) {
+              throw new IllegalArgumentException("Ungültiger Spaltenkey: " + key);
+            }
+          }
+          System.arraycopy(values, 0, SimpleTableModel.columnKeys, 0, values.length);
+        } catch (IllegalArgumentException e) {
+          logger.warn("Fehler beim Lesen von layoutSort, verwende Defaults: {}", e.getMessage());
+        }
       }
 
       Mainframe.startX = getInt(props, "MainframeX", Mainframe.startX);
@@ -142,6 +159,7 @@ public class HandleConfig {
     props.setProperty("apiToken", apiToken);
     props.setProperty("apiURL", apiURL);
     props.setProperty("darkmode", String.valueOf(tmpDarkmode));
+    props.setProperty("version", Mainframe.getVersion());
 
     TableColumnModel columnModel = Mainframe.table.getColumnModel();
     props.setProperty("layoutWidth",
