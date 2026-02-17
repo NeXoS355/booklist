@@ -216,6 +216,8 @@ public class Dialog_backup extends JDialog {
 		}
 
 		try {
+			data.Database.closeConnection();
+
 			Path workingDir = Path.of(System.getProperty("user.dir"));
 
 			File[] backupFiles = backupDir.listFiles();

@@ -97,9 +97,9 @@ class WishlistListModelTest {
 
   // getIndexOf must return 0 when no match is found
   @Test
-  void getIndexOf_nonExistent_returnsZero() {
+  void getIndexOf_nonExistent_returnsNegative() {
     addBook(createWishBook("Tolkien", "Der Hobbit"));
-    assertEquals(0, model.getIndexOf("Unknown", "Unknown"));
+    assertEquals(-1, model.getIndexOf("Unknown", "Unknown"));
   }
 
   // indexOf must return the list index of the given book object

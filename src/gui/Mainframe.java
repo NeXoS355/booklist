@@ -82,7 +82,7 @@ public class Mainframe extends JFrame {
       ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
   // private static Timer animationTimer;
   private static Mainframe instance;
-  private static String treeSelection;
+  private static String treeSelection = "";
   private static String lastSearch = "";
   private static boolean apiConnected = false;
   private static wishlist wishlist_instance;
@@ -467,7 +467,8 @@ public class Mainframe extends JFrame {
           String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
           String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
           int index = allEntries.getIndexOf(searchAutor, searchTitel);
-          new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
+          if (index >= 0)
+            new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
         }
         updateSearchPlaceholder();
         if (SwingUtilities.isRightMouseButton(e)) {
@@ -512,7 +513,8 @@ public class Mainframe extends JFrame {
             String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
             String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
             int index = allEntries.getIndexOf(searchAutor, searchTitel);
-            new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
+            if (index >= 0)
+              new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
           }
         });
         itemAnalyzeAuthor.addActionListener(e5 -> {
@@ -582,6 +584,7 @@ public class Mainframe extends JFrame {
     btnFab.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     btnFab.setSize(FAB_SIZE, FAB_SIZE);
     btnFab.putClientProperty("JButton.buttonType", "none");
+    btnFab.setToolTipText(Localization.get("contextMenu.addBook"));
     btnFab.addActionListener(e -> {
       new Dialog_add_Booklist(Mainframe.getInstance());
       updateSearchPlaceholder();
@@ -743,7 +746,7 @@ public class Mainframe extends JFrame {
     this.setLocation(startX, startY);
     this.setVisible(visible);
 
-    checkApiConnection();
+    Mainframe.executor.submit(() -> checkApiConnection());
     showLastBookWithoutRating();
 
     listScrollPane.setBounds(0, 0, layeredPane.getWidth(), layeredPane.getHeight());
@@ -845,6 +848,7 @@ public class Mainframe extends JFrame {
       String searchAuthor = (String) table.getValueAt(j, 1);
       String searchTitle = (String) table.getValueAt(j, 2);
       int index = allEntries.getIndexOf(searchAuthor, searchTitle);
+      if (index < 0) continue;
 
       int answer = JOptionPane.showConfirmDialog(null,
           MessageFormat.format(Localization.get("book.deleteQuestion"), searchAuthor, searchTitle),
@@ -1055,6 +1059,7 @@ public class Mainframe extends JFrame {
     Timestamp timespan = new Timestamp(System.currentTimeMillis() - 1209600033);
     for (int i = 0; i < allEntries.getSize(); i++) {
       Book_Booklist entry = allEntries.getElementAt(i);
+      if (entry.getDate() == null) continue;
       if (newestBook == null) {
         if (entry.getRating() == 0 && entry.getDate().after(timespan)) {
           newestBook = entry;
@@ -1196,9 +1201,11 @@ public class Mainframe extends JFrame {
         Mainframe.logger.info("Web API request: responseTime: {}", responseTime + "ms");
         if (responseCode == HttpURLConnection.HTTP_OK) {
           apiConnected = true;
-          openWebApi.setEnabled(true);
-          apiDownload.setEnabled(true);
-          apiUpload.setEnabled(true);
+          SwingUtilities.invokeLater(() -> {
+            openWebApi.setEnabled(true);
+            apiDownload.setEnabled(true);
+            apiUpload.setEnabled(true);
+          });
         }
         if (apiConnected) {
           customNotificationPanel notification = showNotification(Localization.get("api.connectedDownload"));
@@ -1224,9 +1231,11 @@ public class Mainframe extends JFrame {
       } catch (IOException e) {
         Mainframe.logger.error("Verbindung zur API fehlgeschlagen");
         apiConnected = false;
-        openWebApi.setEnabled(false);
-        apiDownload.setEnabled(false);
-        apiUpload.setEnabled(false);
+        SwingUtilities.invokeLater(() -> {
+          openWebApi.setEnabled(false);
+          apiDownload.setEnabled(false);
+          apiUpload.setEnabled(false);
+        });
         showNotification(Localization.get("api.noConnect"));
         Mainframe.logger.error(e.getMessage());
       }
@@ -1298,8 +1307,10 @@ public class Mainframe extends JFrame {
                   null, "", "", new Timestamp(System.currentTimeMillis()), true);
               importedBooks.add(imp.getAuthor() + " - " + imp.getTitle());
               imported += 1;
-              Mainframe.allEntries.add(imp);
-              allEntries.checkAuthors();
+              SwingUtilities.invokeLater(() -> {
+                Mainframe.allEntries.add(imp);
+                allEntries.checkAuthors();
+              });
             }
 
           }
@@ -1364,7 +1375,6 @@ public class Mainframe extends JFrame {
   private static void uploadToApi(boolean showUi) {
     try {
       URL deleteUrl = new URI(HandleConfig.apiURL + "/api/deleteSynced.php").toURL();
-      deleteUrl.openConnection();
       HttpURLConnection con = (HttpURLConnection) deleteUrl.openConnection();
       // POST-Anfrage einstellen
       con.setRequestMethod("POST");
@@ -1680,11 +1690,12 @@ public class Mainframe extends JFrame {
    * Wandelt einen Versionsstring (z.B. "3.3.0") in einen int um (330).
    */
   static int parseVersion(String ver) {
-    StringBuilder sb = new StringBuilder();
-    for (String part : ver.split("[.]")) {
-      sb.append(part);
+    String[] parts = ver.split("[.]");
+    int result = 0;
+    for (int i = 0; i < parts.length; i++) {
+      result = result * 1000 + Integer.parseInt(parts[i]);
     }
-    return Integer.parseInt(sb.toString());
+    return result;
   }
 
   /**

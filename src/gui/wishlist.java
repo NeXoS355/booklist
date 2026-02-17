@@ -73,6 +73,7 @@ public class wishlist extends JFrame {
 					String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
 					String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
 					int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
+					if (index < 0) return;
 					Mainframe.logger.info("Clickcount: {};Wishlist open Edit Dialog ", e.getClickCount());
 					new Dialog_edit_Wishlist(instance, wishlistEntries, index);
 				}
@@ -120,6 +121,7 @@ public class wishlist extends JFrame {
                         String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
                         String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
                         int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
+                        if (index < 0) return;
                         Mainframe.logger.info("Menu;Wishlist open Edit Dialog");
                         new Dialog_edit_Wishlist(instance, wishlistEntries, index);
                         updateModel();
@@ -130,6 +132,7 @@ public class wishlist extends JFrame {
                         String searchAuthor = (String) table.getValueAt(table.getSelectedRow(), 0);
                         String searchTitle = (String) table.getValueAt(table.getSelectedRow(), 1);
                         int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
+                        if (index < 0) return;
                         Book_Wishlist wishBook = wishlistEntries.getElementAt(index);
 
                         String author = wishBook.getAuthor();
@@ -219,6 +222,7 @@ public class wishlist extends JFrame {
 		btnFab.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnFab.setSize(fabSize, fabSize);
 		btnFab.putClientProperty("JButton.buttonType", "none");
+		btnFab.setToolTipText(Localization.get("contextMenu.addBook"));
 		btnFab.addActionListener(e -> {
 			new Dialog_add_Wishlist(instance);
 			updateModel();
@@ -260,6 +264,7 @@ public class wishlist extends JFrame {
             String searchAuthor = (String) table.getValueAt(j, 0);
             String searchTitle = (String) table.getValueAt(j, 1);
             int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
+            if (index < 0) continue;
             int response = JOptionPane.showConfirmDialog(this, Localization.get("book.deleteQuestion"), Localization.get("text.delete"),
                     JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {

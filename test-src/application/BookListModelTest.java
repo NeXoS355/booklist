@@ -103,10 +103,10 @@ class BookListModelTest {
 
   // getIndexOf must return 0 when no match is found
   @Test
-  void getIndexOf_nonExistent_returnsZero() {
+  void getIndexOf_nonExistent_returnsNegative() {
     BookListModel model = new BookListModel(false);
     model.add(createBook("Tolkien", "Der Hobbit"));
-    assertEquals(0, model.getIndexOf("Unknown", "Unknown"));
+    assertEquals(-1, model.getIndexOf("Unknown", "Unknown"));
   }
 
   // getIndexOf must be case-insensitive

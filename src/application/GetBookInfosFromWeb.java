@@ -369,7 +369,9 @@ public class GetBookInfosFromWeb {
 			} else {
 				scaledImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
 						BufferedImage.TYPE_INT_RGB);
-				scaledImage.createGraphics().drawImage(originalImage, 0, 0, null);
+				Graphics2D g2Copy = scaledImage.createGraphics();
+				g2Copy.drawImage(originalImage, 0, 0, null);
+				g2Copy.dispose();
 			}
 
 			// JPEG mit guter Qualitaet speichern

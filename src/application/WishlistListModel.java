@@ -81,7 +81,7 @@ public class WishlistListModel extends AbstractListModel<Book_Wishlist> {
 				return i;
 			}
 		}
-		return 0;
+		return -1;
 
 	}
 

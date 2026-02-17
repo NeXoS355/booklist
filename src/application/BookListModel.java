@@ -477,7 +477,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				return i;
 			}
 		}
-		return 0;
+		return -1;
 
 	}
 
@@ -514,9 +514,16 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		// get the last owned Book of the Series and store the number in maxVol
         for (Book_Booklist book : books) {
             if (book.getSeries().equals(series)) {
-                ownedBooksOfSeries.add(Integer.parseInt(book.getSeriesVol()));
-                if (maxVol < Integer.parseInt(book.getSeriesVol()))
-                    maxVol = Integer.parseInt(book.getSeriesVol());
+                String vol = book.getSeriesVol();
+                if (vol == null || vol.trim().isEmpty()) continue;
+                try {
+                    int volInt = Integer.parseInt(vol.trim());
+                    ownedBooksOfSeries.add(volInt);
+                    if (maxVol < volInt)
+                        maxVol = volInt;
+                } catch (NumberFormatException e) {
+                    Mainframe.logger.warn("Ungueltige Bandnummer fuer {}: '{}'", book.getTitle(), vol);
+                }
             }
         }
 		// create a list with the missing parts in the series up to maxVol
