@@ -1,29 +1,12 @@
 package gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.Serial;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.table.JTableHeader;
 
 import application.Book_Booklist;
@@ -71,16 +54,6 @@ public class wishlist extends JFrame {
 
 		wishlistEntries = new WishlistListModel();
 		display = new WishlistTableModel(wishlistEntries);
-
-		JPanel north_panel = new JPanel();
-		north_panel.setLayout(new BorderLayout(5, 5));
-
-		north_panel.add(new JPanel(), BorderLayout.CENTER);
-
-		JButton btnAdd = ButtonsFactory.createButton("+");
-		btnAdd.setFont(btnAdd.getFont().deriveFont(Font.BOLD, 20));
-		btnAdd.addActionListener(e -> new Dialog_add_Wishlist(instance));
-		north_panel.add(btnAdd, BorderLayout.WEST);
 
 		table.setModel(display);
 		CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer(this.getTitle());
@@ -210,16 +183,59 @@ public class wishlist extends JFrame {
 			}
 		});
 
-		JPanel mid_panel = new JPanel(new BorderLayout());
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		if (HandleConfig.darkmode == 1)
-			listScrollPane.getViewport().setBackground(new Color(75, 75, 75));
-		mid_panel.add(listScrollPane, BorderLayout.CENTER);
+		listScrollPane.getViewport().setBackground(UIManager.getColor("Table.background"));
+		JScrollBar verticalScrollBar = listScrollPane.getVerticalScrollBar();
+		verticalScrollBar.setUI(new CustomScrollBar());
+
+		int fabSize = UIScale.scale(48);
+		JLayeredPane layeredPane = new JLayeredPane();
+		layeredPane.setLayout(null);
+		layeredPane.add(listScrollPane, Integer.valueOf(1));
+
+		JButton btnFab = new JButton("+") {
+			@Serial
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2 = (Graphics2D) g.create();
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				Color accent = UIManager.getColor("Component.accentColor");
+				if (accent == null) accent = new Color(0, 120, 212);
+				g2.setColor(getModel().isRollover() ? accent.brighter() : accent);
+				g2.fillOval(0, 0, getWidth(), getHeight());
+				g2.dispose();
+				super.paintComponent(g);
+			}
+		};
+		btnFab.setFont(Mainframe.defaultFont.deriveFont(Font.BOLD, Mainframe.defaultFont.getSize() * 1.5f));
+		btnFab.setForeground(Color.WHITE);
+		btnFab.setContentAreaFilled(false);
+		btnFab.setOpaque(false);
+		btnFab.setBorderPainted(false);
+		btnFab.setFocusPainted(false);
+		btnFab.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnFab.setSize(fabSize, fabSize);
+		btnFab.putClientProperty("JButton.buttonType", "none");
+		btnFab.addActionListener(e -> {
+			new Dialog_add_Wishlist(instance);
+			updateModel();
+		});
+		layeredPane.add(btnFab, Integer.valueOf(2));
+
+		layeredPane.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				int margin = UIScale.scale(20);
+				listScrollPane.setBounds(0, 0, layeredPane.getWidth(), layeredPane.getHeight());
+				btnFab.setLocation(layeredPane.getWidth() - fabSize - margin, layeredPane.getHeight() - fabSize - margin);
+			}
+		});
 
 		Mainframe.logger.info("Wishlist: Frame created successfully");
-		this.add(north_panel, BorderLayout.NORTH);
-		this.add(mid_panel, BorderLayout.CENTER);
+		this.add(layeredPane, BorderLayout.CENTER);
 		this.setVisible(visible);
 
 	}
