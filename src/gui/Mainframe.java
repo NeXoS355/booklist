@@ -1450,6 +1450,10 @@ public class Mainframe extends JFrame {
       jsonBook.addProperty("ebook", book.isEbook());
       jsonBook.addProperty("rating", book.getRating());
       jsonBook.addProperty("note", book.getNote() != null ? book.getNote() : "");
+      // Im loadOnDemand-Modus sind ISBN und Beschreibung noch nicht geladen
+      if (HandleConfig.loadOnDemand == 1) {
+        Database.loadIsbnAndDescForSync(book);
+      }
       jsonBook.addProperty("isbn", book.getIsbn() != null ? book.getIsbn() : "");
       jsonBook.addProperty("description", book.getDesc() != null ? book.getDesc() : "");
       jsonBook.addProperty("date_added", book.getDate() != null ? book.getDate().toString() : "");

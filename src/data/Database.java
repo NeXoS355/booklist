@@ -304,6 +304,28 @@ public class Database {
 	}
 
 	/**
+	 * Laedt ISBN und Beschreibung eines Buches direkt aus der DB (fuer den
+	 * Web-Sync im loadOnDemand-Modus, ohne Coverbild zu laden).
+	 *
+	 * @param book - Book_Booklist-Objekt, dessen isbn/desc gesetzt werden sollen
+	 */
+	public static void loadIsbnAndDescForSync(Book_Booklist book) {
+		String sql = "SELECT isbn, description FROM books WHERE bid=?";
+		try (PreparedStatement st = con.prepareStatement(sql)) {
+			st.setInt(1, book.getBid());
+			ResultSet rs = st.executeQuery();
+			if (rs.next()) {
+				String isbn = rs.getString("isbn");
+				String desc = rs.getString("description");
+				book.setIsbn(isbn != null ? isbn : "", false);
+				book.setDesc(desc != null ? desc : "", false);
+			}
+		} catch (SQLException e) {
+			Mainframe.logger.error("Fehler beim Laden von ISBN/Beschreibung fuer bid {}: {}", book.getBid(), e.getMessage());
+		}
+	}
+
+	/**
 	 * exports all entries from booklist to .csv file (books.csv) in the same
 	 * Directory
 	 *
