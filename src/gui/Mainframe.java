@@ -1446,6 +1446,23 @@ public class Mainframe extends JFrame {
       jsonBook.addProperty("author", book.getAuthor());
       jsonBook.addProperty("title", book.getTitle());
       jsonBook.addProperty("series", book.getSeries());
+      jsonBook.addProperty("series_part", book.getSeriesVol());
+      jsonBook.addProperty("ebook", book.isEbook());
+      jsonBook.addProperty("rating", book.getRating());
+      jsonBook.addProperty("note", book.getNote() != null ? book.getNote() : "");
+      jsonBook.addProperty("isbn", book.getIsbn() != null ? book.getIsbn() : "");
+      jsonBook.addProperty("description", book.getDesc() != null ? book.getDesc() : "");
+      jsonBook.addProperty("date_added", book.getDate() != null ? book.getDate().toString() : "");
+      if (!book.getBorrowedTo().isEmpty()) {
+        jsonBook.addProperty("ausgeliehen", "an");
+        jsonBook.addProperty("borrow_name", book.getBorrowedTo());
+      } else if (!book.getBorrowedFrom().isEmpty()) {
+        jsonBook.addProperty("ausgeliehen", "von");
+        jsonBook.addProperty("borrow_name", book.getBorrowedFrom());
+      } else {
+        jsonBook.addProperty("ausgeliehen", "nein");
+        jsonBook.addProperty("borrow_name", "");
+      }
       jsonArray.add(jsonBook);
 
     }
