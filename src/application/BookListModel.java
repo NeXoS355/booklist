@@ -95,11 +95,13 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					Image buf_pic = null;
 					if (picBytes != null) {
 						BufferedInputStream bis_pic = new BufferedInputStream(new ByteArrayInputStream(picBytes));
-						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
+						buf_pic = ImageIO.read(bis_pic);
 					}
 					book = new Book_Booklist(author, title, boolBorrowed, borrowedTo, borrowedFrom, note, series,
 							seriesVolume, ebook, rating, buf_pic, desc, isbn, date, false);
 					book.setBid(bid);
+					if (picBytes != null) book.setPicSizeBytes(picBytes.length);
+					book.setExtendedDataLoaded(true);
 					getBooks().add(book);
 					Mainframe.logger.info("Buch ausgelesen: {}-{}", book.getAuthor(), book.getTitle());
 				} catch (DateTimeParseException e) {
@@ -121,7 +123,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 	 *
 	 */
 	public static void loadOnDemand(Book_Booklist book) {
-		if (Objects.equals(book.getDesc(), "") && book.getPic() == null) {
+		if (!book.isExtendedDataLoaded()) {
 			ResultSet rs = null;
 			try {
 				rs = Database.selectFromBooklist(book.getBid());
@@ -136,7 +138,8 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 					Image buf_pic = null;
 					if (picBytes != null) {
 						BufferedInputStream bis_pic = new BufferedInputStream(new ByteArrayInputStream(picBytes));
-						buf_pic = ImageIO.read(bis_pic).getScaledInstance(200, 300, Image.SCALE_FAST);
+						buf_pic = ImageIO.read(bis_pic);
+						book.setPicSizeBytes(picBytes.length);
 					}
 
 					book.setPic(buf_pic);
@@ -164,6 +167,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 			} finally {
 				Database.closeResultSet(rs);
 			}
+			book.setExtendedDataLoaded(true);
         }
 	}
 

@@ -24,6 +24,8 @@ public class Book_Booklist {
 	private Timestamp date;
 	private int bid;
 	private double rating;
+	private int picSizeBytes;
+	private boolean extendedDataLoaded;
 
 	/**
 	 * Booklist Entry Constructor
@@ -220,6 +222,22 @@ public class Book_Booklist {
 
 	public void setPic(Image pic) {
 		this.pic = pic;
+	}
+
+	public int getPicSizeBytes() {
+		return picSizeBytes;
+	}
+
+	public void setPicSizeBytes(int picSizeBytes) {
+		this.picSizeBytes = picSizeBytes;
+	}
+
+	public boolean isExtendedDataLoaded() {
+		return extendedDataLoaded;
+	}
+
+	public void setExtendedDataLoaded(boolean extendedDataLoaded) {
+		this.extendedDataLoaded = extendedDataLoaded;
 	}
 
 	public Timestamp getDate() {

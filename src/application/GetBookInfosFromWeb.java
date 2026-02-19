@@ -223,7 +223,6 @@ public class GetBookInfosFromWeb {
 					link = imageLinks.get("smallThumbnail").getAsString();
 				}
 				if (link != null) {
-					link = link.replaceAll("&zoom=\\d+", "&zoom=1");
 					savePic(link, entry);
 					hasCover = true;
 				}
@@ -346,25 +345,43 @@ public class GetBookInfosFromWeb {
 		return Database.delPic(bid);
 	}
 
-	private static final int MAX_COVER_WIDTH = 600;
+	private static final int MAX_COVER_HEIGHT = 512;
 	private static final float JPEG_QUALITY = 0.92f;
 
 	/**
-	 * Saves a pic from a Book entry
+	 * Laedt ein Cover-Bild herunter und speichert es. Versucht zuerst zoom=0
+	 * (groesseres Bild), faellt bei Fehler auf den Original-Link (zoom=1) zurueck.
 	 */
 	public static void savePic(String weblink, Book_Booklist entry) {
+		String zoomedLink = weblink.replaceAll("&zoom=\\d+", "&zoom=0");
+		if (!doSavePic(zoomedLink, entry)) {
+			Mainframe.logger.warn("zoom=0 fehlgeschlagen, Fallback auf zoom=1: {}", weblink);
+			doSavePic(weblink, entry);
+		}
+	}
+
+	/**
+	 * Fuehrt den eigentlichen Download und die Verarbeitung durch.
+	 *
+	 * @return true bei Erfolg, false bei Fehler
+	 */
+	private static boolean doSavePic(String weblink, Book_Booklist entry) {
 		try (BufferedInputStream in = new BufferedInputStream(new URI(weblink).toURL().openStream())) {
 
 			BufferedImage originalImage = ImageIO.read(in);
+			if (originalImage == null) {
+				Mainframe.logger.error("Bild konnte nicht gelesen werden: {}", weblink);
+				return false;
+			}
 
-			// Bei Bedarf auf Maximalbreite skalieren (Seitenverhaeltnis beibehalten)
+			// Bei Bedarf auf Maximalhoehe skalieren (Seitenverhaeltnis beibehalten)
 			BufferedImage scaledImage;
-			if (originalImage.getWidth() > MAX_COVER_WIDTH) {
-				int newHeight = (int) ((double) MAX_COVER_WIDTH / originalImage.getWidth() * originalImage.getHeight());
-				scaledImage = new BufferedImage(MAX_COVER_WIDTH, newHeight, BufferedImage.TYPE_INT_RGB);
+			if (originalImage.getHeight() > MAX_COVER_HEIGHT) {
+				int newWidth = (int) ((double) MAX_COVER_HEIGHT / originalImage.getHeight() * originalImage.getWidth());
+				scaledImage = new BufferedImage(newWidth, MAX_COVER_HEIGHT, BufferedImage.TYPE_INT_RGB);
 				Graphics2D g2 = scaledImage.createGraphics();
 				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-				g2.drawImage(originalImage, 0, 0, MAX_COVER_WIDTH, newHeight, null);
+				g2.drawImage(originalImage, 0, 0, newWidth, MAX_COVER_HEIGHT, null);
 				g2.dispose();
 			} else {
 				scaledImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(),
@@ -389,6 +406,7 @@ public class GetBookInfosFromWeb {
 
 			byte[] imageData = baos.toByteArray();
 			entry.setPic(scaledImage);
+			entry.setPicSizeBytes(imageData.length);
 
 			Mainframe.executor.submit(() -> {
 				try (ByteArrayInputStream dbStream = new ByteArrayInputStream(imageData)) {
@@ -398,8 +416,11 @@ public class GetBookInfosFromWeb {
 				}
 			});
 
+			return true;
+
 		} catch (URISyntaxException | IOException e) {
 			Mainframe.logger.error(e.getMessage());
+			return false;
 		}
 	}
 

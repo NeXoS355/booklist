@@ -1053,6 +1053,21 @@ public class Dialog_edit_Booklist extends JDialog {
         int x = (getWidth() - drawW) / 2;
         int y = (getHeight() - drawH) / 2;
         g2.drawImage(img, x, y, drawW, drawH, null);
+
+        // Bildgroesse und Dateigroesse dezent einblenden
+        String sizeText = imgW + " × " + imgH + " px";
+        int kb = entry.getPicSizeBytes() / 1024;
+        if (kb > 0) sizeText += "  •  " + kb + " KB";
+        g2.setFont(g2.getFont().deriveFont(11f));
+        FontMetrics fm = g2.getFontMetrics();
+        int textW = fm.stringWidth(sizeText);
+        int textH = fm.getAscent();
+        int labelX = x + drawW - textW - 8;
+        int labelY = y + drawH - 6;
+        g2.setColor(new Color(0, 0, 0, 120));
+        g2.fillRoundRect(labelX - 4, labelY - textH - 2, textW + 8, textH + 6, 6, 6);
+        g2.setColor(new Color(220, 220, 220, 200));
+        g2.drawString(sizeText, labelX, labelY);
         g2.dispose();
       }
     };
