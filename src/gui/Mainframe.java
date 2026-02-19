@@ -1366,7 +1366,76 @@ public class Mainframe extends JFrame {
       if (showUi)
         JOptionPane.showMessageDialog(Mainframe.getInstance(), "Error in API Call");
     }
+    fetchRatingUpdates();
     return downloaded;
+  }
+
+  /**
+   * Ruft ausstehende Rating-Updates von der Web-App ab und wendet sie lokal an.
+   * Loescht die Eintraege anschliessend aus der Web-App.
+   */
+  private static void fetchRatingUpdates() {
+    try {
+      URL url = new URI(HandleConfig.apiURL + "/api/getRatingUpdates.php?token=" + HandleConfig.apiToken).toURL();
+      HttpURLConnection con = (HttpURLConnection) url.openConnection();
+      con.setRequestMethod("GET");
+      con.setConnectTimeout(5000);
+      con.setReadTimeout(10000);
+
+      if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
+        logger.warn("getRatingUpdates: HTTP {}", con.getResponseCode());
+        con.disconnect();
+        return;
+      }
+
+      StringBuilder response = new StringBuilder();
+      try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+        String line;
+        while ((line = in.readLine()) != null) response.append(line);
+      }
+      con.disconnect();
+
+      JsonElement el = JsonParser.parseString(response.toString());
+      if (!el.isJsonArray()) return;
+
+      JsonArray arr = el.getAsJsonArray();
+      if (arr.isEmpty()) return;
+
+      int updated = 0;
+      for (JsonElement e : arr) {
+        JsonObject obj = e.getAsJsonObject();
+        int bid = obj.get("bid").getAsInt();
+        double rating = obj.get("rating").getAsDouble();
+        for (int i = 0; i < allEntries.getSize(); i++) {
+          Book_Booklist book = allEntries.getElementAt(i);
+          if (book.getBid() == bid) {
+            book.setRating(rating, true);
+            updated++;
+            break;
+          }
+        }
+      }
+      logger.info("Rating-Updates angewendet: {}", updated);
+
+      if (updated > 0) {
+        SwingUtilities.invokeLater(() -> table.repaint());
+
+        // Verarbeitete Updates aus Web-App loeschen
+        URL deleteUrl = new URI(HandleConfig.apiURL + "/api/deleteRatingUpdates.php").toURL();
+        HttpURLConnection delCon = (HttpURLConnection) deleteUrl.openConnection();
+        delCon.setRequestMethod("POST");
+        delCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        delCon.setConnectTimeout(5000);
+        delCon.setDoOutput(true);
+        try (OutputStream os = delCon.getOutputStream()) {
+          os.write(("token=" + HandleConfig.apiToken).getBytes(StandardCharsets.UTF_8));
+        }
+        logger.info("deleteRatingUpdates: HTTP {}", delCon.getResponseCode());
+        delCon.disconnect();
+      }
+    } catch (URISyntaxException | IOException e) {
+      logger.error("Fehler beim Abrufen der Rating-Updates: {}", e.getMessage());
+    }
   }
 
   /**
