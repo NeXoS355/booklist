@@ -42,6 +42,7 @@ public class Dialog_settings extends JDialog {
   private static JComboBox<String> cmbDebug;
   private static JComboBox<Integer> cmbBackup;
   private static JCheckBox chkDark;
+  private static JComboBox<String> cmbScale;
   private static JTextField txtApiUrl;
   private static JTextField txtApiToken;
   private static JLabel lblQrCode;
@@ -204,6 +205,26 @@ public class Dialog_settings extends JDialog {
     chkDark.setSelected(HandleConfig.tmpDarkmode == 1);
     chkDark.addItemListener(e -> restartNeeded = true);
     pnlLeft.add(chkDark, c);
+    c.gridx = 0;
+    c.gridy = 11;
+    JLabel lblScaling = new JLabel(Localization.get("settings.scaling"));
+    lblScaling.setToolTipText(Localization.get("settings.tipScaling"));
+    pnlLeft.add(lblScaling, c);
+    c.gridx = 1;
+    c.gridy = 11;
+    String[] scaleOptions = {
+        Localization.get("settings.scalingAuto"), "100%", "125%", "150%", "200%"
+    };
+    cmbScale = new JComboBox<>(scaleOptions);
+    switch (HandleConfig.uiScale) {
+      case "1.0"  -> cmbScale.setSelectedItem("100%");
+      case "1.25" -> cmbScale.setSelectedItem("125%");
+      case "1.5"  -> cmbScale.setSelectedItem("150%");
+      case "2.0"  -> cmbScale.setSelectedItem("200%");
+      default     -> cmbScale.setSelectedIndex(0);
+    }
+    cmbScale.addItemListener(e -> restartNeeded = true);
+    pnlLeft.add(cmbScale, c);
     JButton btnSave = ButtonsFactory.createButton(Localization.get("label.save"));
     btnSave.setFont(Mainframe.defaultFont);
     btnSave.addActionListener(e -> {
@@ -338,6 +359,13 @@ public class Dialog_settings extends JDialog {
       HandleConfig.debug = (String) cmbDebug.getSelectedItem();
       HandleConfig.backup = (int) cmbBackup.getSelectedItem();
       HandleConfig.tmpDarkmode = chkDark.isSelected() ? 1 : 0;
+      HandleConfig.uiScale = switch ((String) cmbScale.getSelectedItem()) {
+        case "100%" -> "1.0";
+        case "125%" -> "1.25";
+        case "150%" -> "1.5";
+        case "200%" -> "2.0";
+        default     -> "";
+      };
       HandleConfig.apiToken = txtApiToken.getText();
       HandleConfig.apiURL = txtApiUrl.getText();
     } catch (NullPointerException e) {

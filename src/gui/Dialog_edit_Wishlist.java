@@ -3,7 +3,7 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Frame;
+import java.awt.Window;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -46,7 +46,7 @@ public class Dialog_edit_Wishlist extends JDialog {
   private final Border standardBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 125), 2);
   private final Border activeBorder = BorderFactory.createLineBorder(new Color(70, 130, 180, 200), 4);
 
-  public Dialog_edit_Wishlist(Frame owner, WishlistListModel entries, int index) {
+  public Dialog_edit_Wishlist(Window owner, WishlistListModel entries, int index) {
     Mainframe.logger.info("Wishlist Book edit: start creating Frame");
     this.setTitle(Localization.get("t.editBook"));
     this.setSize(new Dimension(UIScale.scale(500), UIScale.scale(330)));

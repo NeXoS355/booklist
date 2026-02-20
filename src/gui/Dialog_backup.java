@@ -27,7 +27,6 @@ public class Dialog_backup extends JDialog {
 	public Dialog_backup(Frame owner) {
 		setTitle(Localization.get("backup.manage.title"));
 		setModal(true);
-		setLocationRelativeTo(owner);
 
 		JPanel content = new JPanel();
 		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
@@ -68,7 +67,8 @@ public class Dialog_backup extends JDialog {
 		scrollPane.getVerticalScrollBar().setUnitIncrement(UIScale.scale(16));
 		setContentPane(scrollPane);
 
-		setSize(UIScale.scale(500), UIScale.scale(480));
+		setSize(UIScale.scale(600), UIScale.scale(560));
+		setLocationRelativeTo(owner);
 		setVisible(true);
 	}
 

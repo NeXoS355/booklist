@@ -65,9 +65,35 @@ public class Mainframe extends JFrame {
   public static int prozEbook = 0;
   public static int prozAuthor = 0;
   public static int prozTitle = 0;
-  public static int prozSeries = 0;
+  public static int prozDate = 0;
   public static int prozRating = 0;
-  public static final JTable table = new JTable();
+  // g) Leere-Tabelle-Platzhalter: zentrierter Hinweistext wenn keine Einträge vorhanden
+  public static final JTable table = new JTable() {
+    @Override
+    protected void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      if (getRowCount() == 0) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        Color fg = UIManager.getColor("Table.foreground");
+        g2.setColor(fg != null ? new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), 110) : new Color(130, 130, 130));
+        Font baseFont = Mainframe.defaultFont != null ? Mainframe.defaultFont : getFont();
+        g2.setFont(baseFont.deriveFont(Font.ITALIC, baseFont.getSize() * 1.05f));
+        String msg;
+        try {
+          boolean hasBooks = Mainframe.allEntries != null && Mainframe.allEntries.getSize() > 0;
+          msg = hasBooks ? Localization.get("table.noResults") : Localization.get("table.noBooks");
+        } catch (Exception e) {
+          msg = "Keine Einträge";
+        }
+        FontMetrics fm = g2.getFontMetrics();
+        int x = (getWidth() - fm.stringWidth(msg)) / 2;
+        int y = getHeight() / 3 + fm.getAscent() / 2;
+        g2.drawString(msg, x, y);
+        g2.dispose();
+      }
+    }
+  };
   private static SimpleTableModel tableDisplay;
   private static int lastTableHoverRow = -1;
   private static TreePath lastPath = null;
@@ -95,6 +121,8 @@ public class Mainframe extends JFrame {
   private static JButton btnSearchReset;
   private static JButton btnFab;
   private static int FAB_SIZE = 48;
+  private static JLabel lblStatusCount;
+  private static JLabel lblStatusDetails;
   public static int defaultFrameWidth = 1300;
   public static int defaultFrameHeight = 800;
   public static int startX = 150;
@@ -216,6 +244,43 @@ public class Mainframe extends JFrame {
       UIManager.put("MenuBar.background", UIManager.getColor("Panel.background"));
       UIManager.put("MenuBar.underlineSelectionColor", UIManager.getColor("Component.accentColor"));
       UIManager.put("MenuBar.border", BorderFactory.createEmptyBorder());
+
+      // --- Tree: minimalistische Chevron-Icons statt blauer Standard-Pfeile ---
+      Color chevronColor = HandleConfig.darkmode == 1 ? new Color(95, 95, 95) : new Color(155, 155, 155);
+      javax.swing.Icon treeCollapsedIcon = new javax.swing.Icon() {
+        @Override public void paintIcon(Component c, Graphics g, int x, int y) {
+          Graphics2D g2 = (Graphics2D) g.create();
+          g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+          g2.setColor(chevronColor);
+          g2.setStroke(new java.awt.BasicStroke(1.5f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
+          int cx = x + getIconWidth() / 2;
+          int cy = y + getIconHeight() / 2;
+          int s = UIScale.scale(3);
+          g2.drawLine(cx - s + 1, cy - s, cx + s - 1, cy);   // obere Linie des ›
+          g2.drawLine(cx - s + 1, cy + s, cx + s - 1, cy);   // untere Linie des ›
+          g2.dispose();
+        }
+        @Override public int getIconWidth()  { return UIScale.scale(12); }
+        @Override public int getIconHeight() { return UIScale.scale(12); }
+      };
+      javax.swing.Icon treeExpandedIcon = new javax.swing.Icon() {
+        @Override public void paintIcon(Component c, Graphics g, int x, int y) {
+          Graphics2D g2 = (Graphics2D) g.create();
+          g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+          g2.setColor(chevronColor);
+          g2.setStroke(new java.awt.BasicStroke(1.5f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
+          int cx = x + getIconWidth() / 2;
+          int cy = y + getIconHeight() / 2;
+          int s = UIScale.scale(3);
+          g2.drawLine(cx - s, cy - s + 1, cx, cy + s - 1);   // linke Linie des ⌄
+          g2.drawLine(cx + s, cy - s + 1, cx, cy + s - 1);   // rechte Linie des ⌄
+          g2.dispose();
+        }
+        @Override public int getIconWidth()  { return UIScale.scale(12); }
+        @Override public int getIconHeight() { return UIScale.scale(12); }
+      };
+      UIManager.put("Tree.collapsedIcon", treeCollapsedIcon);
+      UIManager.put("Tree.expandedIcon",  treeExpandedIcon);
 
     } catch (UnsupportedLookAndFeelException e) {
       logger.error(e.getMessage());
@@ -442,7 +507,7 @@ public class Mainframe extends JFrame {
     table.setFont(defaultFont);
     table.setShowGrid(false);
     table.setIntercellSpacing(new Dimension(0, 0));
-    table.setRowHeight(UIScale.scale(table.getRowHeight() + 22));
+    table.setRowHeight(UIScale.scale(table.getRowHeight() + 46)); // zweizeilige Spotify-Style Zeilen
     table.addMouseMotionListener(new MouseMotionAdapter() {
 
       @Override
@@ -464,8 +529,8 @@ public class Mainframe extends JFrame {
       @Override
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() >= 2 && SwingUtilities.isLeftMouseButton(e)) {
-          String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
-          String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
+          String searchAutor = (String) table.getValueAt(table.getSelectedRow(), viewColFor(SimpleTableModel.KEY_AUTHOR));
+          String searchTitel = titleFromCell(table.getSelectedRow());
           int index = allEntries.getIndexOf(searchAutor, searchTitel);
           if (index >= 0)
             new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
@@ -510,8 +575,8 @@ public class Mainframe extends JFrame {
         });
         itemChanBook.addActionListener(e4 -> {
           if (Objects.equals(e4.getActionCommand(), Localization.get("contextMenu.editBook"))) {
-            String searchAutor = (String) table.getValueAt(table.getSelectedRow(), 1);
-            String searchTitel = (String) table.getValueAt(table.getSelectedRow(), 2);
+            String searchAutor = (String) table.getValueAt(table.getSelectedRow(), viewColFor(SimpleTableModel.KEY_AUTHOR));
+            String searchTitel = titleFromCell(table.getSelectedRow());
             int index = allEntries.getIndexOf(searchAutor, searchTitel);
             if (index >= 0)
               new Dialog_edit_Booklist(Mainframe.getInstance(), allEntries, index, treeModel);
@@ -519,12 +584,11 @@ public class Mainframe extends JFrame {
         });
         itemAnalyzeAuthor.addActionListener(e5 -> {
           if (Objects.equals(e5.getActionCommand(), Localization.get("contextMenu.analyzeSeries"))) {
-            String seriesName = (String) table.getValueAt(table.getSelectedRow(), 3);
-            seriesName = seriesName.split(" - [0-9]")[0];
+            String seriesName = seriesFromCell(table.getSelectedRow());
             if (wishlist_instance == null)
               wishlist_instance = new wishlist(Mainframe.getInstance(), false);
             boolean success = allEntries.analyzeSeries(seriesName,
-                (String) table.getValueAt(table.getSelectedRow(), 1));
+                (String) table.getValueAt(table.getSelectedRow(), viewColFor(SimpleTableModel.KEY_AUTHOR)));
             gui.wishlist.updateModel();
             if (!success) {
               JOptionPane.showMessageDialog(Mainframe.getInstance(),
@@ -741,6 +805,26 @@ public class Mainframe extends JFrame {
       }
     });
 
+    // Statusleiste
+    JPanel statusBar = new JPanel(new BorderLayout());
+    statusBar.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createMatteBorder(1, 0, 0, 0, UIManager.getColor("Separator.foreground")),
+        BorderFactory.createEmptyBorder(UIScale.scale(4), UIScale.scale(12), UIScale.scale(4), UIScale.scale(12))
+    ));
+    lblStatusCount = new JLabel();
+    lblStatusDetails = new JLabel();
+    float statusFontSize = defaultFont.getSize() * 0.85f;
+    lblStatusCount.setFont(defaultFont.deriveFont(Font.PLAIN, statusFontSize));
+    lblStatusDetails.setFont(defaultFont.deriveFont(Font.PLAIN, statusFontSize));
+    Color dimColor = UIManager.getColor("Label.disabledForeground");
+    if (dimColor != null) {
+      lblStatusCount.setForeground(dimColor);
+      lblStatusDetails.setForeground(dimColor);
+    }
+    statusBar.add(lblStatusCount, BorderLayout.WEST);
+    statusBar.add(lblStatusDetails, BorderLayout.EAST);
+    this.add(statusBar, BorderLayout.SOUTH);
+
     updateModel();
     this.setSize(defaultFrameWidth, defaultFrameHeight);
     this.setLocation(startX, startY);
@@ -846,7 +930,7 @@ public class Mainframe extends JFrame {
     int[] selected = table.getSelectedRows();
     for (int j : selected) {
       String searchAuthor = (String) table.getValueAt(j, 1);
-      String searchTitle = (String) table.getValueAt(j, 2);
+      String searchTitle = titleFromCell(j);
       int index = allEntries.getIndexOf(searchAuthor, searchTitle);
       if (index < 0) continue;
 
@@ -865,6 +949,36 @@ public class Mainframe extends JFrame {
       search(treeSelection);
     else
       search(getLastSearch());
+  }
+
+  /** Gibt den aktuellen View-Spaltenindex für einen Spalten-Key zurück. */
+  private static int viewColFor(String key) {
+    for (int v = 0; v < table.getColumnCount(); v++) {
+      int m = table.convertColumnIndexToModel(v);
+      if (m < SimpleTableModel.columnKeys.length && SimpleTableModel.columnKeys[m].equals(key)) {
+        return v;
+      }
+    }
+    return -1;
+  }
+
+  /** Extrahiert den reinen Titel aus der kombinierten Titel-Zelle (NUL-Separator). */
+  private static String titleFromCell(int viewRow) {
+    int col = viewColFor(SimpleTableModel.KEY_TITLE);
+    if (col < 0) return "";
+    String raw = (String) table.getValueAt(viewRow, col);
+    if (raw == null) return "";
+    return raw.split(SimpleTableModel.TITLE_SEP, 3)[0];
+  }
+
+  /** Extrahiert den Seriennamen aus der kombinierten Titel-Zelle. */
+  private static String seriesFromCell(int viewRow) {
+    int col = viewColFor(SimpleTableModel.KEY_TITLE);
+    if (col < 0) return "";
+    String raw = (String) table.getValueAt(viewRow, col);
+    if (raw == null) return "";
+    String[] p = raw.split(SimpleTableModel.TITLE_SEP, 3);
+    return p.length > 1 ? p[1] : "";
   }
 
   /**
@@ -909,7 +1023,42 @@ public class Mainframe extends JFrame {
     treeSelection = "";
     setTableLayout();
     if (btnSearchReset != null) btnSearchReset.setVisible(false);
+    updateStatusBar();
     Mainframe.logger.info("Mainframe Model updated");
+  }
+
+  /**
+   * Aktualisiert die Statusleiste mit Bücheranzahl und E-Book/Physisch-Aufteilung.
+   */
+  public static void updateStatusBar() {
+    if (lblStatusCount == null || tableDisplay == null) return;
+    int total = allEntries != null ? allEntries.getSize() : 0;
+    int shown = tableDisplay.getRowCount();
+
+    // Ebook-Spalte im Modell finden
+    int ebookModelCol = -1;
+    for (int c = 0; c < SimpleTableModel.columnKeys.length; c++) {
+      if (SimpleTableModel.KEY_EBOOK.equals(SimpleTableModel.columnKeys[c])) {
+        ebookModelCol = c;
+        break;
+      }
+    }
+    int ebooks = 0, physical = 0;
+    if (ebookModelCol >= 0) {
+      for (int r = 0; r < shown; r++) {
+        Object val = tableDisplay.getValueAt(r, ebookModelCol);
+        if ("●".equals(val)) ebooks++;
+        else physical++;
+      }
+    }
+
+    String countText = shown < total
+        ? shown + " " + Localization.get("statusbar.of") + " " + total + " " + Localization.get("info.totalBooks")
+        : total + " " + Localization.get("info.totalBooks");
+    String detailText = physical + " " + Localization.get("info.physical") + "  ·  " + ebooks + " E-Books";
+
+    lblStatusCount.setText(countText);
+    lblStatusDetails.setText(detailText);
   }
 
   /**
@@ -964,21 +1113,25 @@ public class Mainframe extends JFrame {
   public static void setTableLayout() {
     TableColumnModel columnModel = table.getColumnModel();
 
-    // Mindestbreite fuer Ebook/Rating anhand FontMetrics berechnen (aufloesungsunabhaengig)
+    // Mindestbreiten anhand FontMetrics berechnen (aufloesungsunabhaengig)
     FontMetrics fm = table.getFontMetrics(table.getFont());
-    int minFixedWidth = fm.stringWidth("5.0") + 20; // breitester Inhalt + Padding
+    int minEbookWidth  = UIScale.scale(32);
+    // Rating-Sterne werden mit <big> gerendert (~1.2× Schriftgröße)
+    Font bigFont = table.getFont().deriveFont(table.getFont().getSize() * 1.2f);
+    FontMetrics bigFm = table.getFontMetrics(bigFont);
+    int minRatingWidth = bigFm.stringWidth("★★★★★") + UIScale.scale(28);
+    int minDateWidth   = fm.stringWidth("14. Jan. 2024") + UIScale.scale(24);
 
     int total = columnModel.getTotalColumnWidth();
     int minProzAuthor = total * 10 / 100;
-    int minProzTitle = total * 10 / 100;
-    int minProzSeries = total * 10 / 100;
+    int minProzTitle  = total * 10 / 100;
 
     for (int i = 0; i < SimpleTableModel.columnKeys.length; i++) {
       switch (SimpleTableModel.columnKeys[i]) {
         case SimpleTableModel.KEY_EBOOK -> {
-          columnModel.getColumn(i).setMinWidth(minFixedWidth);
-          columnModel.getColumn(i).setMaxWidth(minFixedWidth);
-          columnModel.getColumn(i).setPreferredWidth(minFixedWidth);
+          columnModel.getColumn(i).setMinWidth(minEbookWidth);
+          columnModel.getColumn(i).setMaxWidth(minEbookWidth);
+          columnModel.getColumn(i).setPreferredWidth(minEbookWidth);
         }
         case SimpleTableModel.KEY_AUTHOR -> {
           columnModel.getColumn(i).setMinWidth(minProzAuthor);
@@ -990,15 +1143,15 @@ public class Mainframe extends JFrame {
           columnModel.getColumn(i).setMaxWidth(Integer.MAX_VALUE);
           columnModel.getColumn(i).setPreferredWidth(prozTitle);
         }
-        case SimpleTableModel.KEY_SERIES -> {
-          columnModel.getColumn(i).setMinWidth(minProzSeries);
-          columnModel.getColumn(i).setMaxWidth(Integer.MAX_VALUE);
-          columnModel.getColumn(i).setPreferredWidth(prozSeries);
+        case SimpleTableModel.KEY_DATE -> {
+          columnModel.getColumn(i).setMinWidth(minDateWidth);
+          columnModel.getColumn(i).setMaxWidth(minDateWidth * 2);
+          columnModel.getColumn(i).setPreferredWidth(prozDate > 0 ? prozDate : minDateWidth);
         }
         case SimpleTableModel.KEY_RATING -> {
-          columnModel.getColumn(i).setMinWidth(minFixedWidth);
-          columnModel.getColumn(i).setMaxWidth(minFixedWidth);
-          columnModel.getColumn(i).setPreferredWidth(minFixedWidth);
+          columnModel.getColumn(i).setMinWidth(minRatingWidth);
+          columnModel.getColumn(i).setMaxWidth(minRatingWidth);
+          columnModel.getColumn(i).setPreferredWidth(minRatingWidth);
         }
       }
 
@@ -1114,6 +1267,7 @@ public class Mainframe extends JFrame {
       table.setModel(tableDisplay);
       setTableLayout();
       btnSearchReset.setVisible(true);
+      updateStatusBar();
     } else {
       showNotification(Localization.get("search.error"));
       updateModel();
@@ -1322,6 +1476,8 @@ public class Mainframe extends JFrame {
           }
         }
         if (imported >= 1) {
+          // Tabelle nach allen invokeLater-Einfügungen neu aufbauen
+          SwingUtilities.invokeLater(Mainframe::updateModel);
           for (String tmp : importedBooks) {
             showNotification(MessageFormat.format(Localization.get("api.importSuccess"), tmp), 15);
           }
@@ -1402,6 +1558,7 @@ public class Mainframe extends JFrame {
       if (arr.isEmpty()) return;
 
       int updated = 0;
+      ArrayList<Book_Booklist> updatedBooks = new ArrayList<>();
       for (JsonElement e : arr) {
         JsonObject obj = e.getAsJsonObject();
         int bid = obj.get("bid").getAsInt();
@@ -1410,6 +1567,7 @@ public class Mainframe extends JFrame {
           Book_Booklist book = allEntries.getElementAt(i);
           if (book.getBid() == bid) {
             book.setRating(rating, true);
+            updatedBooks.add(book);
             updated++;
             break;
           }
@@ -1418,7 +1576,31 @@ public class Mainframe extends JFrame {
       logger.info("Rating-Updates angewendet: {}", updated);
 
       if (updated > 0) {
-        SwingUtilities.invokeLater(() -> table.repaint());
+        SwingUtilities.invokeLater(() -> {
+          int ratingCol = -1, authorCol = -1, titleCol = -1;
+          for (int i = 0; i < SimpleTableModel.columnKeys.length; i++) {
+            switch (SimpleTableModel.columnKeys[i]) {
+              case SimpleTableModel.KEY_RATING -> ratingCol = i;
+              case SimpleTableModel.KEY_AUTHOR -> authorCol = i;
+              case SimpleTableModel.KEY_TITLE -> titleCol = i;
+            }
+          }
+          if (ratingCol < 0 || authorCol < 0 || titleCol < 0) return;
+          final int rCol = ratingCol, aCol = authorCol, tCol = titleCol;
+          for (Book_Booklist book : updatedBooks) {
+            String ratingStr = book.getRating() > 0 ? Double.toString(book.getRating()) : "";
+            for (int row = 0; row < tableDisplay.getRowCount(); row++) {
+              // Titel-Zelle enthält "Titel\0Serie\0Band" – nur den ersten Teil vergleichen
+              String cellTitle = String.valueOf(tableDisplay.getValueAt(row, tCol))
+                  .split(SimpleTableModel.TITLE_SEP, 2)[0];
+              if (book.getAuthor().equals(tableDisplay.getValueAt(row, aCol)) &&
+                  book.getTitle().equals(cellTitle)) {
+                tableDisplay.setValueAt(ratingStr, row, rCol);
+                break;
+              }
+            }
+          }
+        });
 
         // Verarbeitete Updates aus Web-App loeschen
         URL deleteUrl = new URI(HandleConfig.apiURL + "/api/deleteRatingUpdates.php").toURL();
@@ -1583,7 +1765,7 @@ public class Mainframe extends JFrame {
    */
   public void updateSearchPlaceholder() {
     txt_search.putClientProperty("JTextField.placeholderText",
-        MessageFormat.format(Localization.get("search.text"), allEntries.getSize()));
+        MessageFormat.format(Localization.get("search.text")));
   }
 
   /**
@@ -1916,14 +2098,29 @@ public class Mainframe extends JFrame {
    * @param args - Arguments to trigger different functions
    */
   public static void main(String[] args) {
-    // HiDPI-Skalierung: System-DPI erkennen und FlatLaf-Skalierung setzen
+    // HiDPI-Skalierung: Benutzerkonfiguration hat Vorrang vor Auto-DPI-Erkennung
     if (System.getProperty("flatlaf.uiScale") == null) {
       try {
-        int dpi = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
-        if (dpi > 96) {
-          float scale = dpi / 96f;
-          scale = Math.round(scale * 4f) / 4f;
-          System.setProperty("flatlaf.uiScale", String.valueOf(scale));
+        // Minimal-Vorablesen der config.conf, um uiScale zu ermitteln
+        String savedScale = "";
+        java.io.File earlyConfig = new java.io.File("config.conf");
+        if (earlyConfig.exists()) {
+          java.util.Properties earlyProps = new java.util.Properties();
+          try (java.io.FileReader r = new java.io.FileReader(earlyConfig)) {
+            earlyProps.load(r);
+          }
+          String v = earlyProps.getProperty("uiScale", "").trim();
+          if (!v.isEmpty()) savedScale = v;
+        }
+        if (!savedScale.isEmpty()) {
+          System.setProperty("flatlaf.uiScale", savedScale);
+        } else {
+          int dpi = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
+          if (dpi > 96) {
+            float scale = dpi / 96f;
+            scale = Math.round(scale * 4f) / 4f;
+            System.setProperty("flatlaf.uiScale", String.valueOf(scale));
+          }
         }
       } catch (Exception ignored) {
         // Fallback: keine Skalierung

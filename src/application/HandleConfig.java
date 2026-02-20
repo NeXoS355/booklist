@@ -30,6 +30,7 @@ public class HandleConfig {
   public static String apiURL = "";
   public static int darkmode = 0;
   public static int tmpDarkmode = 0;
+  public static String uiScale = ""; // empty = Auto
 
   public static void readConfig() {
     File f = new File(CONFIG_FILE);
@@ -98,27 +99,20 @@ public class HandleConfig {
       tmpDarkmode = darkmode;
       logger.info("darkmode: {}", darkmode);
 
-      String layoutWidth = props.getProperty("layoutWidth");
-      if (layoutWidth != null) {
-        try {
-          String[] values = layoutWidth.trim().split(",");
-          Mainframe.prozEbook = Integer.parseInt(values[0]);
-          Mainframe.prozAuthor = Integer.parseInt(values[1]);
-          Mainframe.prozTitle = Integer.parseInt(values[2]);
-          Mainframe.prozSeries = Integer.parseInt(values[3]);
-          Mainframe.prozRating = Integer.parseInt(values[4]);
-        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-          logger.error("Fehler beim Lesen von layoutWidth: {}", e.getMessage());
-        }
+      String uiScaleValue = props.getProperty("uiScale");
+      if (uiScaleValue != null) {
+        uiScale = uiScaleValue.trim();
+        logger.info("uiScale: {}", uiScale);
       }
 
+      // layoutSort zuerst laden, damit columnKeys die View-Reihenfolge kennt
       String layoutSort = props.getProperty("layoutSort");
       if (layoutSort != null) {
         try {
           String[] values = layoutSort.trim().split(",");
           Set<String> validKeys = Set.of(
               SimpleTableModel.KEY_EBOOK, SimpleTableModel.KEY_AUTHOR,
-              SimpleTableModel.KEY_TITLE, SimpleTableModel.KEY_SERIES,
+              SimpleTableModel.KEY_TITLE, SimpleTableModel.KEY_DATE,
               SimpleTableModel.KEY_RATING);
           if (values.length != SimpleTableModel.columnKeys.length) {
             throw new IllegalArgumentException("Erwartete " + SimpleTableModel.columnKeys.length + " Spalten, gefunden: " + values.length);
@@ -131,6 +125,28 @@ public class HandleConfig {
           System.arraycopy(values, 0, SimpleTableModel.columnKeys, 0, values.length);
         } catch (IllegalArgumentException e) {
           logger.warn("Fehler beim Lesen von layoutSort, verwende Defaults: {}", e.getMessage());
+        }
+      }
+
+      // layoutWidth anhand der geladenen columnKeys zuordnen (nicht positional)
+      String layoutWidth = props.getProperty("layoutWidth");
+      if (layoutWidth != null) {
+        try {
+          String[] values = layoutWidth.trim().split(",");
+          if (values.length == SimpleTableModel.columnKeys.length) {
+            for (int i = 0; i < values.length; i++) {
+              int w = Integer.parseInt(values[i].trim());
+              switch (SimpleTableModel.columnKeys[i]) {
+                case SimpleTableModel.KEY_EBOOK  -> Mainframe.prozEbook  = w;
+                case SimpleTableModel.KEY_AUTHOR -> Mainframe.prozAuthor = w;
+                case SimpleTableModel.KEY_TITLE  -> Mainframe.prozTitle  = w;
+                case SimpleTableModel.KEY_DATE   -> Mainframe.prozDate   = w;
+                case SimpleTableModel.KEY_RATING -> Mainframe.prozRating = w;
+              }
+            }
+          }
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+          logger.error("Fehler beim Lesen von layoutWidth: {}", e.getMessage());
         }
       }
 
@@ -159,6 +175,7 @@ public class HandleConfig {
     props.setProperty("apiToken", apiToken);
     props.setProperty("apiURL", apiURL);
     props.setProperty("darkmode", String.valueOf(tmpDarkmode));
+    props.setProperty("uiScale", uiScale);
     props.setProperty("version", Mainframe.getVersion());
 
     TableColumnModel columnModel = Mainframe.table.getColumnModel();
@@ -169,7 +186,13 @@ public class HandleConfig {
         columnModel.getColumn(3).getWidth() + "," +
         columnModel.getColumn(4).getWidth());
 
-    props.setProperty("layoutSort", String.join(",", SimpleTableModel.columnKeys));
+    // Spaltenreihenfolge in View-Reihenfolge speichern (nicht Modell-Reihenfolge)
+    String[] keysInViewOrder = new String[SimpleTableModel.columnKeys.length];
+    for (int viewCol = 0; viewCol < keysInViewOrder.length; viewCol++) {
+      int modelCol = Mainframe.table.convertColumnIndexToModel(viewCol);
+      keysInViewOrder[viewCol] = SimpleTableModel.columnKeys[modelCol];
+    }
+    props.setProperty("layoutSort", String.join(",", keysInViewOrder));
     props.setProperty("MainframeX", String.valueOf(Mainframe.getInstance().getX()));
     props.setProperty("MainframeY", String.valueOf(Mainframe.getInstance().getY()));
     props.setProperty("MainframeWidth", String.valueOf(Mainframe.getInstance().getWidth()));
@@ -198,6 +221,7 @@ public class HandleConfig {
     props.setProperty("apiToken", apiToken);
     props.setProperty("apiURL", apiURL);
     props.setProperty("darkmode", String.valueOf(darkmode));
+    props.setProperty("uiScale", uiScale);
 
     try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
       props.store(writer, "Booklist Configuration");

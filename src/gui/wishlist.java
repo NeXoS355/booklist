@@ -16,7 +16,7 @@ import application.HandleConfig;
 import application.WishlistListModel;
 import application.WishlistTableModel;
 
-public class wishlist extends JFrame {
+public class wishlist extends JDialog {
 
 
 	@Serial
@@ -35,12 +35,12 @@ public class wishlist extends JFrame {
 	 * @param visible - set the default visible state
 	 */
 	public wishlist(Frame owner, boolean visible) {
-		super("Wishlist");
+		super(owner, "Wishlist");
 		instance = this;
 		this.setLayout(new BorderLayout(10, 10));
 		this.setSize(UIScale.scale(700), UIScale.scale(700));
 		this.setLocationRelativeTo(owner);
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
 		if (HandleConfig.darkmode == 1) {
 			table.getTableHeader().setOpaque(false);

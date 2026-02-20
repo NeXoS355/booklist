@@ -57,11 +57,16 @@ public class CustomTableHeaderRenderer extends DefaultTableCellRenderer {
 			int row, int column) {
 		Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		currentTable = table;
-		setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
+		// e) Header-Styling: subtile Bottom-Border als Trennlinie zur Tabelle
+		Color separator = UIManager.getColor("Separator.foreground");
+		if (separator == null) separator = UIManager.getColor("TableHeader.separatorColor");
+		if (separator == null) separator = new Color(80, 80, 80);
+		setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createMatteBorder(0, 0, 2, 0, separator),
+				BorderFactory.createEmptyBorder(0, 6, 0, 4)
+		));
 
-		if (table.getColumnName(column).equals(Localization.get("column.rating")))
-			setColumnIcon(column, scaledStarIcon);
-		else if (table.getColumnName(column).equals(Localization.get("column.ebook")))
+		if (table.getColumnName(column).equals(Localization.get("column.ebook")))
 			setColumnIcon(column, scaledEbookIcon);
 		else
 			setColumnIcon(column, null);

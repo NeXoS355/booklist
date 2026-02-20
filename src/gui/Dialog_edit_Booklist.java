@@ -1130,21 +1130,25 @@ public class Dialog_edit_Booklist extends JDialog {
 
     // Rating-Wert direkt in der Tabelle aktualisieren
     String ratingStr = segment > 0 ? Double.toString(entry.getRating()) : "";
-    int ratingCol = -1;
-    int authorCol = -1;
-    int titleCol = -1;
+    int ratingModelCol = -1, authorModelCol = -1, titleModelCol = -1;
     for (int c = 0; c < SimpleTableModel.columnKeys.length; c++) {
       switch (SimpleTableModel.columnKeys[c]) {
-        case SimpleTableModel.KEY_RATING -> ratingCol = c;
-        case SimpleTableModel.KEY_AUTHOR -> authorCol = c;
-        case SimpleTableModel.KEY_TITLE -> titleCol = c;
+        case SimpleTableModel.KEY_RATING -> ratingModelCol = c;
+        case SimpleTableModel.KEY_AUTHOR -> authorModelCol = c;
+        case SimpleTableModel.KEY_TITLE  -> titleModelCol  = c;
       }
     }
-    if (ratingCol >= 0 && authorCol >= 0 && titleCol >= 0) {
+    if (ratingModelCol >= 0 && authorModelCol >= 0 && titleModelCol >= 0) {
+      int ratingViewCol = Mainframe.table.convertColumnIndexToView(ratingModelCol);
+      int authorViewCol = Mainframe.table.convertColumnIndexToView(authorModelCol);
+      int titleViewCol  = Mainframe.table.convertColumnIndexToView(titleModelCol);
       for (int row = 0; row < Mainframe.table.getRowCount(); row++) {
-        if (entry.getAuthor().equals(Mainframe.table.getValueAt(row, authorCol))
-            && entry.getTitle().equals(Mainframe.table.getValueAt(row, titleCol))) {
-          Mainframe.table.setValueAt(ratingStr, row, ratingCol);
+        String cellAuthor = String.valueOf(Mainframe.table.getValueAt(row, authorViewCol));
+        // Titel-Zelle enthält "Titel\0Serie\0Band" – nur den ersten Teil vergleichen
+        String cellTitle = String.valueOf(Mainframe.table.getValueAt(row, titleViewCol))
+            .split(SimpleTableModel.TITLE_SEP, 2)[0];
+        if (entry.getAuthor().equals(cellAuthor) && entry.getTitle().equals(cellTitle)) {
+          Mainframe.table.setValueAt(ratingStr, row, ratingViewCol);
           break;
         }
       }

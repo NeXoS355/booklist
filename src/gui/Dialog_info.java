@@ -23,7 +23,6 @@ public class Dialog_info extends JDialog {
 	public Dialog_info(Frame owner) {
 		setTitle(Localization.get("t.info"));
 		setModal(true);
-		setLocationRelativeTo(owner);
 
 		JPanel content = new JPanel();
 		content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
@@ -107,6 +106,7 @@ public class Dialog_info extends JDialog {
 		setContentPane(scrollPane);
 
 		setSize(UIScale.scale(520), UIScale.scale(620));
+		setLocationRelativeTo(owner);
 		setVisible(true);
 	}
 
