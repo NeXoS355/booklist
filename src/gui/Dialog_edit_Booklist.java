@@ -24,6 +24,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -415,16 +417,6 @@ public class Dialog_edit_Booklist extends JDialog {
     txtAuthor.setPreferredSize(new Dimension(50, height));
     ((AbstractDocument) txtAuthor.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
 
-    txtAuthor.addKeyListener(new KeyAdapter() {
-
-      @Override
-      public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-          case KeyEvent.VK_ENTER -> save(entry); // Speichern
-          case KeyEvent.VK_ESCAPE -> dispose(); // Abbrechen
-        }
-      }
-    });
     JPopupMenu suggestionsPopup = new JPopupMenu();
     txtAuthor.getDocument().addDocumentListener(new DocumentListener() {
       @Override
@@ -486,16 +478,11 @@ public class Dialog_edit_Booklist extends JDialog {
 
       @Override
       public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          save(entry);
-        } else if (!e.isActionKey()) {
-          if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
-            txtTitle.setText("");
-            btnAdd.setEnabled(true);
-          }
+        if (e.getKeyCode() != KeyEvent.VK_ENTER && !e.isActionKey()
+            && txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
+          txtTitle.setText("");
+          btnAdd.setEnabled(true);
         }
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-          dispose();
       }
     });
 
@@ -506,17 +493,6 @@ public class Dialog_edit_Booklist extends JDialog {
     txtNote = new CustomTextField(entry.getNote());
     txtNote.setPreferredSize(new Dimension(50, height));
     ((AbstractDocument) txtNote.getDocument()).setDocumentFilter(new LengthDocumentFilter(100));
-    txtNote.addKeyListener(new KeyAdapter() {
-
-      @Override
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER)
-          save(entry);
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-          dispose();
-      }
-
-    });
 
     JLabel lblSeries = new JLabel(Localization.get("label.series") + " | " + Localization.get("label.vol") + ":");
     lblSeries.setFont(Mainframe.defaultFont);
@@ -525,16 +501,6 @@ public class Dialog_edit_Booklist extends JDialog {
     txtSeries = new CustomTextField(entry.getSeries());
     txtSeries.setPreferredSize(new Dimension(50, height));
     ((AbstractDocument) txtSeries.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-    txtSeries.addKeyListener(new KeyAdapter() {
-
-      @Override
-      public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-          case KeyEvent.VK_ENTER -> save(entry); // Speichern
-          case KeyEvent.VK_ESCAPE -> dispose(); // Abbrechen
-        }
-      }
-    });
     txtSeries.getDocument().addDocumentListener(new DocumentListener() {
       @Override
       public void insertUpdate(DocumentEvent e) {
@@ -587,17 +553,6 @@ public class Dialog_edit_Booklist extends JDialog {
     txtSeriesVol = new CustomTextField(entry.getSeriesVol());
     txtSeriesVol.setPreferredSize(new Dimension(50, height));
     ((AbstractDocument) txtSeriesVol.getDocument()).setDocumentFilter(new LengthDocumentFilter(2));
-    txtSeriesVol.addKeyListener(new KeyAdapter() {
-
-      @Override
-      public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER)
-          save(entry);
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-          dispose();
-      }
-
-    });
 
     JLabel lblEbook = new JLabel("E-Book:");
     lblEbook.setFont(Mainframe.defaultFont);
@@ -720,33 +675,11 @@ public class Dialog_edit_Booklist extends JDialog {
     if (entry.getBorrowedFrom().isEmpty())
       txtBorrowedFrom.setVisible(false);
     ((AbstractDocument) txtBorrowedFrom.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-    txtBorrowedFrom.addKeyListener(new KeyAdapter() {
-
-      @Override
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER)
-          save(entry);
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-          dispose();
-      }
-
-    });
 
     txtBorrowedTo = new CustomTextField(entry.getBorrowedTo());
     if (entry.getBorrowedTo().isEmpty())
       txtBorrowedTo.setVisible(false);
     ((AbstractDocument) txtBorrowedTo.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-    txtBorrowedTo.addKeyListener(new KeyAdapter() {
-
-      @Override
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER)
-          save(entry);
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-          dispose();
-      }
-
-    });
 
     btnAdd = ButtonsFactory.createButton(Localization.get("label.save"));
     btnAdd.setFont(Mainframe.defaultFont);
@@ -820,6 +753,12 @@ public class Dialog_edit_Booklist extends JDialog {
     this.add(panelCenter, BorderLayout.CENTER);
     this.add(panelEastBorder, BorderLayout.EAST);
     this.add(panelSouthBorder, BorderLayout.SOUTH);
+
+    // Root pane key bindings: ENTER = speichern, ESCAPE = schliessen
+    getRootPane().registerKeyboardAction(e -> save(entry),
+        KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+    getRootPane().registerKeyboardAction(e -> dispose(),
+        KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
     Mainframe.logger.info("Book edit: Frame successfully created");
     this.setVisible(true);

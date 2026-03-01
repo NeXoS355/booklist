@@ -17,6 +17,8 @@ import java.net.URL;
 import java.sql.Timestamp;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -84,13 +86,9 @@ public class Dialog_add_Wishlist extends JDialog {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
-				} else if (!e.isActionKey()) {
+				if (e.getKeyCode() != KeyEvent.VK_ENTER && !e.isActionKey()) {
 					txtAuthor.setBackground(UIManager.getColor("TextField.background"));
 				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
 			}
 
 		});
@@ -122,15 +120,10 @@ public class Dialog_add_Wishlist extends JDialog {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
-				} else if (!e.isActionKey()) {
-					if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
-						txtTitle.setText("");
-					}
+				if (e.getKeyCode() != KeyEvent.VK_ENTER && !e.isActionKey()
+						&& txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
+					txtTitle.setText("");
 				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
 			}
 		});
 		txtTitle.addMouseListener(new MouseAdapter() {
@@ -165,18 +158,6 @@ public class Dialog_add_Wishlist extends JDialog {
 		txtNote.setPreferredSize(new Dimension(50, height));
 		txtNote.setBorder(standardBorder);
 		((AbstractDocument) txtNote.getDocument()).setDocumentFilter(new LengthDocumentFilter(100));
-		txtNote.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
-				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
-			}
-
-		});
 		txtNote.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -202,18 +183,6 @@ public class Dialog_add_Wishlist extends JDialog {
 		txtSeries.setPreferredSize(new Dimension(50, height));
 		txtSeries.setBorder(standardBorder);
 		((AbstractDocument) txtSeries.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-		txtSeries.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
-				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
-			}
-
-		});
 		txtSeries.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -234,17 +203,6 @@ public class Dialog_add_Wishlist extends JDialog {
 		txtSeriesVol.setPreferredSize(new Dimension(50, height));
 		txtSeriesVol.setBorder(standardBorder);
 		((AbstractDocument) txtSeriesVol.getDocument()).setDocumentFilter(new LengthDocumentFilter(2));
-		txtSeriesVol.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBuch();
-				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
-			}
-		});
 		txtSeriesVol.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -339,6 +297,12 @@ public class Dialog_add_Wishlist extends JDialog {
 		this.add(panel_center, BorderLayout.CENTER);
 		this.add(panel_south, BorderLayout.SOUTH);
 //		this.add(new JLabel(""), BorderLayout.NORTH); // oberer Abstand vom JFrame
+
+		// Root pane key bindings: ENTER = speichern, ESCAPE = schliessen
+		getRootPane().registerKeyboardAction(e -> addBuch(),
+				KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		getRootPane().registerKeyboardAction(e -> dispose(),
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		Mainframe.logger.info("Wishlist Book add: Frame successfully created");
 		this.setVisible(true);

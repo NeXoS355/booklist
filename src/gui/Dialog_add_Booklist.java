@@ -91,16 +91,6 @@ public class Dialog_add_Booklist extends JDialog {
 		txtAuthor.setText(Mainframe.getTreeSelection());
 		txtAuthor.setPreferredSize(new Dimension(50, height));
 		((AbstractDocument) txtAuthor.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-		txtAuthor.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				switch (e.getKeyCode()) {
-					case KeyEvent.VK_ENTER -> addBook(); // Speichern
-					case KeyEvent.VK_ESCAPE -> dispose(); // Abbrechen
-				}
-			}
-		});
 		JPopupMenu suggestionsPopup = new JPopupMenu();
 		txtAuthor.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
@@ -162,16 +152,11 @@ public class Dialog_add_Booklist extends JDialog {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBook();
-				} else if (!e.isActionKey()) {
-					if (txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
-						txtTitle.setText("");
-						btn_add.setEnabled(true);
-					}
+				if (e.getKeyCode() != KeyEvent.VK_ENTER && !e.isActionKey()
+						&& txtTitle.getText().equals(Localization.get("text.duplicateError"))) {
+					txtTitle.setText("");
+					btn_add.setEnabled(true);
 				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
 			}
 		});
 
@@ -182,18 +167,6 @@ public class Dialog_add_Booklist extends JDialog {
 		txtNote = new CustomTextField();
 		txtNote.setPreferredSize(new Dimension(50, height));
 		((AbstractDocument) txtNote.getDocument()).setDocumentFilter(new LengthDocumentFilter(100));
-		txtNote.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBook();
-				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
-			}
-
-		});
 
 		JLabel lbl_serie = new JLabel(Localization.get("label.series")+ " | " + Localization.get("label.vol"));
 		lbl_serie.setFont(Mainframe.defaultFont);
@@ -202,16 +175,6 @@ public class Dialog_add_Booklist extends JDialog {
 		txtSeries = new CustomTextField();
 		txtSeries.setPreferredSize(new Dimension(50, height));
 		((AbstractDocument) txtSeries.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-		txtSeries.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				switch (e.getKeyCode()) {
-					case KeyEvent.VK_ENTER -> addBook(); // Speichern
-					case KeyEvent.VK_ESCAPE -> dispose(); // Abbrechen
-				}
-			}
-		});
 		txtSeries.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void insertUpdate(DocumentEvent e) {
@@ -264,17 +227,6 @@ public class Dialog_add_Booklist extends JDialog {
 		txtSeriesVol = new CustomTextField();
 		txtSeriesVol.setPreferredSize(new Dimension(50, height));
 		((AbstractDocument) txtSeriesVol.getDocument()).setDocumentFilter(new LengthDocumentFilter(2));
-		txtSeriesVol.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBook();
-				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
-			}
-		});
 
 		JLabel lbl_ebook = new JLabel("E-Book:");
 		lbl_ebook.setFont(Mainframe.defaultFont);
@@ -396,33 +348,10 @@ public class Dialog_add_Booklist extends JDialog {
 		txtBorrowedFrom = new CustomTextField();
 		txtBorrowedFrom.setVisible(false);
 		((AbstractDocument) txtBorrowedFrom.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-		txtBorrowedFrom.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBook();
-				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
-			}
-		});
 
 		txtBorrowedTo = new CustomTextField();
 		txtBorrowedTo.setVisible(false);
 		((AbstractDocument) txtBorrowedTo.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-		txtBorrowedTo.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					addBook();
-					Mainframe.updateModel();
-				}
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-					dispose();
-			}
-		});
 
 		btn_add = ButtonsFactory.createButton(Localization.get("label.save"));
 		btn_add.setFont(Mainframe.defaultFont);
@@ -447,6 +376,12 @@ public class Dialog_add_Booklist extends JDialog {
 
 		this.add(panel_center, BorderLayout.CENTER);
 		this.add(panel_south, BorderLayout.SOUTH);
+
+		// Root pane key bindings: ENTER = speichern, ESCAPE = schliessen
+		getRootPane().registerKeyboardAction(e -> addBook(),
+				KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		getRootPane().registerKeyboardAction(e -> dispose(),
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		this.setVisible(true);
 		this.setModal(true);
