@@ -186,11 +186,6 @@ public class Mainframe extends JFrame {
     logger.info("start creating Frame & readConfig");
 
     HandleConfig.readConfig();
-    if (HandleConfig.debug.equals("WARN")) {
-      Configurator.setLevel(logger, Level.WARN);
-    } else if (HandleConfig.debug.equals("INFO")) {
-      Configurator.setLevel(logger, Level.INFO);
-    }
 
     // Standard-Locale setzen
     if (HandleConfig.lang.equals("English")) {
@@ -1662,6 +1657,8 @@ public class Mainframe extends JFrame {
           }
           String v = earlyProps.getProperty("uiScale", "").trim();
           if (!v.isEmpty()) savedScale = v;
+          String logLevel = earlyProps.getProperty("debug", "WARN").trim().toLowerCase();
+          System.setProperty("booklist.logLevel", logLevel);
         }
         if (!savedScale.isEmpty()) {
           System.setProperty("flatlaf.uiScale", savedScale);

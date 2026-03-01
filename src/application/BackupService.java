@@ -1,7 +1,6 @@
 package application;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import gui.Mainframe;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -11,8 +10,6 @@ import java.util.Date;
 import java.util.Objects;
 
 public class BackupService {
-
-  private static final Logger logger = LogManager.getLogger(BackupService.class);
 
   /**
    * Erstellt ein vollständiges Datei-Backup von DB, Config und JAR.
@@ -32,19 +29,19 @@ public class BackupService {
         copyFileToDirectory(new File(workingDir, "booklist.db"), backupDir);
         copyFileToDirectory(new File(workingDir, "config.conf"), backupDir);
         copyFileToDirectory(jarFile, backupDir);
-        logger.info("Backup created");
+        Mainframe.logger.info("Backup created");
         return true;
       } else {
-        logger.error("Error while creating Backup. Could not extract filename.");
+        Mainframe.logger.error("Error while creating Backup. Could not extract filename.");
         return false;
       }
     } catch (IOException e1) {
-      logger.error("Error while creating Backup. IOException");
-      logger.error(e1.toString());
+      Mainframe.logger.error("Error while creating Backup. IOException");
+      Mainframe.logger.error(e1.toString());
       return false;
     } catch (URISyntaxException e1) {
-      logger.error("Error while creating Backup. URISyntaxException");
-      logger.error(e1.toString());
+      Mainframe.logger.error("Error while creating Backup. URISyntaxException");
+      Mainframe.logger.error(e1.toString());
       return false;
     }
   }
@@ -88,7 +85,7 @@ public class BackupService {
           try {
             Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
           } catch (IOException e) {
-            logger.error(e.getMessage());
+            Mainframe.logger.error(e.getMessage());
           }
         }
       }

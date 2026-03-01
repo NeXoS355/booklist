@@ -2,8 +2,7 @@ package application;
 
 import com.google.gson.*;
 import data.Database;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import gui.Mainframe;
 
 import java.io.*;
 import java.net.*;
@@ -18,8 +17,6 @@ import java.util.List;
  */
 public class ApiSyncService {
 
-  private static final Logger logger = LogManager.getLogger(ApiSyncService.class);
-
   public record PendingBook(String author, String title, String series,
                             String seriesPart, String note, boolean ebook) {}
 
@@ -32,7 +29,7 @@ public class ApiSyncService {
    */
   public boolean testConnection() {
     try {
-      logger.info("Web API request: {}/api/get.php", HandleConfig.apiURL);
+      Mainframe.logger.info("Web API request: {}/api/get.php", HandleConfig.apiURL);
       URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
       HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
       con.setConnectTimeout(2000);
@@ -40,12 +37,12 @@ public class ApiSyncService {
       long startTime = System.currentTimeMillis();
       int responseCode = con.getResponseCode();
       long responseTime = System.currentTimeMillis() - startTime;
-      logger.info("Web API request: responseCode: {}", responseCode);
-      logger.info("Web API request: responseTime: {}ms", responseTime);
+      Mainframe.logger.info("Web API request: responseCode: {}", responseCode);
+      Mainframe.logger.info("Web API request: responseTime: {}ms", responseTime);
       con.disconnect();
       return responseCode == HttpURLConnection.HTTP_OK;
     } catch (URISyntaxException | IOException e) {
-      logger.error("Verbindung zur API fehlgeschlagen: {}", e.getMessage());
+      Mainframe.logger.error("Verbindung zur API fehlgeschlagen: {}", e.getMessage());
       return false;
     }
   }
@@ -58,14 +55,14 @@ public class ApiSyncService {
    */
   public List<PendingBook> fetchPendingBooks() throws URISyntaxException, IOException {
     List<PendingBook> result = new ArrayList<>();
-    logger.info("Web API Download request: {}/api/get.php?token=****{}",
+    Mainframe.logger.info("Web API Download request: {}/api/get.php?token=****{}",
         HandleConfig.apiURL, HandleConfig.apiToken.substring(HandleConfig.apiToken.length() - 4));
     URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
     HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
     con.setRequestMethod("GET");
     con.setConnectTimeout(5000);
     int responseCode = con.getResponseCode();
-    logger.info("Web API GET responseCode: {}", responseCode);
+    Mainframe.logger.info("Web API GET responseCode: {}", responseCode);
     if (responseCode != HttpURLConnection.HTTP_OK) {
       con.disconnect();
       return result;
@@ -79,7 +76,7 @@ public class ApiSyncService {
     con.disconnect();
 
     String jsonResponse = response.toString();
-    logger.info("Web API GET response: {}", jsonResponse);
+    Mainframe.logger.info("Web API GET response: {}", jsonResponse);
     JsonElement jsonElement = JsonParser.parseString(jsonResponse);
     if (jsonElement.isJsonArray()) {
       for (JsonElement element : jsonElement.getAsJsonArray()) {
@@ -111,7 +108,7 @@ public class ApiSyncService {
       os.write(("token=" + HandleConfig.apiToken).getBytes(StandardCharsets.UTF_8));
     }
     int responseCode = con.getResponseCode();
-    logger.info("Web API DELETE books responseCode: {}", responseCode);
+    Mainframe.logger.info("Web API DELETE books responseCode: {}", responseCode);
     con.disconnect();
   }
 
@@ -129,7 +126,7 @@ public class ApiSyncService {
     con.setReadTimeout(10000);
 
     if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
-      logger.warn("getRatingUpdates: HTTP {}", con.getResponseCode());
+      Mainframe.logger.warn("getRatingUpdates: HTTP {}", con.getResponseCode());
       con.disconnect();
       return result;
     }
@@ -164,7 +161,7 @@ public class ApiSyncService {
     try (OutputStream os = delCon.getOutputStream()) {
       os.write(("token=" + HandleConfig.apiToken).getBytes(StandardCharsets.UTF_8));
     }
-    logger.info("deleteRatingUpdates: HTTP {}", delCon.getResponseCode());
+    Mainframe.logger.info("deleteRatingUpdates: HTTP {}", delCon.getResponseCode());
     delCon.disconnect();
 
     return result;
@@ -181,10 +178,10 @@ public class ApiSyncService {
     int responseCode = con.getResponseCode();
     con.disconnect();
     if (responseCode == HttpURLConnection.HTTP_OK) {
-      logger.info("Books successfully uploaded");
+      Mainframe.logger.info("Books successfully uploaded");
       return true;
     } else {
-      logger.error("Error while uploading: {}", responseCode);
+      Mainframe.logger.error("Error while uploading: {}", responseCode);
       return false;
     }
   }
@@ -203,12 +200,12 @@ public class ApiSyncService {
       os.write(("token=" + HandleConfig.apiToken).getBytes(StandardCharsets.UTF_8));
     }
     int responseCode = con.getResponseCode();
-    logger.info("Web API DELETE SyncedBooks responseCode: {}", responseCode);
+    Mainframe.logger.info("Web API DELETE SyncedBooks responseCode: {}", responseCode);
     con.disconnect();
   }
 
   private HttpURLConnection buildUploadConnection(List<Book_Booklist> books) throws URISyntaxException, IOException {
-    logger.info("Web API request: {}/api/upload.php?token=****{}",
+    Mainframe.logger.info("Web API request: {}/api/upload.php?token=****{}",
         HandleConfig.apiURL, HandleConfig.apiToken.substring(HandleConfig.apiToken.length() - 4));
     URL postUrl = new URI(HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken).toURL();
 

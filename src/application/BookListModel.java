@@ -101,7 +101,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 							seriesVolume, ebook, rating, buf_pic, desc, isbn, date, false);
 					book.setBid(bid);
 					if (picBytes != null) book.setPicSizeBytes(picBytes.length);
-					book.setExtendedDataLoaded(true);
+					book.setExtendedDataLoaded(HandleConfig.loadOnDemand == 0);
 					getBooks().add(book);
 					Mainframe.logger.info("Buch ausgelesen: {}-{}", book.getAuthor(), book.getTitle());
 				} catch (DateTimeParseException e) {

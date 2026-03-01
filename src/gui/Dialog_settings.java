@@ -28,6 +28,9 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 import com.formdev.flatlaf.util.UIScale;
 import application.HandleConfig;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 
 public class Dialog_settings extends JDialog {
 
@@ -357,6 +360,8 @@ public class Dialog_settings extends JDialog {
       HandleConfig.autoDownload = chkAutoDownload.isSelected() ? 1 : 0;
       HandleConfig.searchParam = (String) cmbSearchParam.getSelectedItem();
       HandleConfig.debug = (String) cmbDebug.getSelectedItem();
+      Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME,
+          "INFO".equals(HandleConfig.debug) ? Level.INFO : Level.WARN);
       HandleConfig.backup = (int) cmbBackup.getSelectedItem();
       HandleConfig.tmpDarkmode = chkDark.isSelected() ? 1 : 0;
       HandleConfig.uiScale = switch ((String) cmbScale.getSelectedItem()) {

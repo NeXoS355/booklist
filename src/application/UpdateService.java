@@ -1,8 +1,7 @@
 package application;
 
 import com.google.gson.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import gui.Mainframe;
 
 import java.io.*;
 import java.net.*;
@@ -15,8 +14,6 @@ import java.util.function.IntConsumer;
  * GitHub-API-Abfragen, JAR-Download, SHA-256-Prüfung und JAR-Austausch.
  */
 public class UpdateService {
-
-  private static final Logger logger = LogManager.getLogger(UpdateService.class);
 
   public record UpdateInfo(boolean available, String latestTag,
                            String downloadUrl, String expectedDigest) {}
@@ -34,7 +31,7 @@ public class UpdateService {
     apiConn.setRequestMethod("GET");
 
     if (apiConn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-      logger.error("Update - GitHub API returned: {}", apiConn.getResponseCode());
+      Mainframe.logger.error("Update - GitHub API returned: {}", apiConn.getResponseCode());
       throw new IOException("GitHub API returned: " + apiConn.getResponseCode());
     }
 
@@ -48,13 +45,13 @@ public class UpdateService {
 
     JsonObject release = JsonParser.parseString(response.toString()).getAsJsonObject();
     String latestTag = release.get("tag_name").getAsString().replaceAll("^v", "");
-    logger.info("Update - current version: {}, latest version: {}", currentVersion, latestTag);
+    Mainframe.logger.info("Update - current version: {}, latest version: {}", currentVersion, latestTag);
 
     int currentVer = parseVersion(currentVersion);
     int latestVer = parseVersion(latestTag);
 
     if (latestVer <= currentVer) {
-      logger.info("Update - no update available");
+      Mainframe.logger.info("Update - no update available");
       return new UpdateInfo(false, latestTag, null, null);
     }
 
@@ -93,7 +90,7 @@ public class UpdateService {
     URL jarUrl = new URI(url).toURL();
     HttpURLConnection httpConn = (HttpURLConnection) jarUrl.openConnection();
     int fileSize = httpConn.getContentLength();
-    logger.info("Update - downloading JAR ({} KB)", fileSize > 0 ? fileSize / 1024 : "unknown");
+    Mainframe.logger.info("Update - downloading JAR ({} KB)", fileSize > 0 ? fileSize / 1024 : "unknown");
 
     try (BufferedInputStream in = new BufferedInputStream(jarUrl.openStream());
          FileOutputStream fos = new FileOutputStream(target)) {
@@ -113,7 +110,7 @@ public class UpdateService {
         }
       }
     }
-    logger.info("Update - download complete");
+    Mainframe.logger.info("Update - download complete");
   }
 
   /**
