@@ -292,11 +292,11 @@ public class Database {
 	 * @return - ResultSet with one entry from Table "books"
 	 */
 	public static ResultSet selectFromBooklist(int bid) {
-		String sql = "SELECT * FROM books WHERE bid=" + bid;
 		ResultSet rs = null;
 		try {
-			Statement st = con.createStatement();
-			rs = st.executeQuery(sql);
+			PreparedStatement st = con.prepareStatement("SELECT * FROM books WHERE bid=?");
+			st.setInt(1, bid);
+			rs = st.executeQuery();
 		} catch (SQLException e) {
 			Mainframe.logger.error(e.getMessage());
 		}
@@ -486,19 +486,19 @@ public class Database {
 	 * @param colName - set value of this column
 	 * @param value   - set column to this value
 	 */
-	public static void updateBooklistEntry(int bid, String colName, String value) {
-		String sql = "update books set " + colName + "=? where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
-			st.setString(1, value);
+	private static void updateField(int bid, String column, Object value) {
+		try (PreparedStatement st = con.prepareStatement("UPDATE books SET " + column + "=? WHERE bid=?")) {
+			st.setObject(1, value);
 			st.setInt(2, bid);
 			st.execute();
-			st.close();
-			Mainframe.logger.info("Table updated - {}-{}={}", bid, colName, value);
+			Mainframe.logger.info("Table updated - {}:{}={}", bid, column, value);
 		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim aktualisieren des Buchs: {}-{}={}",bid, colName, value);
+			Mainframe.logger.error("Fehler beim Aktualisieren von {}: {}", column, e.getMessage());
 		}
+	}
+
+	public static void updateBooklistEntry(int bid, String colName, String value) {
+		updateField(bid, colName, value);
 	}
 
 	/**
@@ -554,19 +554,7 @@ public class Database {
 	 * @param desc - description String
 	 */
 	public static void updateDesc(int bid, String desc) {
-		String sql = "update books set description=? where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
-			st.setString(1, desc);
-			st.setInt(2, bid);
-			st.execute();
-			st.close();
-			Mainframe.logger.info("Description gespeichert: {}", bid);
-		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim speichern der Beschreibung: {}", bid);
-		}
-
+		updateField(bid, "description", desc);
 	}
 
 	/**
@@ -600,19 +588,7 @@ public class Database {
 	 * @param isbn - isbn Number as String
 	 */
 	public static void updateIsbn(int bid, String isbn) {
-		String sql = "update books set isbn=? where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
-			st.setString(1, isbn);
-			st.setInt(2, bid);
-			st.execute();
-			st.close();
-			Mainframe.logger.info("ISBN gespeichert: {}", bid);
-		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim speichern der ISBN: {}", bid);
-		}
-
+		updateField(bid, "isbn", isbn);
 	}
 
 	/**
@@ -622,19 +598,7 @@ public class Database {
 	 * @param date - new Date as String
 	 */
 	public static void updateDate(int bid, String date) {
-		String sql = "update books set added_date=? where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
-			st.setString(1, date);
-			st.setInt(2, bid);
-			st.execute();
-			st.close();
-			Mainframe.logger.info("Neues Datum gespeichert: {}", bid);
-		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim speichern des neuen Datums: {}", bid);
-		}
-
+		updateField(bid, "added_date", date);
 	}
 
 	/**
@@ -644,19 +608,7 @@ public class Database {
 	 * @param rating - rating as double (0.0 - 5.0)
 	 */
 	public static void updateRating(int bid, double rating) {
-		String sql = "update books set rating=? where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
-			st.setDouble(1, rating);
-			st.setInt(2, bid);
-			st.execute();
-			st.close();
-			Mainframe.logger.info("Rating gespeichert: {}", bid);
-		} catch (SQLException e) {
-			Mainframe.logger.error("Fehler beim speichern des Ratings: {}", bid);
-		}
-
+		updateField(bid, "rating", rating);
 	}
 
 	/**
