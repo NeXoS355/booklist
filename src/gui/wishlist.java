@@ -189,13 +189,11 @@ public class wishlist extends JDialog {
 		JScrollPane listScrollPane = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		listScrollPane.getViewport().setBackground(UIManager.getColor("Table.background"));
+		listScrollPane.setBorder(BorderFactory.createEmptyBorder());
 		JScrollBar verticalScrollBar = listScrollPane.getVerticalScrollBar();
 		verticalScrollBar.setUI(new CustomScrollBar());
 
 		int fabSize = UIScale.scale(48);
-		JLayeredPane layeredPane = new JLayeredPane();
-		layeredPane.setLayout(null);
-		layeredPane.add(listScrollPane, Integer.valueOf(1));
 
 		JButton btnFab = new JButton("+") {
 			@Serial
@@ -227,16 +225,19 @@ public class wishlist extends JDialog {
 			new Dialog_add_Wishlist(instance);
 			updateModel();
 		});
-		layeredPane.add(btnFab, Integer.valueOf(2));
 
-		layeredPane.addComponentListener(new ComponentAdapter() {
+		JLayeredPane layeredPane = new JLayeredPane() {
 			@Override
-			public void componentResized(ComponentEvent e) {
+			public void doLayout() {
+				int w = getWidth();
+				int h = getHeight();
+				listScrollPane.setBounds(0, 0, w, h);
 				int margin = UIScale.scale(20);
-				listScrollPane.setBounds(0, 0, layeredPane.getWidth(), layeredPane.getHeight());
-				btnFab.setLocation(layeredPane.getWidth() - fabSize - margin, layeredPane.getHeight() - fabSize - margin);
+				btnFab.setLocation(w - fabSize - margin, h - fabSize - margin);
 			}
-		});
+		};
+		layeredPane.add(listScrollPane, Integer.valueOf(1));
+		layeredPane.add(btnFab, Integer.valueOf(2));
 
 		Mainframe.logger.info("Wishlist: Frame created successfully");
 		this.add(layeredPane, BorderLayout.CENTER);

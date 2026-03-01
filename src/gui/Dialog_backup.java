@@ -1,5 +1,9 @@
 package gui;
 
+import application.BackupService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.awt.*;
 import java.io.*;
 import java.nio.file.Files;
@@ -22,6 +26,8 @@ public class Dialog_backup extends JDialog {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	private static final Logger logger = LogManager.getLogger(Dialog_backup.class);
+
 	private final JPanel listPanel;
 
 	public Dialog_backup(Frame owner) {
@@ -43,7 +49,7 @@ public class Dialog_backup extends JDialog {
 		JButton btnNewBackup = new JButton(Localization.get("backup.manage.newBackup"));
 		btnNewBackup.setAlignmentX(Component.LEFT_ALIGNMENT);
 		btnNewBackup.addActionListener(e -> {
-			boolean success = Mainframe.createBackup();
+			boolean success = BackupService.createBackup();
 			if (success) {
 				Mainframe.showNotification(Localization.get("backup.success"));
 				refreshList();
@@ -226,7 +232,7 @@ public class Dialog_backup extends JDialog {
 					Path target = workingDir.resolve(file.getName());
 					if (file.isDirectory()) {
 						// DerbyDB (BooklistDB/) aus alten Backups
-						Mainframe.copyFilesInDirectory(file, target.toFile());
+						BackupService.copyFilesInDirectory(file, target.toFile());
 					} else {
 						Files.copy(file.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
 					}
@@ -235,7 +241,7 @@ public class Dialog_backup extends JDialog {
 
 			JOptionPane.showMessageDialog(this, Localization.get("backup.manage.restoreSuccess"));
 		} catch (IOException e) {
-			Mainframe.logger.error("Fehler beim Wiederherstellen des Backups: {}", e.getMessage());
+			logger.error("Fehler beim Wiederherstellen des Backups: {}", e.getMessage());
 			JOptionPane.showMessageDialog(this, Localization.get("backup.manage.restoreError"),
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}
@@ -255,7 +261,7 @@ public class Dialog_backup extends JDialog {
 			deleteDirectoryRecursive(backupDir.toPath());
 			refreshList();
 		} catch (IOException e) {
-			Mainframe.logger.error("Fehler beim Löschen des Backups: {}", e.getMessage());
+			logger.error("Fehler beim Löschen des Backups: {}", e.getMessage());
 			JOptionPane.showMessageDialog(this, Localization.get("backup.manage.deleteError"),
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}

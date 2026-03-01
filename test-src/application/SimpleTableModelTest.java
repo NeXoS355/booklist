@@ -35,7 +35,7 @@ class SimpleTableModelTest {
     assertEquals(0, table.getRowCount());
   }
 
-  // Column count must always be 5 (ebook, author, title, series, rating)
+  // Column count must always be 5 (ebook, author, title, date, rating)
   @Test
   void columnCount_isFive() {
     BookListModel books = new BookListModel(false);
@@ -51,7 +51,7 @@ class SimpleTableModelTest {
     assertEquals("E-Book", table.getColumnName(0));
     assertEquals("Author", table.getColumnName(1));
     assertEquals("Title", table.getColumnName(2));
-    assertEquals("Series", table.getColumnName(3));
+    assertEquals("Added", table.getColumnName(3));
     assertEquals("Rating", table.getColumnName(4));
   }
 
@@ -67,7 +67,7 @@ class SimpleTableModelTest {
     assertEquals("○", table.getValueAt(1, 0));
   }
 
-  // Author and title columns must contain the correct values
+  // Author column must contain the correct value; title cell embeds series via TITLE_SEP
   @Test
   void authorAndTitle_correctValues() {
     BookListModel books = new BookListModel(false);
@@ -75,17 +75,22 @@ class SimpleTableModelTest {
 
     SimpleTableModel table = new SimpleTableModel(books);
     assertEquals("Tolkien", table.getValueAt(0, 1));
-    assertEquals("Der Hobbit", table.getValueAt(0, 2));
+    // Title cell = "Der Hobbit<SEP><SEP>" — extract just the title part
+    String titleCell = (String) table.getValueAt(0, 2);
+    assertEquals("Der Hobbit", titleCell.split(SimpleTableModel.TITLE_SEP, 3)[0]);
   }
 
-  // Series column must combine series name and volume with " - "
+  // Title cell must embed series name and volume separated by TITLE_SEP
   @Test
-  void seriesColumn_combinesNameAndVol() {
+  void titleCell_embedsSeriesAndVol() {
     BookListModel books = new BookListModel(false);
     books.add(createBook("Tolkien", "Die Gefährten", false, "HdR", "1", 0));
 
     SimpleTableModel table = new SimpleTableModel(books);
-    assertEquals("HdR - 1", table.getValueAt(0, 3));
+    String[] parts = ((String) table.getValueAt(0, 2)).split(SimpleTableModel.TITLE_SEP, 3);
+    assertEquals("Die Gefährten", parts[0]);
+    assertEquals("HdR", parts[1]);
+    assertEquals("1", parts[2]);
   }
 
   // Rating column must show the rating when > 0

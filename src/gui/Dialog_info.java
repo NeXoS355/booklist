@@ -105,7 +105,7 @@ public class Dialog_info extends JDialog {
 		scrollPane.getVerticalScrollBar().setUnitIncrement(UIScale.scale(16));
 		setContentPane(scrollPane);
 
-		setSize(UIScale.scale(520), UIScale.scale(620));
+		setSize(UIScale.scale(680), UIScale.scale(620));
 		setLocationRelativeTo(owner);
 		setVisible(true);
 	}

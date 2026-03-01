@@ -1,0 +1,97 @@
+package application;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Date;
+import java.util.Objects;
+
+public class BackupService {
+
+  private static final Logger logger = LogManager.getLogger(BackupService.class);
+
+  /**
+   * Erstellt ein vollständiges Datei-Backup von DB, Config und JAR.
+   *
+   * @return true bei Erfolg, false bei Fehler
+   */
+  public static boolean createBackup() {
+    try {
+      File jarFile = new File(BackupService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+      String filename = jarFile.getName();
+      File workingDir = new File(System.getProperty("user.dir"));
+      if (filename.contains(".jar")) {
+        Date dt = new Date();
+        long LongTime = dt.getTime();
+        String StrTime = Long.toString(LongTime).substring(0, Long.toString(LongTime).length() - 3);
+        File backupDir = new File(workingDir, "Backup/" + StrTime);
+        copyFileToDirectory(new File(workingDir, "booklist.db"), backupDir);
+        copyFileToDirectory(new File(workingDir, "config.conf"), backupDir);
+        copyFileToDirectory(jarFile, backupDir);
+        logger.info("Backup created");
+        return true;
+      } else {
+        logger.error("Error while creating Backup. Could not extract filename.");
+        return false;
+      }
+    } catch (IOException e1) {
+      logger.error("Error while creating Backup. IOException");
+      logger.error(e1.toString());
+      return false;
+    } catch (URISyntaxException e1) {
+      logger.error("Error while creating Backup. URISyntaxException");
+      logger.error(e1.toString());
+      return false;
+    }
+  }
+
+  /**
+   * Kopiert eine einzelne Datei in ein Zielverzeichnis.
+   *
+   * @param file - zu kopierende Datei
+   * @param to   - Zielverzeichnis
+   */
+  private static void copyFileToDirectory(File file, File to) throws IOException {
+    boolean success;
+    if (!to.exists()) {
+      success = to.mkdirs();
+    } else {
+      success = true;
+    }
+    if (success) {
+      File n = new File(to.getAbsolutePath() + "/" + file.getName());
+      Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+  }
+
+  /**
+   * Kopiert mehrere Dateien rekursiv in ein Zielverzeichnis.
+   *
+   * @param from - Quellverzeichnis oder -datei
+   * @param to   - Zielverzeichnis
+   */
+  public static void copyFilesInDirectory(File from, File to) {
+    boolean success = false;
+    if (!to.exists()) {
+      success = to.mkdirs();
+    }
+    if (success) {
+      for (File file : Objects.requireNonNull(from.listFiles())) {
+        File n = new File(to.getAbsolutePath() + "/" + file.getName());
+        if (file.isDirectory()) {
+          copyFilesInDirectory(file, n);
+        } else {
+          try {
+            Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
+          } catch (IOException e) {
+            logger.error(e.getMessage());
+          }
+        }
+      }
+    }
+  }
+}

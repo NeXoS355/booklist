@@ -1,9 +1,12 @@
 package gui;
 
+import application.ApiSyncService;
+import application.BackupService;
 import application.BookListModel;
 import application.Book_Booklist;
 import application.HandleConfig;
 import application.SimpleTableModel;
+import application.UpdateService;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.util.UIScale;
@@ -100,7 +103,18 @@ public class Mainframe extends JFrame {
   private static DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("rootNode");
   static DefaultTreeModel treeModel;
   private static final JTree tree = new JTree(treeModel);
-  static final JLayeredPane layeredPane = new JLayeredPane();
+  static final JLayeredPane layeredPane = new JLayeredPane() {
+    @Override
+    public void doLayout() {
+      int w = getWidth();
+      int h = getHeight();
+      listScrollPane.setBounds(0, 0, w, h);
+      if (btnFab != null) {
+        int margin = UIScale.scale(20);
+        btnFab.setLocation(w - FAB_SIZE - margin, h - FAB_SIZE - margin);
+      }
+    }
+  };
   static final ArrayList<JPanel> activeNotifications = new ArrayList<>();
   public static JSplitPane splitPane;
   private static final JScrollPane listScrollPane = new JScrollPane(table,
@@ -117,6 +131,8 @@ public class Mainframe extends JFrame {
   private static JMenuItem apiUpload;
   private static String version;
   private static final String MIGRATION_BRIDGE_TAG = "4.0.1";
+  private static final ApiSyncService apiSyncService = new ApiSyncService();
+  private static final UpdateService updateService = new UpdateService();
   private JTextField txt_search;
   private static JButton btnSearchReset;
   private static JButton btnFab;
@@ -617,9 +633,9 @@ public class Mainframe extends JFrame {
     JPanel pnl_mid = new JPanel(new BorderLayout());
 
     listScrollPane.getViewport().setBackground(UIManager.getColor("Table.background"));
+    listScrollPane.setBorder(BorderFactory.createEmptyBorder());
     JScrollBar tableVerticalScrollBar = listScrollPane.getVerticalScrollBar();
     tableVerticalScrollBar.setUI(new CustomScrollBar());
-    layeredPane.setLayout(null);
     layeredPane.add(listScrollPane, Integer.valueOf(1)); // Die Tabelle im unteren Layer
 
     // Floating Action Button (FAB) zum Hinzufügen von Büchern
@@ -655,14 +671,6 @@ public class Mainframe extends JFrame {
     });
     layeredPane.add(btnFab, Integer.valueOf(2));
 
-    // Position bei Resize aktualisieren
-    layeredPane.addComponentListener(new ComponentAdapter() {
-      @Override
-      public void componentResized(ComponentEvent e) {
-        int fabMargin = UIScale.scale(20);
-        btnFab.setLocation(layeredPane.getWidth() - FAB_SIZE - fabMargin, layeredPane.getHeight() - FAB_SIZE - fabMargin);
-      }
-    });
 
     pnl_mid.add(layeredPane, BorderLayout.CENTER);
 
@@ -754,6 +762,8 @@ public class Mainframe extends JFrame {
     JScrollBar treeVerticalScrollBar = treeScrollPane.getVerticalScrollBar();
     treeVerticalScrollBar.setUI(new CustomScrollBar());
     treeScrollPane.setPreferredSize(new Dimension(UIScale.scale(300), pnl_mid.getHeight()));
+    treeScrollPane.setMinimumSize(new Dimension(UIScale.scale(80), 0));
+    layeredPane.setMinimumSize(new Dimension(UIScale.scale(300), 0));
 
     splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, layeredPane);
     splitPane.setBorder(BorderFactory.createEmptyBorder());
@@ -771,13 +781,13 @@ public class Mainframe extends JFrame {
         Database.closeConnection();
         if (HandleConfig.backup == 2) {
           logger.info("Frame Closing: Do Backup");
-          createBackup();
+          BackupService.createBackup();
         } else if (HandleConfig.backup == 1) {
           logger.info("Frame Closing: ask do Backup?");
           if (JOptionPane.showConfirmDialog(null, Localization.get("q.backup"), "Backup?", JOptionPane.YES_NO_OPTION,
               JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
 
-            boolean ret = createBackup();
+            boolean ret = BackupService.createBackup();
             if (ret) {
               JOptionPane.showMessageDialog(Mainframe.getInstance(), Localization.get("backup.success"));
               logger.info("Frame Closing: Backup success");
@@ -832,8 +842,6 @@ public class Mainframe extends JFrame {
 
     Mainframe.executor.submit(() -> checkApiConnection());
     showLastBookWithoutRating();
-
-    listScrollPane.setBounds(0, 0, layeredPane.getWidth(), layeredPane.getHeight());
     logger.info("Init completed");
   }
 
@@ -911,10 +919,6 @@ public class Mainframe extends JFrame {
       int yPos = splitPane.getHeight() - yOffset;
       notification.setLocation(xPos, yPos);
       notification.setBounds(xPos, yPos, notification.getWidth(), notification.getHeight());
-    }
-    listScrollPane.setBounds(0, 0, layeredPane.getWidth(), layeredPane.getHeight());
-    if (btnFab != null) {
-      btnFab.setLocation(layeredPane.getWidth() - FAB_SIZE - 20, layeredPane.getHeight() - FAB_SIZE - 20);
     }
     // Revalidate und Repaint sofort aufrufen
     SwingUtilities.invokeLater(() -> {
@@ -1059,52 +1063,6 @@ public class Mainframe extends JFrame {
 
     lblStatusCount.setText(countText);
     lblStatusDetails.setText(detailText);
-  }
-
-  /**
-   * copy multiple files to specified directory
-   *
-   * @param from - Source file or Directory
-   * @param to   - Destination Directory
-   */
-  public static void copyFilesInDirectory(File from, File to) {
-    boolean success = false;
-    if (!to.exists()) {
-      success = to.mkdirs();
-    }
-    if (success) {
-      for (File file : Objects.requireNonNull(from.listFiles())) {
-        File n = new File(to.getAbsolutePath() + "/" + file.getName());
-        if (file.isDirectory()) {
-          copyFilesInDirectory(file, n);
-        } else {
-          try {
-            Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
-          } catch (IOException e) {
-            Mainframe.logger.error(e.getMessage());
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * copy single specified file to specified directory
-   *
-   * @param file - file to copy
-   * @param to   - path where to save the file
-   */
-  private static void copyFileToDirectory(File file, File to) throws IOException {
-    boolean success;
-    if (!to.exists()) {
-      success = to.mkdirs();
-    } else {
-      success = true;
-    }
-    if (success) {
-      File n = new File(to.getAbsolutePath() + "/" + file.getName());
-      Files.copy(file.toPath(), n.toPath(), StandardCopyOption.REPLACE_EXISTING);
-    }
   }
 
   /**
@@ -1275,41 +1233,6 @@ public class Mainframe extends JFrame {
   }
 
   /**
-   * creates a full file based copy of all important files
-   *
-   * @return return success state True=success False=failure
-   */
-  public static boolean createBackup() {
-    try {
-      File jarFile = new File(Mainframe.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-      String filename = jarFile.getName();
-      File workingDir = new File(System.getProperty("user.dir"));
-      if (filename.contains(".jar")) {
-        Date dt = new Date();
-        long LongTime = dt.getTime();
-        String StrTime = Long.toString(LongTime).substring(0, Long.toString(LongTime).length() - 3);
-        File backupDir = new File(workingDir, "Backup/" + StrTime);
-        copyFileToDirectory(new File(workingDir, "booklist.db"), backupDir);
-        copyFileToDirectory(new File(workingDir, "config.conf"), backupDir);
-        copyFileToDirectory(jarFile, backupDir);
-        Mainframe.logger.info("Backup created");
-        return true;
-      } else {
-        Mainframe.logger.error("Error while creating Backup. Could not extract filename.");
-        return false;
-      }
-    } catch (IOException e1) {
-      Mainframe.logger.error("Error while creating Backup. IOException");
-      Mainframe.logger.error(e1.toString());
-      return false;
-    } catch (URISyntaxException e1) {
-      Mainframe.logger.error("Error while creating Backup. URISyntaxException");
-      Mainframe.logger.error(e1.toString());
-      return false;
-    }
-  }
-
-  /**
    * get current Tree Selection for other Classes
    *
    * @return current Tree Selection
@@ -1341,59 +1264,31 @@ public class Mainframe extends JFrame {
    */
   public static void checkApiConnection() {
     if (!HandleConfig.apiURL.isEmpty()) {
-      try {
-        Mainframe.logger.info("Web API request: {}/api/get.php", HandleConfig.apiURL);
-        URL getUrl;
-        getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
-        HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
-        con.setConnectTimeout(2000);
-        con.setRequestMethod("GET");
-        long startTime = System.currentTimeMillis();
-        int responseCode = con.getResponseCode();
-        long responseTime = System.currentTimeMillis() - startTime;
-        Mainframe.logger.info("Web API request: responseCode: {}", responseCode);
-        Mainframe.logger.info("Web API request: responseTime: {}", responseTime + "ms");
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-          apiConnected = true;
-          SwingUtilities.invokeLater(() -> {
-            openWebApi.setEnabled(true);
-            apiDownload.setEnabled(true);
-            apiUpload.setEnabled(true);
-          });
+      boolean connected = apiSyncService.testConnection();
+      apiConnected = connected;
+      if (connected) {
+        SwingUtilities.invokeLater(() -> {
+          openWebApi.setEnabled(true);
+          apiDownload.setEnabled(true);
+          apiUpload.setEnabled(true);
+        });
+        customNotificationPanel notification = showNotification(Localization.get("api.connectedDownload"));
+        boolean downloaded = downloadFromApi(false);
+        notification.setText(Localization.get("api.connectedUpload"));
+        uploadToApi(false);
+        if (downloaded) {
+          notification.setText(Localization.get("api.successNewBooks"));
+        } else {
+          notification.setText(Localization.get("api.successNoBooks"));
         }
-        if (apiConnected) {
-          customNotificationPanel notification = showNotification(Localization.get("api.connectedDownload"));
-          boolean downloaded = downloadFromApi(false);
-          notification.setText(Localization.get("api.connectedUpload"));
-          uploadToApi(false);
-          if (downloaded) {
-            notification.setText(Localization.get("api.successNewBooks"));
-          } else {
-            notification.setText(Localization.get("api.successNoBooks"));
-          }
-
-        }
-      } catch (MalformedURLException e) {
-        Mainframe.logger.error("MalformedURLException");
-        Mainframe.logger.error(e.getMessage());
-      } catch (URISyntaxException e) {
-        Mainframe.logger.error("URISyntaxException");
-        Mainframe.logger.error(e.getMessage());
-      } catch (ProtocolException e) {
-        Mainframe.logger.error("ProtocolException");
-        Mainframe.logger.error(e.getMessage());
-      } catch (IOException e) {
-        Mainframe.logger.error("Verbindung zur API fehlgeschlagen");
-        apiConnected = false;
+      } else {
         SwingUtilities.invokeLater(() -> {
           openWebApi.setEnabled(false);
           apiDownload.setEnabled(false);
           apiUpload.setEnabled(false);
         });
         showNotification(Localization.get("api.noConnect"));
-        Mainframe.logger.error(e.getMessage());
       }
-
     }
   }
 
@@ -1402,120 +1297,56 @@ public class Mainframe extends JFrame {
   }
 
   /**
-   * download the saved books via API from the webApp
+   * Lädt ausstehende Bücher aus der Web-App herunter, prüft Duplikate und fügt neue Bücher ein.
    */
   private static boolean downloadFromApi(boolean showUi) {
     boolean downloaded = false;
     try {
-      logger.info("Web API Download request: {}/api/get.php?token=****{}", HandleConfig.apiURL, HandleConfig.apiToken.substring(HandleConfig.apiToken.length() - 4));
-      URL getUrl = new URI(HandleConfig.apiURL + "/api/get.php?token=" + HandleConfig.apiToken).toURL();
-      HttpURLConnection con = (HttpURLConnection) getUrl.openConnection();
-      con.setRequestMethod("GET");
-      con.setConnectTimeout(5000);
-      int responseCode = con.getResponseCode();
-      logger.info("Web API GET responseCode: {}", responseCode);
-      if (responseCode == HttpURLConnection.HTTP_OK) {
-        // API-Antwort lesen (Rohdaten)
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
+      java.util.List<ApiSyncService.PendingBook> pendingBooks = apiSyncService.fetchPendingBooks();
+      int imported = 0;
+      int rejected = 0;
+      ArrayList<String> importedBooks = new ArrayList<>();
+      ArrayList<String> rejectedBooks = new ArrayList<>();
 
-        while ((inputLine = in.readLine()) != null) {
-          response.append(inputLine);
-        }
-
-        String jsonResponse = response.toString();
-        logger.info("Web API GET response: {}", jsonResponse);
-        JsonElement jsonElement = JsonParser.parseString(jsonResponse);
-        int imported = 0;
-        int rejected = 0;
-        ArrayList<String> importedBooks = new ArrayList<>();
-        ArrayList<String> rejectedBooks = new ArrayList<>();
-        if (jsonElement.isJsonArray()) {
-          JsonArray jsonArray = jsonElement.getAsJsonArray();
-          for (JsonElement element : jsonArray) {
-            JsonObject jsonObject = element.getAsJsonObject();
-            // Felder als String-Variablen speichern
-            String author = jsonObject.get("author").getAsString();
-            String title = jsonObject.get("title").getAsString();
-            String series = jsonObject.has("series") ? jsonObject.get("series").getAsString() : "";
-            String seriesPart = jsonObject.has("series_part") ? jsonObject.get("series_part").getAsString()
-                : "";
-            String note = jsonObject.has("note") ? jsonObject.get("note").getAsString() : "";
-            String ebook = jsonObject.has("ebook") ? jsonObject.get("ebook").getAsString() : null;
-            boolean boolEbook = Objects.equals(ebook, "1");
-            if (seriesPart.equals("0"))
-              seriesPart = "";
-
-            boolean duplicate = false;
-            for (int i = 0; i < allEntries.getSize(); i++) {
-              if (allEntries.getElementAt(i).getAuthor().equals(author)
-                  && allEntries.getElementAt(i).getTitle().equals(title) && !duplicate) {
-                duplicate = true;
-                rejectedBooks.add(author + " - " + title);
-                rejected += 1;
-              }
-            }
-            if (!duplicate) {
-              Book_Booklist imp = new Book_Booklist(author, title, note, series, seriesPart, boolEbook, 0,
-                  null, "", "", new Timestamp(System.currentTimeMillis()), true);
-              importedBooks.add(imp.getAuthor() + " - " + imp.getTitle());
-              imported += 1;
-              SwingUtilities.invokeLater(() -> {
-                Mainframe.allEntries.add(imp);
-                allEntries.checkAuthors();
-              });
-            }
-
+      for (ApiSyncService.PendingBook pb : pendingBooks) {
+        boolean duplicate = false;
+        for (int i = 0; i < allEntries.getSize(); i++) {
+          if (allEntries.getElementAt(i).getAuthor().equals(pb.author())
+              && allEntries.getElementAt(i).getTitle().equals(pb.title()) && !duplicate) {
+            duplicate = true;
+            rejectedBooks.add(pb.author() + " - " + pb.title());
+            rejected += 1;
           }
         }
-        in.close();
-        if (rejected > 0) {
-          for (String tmp : rejectedBooks) {
-            showNotification(MessageFormat.format(Localization.get("api.importDeclined"), tmp), 15);
-          }
+        if (!duplicate) {
+          Book_Booklist imp = new Book_Booklist(pb.author(), pb.title(), pb.note(),
+              pb.series(), pb.seriesPart(), pb.ebook(), 0,
+              null, "", "", new Timestamp(System.currentTimeMillis()), true);
+          importedBooks.add(imp.getAuthor() + " - " + imp.getTitle());
+          imported += 1;
+          SwingUtilities.invokeLater(() -> {
+            Mainframe.allEntries.add(imp);
+            allEntries.checkAuthors();
+          });
         }
-        if (imported >= 1) {
-          // Tabelle nach allen invokeLater-Einfügungen neu aufbauen
-          SwingUtilities.invokeLater(Mainframe::updateModel);
-          for (String tmp : importedBooks) {
-            showNotification(MessageFormat.format(Localization.get("api.importSuccess"), tmp), 15);
-          }
-          try {
-            // URL des Endpunkts
-            URL deleteUrl = new URI(HandleConfig.apiURL + "/api/delete.php").toURL();
-            con = (HttpURLConnection) deleteUrl.openConnection();
-            // POST-Anfrage einstellen
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            con.setDoOutput(true);
+      }
 
-            // Der Token, der gesendet werden soll
-            String postData = "token=" + HandleConfig.apiToken;
-
-            // Daten in den OutputStream schreiben
-            try (OutputStream os = con.getOutputStream()) {
-              byte[] input = postData.getBytes(StandardCharsets.UTF_8);
-              os.write(input, 0, input.length);
-            }
-
-            // Antwortcode überprüfen
-            responseCode = con.getResponseCode();
-            logger.info("Web API DELETE books responseCode: {}", responseCode);
-
-            uploadToApi(showUi);
-            downloaded = true;
-          } catch (Exception e) {
-            logger.error(e.getMessage());
-          }
-        } else {
-          if (showUi)
-            showNotification(Localization.get("api.importNoBooks"));
+      if (rejected > 0) {
+        for (String tmp : rejectedBooks) {
+          showNotification(MessageFormat.format(Localization.get("api.importDeclined"), tmp), 15);
         }
-        con.disconnect();
+      }
+      if (imported >= 1) {
+        SwingUtilities.invokeLater(Mainframe::updateModel);
+        for (String tmp : importedBooks) {
+          showNotification(MessageFormat.format(Localization.get("api.importSuccess"), tmp), 15);
+        }
+        apiSyncService.clearPendingBooks();
+        uploadToApi(showUi);
+        downloaded = true;
       } else {
         if (showUi)
-          JOptionPane.showMessageDialog(Mainframe.getInstance(), "Get request failed.");
+          showNotification(Localization.get("api.importNoBooks"));
       }
     } catch (URISyntaxException | IOException e) {
       logger.error(e.getMessage());
@@ -1528,45 +1359,19 @@ public class Mainframe extends JFrame {
 
   /**
    * Ruft ausstehende Rating-Updates von der Web-App ab und wendet sie lokal an.
-   * Loescht die Eintraege anschliessend aus der Web-App.
    */
   private static void fetchRatingUpdates() {
     try {
-      URL url = new URI(HandleConfig.apiURL + "/api/getRatingUpdates.php?token=" + HandleConfig.apiToken).toURL();
-      HttpURLConnection con = (HttpURLConnection) url.openConnection();
-      con.setRequestMethod("GET");
-      con.setConnectTimeout(5000);
-      con.setReadTimeout(10000);
-
-      if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
-        logger.warn("getRatingUpdates: HTTP {}", con.getResponseCode());
-        con.disconnect();
-        return;
-      }
-
-      StringBuilder response = new StringBuilder();
-      try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
-        String line;
-        while ((line = in.readLine()) != null) response.append(line);
-      }
-      con.disconnect();
-
-      JsonElement el = JsonParser.parseString(response.toString());
-      if (!el.isJsonArray()) return;
-
-      JsonArray arr = el.getAsJsonArray();
-      if (arr.isEmpty()) return;
+      java.util.List<ApiSyncService.RatingUpdate> updates = apiSyncService.fetchPendingRatingUpdates();
+      if (updates.isEmpty()) return;
 
       int updated = 0;
       ArrayList<Book_Booklist> updatedBooks = new ArrayList<>();
-      for (JsonElement e : arr) {
-        JsonObject obj = e.getAsJsonObject();
-        int bid = obj.get("bid").getAsInt();
-        double rating = obj.get("rating").getAsDouble();
+      for (ApiSyncService.RatingUpdate ru : updates) {
         for (int i = 0; i < allEntries.getSize(); i++) {
           Book_Booklist book = allEntries.getElementAt(i);
-          if (book.getBid() == bid) {
-            book.setRating(rating, true);
+          if (book.getBid() == ru.bid()) {
+            book.setRating(ru.rating(), true);
             updatedBooks.add(book);
             updated++;
             break;
@@ -1601,19 +1406,6 @@ public class Mainframe extends JFrame {
             }
           }
         });
-
-        // Verarbeitete Updates aus Web-App loeschen
-        URL deleteUrl = new URI(HandleConfig.apiURL + "/api/deleteRatingUpdates.php").toURL();
-        HttpURLConnection delCon = (HttpURLConnection) deleteUrl.openConnection();
-        delCon.setRequestMethod("POST");
-        delCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        delCon.setConnectTimeout(5000);
-        delCon.setDoOutput(true);
-        try (OutputStream os = delCon.getOutputStream()) {
-          os.write(("token=" + HandleConfig.apiToken).getBytes(StandardCharsets.UTF_8));
-        }
-        logger.info("deleteRatingUpdates: HTTP {}", delCon.getResponseCode());
-        delCon.disconnect();
       }
     } catch (URISyntaxException | IOException e) {
       logger.error("Fehler beim Abrufen der Rating-Updates: {}", e.getMessage());
@@ -1621,115 +1413,29 @@ public class Mainframe extends JFrame {
   }
 
   /**
-   * upload all current Books to the webApp with the corresponding Token
+   * Lädt alle aktuellen Bücher in die Web-App hoch.
    */
   private static void uploadToApi(boolean showUi) {
     try {
-      URL deleteUrl = new URI(HandleConfig.apiURL + "/api/deleteSynced.php").toURL();
-      HttpURLConnection con = (HttpURLConnection) deleteUrl.openConnection();
-      // POST-Anfrage einstellen
-      con.setRequestMethod("POST");
-      con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-      con.setDoOutput(true);
-      con.setConnectTimeout(5000);
-
-      // Der Token, der gesendet werden soll
-      String postData = "token=" + HandleConfig.apiToken;
-
-      // Daten in den OutputStream schreiben
-      try (OutputStream os = con.getOutputStream()) {
-        byte[] input = postData.getBytes(StandardCharsets.UTF_8);
-        os.write(input, 0, input.length);
-      }
-      int responseCode = con.getResponseCode();
-      logger.info("Web API DELETE SyncedBooks responseCode: {}", responseCode);
+      apiSyncService.clearSyncedBooks();
     } catch (Exception e) {
       logger.error(e.getMessage());
     }
 
     try {
-      // URL des API-Endpunkts
-      logger.info("Web API request: {}/api/upload.php?token=****{}", HandleConfig.apiURL, HandleConfig.apiToken.substring(HandleConfig.apiToken.length() - 4));
-
-      HttpURLConnection con = getHttpURLConnection();
-
-      // Antwort vom Server lesen
-      int responseCode = con.getResponseCode();
-      if (responseCode == HttpURLConnection.HTTP_OK) {
-        logger.info("Books successfully uploaded");
+      boolean success = apiSyncService.uploadBooks(allEntries.getBooks());
+      if (success) {
         if (showUi)
           showNotification(Localization.get("api.uploadSuccess"));
       } else {
-        logger.error("Error while uploading: {}", responseCode);
         if (showUi)
-          showNotification(MessageFormat.format(Localization.get("api.uploadError"), responseCode));
+          showNotification(MessageFormat.format(Localization.get("api.uploadError"), ""));
       }
-
-      // Verbindung schließen
-      con.disconnect();
     } catch (URISyntaxException | IOException e) {
       logger.error(e.getMessage());
       if (showUi)
         JOptionPane.showMessageDialog(Mainframe.getInstance(), "Error while API Upload.");
     }
-
-  }
-
-  private static HttpURLConnection getHttpURLConnection() throws URISyntaxException, IOException {
-    URL postUrl = new URI(HandleConfig.apiURL + "/api/upload.php?token=" + HandleConfig.apiToken).toURL();
-
-    // Verbindung aufbauen
-    HttpURLConnection con = (HttpURLConnection) postUrl.openConnection();
-    con.setRequestMethod("POST");
-    con.setRequestProperty("Content-Type", "application/json; utf-8");
-    con.setRequestProperty("Accept", "application/json");
-    con.setDoOutput(true);
-    con.setConnectTimeout(5000);
-
-    // GSON-Instanz erstellen
-    Gson gson = new Gson();
-    JsonArray jsonArray = new JsonArray();
-    // Nur die relevanten Felder in ein JSON-Array umwandeln
-
-    for (Book_Booklist book : allEntries.getBooks()) {
-      JsonObject jsonBook = new JsonObject();
-      jsonBook.addProperty("bid", book.getBid());
-      jsonBook.addProperty("author", book.getAuthor());
-      jsonBook.addProperty("title", book.getTitle());
-      jsonBook.addProperty("series", book.getSeries());
-      jsonBook.addProperty("series_part", book.getSeriesVol());
-      jsonBook.addProperty("ebook", book.isEbook());
-      jsonBook.addProperty("rating", book.getRating());
-      jsonBook.addProperty("note", book.getNote() != null ? book.getNote() : "");
-      // Im loadOnDemand-Modus sind ISBN und Beschreibung noch nicht geladen
-      if (HandleConfig.loadOnDemand == 1) {
-        Database.loadIsbnAndDescForSync(book);
-      }
-      jsonBook.addProperty("isbn", book.getIsbn() != null ? book.getIsbn() : "");
-      jsonBook.addProperty("description", book.getDesc() != null ? book.getDesc() : "");
-      jsonBook.addProperty("date_added", book.getDate() != null ? book.getDate().toString() : "");
-      if (!book.getBorrowedTo().isEmpty()) {
-        jsonBook.addProperty("ausgeliehen", "an");
-        jsonBook.addProperty("borrow_name", book.getBorrowedTo());
-      } else if (!book.getBorrowedFrom().isEmpty()) {
-        jsonBook.addProperty("ausgeliehen", "von");
-        jsonBook.addProperty("borrow_name", book.getBorrowedFrom());
-      } else {
-        jsonBook.addProperty("ausgeliehen", "nein");
-        jsonBook.addProperty("borrow_name", "");
-      }
-      jsonArray.add(jsonBook);
-
-    }
-
-    // JSON-Daten senden
-    String jsonInputString = gson.toJson(jsonArray);
-
-    try (OutputStream os = con.getOutputStream()) {
-      byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
-      os.write(input, 0, input.length);
-    }
-    return con;
   }
 
   /**
@@ -1765,176 +1471,59 @@ public class Mainframe extends JFrame {
    */
   public void updateSearchPlaceholder() {
     txt_search.putClientProperty("JTextField.placeholderText",
-        MessageFormat.format(Localization.get("search.text")));
+        Localization.get("search.text"));
   }
 
   /**
-   * update the jar file with the already downloaded latest.jar
-   */
-  /**
-   * Kopiert latest.jar ueber die aktuelle JAR und startet die App neu.
-   * Wird als separater Prozess ausgefuehrt (java -jar app.jar update).
+   * Delegiert an UpdateService.applyUpdate().
+   * Wird als separater Prozess ausgeführt (java -jar app.jar update).
    */
   public static void update() {
-    try {
-      File jarFile = new File(Mainframe.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-      File baseDir = jarFile.getParentFile();
-      try (PrintWriter log = new PrintWriter(new File(baseDir, "update.log"))) {
-        Thread.sleep(2000);
-        File source = new File(baseDir, "latest.jar");
-        log.println("UPDATER: initialize");
-        log.println("UPDATER: detected fileName: " + jarFile.getAbsolutePath());
-        try (InputStream is = new FileInputStream(source);
-             OutputStream os = new FileOutputStream(jarFile)) {
-          byte[] buffer = new byte[8192];
-          int length;
-          log.println("UPDATER: overwriting file");
-          while ((length = is.read(buffer)) > 0) {
-            os.write(buffer, 0, length);
-          }
-          log.println("UPDATER: writing complete");
-          ProcessBuilder pb = new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath());
-          pb.directory(baseDir);
-          log.println("UPDATER: starting " + pb.command());
-          pb.start();
-          log.println("UPDATER: SUCCESS");
-        } catch (IOException e) {
-          log.println("UPDATER: ERROR - " + e.getMessage());
-        }
-      }
-    } catch (FileNotFoundException | InterruptedException | URISyntaxException e1) {
-      e1.printStackTrace();
-    }
+    UpdateService.applyUpdate();
   }
 
   /**
-   * Prueft ueber die GitHub API ob ein Update verfuegbar ist.
+   * Prüft über die GitHub API ob ein Update verfügbar ist.
    * Nur wenn eine neuere Version gefunden wird, wird die JAR heruntergeladen.
    */
   private void checkUpdate() {
     Mainframe.executor.submit(() -> {
       try {
-        // Version ueber GitHub API pruefen (wenige KB statt gesamte JAR)
         customNotificationPanel notification = showNotification(Localization.get("update.versionCheck"), 15);
-        URL apiUrl = new URI("https://api.github.com/repos/NeXoS355/booklist/releases/latest").toURL();
-        HttpURLConnection apiConn = (HttpURLConnection) apiUrl.openConnection();
-        apiConn.setRequestProperty("Accept", "application/vnd.github+json");
-        apiConn.setRequestMethod("GET");
+        UpdateService.UpdateInfo info = updateService.checkForUpdate(version);
 
-        if (apiConn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-          notification.setText(Localization.get("api.noConnect"));
-          logger.error("Update - GitHub API returned: {}", apiConn.getResponseCode());
-          return;
-        }
-
-        StringBuilder response = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(apiConn.getInputStream(), StandardCharsets.UTF_8))) {
-          String line;
-          while ((line = reader.readLine()) != null) {
-            response.append(line);
-          }
-        }
-        apiConn.disconnect();
-
-        JsonObject release = JsonParser.parseString(response.toString()).getAsJsonObject();
-        String latestTag = release.get("tag_name").getAsString().replaceAll("^v", "");
-        logger.info("Update - current version: {}, latest version: {}", version, latestTag);
-
-        int currentVer = parseVersion(version);
-        int latestVer = parseVersion(latestTag);
-
-        if (latestVer <= currentVer) {
+        if (!info.available()) {
           notification.setText(Localization.get("update.noUpdate"));
-          logger.info("Update - no update available");
           return;
         }
 
-        // Update verfuegbar
         notification.setText(Localization.get("update.update"));
         int answer = JOptionPane.showConfirmDialog(Mainframe.getInstance(),
-            MessageFormat.format(Localization.get("q.update"), latestTag),
+            MessageFormat.format(Localization.get("q.update"), info.latestTag()),
             "Update", JOptionPane.YES_NO_OPTION);
         if (answer != JOptionPane.YES_OPTION) {
           return;
         }
 
-        // Backup erstellen und JAR herunterladen
-        boolean backupOk = createBackup();
+        boolean backupOk = BackupService.createBackup();
         if (!backupOk) {
           logger.error("Update - backup failed, aborting update");
           return;
         }
 
-        // Download-URL und SHA-256 Digest aus den Release Assets lesen
-        String downloadUrl = "https://github.com/NeXoS355/booklist/releases/latest/download/Booklist.jar";
-        String expectedDigest = null;
-        if (release.has("assets")) {
-          var assets = release.getAsJsonArray("assets");
-          for (var asset : assets) {
-            JsonObject assetObj = asset.getAsJsonObject();
-            String name = assetObj.get("name").getAsString();
-            if (name.endsWith(".jar")) {
-              downloadUrl = assetObj.get("browser_download_url").getAsString();
-              if (assetObj.has("digest") && !assetObj.get("digest").isJsonNull()) {
-                String digest = assetObj.get("digest").getAsString();
-                if (digest.startsWith("sha256:")) {
-                  expectedDigest = digest.substring(7);
-                }
-              }
-              break;
-            }
-          }
-        }
-
-        URL jarUrl = new URI(downloadUrl).toURL();
-        HttpURLConnection httpConn = (HttpURLConnection) jarUrl.openConnection();
-        int fileSize = httpConn.getContentLength();
-        logger.info("Update - downloading JAR ({} KB)", fileSize > 0 ? fileSize / 1024 : "unknown");
-
         File jarFile = new File(Mainframe.class.getProtectionDomain()
             .getCodeSource().getLocation().toURI());
         File baseDir = jarFile.getParentFile();
+        File latestJar = new File(baseDir, "latest.jar");
 
         notification.setText(Localization.get("update.download"));
-        File latestJar = new File(baseDir, "latest.jar");
-        try (BufferedInputStream in = new BufferedInputStream(jarUrl.openStream());
-             FileOutputStream fos = new FileOutputStream(latestJar)) {
-          byte[] buffer = new byte[8192];
-          int bytesRead;
-          int downloaded = 0;
-          int oldProgress = 0;
-          while ((bytesRead = in.read(buffer)) != -1) {
-            fos.write(buffer, 0, bytesRead);
-            downloaded += bytesRead;
-            if (fileSize > 0) {
-              int progress = (int) ((double) downloaded / fileSize * 100);
-              if (progress > oldProgress) {
-                notification.setText(Localization.get("update.download") + " " + progress + "%");
-                oldProgress = progress;
-              }
-            }
-          }
-        }
-        logger.info("Update - download complete");
+        updateService.downloadJar(info.downloadUrl(), latestJar,
+            pct -> notification.setText(Localization.get("update.download") + " " + pct + "%"));
 
-        // SHA-256 Prüfung
-        if (expectedDigest != null) {
-          java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
-          try (java.io.InputStream fis = new java.io.FileInputStream(latestJar)) {
-            byte[] buf = new byte[8192];
-            int n;
-            while ((n = fis.read(buf)) != -1) {
-              md.update(buf, 0, n);
-            }
-          }
-          StringBuilder sb = new StringBuilder();
-          for (byte b : md.digest()) {
-            sb.append(String.format("%02x", b));
-          }
-          String actualDigest = sb.toString();
-          if (!actualDigest.equals(expectedDigest)) {
-            logger.error("Update - SHA-256 mismatch: expected {}, got {}", expectedDigest, actualDigest);
+        if (info.expectedDigest() != null) {
+          boolean ok = UpdateService.verifyChecksum(latestJar, info.expectedDigest());
+          if (!ok) {
+            logger.error("Update - SHA-256 mismatch");
             latestJar.delete();
             notification.setText(Localization.get("update.error"));
             return;
@@ -1944,7 +1533,6 @@ public class Mainframe extends JFrame {
           logger.warn("Update - no SHA-256 digest available, skipping verification");
         }
 
-        // Update starten: aktuelles JAR durch neues ersetzen
         ProcessBuilder pb = new ProcessBuilder("java", "-jar", jarFile.getAbsolutePath(), "update");
         pb.directory(baseDir);
         logger.info("Update - starting: {}", pb.command());
@@ -1956,43 +1544,6 @@ public class Mainframe extends JFrame {
         logger.error("Update error: {}", e.getMessage());
       }
     });
-  }
-
-  /**
-   * Wandelt einen Versionsstring (z.B. "3.3.0") in einen int um (330).
-   */
-  static int parseVersion(String ver) {
-    String[] parts = ver.split("[.]");
-    int result = 0;
-    for (int i = 0; i < parts.length; i++) {
-      result = result * 1000 + Integer.parseInt(parts[i]);
-    }
-    return result;
-  }
-
-  /**
-   * Ruft ein GitHub Release anhand eines Tags ab.
-   */
-  private static JsonObject fetchReleaseByTag(String tag) throws IOException, URISyntaxException {
-    URL apiUrl = new URI("https://api.github.com/repos/NeXoS355/booklist/releases/tags/" + tag).toURL();
-    HttpURLConnection apiConn = (HttpURLConnection) apiUrl.openConnection();
-    apiConn.setRequestProperty("Accept", "application/vnd.github+json");
-    apiConn.setRequestMethod("GET");
-
-    if (apiConn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-      throw new IOException("GitHub API returned: " + apiConn.getResponseCode());
-    }
-
-    StringBuilder response = new StringBuilder();
-    try (BufferedReader reader = new BufferedReader(
-        new InputStreamReader(apiConn.getInputStream(), StandardCharsets.UTF_8))) {
-      String line;
-      while ((line = reader.readLine()) != null) {
-        response.append(line);
-      }
-    }
-    apiConn.disconnect();
-    return JsonParser.parseString(response.toString()).getAsJsonObject();
   }
 
   /**
@@ -2044,7 +1595,7 @@ public class Mainframe extends JFrame {
     }
 
     try {
-      JsonObject release = fetchReleaseByTag(MIGRATION_BRIDGE_TAG);
+      JsonObject release = UpdateService.fetchReleaseByTag(MIGRATION_BRIDGE_TAG);
 
       String downloadUrl = null;
       if (release.has("assets")) {
