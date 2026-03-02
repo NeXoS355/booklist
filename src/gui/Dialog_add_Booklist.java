@@ -13,13 +13,10 @@ import java.io.Serial;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 
 import com.formdev.flatlaf.util.UIScale;
@@ -37,14 +34,14 @@ public class Dialog_add_Booklist extends JDialog {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-	private final CustomTextField txtAuthor;
+	private final AutoCompleteField txtAuthor;
 	private final CustomTextField txtTitle;
 	private final JCheckBox checkFrom;
 	private final CustomTextField txtBorrowedFrom;
 	private final JCheckBox checkTo;
 	private final CustomTextField txtBorrowedTo;
 	private final CustomTextField txtNote;
-	private final CustomTextField txtSeries;
+	private final AutoCompleteField txtSeries;
 	private final CustomTextField txtSeriesVol;
 	private final JCheckBox checkEbook;
 	private final JButton btn_add;
@@ -87,59 +84,10 @@ public class Dialog_add_Booklist extends JDialog {
 		/*
 		 * Create Components for Panel Center
 		 */
-		txtAuthor = new CustomTextField();
+		txtAuthor = new AutoCompleteField(() -> Mainframe.allEntries.authors);
 		txtAuthor.setText(Mainframe.getTreeSelection());
 		txtAuthor.setPreferredSize(new Dimension(50, height));
 		((AbstractDocument) txtAuthor.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-		JPopupMenu suggestionsPopup = new JPopupMenu();
-		txtAuthor.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				showSuggestions();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				showSuggestions();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				// not used
-			}
-
-			private void showSuggestions() {
-				String typedText = txtAuthor.getText().trim();
-
-				// Popup zurücksetzen
-				suggestionsPopup.setVisible(false);
-				suggestionsPopup.removeAll();
-
-				if (typedText.isEmpty()) {
-					return; // Keine Eingabe -> nichts tun
-				}
-
-				String[] suggestions = autoCompletion(typedText, "author");
-
-				if (suggestions.length == 0) {
-					return; // Keine Vorschläge -> nichts anzeigen
-				}
-
-				// Vorschläge hinzufügen
-				for (String suggestion : suggestions) {
-					JMenuItem item = new JMenuItem(suggestion);
-					item.addActionListener(e -> {
-                        txtAuthor.setText(suggestion);
-                        suggestionsPopup.setVisible(false);
-                    });
-					suggestionsPopup.add(item);
-				}
-
-				// Popup anzeigen
-				suggestionsPopup.show(txtAuthor, 0, txtAuthor.getHeight());
-				txtAuthor.grabFocus();
-			}
-		});
 
 		JLabel lbl_title = new JLabel(Localization.get("label.title") + ":");
 		lbl_title.setFont(Mainframe.defaultFont);
@@ -172,57 +120,13 @@ public class Dialog_add_Booklist extends JDialog {
 		lbl_serie.setFont(Mainframe.defaultFont);
 		lbl_serie.setPreferredSize(new Dimension(width, height));
 
-		txtSeries = new CustomTextField();
+		txtSeries = new AutoCompleteField(() -> {
+			String author = txtAuthor.getText().trim();
+			if (author.isEmpty()) return List.of();
+			return Arrays.asList(Mainframe.allEntries.getSeriesFromAuthor(author));
+		});
 		txtSeries.setPreferredSize(new Dimension(50, height));
 		((AbstractDocument) txtSeries.getDocument()).setDocumentFilter(new LengthDocumentFilter(50));
-		txtSeries.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				showSuggestions();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				showSuggestions();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				// not used
-			}
-
-			private void showSuggestions() {
-				String typedText = txtSeries.getText().trim();
-
-				// Popup zurücksetzen
-				suggestionsPopup.setVisible(false);
-				suggestionsPopup.removeAll();
-
-				if (typedText.isEmpty()) {
-					return; // Keine Eingabe -> nichts tun
-				}
-
-				String[] suggestions = autoCompletion(typedText, "series");
-
-				if (suggestions.length == 0) {
-					return; // Keine Vorschläge -> nichts anzeigen
-				}
-
-				// Vorschläge hinzufügen
-				for (String suggestion : suggestions) {
-					JMenuItem item = new JMenuItem(suggestion);
-					item.addActionListener(e -> {
-                        txtSeries.setText(suggestion);
-                        suggestionsPopup.setVisible(false);
-                    });
-					suggestionsPopup.add(item);
-				}
-
-				// Popup anzeigen
-				suggestionsPopup.show(txtSeries, 0, txtSeries.getHeight());
-				txtSeries.grabFocus();
-			}
-		});
 
 		txtSeriesVol = new CustomTextField();
 		txtSeriesVol.setPreferredSize(new Dimension(50, height));
@@ -457,45 +361,6 @@ public class Dialog_add_Booklist extends JDialog {
 			}
 		}
 
-	}
-
-	/**
-	 * add the autoComplete feature to "autor" and "serie"
-	 * 
-	 * @param search - currently typed String
-	 * @param field  - sets variable based on which field is active
-	 * 
-	 * @return String array with matching authors or series
-	 * 
-	 */
-	public String[] autoCompletion(String search, String field) {
-		// Eingabe validieren
-		if (search == null || search.isEmpty() || field == null) {
-			return new String[0];
-		}
-		search = search.trim().toLowerCase();
-		List<String> suggestions;
-		if (field.equals("author")) {
-			String finalSearch = search;
-			suggestions = Mainframe.allEntries.authors.stream()
-					.filter(author -> author.toLowerCase().startsWith(finalSearch))
-					.collect(Collectors.toList());
-		} else if (field.equals("series")) {
-			String author = txtAuthor.getText();
-			if (author == null || author.isEmpty()) {
-				return new String[0];
-			}
-			String[] series = Mainframe.allEntries.getSeriesFromAuthor(author);
-			suggestions = new ArrayList<>();
-			for (String s : series) {
-				if (s.toLowerCase().startsWith(search)) {
-					suggestions.add(s);
-				}
-			}
-		} else {
-			return new String[0];
-		}
-		return suggestions.toArray(new String[0]);
 	}
 
 	/**
