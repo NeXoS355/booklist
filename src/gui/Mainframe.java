@@ -36,6 +36,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import javax.swing.table.TableRowSorter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
@@ -508,7 +510,7 @@ public class Mainframe extends JFrame {
     logger.info("Finished creating GUI Components. Start creating Table Contents");
 
     table.setModel(tableDisplay);
-    table.setAutoCreateRowSorter(true);
+    applyTableSorter();
     table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
     CustomTableCellRenderer tableRenderer = new CustomTableCellRenderer(this.getTitle());
     table.setDefaultRenderer(Object.class, tableRenderer);
@@ -1019,6 +1021,7 @@ public class Mainframe extends JFrame {
   public static void updateModel() {
     tableDisplay = new SimpleTableModel(allEntries);
     table.setModel(tableDisplay);
+    applyTableSorter();
     treeSelection = "";
     setTableLayout();
     if (btnSearchReset != null) btnSearchReset.setVisible(false);
@@ -1110,6 +1113,40 @@ public class Mainframe extends JFrame {
 
     }
 
+  }
+
+  /**
+   * Erstellt einen TableRowSorter mit chronologisch korrektem Datums-Comparator
+   * und setzt ihn an der Tabelle. Muss nach jedem setModel()-Aufruf aufgerufen werden.
+   */
+  private static void applyTableSorter() {
+    TableRowSorter<SimpleTableModel> sorter = new TableRowSorter<>(tableDisplay);
+    int dateModelCol = -1;
+    for (int i = 0; i < SimpleTableModel.columnKeys.length; i++) {
+      if (SimpleTableModel.KEY_DATE.equals(SimpleTableModel.columnKeys[i])) {
+        dateModelCol = i;
+        break;
+      }
+    }
+    if (dateModelCol >= 0) {
+      Locale locale = HandleConfig.lang.equals("GERMAN") ? Locale.GERMAN : Locale.ENGLISH;
+      SimpleDateFormat sdf = new SimpleDateFormat(
+          HandleConfig.lang.equals("GERMAN") ? "dd. MMM. yyyy" : "MMM dd, yyyy", locale);
+      final int col = dateModelCol;
+      sorter.setComparator(col, (a, b) -> {
+        String sa = a.toString();
+        String sb = b.toString();
+        if (sa.isEmpty() && sb.isEmpty()) return 0;
+        if (sa.isEmpty()) return 1;
+        if (sb.isEmpty()) return -1;
+        try {
+          return sdf.parse(sa).compareTo(sdf.parse(sb));
+        } catch (java.text.ParseException e) {
+          return sa.compareTo(sb);
+        }
+      });
+    }
+    table.setRowSorter(sorter);
   }
 
   /**
@@ -1218,6 +1255,7 @@ public class Mainframe extends JFrame {
     if (filteredEntries.getSize() > 0) {
       tableDisplay = new SimpleTableModel(filteredEntries);
       table.setModel(tableDisplay);
+      applyTableSorter();
       setTableLayout();
       btnSearchReset.setVisible(true);
       updateStatusBar();
