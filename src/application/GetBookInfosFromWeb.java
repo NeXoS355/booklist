@@ -84,25 +84,45 @@ public class GetBookInfosFromWeb {
 
 	/**
 	 * request Series Infos from Google API to save new Books from that series.
+	 * First tries with langRestrict=de, falls back to unrestricted if no results.
 	 *
-	 * @param str        - search String for API request
+	 * @param series     - name of the series
+	 * @param author     - author of the series
+	 * @param volNumber  - missing volume number to search for
 	 * @param maxResults - how many Results should be requested from Google Books API
 	 */
-	public static String[][] getSeriesInfoFromGoogleApiWebRequest(String str, int maxResults) {
-		String[][] compareReturn = new String[3][10];
+	public static String[][] getSeriesInfoFromGoogleApiWebRequest(String series, String author, int volNumber, int maxResults) {
+		String[][] result = doSeriesApiRequest(series, author, volNumber, maxResults, true);
+		boolean hasResults = false;
+		for (String[] entry : result) {
+			if (entry[0] != null || entry[1] != null) { hasResults = true; break; }
+		}
+		if (!hasResults) {
+			Mainframe.logger.info("Serie: keine Treffer mit langRestrict=de, Wiederholung ohne Sprachfilter");
+			result = doSeriesApiRequest(series, author, volNumber, maxResults, false);
+		}
+		return result;
+	}
+
+	private static String[][] doSeriesApiRequest(String series, String author, int volNumber, int maxResults, boolean langRestrict) {
+		String[][] compareReturn = new String[maxResults][3];
 		try {
-			str = sanitizeString(str);
+			String query = "intitle:" + sanitizeString(series)
+					+ "+intitle:" + sanitizeString(String.valueOf(volNumber))
+					+ "+inauthor:" + sanitizeString(author);
 
-			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + str + "&maxResults=" + maxResults
-					+ "&printType=books";
+			String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + query
+					+ "&maxResults=" + maxResults
+					+ "&printType=books"
+					+ (langRestrict ? "&langRestrict=de" : "");
 
-			Mainframe.logger.info("Search API: {}", str);
+			Mainframe.logger.info("Search API series query: {}", query);
 			Mainframe.logger.info("Search API URL: {}", apiUrl);
 
 			String response = executeApiRequest(apiUrl);
 			if (response != null) {
 				JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
-				compareReturn = analyseApiRequestSeries(jsonObject, maxResults);
+				compareReturn = analyseApiRequestSeries(jsonObject, maxResults, volNumber);
 			}
 
 		} catch (IOException | URISyntaxException e) {
@@ -116,10 +136,10 @@ public class GetBookInfosFromWeb {
 	 * Execute an API request with timeouts and rate-limit handling
 	 */
 	private static String executeApiRequest(String apiUrl) throws IOException, URISyntaxException {
-		return executeApiRequest(apiUrl, false);
+		return executeApiRequest(apiUrl, 0);
 	}
 
-	private static String executeApiRequest(String apiUrl, boolean isRetry) throws IOException, URISyntaxException {
+	private static String executeApiRequest(String apiUrl, int attempt) throws IOException, URISyntaxException {
 		URL url = new URI(apiUrl).toURL();
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
@@ -129,15 +149,17 @@ public class GetBookInfosFromWeb {
 		int responseCode = connection.getResponseCode();
 		Mainframe.logger.info("Search API response: {}", responseCode);
 
-		if (responseCode == 429 && !isRetry) {
+		if ((responseCode == 429 || responseCode == 503) && attempt < 3) {
 			connection.disconnect();
-			Mainframe.logger.warn("Google Books API Rate Limit erreicht, warte 1s ...");
+			// Exponential backoff: 3s, 6s, 12s
+			int waitMs = responseCode == 429 ? 1000 : (3000 * (1 << attempt));
+			Mainframe.logger.warn("Google Books API HTTP {} (Versuch {}) – warte {}ms ...", responseCode, attempt + 1, waitMs);
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(waitMs);
 			} catch (InterruptedException ignored) {
 				Thread.currentThread().interrupt();
 			}
-			return executeApiRequest(apiUrl, true);
+			return executeApiRequest(apiUrl, attempt + 1);
 		}
 
 		try {
@@ -254,37 +276,73 @@ public class GetBookInfosFromWeb {
 	}
 
 	/**
-	 * Analyze the JSON response from Google Books API
+	 * Analyze the JSON response from Google Books API.
+	 * Ergebnisse mit volNumber im Titel werden bevorzugt (an Index 0 gestellt).
 	 */
-	private static String[][] analyseApiRequestSeries(JsonObject jsonObject, int maxResults) {
+	private static String[][] analyseApiRequestSeries(JsonObject jsonObject, int maxResults, int volNumber) {
 		String[][] returnArray = new String[maxResults][3];
 		if (!jsonObject.has("items")) return returnArray;
 
 		var itemsArray = jsonObject.getAsJsonArray("items");
 		int itemCount = Math.min(itemsArray.size(), maxResults);
 
+		int fillIndex = 0;
+		int firstVolMatch = -1;
+
 		for (int i = 0; i < itemCount; i++) {
 			var item = itemsArray.get(i).getAsJsonObject();
 			if (!item.has("volumeInfo")) continue;
 			var volumeInfo = item.getAsJsonObject("volumeInfo");
 
+			String[] entry = new String[3];
+			if (volumeInfo.has("title")) {
+				entry[1] = volumeInfo.get("title").getAsString();
+			}
+			if (volumeInfo.has("authors") && !volumeInfo.getAsJsonArray("authors").isEmpty()) {
+				entry[0] = volumeInfo.getAsJsonArray("authors").get(0).getAsString();
+			}
 			if (volumeInfo.has("industryIdentifiers")) {
 				var identifiers = volumeInfo.getAsJsonArray("industryIdentifiers");
 				for (int j = 0; j < identifiers.size(); j++) {
 					var identifier = identifiers.get(j).getAsJsonObject();
 					if (identifier.has("type") && identifier.get("type").getAsString().equals("ISBN_13")) {
-						returnArray[i][2] = identifier.get("identifier").getAsString();
+						entry[2] = identifier.get("identifier").getAsString();
 					}
 				}
 			}
-			if (volumeInfo.has("title")) {
-				returnArray[i][1] = volumeInfo.get("title").getAsString();
-			}
-			if (volumeInfo.has("authors") && !volumeInfo.getAsJsonArray("authors").isEmpty()) {
-				returnArray[i][0] = volumeInfo.getAsJsonArray("authors").get(0).getAsString();
+
+			if (fillIndex < maxResults) {
+				returnArray[fillIndex] = entry;
+				if (firstVolMatch < 0 && entry[1] != null && titleContainsVolume(entry[1], volNumber)) {
+					firstVolMatch = fillIndex;
+				}
+				fillIndex++;
 			}
 		}
+
+		// Bestes Ergebnis (Bandnummer im Titel) an Index 0 schieben
+		if (firstVolMatch > 0) {
+			String[] best = returnArray[firstVolMatch];
+			returnArray[firstVolMatch] = returnArray[0];
+			returnArray[0] = best;
+		}
+
 		return returnArray;
+	}
+
+	/**
+	 * Prueft ob ein Titel die Bandnummer enthaelt — unterstuetzt gaengige Formate
+	 * wie "Band 3", "Bd. 3", "Teil 3", "Vol. 3" sowie blosse Zahlen als eigenes Wort.
+	 */
+	static boolean titleContainsVolume(String title, int volNumber) {
+		String volStr = String.valueOf(volNumber);
+		String titleLower = title.toLowerCase();
+		String[] prefixes = {"band ", "bd. ", "bd ", "teil ", "vol. ", "vol ", "tome ", "book ", "part "};
+		for (String prefix : prefixes) {
+			if (titleLower.contains(prefix + volStr)) return true;
+		}
+		// Zahl als eigenes Wort (keine Ziffern direkt davor/dahinter)
+		return title.matches(".*(?<!\\d)" + volStr + "(?!\\d).*");
 	}
 
 	/**

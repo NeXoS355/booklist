@@ -532,10 +532,10 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
                 }
             }
         }
-		// create a list with the missing parts in the series up to maxVol
+		// create a list with the missing parts in the series up to maxVol+1 (Lookahead fuer neuen Band)
 		ArrayList<Integer> missingBooksOfSeries = new ArrayList<>();
 		boolean missing = true;
-		for (int i = 1; i < maxVol; i++) {
+		for (int i = 1; i <= maxVol + 1; i++) {
             for (Integer ownedBookOfSeries : ownedBooksOfSeries) {
                 if (ownedBookOfSeries == i) {
                     missing = false;
@@ -549,13 +549,18 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 		}
 		// how many Books should be requested from the Google Books API for every
 		// missing Volume
-		int returnCount = 3;
+		int returnCount = 7;
 		// create a list with new Books which are not in the current list
 		ArrayList<String[]> newBooksList = new ArrayList<>();
 		// query the Google Book API for every missing Volume
+		boolean firstRequest = true;
         for (Integer missingBookOfSeries : missingBooksOfSeries) {
+            if (!firstRequest) {
+                try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
+            }
+            firstRequest = false;
             String[][] returnArray = GetBookInfosFromWeb
-                    .getSeriesInfoFromGoogleApiWebRequest(series + "+" + missingBookOfSeries, returnCount);
+                    .getSeriesInfoFromGoogleApiWebRequest(series, author, missingBookOfSeries, returnCount);
             int tryCounter = 0;
             // go through all returned Books to analyze them
             for (int j = 0; j < returnCount; j++) {
@@ -574,11 +579,10 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
                             break;
                         }
                     }
-                    // filter out some cases where the Title is too long or might be a collection
-                    if (foundTitle.length() <= 50 && !foundTitle.contains(" / ")) {
-                        // progress only if book is not already owned, author is the same as the
-                        // requested one
-                        if (!owned && foundAuthor.equals(author)) {
+                    // filter out some cases where the Title is too long
+                    if (foundTitle.length() <= 80) {
+                        // progress only if book is not already owned, author matches (fuzzy, mind. 60%)
+                        if (!owned && GetBookInfosFromWeb.compareString(foundAuthor, author) >= 60) {
                             boolean added = false;
                             // check if Book was previously added
                             for (String[] strings : newBooksList) {
@@ -608,6 +612,7 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
                                         .add(new Book_Wishlist(foundAuthor, foundTitle, "Automatisch hinzugefuegt",
                                                 series, Integer.toString(missingBookOfSeries),
                                                 new Timestamp(System.currentTimeMillis()), true));
+                                break; // ein Treffer pro Band reicht
                             }
                         }
                     }

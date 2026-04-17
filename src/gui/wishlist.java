@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.Serial;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.Objects;
 
 import javax.swing.*;
@@ -266,7 +267,7 @@ public class wishlist extends JDialog {
             String searchTitle = (String) table.getValueAt(j, 1);
             int index = wishlistEntries.getIndexOf(searchAuthor, searchTitle);
             if (index < 0) continue;
-            int response = JOptionPane.showConfirmDialog(this, Localization.get("book.deleteQuestion"), Localization.get("text.delete"),
+            int response = JOptionPane.showConfirmDialog(this, MessageFormat.format(Localization.get("book.deleteQuestion"), searchAuthor, searchTitle), Localization.get("text.delete"),
                     JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
                 wishlistEntries.delete(index);

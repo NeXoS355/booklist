@@ -602,17 +602,24 @@ public class Mainframe extends JFrame {
           if (Objects.equals(e5.getActionCommand(), Localization.get("contextMenu.analyzeSeries"))) {
             if (table.getSelectedRow() < 0) return;
             String seriesName = seriesFromCell(table.getSelectedRow());
+            String authorName = (String) table.getValueAt(table.getSelectedRow(), viewColFor(SimpleTableModel.KEY_AUTHOR));
             if (wishlist_instance == null)
               wishlist_instance = new wishlist(Mainframe.getInstance(), false);
-            boolean success = allEntries.analyzeSeries(seriesName,
-                (String) table.getValueAt(table.getSelectedRow(), viewColFor(SimpleTableModel.KEY_AUTHOR)));
-            gui.wishlist.updateModel();
-            if (!success) {
-              JOptionPane.showMessageDialog(Mainframe.getInstance(),
-                  Localization.get("analyze.error"));
-            } else {
-              wishlist_instance.setVisible(true);
-            }
+            customNotificationPanel loadingPanel = showNotification(Localization.get("analyze.loading"), Integer.MAX_VALUE);
+            loadingPanel.startSpinner();
+            executor.submit(() -> {
+              boolean success = allEntries.analyzeSeries(seriesName, authorName);
+              SwingUtilities.invokeLater(() -> {
+                loadingPanel.startFadeOut();
+                gui.wishlist.updateModel();
+                if (!success) {
+                  JOptionPane.showMessageDialog(Mainframe.getInstance(),
+                      Localization.get("analyze.error"));
+                } else {
+                  wishlist_instance.setVisible(true);
+                }
+              });
+            });
           }
         });
       }

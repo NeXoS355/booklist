@@ -11,12 +11,16 @@ import static gui.Mainframe.*;
 public class customNotificationPanel extends JPanel {
 
     final JLabel notificationLabel;
+    JLabel iconLabel;
     int timer;
     final int oriTimer;
     private float opacity = 0f;
     private int slideOffset;
     private Timer animationTimer;
+    private Timer spinnerTimer;
     private boolean fadingOut = false;
+
+    private static final String[] SPINNER_FRAMES = {"-", "\\", "|", "/"};
 
     private static final int MAX_WIDTH = 450;
     private static final int ARC = 12;
@@ -32,7 +36,7 @@ public class customNotificationPanel extends JPanel {
         // Icon
         String iconText = message.toLowerCase().contains("fehler") ||
                 message.toLowerCase().contains("error") ? "\u26A0" : "\u2713";
-        JLabel iconLabel = new JLabel(iconText);
+        iconLabel = new JLabel(iconText);
         iconLabel.setForeground(new Color(255, 255, 255, 200));
         iconLabel.setFont(Mainframe.defaultFont);
         add(iconLabel, BorderLayout.WEST);
@@ -89,6 +93,7 @@ public class customNotificationPanel extends JPanel {
     }
 
     private void removeNotification() {
+        if (spinnerTimer != null) spinnerTimer.stop();
         setVisible(false);
         activeNotifications.remove(this);
         layeredPane.remove(this);
@@ -100,6 +105,16 @@ public class customNotificationPanel extends JPanel {
         if (!animationTimer.isRunning()) {
             animationTimer.start();
         }
+    }
+
+    public void startSpinner() {
+        int[] frame = {0};
+        spinnerTimer = new Timer(150, e -> {
+            frame[0] = (frame[0] + 1) % SPINNER_FRAMES.length;
+            iconLabel.setText(SPINNER_FRAMES[frame[0]]);
+        });
+        iconLabel.setText(SPINNER_FRAMES[0]);
+        spinnerTimer.start();
     }
 
     private void applyText(String message) {
