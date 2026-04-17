@@ -64,7 +64,7 @@ java -jar target/booklist-3.4.1-jar-with-dependencies.jar
 | [Gson](https://github.com/google/gson) | 2.13.2 | JSON parsing |
 | [OpenCSV](https://opencsv.sourceforge.net/) | 5.12.0 | CSV export |
 | [ZXing](https://github.com/zxing/zxing) | 3.5.4 | QRCode generation |
-| [Log4j](https://logging.apache.org/log4j/) | 2.25.3 | Logging |
+| [Log4j](https://logging.apache.org/log4j/) | 2.25.4 | Logging |
 
 ## License
 
