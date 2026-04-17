@@ -215,6 +215,7 @@ public class ApiSyncService {
     con.setRequestProperty("Accept", "application/json");
     con.setDoOutput(true);
     con.setConnectTimeout(5000);
+    con.setReadTimeout(15000);
 
     Gson gson = new Gson();
     JsonArray jsonArray = new JsonArray();

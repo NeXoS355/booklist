@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
-import java.util.Objects;
 
 public class BackupService {
 
@@ -76,9 +75,10 @@ public class BackupService {
     if (!to.exists()) {
       success = to.mkdirs();
     }
-    if (success) {
-      for (File file : Objects.requireNonNull(from.listFiles())) {
-        File n = new File(to.getAbsolutePath() + "/" + file.getName());
+    File[] files = from.listFiles();
+    if (success && files != null) {
+      for (File file : files) {
+        File n = new File(to, file.getName());
         if (file.isDirectory()) {
           copyFilesInDirectory(file, n);
         } else {

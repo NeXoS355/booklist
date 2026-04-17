@@ -140,21 +140,23 @@ public class GetBookInfosFromWeb {
 			return executeApiRequest(apiUrl, true);
 		}
 
-		if (responseCode == HttpURLConnection.HTTP_OK) {
-			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-				StringBuilder response = new StringBuilder();
-				String line;
-				while ((line = reader.readLine()) != null) {
-					response.append(line);
+		try {
+			if (responseCode == HttpURLConnection.HTTP_OK) {
+				try (BufferedReader reader = new BufferedReader(
+						new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+					StringBuilder response = new StringBuilder();
+					String line;
+					while ((line = reader.readLine()) != null) {
+						response.append(line);
+					}
+					return response.toString();
 				}
-				return response.toString();
+			} else {
+				Mainframe.logger.warn("API returned HTTP {}", responseCode);
 			}
-		} else {
-			Mainframe.logger.warn("API returned HTTP {}", responseCode);
+		} finally {
+			connection.disconnect();
 		}
-
-		connection.disconnect();
 		return null;
 	}
 

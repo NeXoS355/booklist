@@ -133,6 +133,7 @@ public class Mainframe extends JFrame {
   private static JMenuItem apiUpload;
   private static String version;
   private static final String MIGRATION_BRIDGE_TAG = "4.0.1";
+  private static final long RATING_REMINDER_INTERVAL_MS = 14L * 24 * 60 * 60 * 1000;
   private static final ApiSyncService apiSyncService = new ApiSyncService();
   private static final UpdateService updateService = new UpdateService();
   private JTextField txt_search;
@@ -542,6 +543,7 @@ public class Mainframe extends JFrame {
       @Override
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() >= 2 && SwingUtilities.isLeftMouseButton(e)) {
+          if (table.getSelectedRow() < 0) return;
           String searchAutor = (String) table.getValueAt(table.getSelectedRow(), viewColFor(SimpleTableModel.KEY_AUTHOR));
           String searchTitel = titleFromCell(table.getSelectedRow());
           int index = allEntries.getIndexOf(searchAutor, searchTitel);
@@ -588,6 +590,7 @@ public class Mainframe extends JFrame {
         });
         itemChanBook.addActionListener(e4 -> {
           if (Objects.equals(e4.getActionCommand(), Localization.get("contextMenu.editBook"))) {
+            if (table.getSelectedRow() < 0) return;
             String searchAutor = (String) table.getValueAt(table.getSelectedRow(), viewColFor(SimpleTableModel.KEY_AUTHOR));
             String searchTitel = titleFromCell(table.getSelectedRow());
             int index = allEntries.getIndexOf(searchAutor, searchTitel);
@@ -597,6 +600,7 @@ public class Mainframe extends JFrame {
         });
         itemAnalyzeAuthor.addActionListener(e5 -> {
           if (Objects.equals(e5.getActionCommand(), Localization.get("contextMenu.analyzeSeries"))) {
+            if (table.getSelectedRow() < 0) return;
             String seriesName = seriesFromCell(table.getSelectedRow());
             if (wishlist_instance == null)
               wishlist_instance = new wishlist(Mainframe.getInstance(), false);
@@ -930,7 +934,7 @@ public class Mainframe extends JFrame {
   public static void deleteBook() {
     int[] selected = table.getSelectedRows();
     for (int j : selected) {
-      String searchAuthor = (String) table.getValueAt(j, 1);
+      String searchAuthor = (String) table.getValueAt(j, viewColFor(SimpleTableModel.KEY_AUTHOR));
       String searchTitle = titleFromCell(j);
       int index = allEntries.getIndexOf(searchAuthor, searchTitle);
       if (index < 0) continue;
@@ -1199,7 +1203,7 @@ public class Mainframe extends JFrame {
    */
   private static void showLastBookWithoutRating() {
     Book_Booklist newestBook = null;
-    Timestamp timespan = new Timestamp(System.currentTimeMillis() - 1209600033);
+    Timestamp timespan = new Timestamp(System.currentTimeMillis() - RATING_REMINDER_INTERVAL_MS);
     for (int i = 0; i < allEntries.getSize(); i++) {
       Book_Booklist entry = allEntries.getElementAt(i);
       if (entry.getDate() == null) continue;

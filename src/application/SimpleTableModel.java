@@ -41,10 +41,6 @@ public class SimpleTableModel extends DefaultTableModel {
 		super();
 		this.setColumnIdentifiers(columnNames);
 
-		for (int i = 0; i < this.getRowCount(); i++) {
-			this.removeRow(i);
-		}
-
 		int columnEbook  = 0;
 		int columnAuthor = 0;
 		int columnTitle  = 0;

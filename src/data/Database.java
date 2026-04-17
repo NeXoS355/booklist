@@ -415,12 +415,9 @@ public class Database {
 	 * @param bid - Book ID of entry
 	 */
 	public static void deleteFromBooklist(int bid) {
-		try {
-			String sql = "DELETE FROM books WHERE bid = ?";
-			PreparedStatement st = con.prepareStatement(sql);
+		try (PreparedStatement st = con.prepareStatement("DELETE FROM books WHERE bid = ?")) {
 			st.setInt(1, bid);
 			st.executeUpdate();
-			st.close();
 			Mainframe.logger.info("Booklist Datenbank Eintrag geloescht - {}", bid);
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim löschen des Buchs (Booklist)");
@@ -445,34 +442,33 @@ public class Database {
 	public static int addToBooklist(String author, String title, String borrowed, String name, String note,
 			String series, String seriesVol, boolean ebook, String date) throws SQLException {
 		String sql = "INSERT INTO books(author,title,borrow_status,borrower,note,series,series_vol,ebook,added_date) VALUES(?,?,?,?,?,?,?,?,?)";
-		PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		int int_ebook = ebook ? 1 : 0;
-
-		st.setString(1, author);
-		st.setString(2, title);
-		st.setString(3, borrowed);
-		st.setString(4, name);
-		st.setString(5, note);
-		st.setString(6, series);
-		if (seriesVol != null && !seriesVol.trim().isEmpty()) {
-			try {
-				st.setInt(7, Integer.parseInt(seriesVol.trim()));
-			} catch (NumberFormatException e) {
+		int generatedBid;
+		try (PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			st.setString(1, author);
+			st.setString(2, title);
+			st.setString(3, borrowed);
+			st.setString(4, name);
+			st.setString(5, note);
+			st.setString(6, series);
+			if (seriesVol != null && !seriesVol.trim().isEmpty()) {
+				try {
+					st.setInt(7, Integer.parseInt(seriesVol.trim()));
+				} catch (NumberFormatException e) {
+					st.setNull(7, java.sql.Types.INTEGER);
+				}
+			} else {
 				st.setNull(7, java.sql.Types.INTEGER);
 			}
-		} else {
-			st.setNull(7, java.sql.Types.INTEGER);
-		}
-		st.setInt(8, int_ebook);
-		st.setString(9, date);
-		st.executeUpdate();
+			st.setInt(8, int_ebook);
+			st.setString(9, date);
+			st.executeUpdate();
 
-		int generatedBid;
-		try (ResultSet keys = st.getGeneratedKeys()) {
-			keys.next();
-			generatedBid = keys.getInt(1);
+			try (ResultSet keys = st.getGeneratedKeys()) {
+				keys.next();
+				generatedBid = keys.getInt(1);
+			}
 		}
-		st.close();
 
 		Mainframe.logger
 				.info("Booklist Datenbank Eintrag erstellt: {},{},{},{},{},{},{},{},{}", author, title, borrowed, name, note,series,seriesVol,date,int_ebook);
@@ -508,19 +504,14 @@ public class Database {
 	 * @param photo - photo data
 	 */
 	public static void updatePic(int bid, InputStream photo) {
-		String sql = "update books set pic=? where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
+		try (PreparedStatement st = con.prepareStatement("update books set pic=? where bid=?")) {
 			st.setBytes(1, photo.readAllBytes());
 			st.setInt(2, bid);
 			st.execute();
-			st.close();
 			Mainframe.logger.info("Cover gespeichert: {}", bid);
 		} catch (SQLException | IOException e) {
 			Mainframe.logger.error("Fehler beim speichern des Covers: {}", bid);
 		}
-
 	}
 
 	/**
@@ -531,20 +522,15 @@ public class Database {
 	 * @return success value
 	 */
 	public static boolean delPic(int bid) {
-		String sql = "update books set pic=null where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
+		try (PreparedStatement st = con.prepareStatement("update books set pic=null where bid=?")) {
 			st.setInt(1, bid);
 			st.execute();
-			st.close();
 			Mainframe.logger.info("Cover geloescht: {}", bid);
 			return true;
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim löschen des Covers: {}", bid);
 			return false;
 		}
-
 	}
 
 	/**
@@ -565,20 +551,15 @@ public class Database {
 	 * @return success value
 	 */
 	public static boolean delDesc(int bid) {
-		String sql = "update books set description=null where bid=?";
-		PreparedStatement st;
-		try {
-			st = con.prepareStatement(sql);
+		try (PreparedStatement st = con.prepareStatement("update books set description=null where bid=?")) {
 			st.setInt(1, bid);
 			st.execute();
-			st.close();
 			Mainframe.logger.info("Description geloescht: {}", bid);
 			return true;
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim löschen der Beschreibung: {}", bid);
 			return false;
 		}
-
 	}
 
 	/**
@@ -643,29 +624,29 @@ public class Database {
 			String date) {
 		try {
 			String sql = "INSERT INTO wishlist(author,title,note,series,series_vol,added_date) VALUES(?,?,?,?,?,?)";
-			PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			st.setString(1, author);
-			st.setString(2, title);
-			st.setString(3, note);
-			st.setString(4, series);
-			if (seriesVol != null && !seriesVol.trim().isEmpty()) {
-				try {
-					st.setInt(5, Integer.parseInt(seriesVol.trim()));
-				} catch (NumberFormatException e) {
+			int generatedWid;
+			try (PreparedStatement st = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+				st.setString(1, author);
+				st.setString(2, title);
+				st.setString(3, note);
+				st.setString(4, series);
+				if (seriesVol != null && !seriesVol.trim().isEmpty()) {
+					try {
+						st.setInt(5, Integer.parseInt(seriesVol.trim()));
+					} catch (NumberFormatException e) {
+						st.setNull(5, java.sql.Types.INTEGER);
+					}
+				} else {
 					st.setNull(5, java.sql.Types.INTEGER);
 				}
-			} else {
-				st.setNull(5, java.sql.Types.INTEGER);
-			}
-			st.setString(6, date);
-			st.executeUpdate();
+				st.setString(6, date);
+				st.executeUpdate();
 
-			int generatedWid;
-			try (ResultSet keys = st.getGeneratedKeys()) {
-				keys.next();
-				generatedWid = keys.getInt(1);
+				try (ResultSet keys = st.getGeneratedKeys()) {
+					keys.next();
+					generatedWid = keys.getInt(1);
+				}
 			}
-			st.close();
 			Mainframe.logger.info("Wishlist Datenbank Eintrag erstellt: {},{},{},{},{},{}", author ,title, note,series, seriesVol, date);
 			return generatedWid;
 		} catch (SQLException e) {
@@ -680,12 +661,9 @@ public class Database {
 	 * @param wid - wishlist entry id
 	 */
 	public static void deleteFromWishlist(int wid) {
-		try {
-			String sql = "DELETE FROM wishlist WHERE wid = ?";
-			PreparedStatement st = con.prepareStatement(sql);
+		try (PreparedStatement st = con.prepareStatement("DELETE FROM wishlist WHERE wid = ?")) {
 			st.setInt(1, wid);
 			st.executeUpdate();
-			st.close();
 			Mainframe.logger.info("Wishlist Datenbank Eintrag geloescht: {}", wid);
 		} catch (SQLException e) {
 			Mainframe.logger.error("Fehler beim löschen des Buchs (Wunschliste): {}", wid);

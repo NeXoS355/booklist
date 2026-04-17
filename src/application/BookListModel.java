@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 
 import javax.imageio.ImageIO;
@@ -193,10 +194,11 @@ public class BookListModel extends AbstractListModel<Book_Booklist> {
 				Database.closeResultSet(rs);
 			}
 		} else {
-			for (int i = 0; i < getBooks().size(); i++) {
-				if (!authors.contains(getBooks().get(i).getAuthor()))
-					authors.add(getBooks().get(i).getAuthor());
+			LinkedHashSet<String> seen = new LinkedHashSet<>();
+			for (Book_Booklist book : getBooks()) {
+				seen.add(book.getAuthor());
 			}
+			authors.addAll(seen);
 			Mainframe.logger.info("Updated Author List through Java Lists");
 		}
 		Mainframe.updateNode();
