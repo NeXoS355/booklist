@@ -4,6 +4,8 @@ A desktop application for managing your personal book collection. Built with Jav
 
 Pairs with a self-hosted [Web App](https://github.com/NeXoS355/booklist_webapp) for adding books on the go.
 
+![Booklist UI](doc/example_UI.png)
+
 ## Features
 
 **Collection Management**
