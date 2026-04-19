@@ -3,7 +3,7 @@ name: Build JAR Release
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
 
 jobs:
   build:
