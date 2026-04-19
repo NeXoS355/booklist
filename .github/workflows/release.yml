@@ -1,0 +1,187 @@
+name: Build & Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: false
+        default: ''
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.VERSION }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Resolve version
+        id: ver
+        run: |
+          POM=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          INPUT="${{ github.event.inputs.version }}"
+          echo "VERSION=${INPUT:-$POM}" >> $GITHUB_OUTPUT
+
+  build-windows:
+    needs: prepare
+    runs-on: windows-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Build JAR
+        run: mvn clean package -DskipTests
+      - name: Install WiX Toolset (required by jpackage for MSI)
+        run: choco install wixtoolset --version=3.14.1 -y
+        shell: powershell
+      - name: Convert icon to .ico
+        run: magick src/resources/Icon.png -resize 256x256 Icon.ico
+        shell: bash
+      - name: Prepare jpackage input
+        run: |
+          mkdir -p jpackage-input
+          cp target/booklist-*-jar-with-dependencies.jar jpackage-input/
+        shell: bash
+      - name: Create MSI installer
+        run: |
+          jpackage \
+            --type msi \
+            --name Booklist \
+            --app-version "$VERSION" \
+            --input jpackage-input \
+            --main-jar booklist-${VERSION}-jar-with-dependencies.jar \
+            --main-class gui.Mainframe \
+            --icon Icon.ico \
+            --win-dir-chooser \
+            --win-shortcut \
+            --win-menu \
+            --dest dist
+        shell: bash
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-msi
+          path: dist/*.msi
+
+  build-linux:
+    needs: prepare
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Install packaging tools
+        run: sudo apt-get install -y rpm fakeroot binutils
+      - name: Build JAR
+        run: mvn clean package -DskipTests
+      - name: Prepare jpackage input
+        run: |
+          mkdir -p jpackage-input
+          cp target/booklist-*-jar-with-dependencies.jar jpackage-input/
+      - name: Create .deb
+        run: |
+          jpackage \
+            --type deb \
+            --name booklist \
+            --app-version "$VERSION" \
+            --input jpackage-input \
+            --main-jar booklist-${VERSION}-jar-with-dependencies.jar \
+            --main-class gui.Mainframe \
+            --icon src/resources/Icon.png \
+            --linux-shortcut \
+            --dest dist
+      - name: Create .rpm
+        run: |
+          jpackage \
+            --type rpm \
+            --name booklist \
+            --app-version "$VERSION" \
+            --input jpackage-input \
+            --main-jar booklist-${VERSION}-jar-with-dependencies.jar \
+            --main-class gui.Mainframe \
+            --icon src/resources/Icon.png \
+            --linux-shortcut \
+            --dest dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            dist/*.deb
+            dist/*.rpm
+
+  build-macos:
+    needs: prepare
+    runs-on: macos-latest
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Build JAR
+        run: mvn clean package -DskipTests
+      - name: Convert icon to .icns
+        run: |
+          mkdir -p Icon.iconset
+          sips -z 16 16   src/resources/Icon.png --out Icon.iconset/icon_16x16.png
+          sips -z 32 32   src/resources/Icon.png --out Icon.iconset/icon_16x16@2x.png
+          sips -z 32 32   src/resources/Icon.png --out Icon.iconset/icon_32x32.png
+          sips -z 64 64   src/resources/Icon.png --out Icon.iconset/icon_32x32@2x.png
+          sips -z 128 128 src/resources/Icon.png --out Icon.iconset/icon_128x128.png
+          sips -z 256 256 src/resources/Icon.png --out Icon.iconset/icon_128x128@2x.png
+          sips -z 256 256 src/resources/Icon.png --out Icon.iconset/icon_256x256.png
+          sips -z 512 512 src/resources/Icon.png --out Icon.iconset/icon_256x256@2x.png
+          sips -z 512 512 src/resources/Icon.png --out Icon.iconset/icon_512x512.png
+          iconutil -c icns Icon.iconset -o Icon.icns
+      - name: Prepare jpackage input
+        run: |
+          mkdir -p jpackage-input
+          cp target/booklist-*-jar-with-dependencies.jar jpackage-input/
+      - name: Create DMG
+        run: |
+          jpackage \
+            --type dmg \
+            --name Booklist \
+            --app-version "$VERSION" \
+            --input jpackage-input \
+            --main-jar booklist-${VERSION}-jar-with-dependencies.jar \
+            --main-class gui.Mainframe \
+            --icon Icon.icns \
+            --dest dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: dist/*.dmg
+
+  release:
+    needs: [prepare, build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: dist
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ needs.prepare.outputs.version }}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Booklist v${{ needs.prepare.outputs.version }}" \
+            --generate-notes \
+            dist/*
