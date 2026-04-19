@@ -219,11 +219,20 @@ public class GetBookInfosFromWeb {
 						volumeInfo.getAsJsonArray("authors").get(0).getAsString(), entry.getAuthor());
 			}
 
-			int score = (scoreAuthor + scoreTitle) / 2;
+			// Title weighted 2:1; if title absent, heavily penalize to avoid wrong-book-same-author matches
+			int score = scoreTitle == 0
+					? scoreAuthor / 4
+					: (scoreAuthor + scoreTitle * 2) / 3;
+			Mainframe.logger.info("checkWebInfo item[{}] scoreAuthor:{} scoreTitle:{} combined:{}", i, scoreAuthor, scoreTitle, score);
 			if (score > bestScore) {
 				bestScore = score;
 				bestIndex = i;
 			}
+		}
+
+		if (bestScore < 50) {
+			Mainframe.logger.info("WebInfo: bestScore {} below threshold, skipping data save", bestScore);
+			return bestScore;
 		}
 
 		// Daten vom besten Treffer und ggf. Fallbacks extrahieren

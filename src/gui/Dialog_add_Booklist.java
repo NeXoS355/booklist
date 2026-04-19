@@ -334,7 +334,7 @@ public class Dialog_add_Booklist extends JDialog {
 				if (HandleConfig.autoDownload == 1) {
 					Mainframe.executor.submit(() -> {
 						Book_Booklist downloadBook = allEntries.getElementAt(allEntries.getIndexOf(autor, titel));
-						GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(downloadBook, 2, false);
+						GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(downloadBook, 5, false);
 					});
 				}
 				allEntries.checkAuthors();

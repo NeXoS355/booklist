@@ -316,7 +316,7 @@ public class Dialog_edit_Booklist extends JDialog {
           itemChanPic.addActionListener(e4 -> {
             String webpage = JOptionPane.showInputDialog(null, Localization.get("book.changePic"));
             if (webpage != null && !webpage.isEmpty()) {
-              GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, false);
+              GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 5, false);
               updateCoverDisplay(entry, panelEastBorder);
             }
           });
@@ -339,11 +339,11 @@ public class Dialog_edit_Booklist extends JDialog {
       btnDownloadInfo.addActionListener(arg0 -> Mainframe.executor.submit(() -> {
         int compResult1;
         int compResult2;
-        compResult1 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, false);
+        compResult1 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 5, false);
         if (compResult1 < 75) {
-          compResult2 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, true);
+          compResult2 = GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 5, true);
           if (compResult1 > compResult2) {
-            GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 2, true);
+            GetBookInfosFromWeb.getBookInfoFromGoogleApiWebRequest(entry, 5, true);
           }
         }
         SwingUtilities.invokeLater(() -> {
