@@ -18,6 +18,8 @@ jobs:
           distribution: 'temurin'
       - name: Build JAR
         run: mvn clean package -DskipTests
+      - name: Rename JAR
+        run: cp target/booklist-*-jar-with-dependencies.jar target/booklist.jar
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -26,4 +28,4 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --title "Booklist ${{ github.ref_name }}" \
             --generate-notes \
-            target/booklist-*-jar-with-dependencies.jar
+            target/booklist.jar
