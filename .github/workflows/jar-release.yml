@@ -1,0 +1,29 @@
+name: Build JAR Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Build JAR
+        run: mvn clean package -DskipTests
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Booklist ${{ github.ref_name }}" \
+            --generate-notes \
+            target/booklist-*-jar-with-dependencies.jar
